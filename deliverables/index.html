@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBI — Dossier de conception Intranet SharePoint Online</title>
+<style>
+  :root{
+    --navy:#0E265C; --navy-2:#1F3A70; --navy-3:#2E4A86; --navy-soft:#F4F6FA;
+    --red:#D21419; --red-soft:#FDEEEE;
+    --ink:#21252B; --muted:#5A6270; --line:#E1E4EA; --bg:#F0F2F5; --card:#FFFFFF;
+    --ok:#0E7A3D; --warn:#B25E00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:15.5px}
+  a{color:var(--navy-3);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{display:flex;min-height:100vh}
+  /* ---------- Sidebar ---------- */
+  nav.side{width:280px;flex:0 0 280px;background:var(--navy);color:#fff;position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 0 40px}
+  .brand{display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding:0 22px 18px;border-bottom:1px solid rgba(255,255,255,.15);margin-bottom:14px}
+  .brand img{width:200px;background:#fff;border-radius:6px;padding:8px}
+  .brand .doctitle{font-size:13px;color:#C9D3E8;font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+  nav.side ol{list-style:none;counter-reset:sec}
+  nav.side li a{display:block;color:#E6EBF6;padding:7px 22px;font-size:13.5px;border-left:3px solid transparent}
+  nav.side li a:hover{background:rgba(255,255,255,.08);text-decoration:none;border-left-color:var(--red)}
+  nav.side li a.active{background:rgba(255,255,255,.1);border-left-color:#fff;font-weight:600}
+  .side-note{margin:18px 22px 0;padding:12px;background:rgba(255,255,255,.07);border-radius:8px;font-size:12.5px;color:#C9D3E8}
+  /* ---------- Main ---------- */
+  main{flex:1;min-width:0;padding:36px 48px 90px;max-width:1240px}
+  header.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:8px}
+  h1{font-size:30px;color:var(--navy);line-height:1.2}
+  .subtitle{color:var(--muted);margin-top:6px;font-size:16px}
+  .pill-row{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 8px}
+  .pill{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px;background:var(--navy-soft);color:var(--navy);border:1px solid var(--line)}
+  .pill.red{background:var(--red-soft);color:var(--red);border-color:#F3C9CB}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:34px 38px;margin-top:28px;box-shadow:0 1px 3px rgba(14,38,92,.06)}
+  h2{font-size:23px;color:var(--navy);margin-bottom:4px;scroll-margin-top:20px}
+  h2 .num{color:var(--red);margin-right:8px}
+  h3{font-size:17.5px;color:var(--navy-2);margin:26px 0 8px;scroll-margin-top:20px}
+  h4{font-size:15px;color:var(--ink);margin:18px 0 6px}
+  p{margin:8px 0}
+  ul,ol{margin:8px 0 8px 22px}
+  li{margin:4px 0}
+  .lead{font-size:16.5px;color:var(--ink)}
+  .muted{color:var(--muted)}
+  small{font-size:12.5px}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:13.8px}
+  th{background:var(--navy);color:#fff;text-align:left;padding:9px 12px;font-weight:600;font-size:12.8px;letter-spacing:.3px}
+  td{padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tr:nth-child(even) td{background:#FAFBFC}
+  table.t-navy th{background:var(--navy-soft);color:var(--navy);border-bottom:2px solid var(--navy)}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;letter-spacing:.3px;vertical-align:middle}
+  .tag.spfx{background:var(--red);color:#fff}
+  .tag.natif{background:var(--navy);color:#fff}
+  .tag.opt{background:#EDEFF3;color:#4A5058;border:1px solid var(--line)}
+  .tag.ok{background:#E4F4EA;color:var(--ok)}
+  .tag.warn{background:#FFF3E0;color:var(--warn)}
+  code,pre{font-family:"Cascadia Code",Consolas,Menlo,monospace}
+  code{background:#EEF1F6;padding:1px 6px;border-radius:4px;font-size:12.8px;color:var(--navy)}
+  pre{background:#0B1C3A;color:#DCE4F5;padding:18px 20px;border-radius:10px;overflow-x:auto;font-size:13px;line-height:1.55;margin:14px 0}
+  pre .c{color:#8FA3C8}
+  pre .k{color:#F0A3A6}
+  pre .s{color:#9FD3A8}
+  .callout{border-left:4px solid var(--navy);background:var(--navy-soft);padding:14px 18px;border-radius:0 8px 8px 0;margin:14px 0;font-size:14.2px}
+  .callout.red{border-left-color:var(--red);background:var(--red-soft)}
+  .callout.ok{border-left-color:var(--ok);background:#EDF7F1}
+  .callout b:first-child{display:block;margin-bottom:4px;color:var(--navy)}
+  .callout.red b:first-child{color:var(--red)}
+  .callout.ok b:first-child{color:var(--ok)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:14px 0}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:14px 0}
+  .card{background:#FAFBFC;border:1px solid var(--line);border-radius:10px;padding:16px 18px}
+  .card h4{margin-top:0;color:var(--navy)}
+  .card .icon{font-size:22px}
+  /* wireframe */
+  .wf{border:2px solid var(--navy);border-radius:10px;overflow:hidden;font-size:11.5px;margin:16px 0;background:#fff}
+  .wf-row{display:grid;gap:6px;padding:6px}
+  .wf-box{background:var(--navy-soft);border:1.5px dashed var(--navy-3);border-radius:6px;padding:8px 10px;color:var(--navy);min-height:34px;display:flex;flex-direction:column;justify-content:center}
+  .wf-box b{font-size:11.5px}
+  .wf-box small{color:var(--muted);line-height:1.3}
+  .wf-box.red{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .wf-box.navy{background:var(--navy);color:#fff;border-style:solid}
+  .wf-box.navy small{color:#C9D3E8}
+  .c-1{grid-template-columns:1fr}.c-2a{grid-template-columns:2fr 1fr}.c-3{grid-template-columns:repeat(3,1fr)}.c-4{grid-template-columns:repeat(4,1fr)}.c-2{grid-template-columns:1fr 1fr}.c-1a{grid-template-columns:1fr 2fr}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:-6px}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .dot{width:12px;height:12px;border-radius:3px;display:inline-block}
+  /* layers stack */
+  .layers{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+  .layer{display:flex;align-items:center;gap:14px;border-radius:8px;padding:12px 16px;color:#fff;font-size:13.5px}
+  .layer b{min-width:210px;font-size:13.5px}
+  .layer small{color:rgba(255,255,255,.85);display:block;font-size:12.3px}
+  .l1{background:#0B1C3A}.l2{background:#0E265C}.l3{background:#1F3A70}.l4{background:#2E4A86}.l5{background:#4A5F94}
+  .l-badge{background:#fff;color:var(--navy);font-weight:700;border-radius:6px;padding:2px 10px;font-size:12px;flex:0 0 auto}
+  /* roadmap */
+  .timeline{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:18px 0;position:relative}
+  .tl-item{position:relative;padding:0 10px 0 0}
+  .tl-item .tl-bar{height:8px;border-radius:99px;background:linear-gradient(90deg,var(--navy),var(--navy-3));margin-bottom:12px}
+  .tl-item:first-child .tl-bar{background:linear-gradient(90deg,var(--red),var(--red));}
+  .tl-item h4{margin:0 0 4px;color:var(--navy);font-size:14px}
+  .tl-item small{color:var(--muted);display:block;line-height:1.45}
+  /* persona cards */
+  .persona{border-top:5px solid var(--red)}
+  .persona .who{font-size:12px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px}
+  .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0}
+  .kpi .card{text-align:center}
+  .kpi .big{font-size:26px;font-weight:700;color:var(--red)}
+  footer.end{margin-top:34px;color:var(--muted);font-size:12.5px;text-align:center}
+  .btn{display:inline-block;background:var(--red);color:#fff!important;font-weight:600;padding:9px 20px;border-radius:8px;margin:6px 8px 6px 0}
+  .btn:hover{background:#B0121
+5}
+  .btn.ghost{background:transparent;border:2px solid var(--navy);color:var(--navy)!important}
+  @media (max-width:1100px){.wrap{flex-direction:column}nav.side{width:100%;flex:none;height:auto;position:relative}main{padding:24px}}
+  @media print{nav.side{display:none}section{break-inside:avoid;border:none;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ============ SIDEBAR ============ -->
+<nav class="side">
+  <div class="brand">
+    <img src="assets/img/logo.png" alt="Business Builders International">
+    <div class="doctitle">Dossier de conception<br>Intranet SharePoint Online</div>
+  </div>
+  <ol>
+    <li><a href="#s0">0. Synthèse exécutive</a></li>
+    <li><a href="#s1">1. Analyse des inspirations &amp; besoins</a></li>
+    <li><a href="#s2">2. Architecture cible (hub &amp; sites)</a></li>
+    <li><a href="#s3">3. Page d'accueil — structure</a></li>
+    <li><a href="#s4">4. Expérience utilisateur (UX)</a></li>
+    <li><a href="#s5">5. Design visuel (UI) &amp; thème</a></li>
+    <li><a href="#s6">6. Gestion des formations</a></li>
+    <li><a href="#s7">7. Protection des documents</a></li>
+    <li><a href="#s8">8. Composants SPFx</a></li>
+    <li><a href="#s9">9. Configurations SharePoint</a></li>
+    <li><a href="#s10">10. Sécurité &amp; gouvernance</a></li>
+    <li><a href="#s11">11. Maintenance &amp; ALM</a></li>
+    <li><a href="#s12">12. Feuille de route</a></li>
+    <li><a href="#s13">13. Prérequis &amp; licences</a></li>
+    <li><a href="#annexeA">Annexe A — Thème JSON</a></li>
+    <li><a href="#annexeB">Annexe B — Conventions</a></li>
+  </ol>
+  <div class="side-note">
+    📐 <strong>Maquette haute-fidélité :</strong> ouvrez <a href="maquette-accueil.html" style="color:#fff;text-decoration:underline">maquette-accueil.html</a> pour visualiser le rendu cible de la page d'accueil.
+  </div>
+</nav>
+
+<!-- ============ MAIN ============ -->
+<main>
+
+<header class="top">
+  <div>
+    <h1>Intranet SharePoint Online — Business Builders International</h1>
+    <p class="subtitle">Conception de la page d'accueil, gestion des formations et protection des supports pédagogiques · Document de cadrage v1.0</p>
+  </div>
+</header>
+<div class="pill-row">
+  <span class="pill">SharePoint Online / Microsoft 365</span>
+  <span class="pill">Hub site + SPFx</span>
+  <span class="pill red">Supports en lecture seule</span>
+  <span class="pill">Charte : Bleu #0E265C · Rouge #D21419</span>
+  <span class="pill">Date : 28 septembre 2026</span>
+</div>
+
+<!-- ================================================== S0 -->
+<section id="s0">
+  <h2><span class="num">0.</span>Synthèse exécutive</h2>
+  <p class="lead">Ce dossier formalise la conception d'un intranet <strong>SharePoint Online</strong> pour <strong>Business Builders International (BBI)</strong>, organisme de formation professionnelle. Il couvre l'architecture de la page d'accueil, l'expérience utilisateur, le design, les composants SPFx, les web parts natives, les configurations de plateforme, la gestion des formations et — point critique — la <strong>protection des supports pédagogiques contre la modification, le téléchargement et l'impression</strong>.</p>
+
+  <div class="kpi">
+    <div class="card"><div class="big">1</div><small>hub « BBI Intranet » + 3 sites associés (vitrine, espace formateurs, catalogue formations)</small></div>
+    <div class="card"><div class="big">≈15</div><small>web parts sur la page d'accueil : 90&nbsp;% natives, 2–3 SPFx ciblées</small></div>
+    <div class="card"><div class="big">4</div><small>couches de protection documentaire (permissions, chiffrement/IRM, accès conditionnel, audit)</small></div>
+    <div class="card"><div class="big">16</div><small>semaines de feuille de route, du cadrage à l'hypercare post-déploiement</small></div>
+  </div>
+
+  <h3>Les 5 décisions structurantes</h3>
+  <table>
+    <tr><th style="width:34%">Décision</th><th>Recommandation de l'équipe</th></tr>
+    <tr><td><b>D1 — Architecture</b></td><td>Un <b>hub site</b> « BBI Intranet » fédère 3 sites : vitrine (communication), <b>Espace Formateurs</b> (collaboration privée) et <b>Catalogue des Formations</b> (publication en consultation). Évolutif vers des sites par filière si la volumétrie l'exige — modèle observé dans vos références (DashBOARD par pays).</td></tr>
+    <tr><td><b>D2 — Page d'accueil</b></td><td>Accueil moderne à dominante de <b>web parts natives</b> (Hero, Actualités, Liens rapides, Événements…) enrichies de <b>2 à 3 web parts SPFx</b> uniquement là où le natif ne suffit pas : catalogue de formations filtrable, visionneuse sécurisée « lecture seule », tableau de bord formateur.</td></tr>
+    <tr><td><b>D3 — Gestion des contenus</b></td><td>Modèle <b>métadonnéé plutôt que dossiers</b> : types de contenu « Support de formation » hérités, cycle <i>Brouillon → Révision → Publication</i> avec approbation, versioning majeur/mineur, flux Power Automate.</td></tr>
+    <tr><td><b>D4 — Protection</b></td><td><b>Défense en profondeur</b> : permissions en lecture seule + étiquettes de sensibilité avec chiffrement « afficher uniquement » (ou IRM) + accès conditionnel limitant le téléchargement sur appareils non gérés + audit. Les limites (capture d'écran) sont documentées honnêtement en section 7.</td></tr>
+    <tr><td><b>D5 — Identité visuelle</b></td><td>Thème SharePoint personnalisé dérivé du logo : <b>bleu marine #0E265C</b> en primaire, <b>rouge #D21419</b> en accent, typographie Segoe UI, iconographie Fluent — validée AA WCAG 2.1.</td></tr>
+  </table>
+
+  <div class="callout">
+    <b>💡 Livrable complémentaire</b>
+    Ce document s'accompagne d'une <a href="maquette-accueil.html"><b>maquette haute-fidélité interactive</b></a> de la page d'accueil (rendu statique non contractuel, destiné à valider l'UX/UI avec les parties prenantes avant développement).
+  </div>
+</section>
+
+<!-- ================================================== S1 -->
+<section id="s1">
+  <h2><span class="num">1.</span>Analyse des inspirations &amp; des besoins</h2>
+
+  <h3>1.1 Ce que révèlent vos captures d'écran (référence ActionCOACH)</h3>
+  <p>Les 18 captures fournies illustrent un intranet <b>hub + sites satellites</b> (« DashBOARD » par langue/pays : French, ML, UK, Vietnam…). Les enseignements structurants pour BBI :</p>
+  <div class="grid3">
+    <div class="card"><div class="icon">🗂️</div><h4>Hub fédérateur</h4><small>Une page SharePoint « Frequent sites » agrège les sites du hub avec activité récente : l'utilisateur retrouve tout depuis un point d'entrée. <b>À retenir</b> : le hub comme porte d'entrée unique.</small></div>
+    <div class="card"><div class="icon">🧭</div><h4>Grilles de liens thématiques</h4><small>La page d'accueil est une mosaïque de sections (Coaching System, Sales System, Marketing…) en grilles de liens iconographiés. <b>À retenir</b> : navigation par domaine métier, visuelle et prévisible.</small></div>
+    <div class="card"><div class="icon">🔢</div><h4>Parcours numérotés</h4><small>Le French DashBOARD numérote les contenus pédagogiques (« 9.1 Les 28 questions », « Étape 1 – Maîtrise »…) alignés sur une arborescence documentaire. <b>À retenir</b> : un <b>code de formation</b> porté en métadonnée, pas dans les noms de fichiers.</small></div>
+    <div class="card"><div class="icon">📄</div><h4>Web part Documents en colonne</h4><small>Une colonne latérale « Documents » avec vue « Afficher tout » donne un accès direct aux derniers contenus. <b>À retenir</b> : exposer les supports récents directement sur l'accueil.</small></div>
+    <div class="card"><div class="icon">🎉</div><h4>Contenu vivant</h4><small>Podcast, « Book of the Month », Town Hall recaps, événements… <b>À retenir</b> : cycle d'actualités régulier pour donner une raison de revenir — la faiblesse principale du site de référence est son statisme (page longue, peu d'actualités).</small></div>
+    <div class="card"><div class="icon">⚠️</div><h4>Limites du modèle de référence</h4><small>Navigation verticale surchargée, sous-sites (anti-pattern moderne), mixture FR/EN, icônes hétérogènes, pas de gouvernance apparente. <b>À ne pas reproduire</b> ; nous en corrigeons chaque point.</small></div>
+  </div>
+
+  <h3>1.2 Besoins fonctionnels confirmés</h3>
+  <table class="t-navy">
+    <tr><th style="width:26%">Besoin</th><th>Traduction fonctionnelle</th><th style="width:18%">Solution cible</th></tr>
+    <tr><td><b>Page d'accueil moderne</b></td><td>Point d'entrée unique, aux couleurs BBI, responsive, rapide, actualisé automatiquement.</td><td>Site vitrine + web parts natives + SPFx ciblé (§3–§5)</td></tr>
+    <tr><td><b>Publier les supports de formation</b></td><td>Déposer, qualifier, valider et diffuser les supports par programme/module.</td><td>Types de contenu + approbation + métadonnées (§6)</td></tr>
+    <tr><td><b>Accès facile pour les formateurs</b></td><td>Chaque formateur voit « ses » formations, ses sessions et ses supports sans chercher.</td><td>SPFx « Mes formations » + permissions (§8.3)</td></tr>
+    <tr><td><b>Empêcher la modification</b></td><td>Les contenus publiés sont non éditables, y compris par les formateurs.</td><td>Niveau d'autorisation « Lecture » + versioning verrouillé (§7.1)</td></tr>
+    <tr><td><b>Empêcher le téléchargement</b></td><td>Aucun fichier récupéré en local, y compris via synchro OneDrive ou clients bureautiques.</td><td>Chiffrement « afficher uniquement » + accès conditionnel web-only (§7.2–7.3)</td></tr>
+    <tr><td><b>Empêcher l'impression</b></td><td>Ni impression papier, ni export PDF, ni copier/coller.</td><td>IRM / étiquette « afficher uniquement » + impression bloquée en CAE (§7.2)</td></tr>
+  </table>
+
+  <h3>1.3 Personas de référence</h3>
+  <div class="grid2">
+    <div class="card persona"><div class="who">Persona 1 — La formatrice / le formateur</div><h4>« Je dois trouver mon support en 2 clics, avant la session. »</h4>
+      <small><b>Besoins :</b> accès direct à ses formations, supports à jour, vue « cette semaine ». <b>Frustrations actuelles (héritées de la référence) :</b> arborescences profondes, doublons, versions douteuses. <b>Réponse :</b> tableau de bord formateur SPFx, filtres par formateur référent, badge de version et statut.</small></div>
+    <div class="card persona"><div class="who">Persona 2 — Le responsable pédagogique</div><h4>« Je pilote le catalogue et la qualité des contenus. »</h4>
+      <small><b>Besoins :</b> workflow d'approbation, visibilité sur l'état du catalogue (brouillons, obsolètes), indicateurs d'utilisation. <b>Réponse :</b> vues administrateur, flux Power Automate d'approbation, page Power BI de pilotage.</small></div>
+    <div class="card persona"><div class="who">Persona 3 — Le collaborateur / apprenant interne</div><h4>« Je veux la liste des formations et m'inscrire facilement. »</h4>
+      <small><b>Besoins :</b> catalogue clair, calendrier des sessions, consignes d'inscription. <b>Réponse :</b> catalogue filtrable sur l'accueil, web part Événements, fiches programme en lecture seule.</small></div>
+    <div class="card persona"><div class="who">Persona 4 — La direction</div><h4>« Je mesure l'activité de formation. »</h4>
+      <small><b>Besoins :</b> indicateurs synthétiques, actualités corporate. <b>Réponse :</b> zone Hero avec messages clés, web part Power BI agrégée, actualités hiérarchisées.</small></div>
+  </div>
+</section>
+
+<!-- ================================================== S2 -->
+<section id="s2">
+  <h2><span class="num">2.</span>Architecture cible — hub &amp; sites</h2>
+  <p>Conformément aux bonnes pratiques Microsoft (un seul hub par identité de marque, pas de sous-sites, séparation collaboration / publication), l'architecture recommandée est :</p>
+
+  <pre><span class="c">── Architecture d'informations ─────────────────────────────────────</span>
+HUB « BBI Intranet »  <span class="c">(site de communication, membre du hub)</span>
+│
+├─ 🏠 s0-bbi-vitrine        <span class="c">Vitrine accueil — tout le monde en lecture</span>
+│    · Page d'accueil conçue (§3) · Actualités · Liens rapides · FAQ
+│
+├─ 👩‍🏫 s1-formation-catalogue  <span class="c">Catalogue &amp; supports PUBLIÉS — consultation</span>
+│    · Liste « Formations » (catalogue)
+│    · Bibliothèque « Supports publiés » ← lecture seule protégée (§7)
+│
+├─ 🔒 s2-espace-formateurs   <span class="c">Collaboration formateurs — accès restreint</span>
+│    · Bibliothèque « Production des supports » (co-édition, brouillons)
+│    · Listes sessions / planning · OneNote · canal Teams couplé
+│
+└─ ➕ s3-… (à la demande)     <span class="c">Extensions futures : RH, direction, filières</span></pre>
+
+  <table>
+    <tr><th style="width:20%">Site</th><th style="width:14%">Modèle</th><th style="width:24%">Audience</th><th>Rôle</th></tr>
+    <tr><td><b>BBI Intranet</b> (hub)</td><td>Communication site</td><td>Tous les collaborateurs</td><td>Fédération : navigation hub, actualités transverses, recherche. Le hub lui-même peut héberger la vitrine (option : fusionner vitrine &amp; hub — voir note).</td></tr>
+    <tr><td><b>Catalogue des Formations</b></td><td>Communication site</td><td>Collaborateurs en lecture ; responsables pédagogiques en contribution</td><td>Catalogue consultable + bibliothèque de supports <b>publiés et verrouillés</b>.</td></tr>
+    <tr><td><b>Espace Formateurs</b></td><td>Team site (groupe M365)</td><td>Formateurs &amp; équipe pédagogique</td><td>Zone de production : co-édition, brouillons, planning des sessions, discussions. C'est ici que les documents sont <b>modifiables</b> — et nulle part ailleurs.</td></tr>
+    <tr><td><b>Extensions</b></td><td>Team / Communication</td><td>Variable</td><td>Sites ajoutés au hub au fil des besoins via le formulaire de demande de site (§10.3).</td></tr>
+  </table>
+
+  <div class="callout ok">
+    <b>✅ Pourquoi ce découpage</b>
+    La protection des documents est d'abord un <b>problème de périmètre</b> : on ne cherche pas à « empêcher la modification » partout, on confine l'édition dans l'Espace Formateurs et on ne publie que des copies verrouillées dans le Catalogue. Cela rend les protections techniques (§7) simples, robustes et compréhensibles. La fusion hub/vitrine est possible pour simplifier (un site de moins) ; nous recommandons de la garder <b>séparée</b> si d'autres sites RH/direction sont prévus à 12 mois.
+  </div>
+
+  <h3>2.1 Navigation hub</h3>
+  <ul>
+    <li><b>Barre hub (horizontale)</b> : <code>Accueil</code> · <code>Catalogue des formations</code> · <code>Espace Formateurs</code> (masqué aux non-membres) · <code>Actualités</code> · <code>Annuaire</code> · <code>Support &amp; FAQ</code>. Le cache de sécurité de la navigation hub masque automatiquement les sites auxquels l'utilisateur n'a pas accès.</li>
+    <li><b>Sites satellites</b> : navigation moderne <i>verticale</i> sur les pages de contenu (étendue « hub » activée dans les paramètres du hub), sobre et générée automatiquement.</li>
+    <li><b>Recherche</b> : étendue du hub par défaut ; recherche Microsoft configurée avec plan vertical « Formations » (§9.5).</li>
+  </ul>
+</section>
+
+<!-- ================================================== S3 -->
+<section id="s3">
+  <h2><span class="num">3.</span>Page d'accueil — structure détaillée</h2>
+  <p class="lead">La page d'accueil de la vitrine est le cœur du projet. Principe directeur : <b>« 5 secondes pour comprendre, 2 clics pour agir »</b>. Elle est construite à 90&nbsp;% avec des web parts natives SharePoint (robustes, maintenues par Microsoft, accessibles) et accueille 2 web parts SPFx métier.</p>
+
+  <h3>3.1 Wireframe de la page</h3>
+  <div class="wf">
+    <div class="wf-row c-1"><div class="wf-box navy"><b>Barre de suite Microsoft 365 + en-tête hub BBI (logo, navigation hub, recherche)</b><small>Gérée au niveau tenant/hub — non modifiable page par page</small></div></div>
+    <div class="wf-row c-1"><div class="wf-box red"><b>① HERO — Image mission BBI + message d'accueil + 2 boutons d'action</b><small>Web part Hero (1 tuile pleine largeur) — « Voir le catalogue » / « Espace Formateurs »</small></div></div>
+    <div class="wf-row c-2a"><div class="wf-box"><b>② ACTUALITÉS BBI</b><small>Web part Actualités (3 titres + une mise en avant) — actualités hub</small></div><div class="wf-box"><b>③ PROCHAINES SESSIONS</b><small>Web part Événements — liste « Sessions de formation » (5 à venir)</small></div></div>
+    <div class="wf-row c-4"><div class="wf-box"><b>④ LIEN RAPIDE : Catalogue</b></div><div class="wf-box"><b>④ LIEN RAPIDE : Espace Formateurs</b></div><div class="wf-box"><b>④ LIEN RAPIDE : Mon planning</b></div><div class="wf-box"><b>④ LIEN RAPIDE : Support IT &amp; FAQ</b></div></div>
+    <div class="wf-row c-2a"><div class="wf-box"><b>⑤ CATALOGUE DES FORMATIONS <span class="tag spfx">SPFx</span></b><small>bbi-training-catalog — cartes filtrables (filière, modalité, public) alimentées par la liste Formations</small></div><div class="wf-box"><b>⑥ ANNUAIRE FORMATEURS</b><small>Web part Personnes (filtre : formateurs référents)</small></div></div>
+    <div class="wf-row c-2a"><div class="wf-box"><b>⑦ DERNIERS SUPPORTS PUBLIÉS <span class="tag spfx">SPFx</span></b><small>bbi-secure-documents — cartes « lecture seule », ouverture navigateur uniquement, badge verrou</small></div><div class="wf-box"><b>⑧ ACTIVITÉ &amp; CHIFFRES</b><small>Activité du site + tuile Power BI (sessions animées, taux de complétion)</small></div></div>
+    <div class="wf-row c-3"><div class="wf-box"><b>⑨ MÉTHODES &amp; OUTILS</b><small>Liens rapides (grille) : parcours numérotés, kits d'animation</small></div><div class="wf-box"><b>⑩ CERTIFICATION &amp; QUALITÉ</b><small>Liens rapides : Qualiopi, évaluations, templates</small></div><div class="wf-box"><b>⑪ COMMUNAUTÉ</b><small>Viva Engage / Teams — fils de discussion formateurs</small></div></div>
+    <div class="wf-row c-1"><div class="wf-box"><b>⑫ PIED DE PAGE — Mentions, RGPD, accessibilité, support, © BBI</b><small>Configuré au niveau du hub</small></div></div>
+  </div>
+  <div class="legend">
+    <span><span class="dot" style="background:var(--red)"></span> Zone à forte valeur (brand)</span>
+    <span><span class="dot" style="background:var(--navy)"></span> Chrome plateforme</span>
+    <span><span class="dot" style="background:var(--navy-soft);border:1px dashed var(--navy-3)"></span> Zone de contenu — web part</span>
+    <span><span class="tag spfx">SPFx</span>&nbsp;Web part personnalisée</span>
+  </div>
+
+  <h3>3.2 Récapitulatif des web parts (native vs SPFx)</h3>
+  <table>
+    <tr><th style="width:4%">N°</th><th style="width:24%">Zone</th><th style="width:26%">Web part</th><th>Paramétrage recommandé</th></tr>
+    <tr><td>①</td><td>Hero <span class="tag natif">Natif</span></td><td><b>Héro</b></td><td>1 tuile pleine largeur, image de marque (salle de formation), titre « Propulseur de croissance, créateur d'impacts », 2 liens d'action : <i>Catalogue des formations</i>, <i>Espace Formateurs</i>. Call to action alterné selon les campagnes (rentrée, certification…).</td></tr>
+    <tr><td>②</td><td>Actualités <span class="tag natif">Natif</span></td><td><b>Actualités</b></td><td>Source : « sites du hub », mise en page « Mise en avant + liste », 4 éléments, tri antichronologique, masquer les images si absentes.</td></tr>
+    <tr><td>③</td><td>Calendrier <span class="tag natif">Natif</span></td><td><b>Événements</b></td><td>Source : liste « Sessions de formation » (site Catalogue), 5 prochains événements, regroupement par date, affichage lieu + modalité (présentiel/distanciel).</td></tr>
+    <tr><td>④</td><td>Accès rapides <span class="tag natif">Natif</span></td><td><b>Liens rapides</b></td><td>4 tuiles « Compactes » avec icônes Fluent (bleu nuit), description au survol, tri manuel fixe.</td></tr>
+    <tr><td>⑤</td><td>Catalogue <span class="tag spfx">SPFx</span></td><td><b>bbi-training-catalog</b></td><td>Cartes formation (vignette, code, durée, modalité), filtres par filière/public/modalité, bouton « Voir la fiche » (page détail dynamique). Voir §8.1.</td></tr>
+    <tr><td>⑥</td><td>Annuaire <span class="tag natif">Natif</span></td><td><b>Personnes</b></td><td>Sélection : groupe « BBI – Formateurs référents », cartes avec photo, rôle, lien « Envoyer un message ».</td></tr>
+    <tr><td>⑦</td><td>Supports récents <span class="tag spfx">SPFx</span></td><td><b>bbi-secure-documents</b></td><td>Source : bibliothèque « Supports publiés », 6 derniers publiés, badge 🔒 « Lecture seule », ouverture en visionneuse web uniquement — jamais de bouton Télécharger. Voir §8.2.</td></tr>
+    <tr><td>⑧</td><td>Activité <span class="tag natif">Natif</span></td><td><b>Activité du site</b> + <b>Power BI</b></td><td>Activité : 14 jours. Power BI : rapport « Pilotage formation » (sessions animées, évaluations à chaud) filtré par profil.</td></tr>
+    <tr><td>⑨⑩</td><td>Grilles thématiques <span class="tag natif">Natif</span></td><td><b>Liens rapides</b> ×2</td><td>Reprend le vocabulaire et la numérotation des références (« 1. Parcours fondamentaux », « 2. Kits d'animation »…) — mais les codes de formation vivent en <b>métadonnée</b>, pas dans les intitulés.</td></tr>
+    <tr><td>⑪</td><td>Communauté <span class="tag natif">Natif</span></td><td><b>Viva Engage</b> (ou web part Teams)</td><td>Communauté « Formateurs BBI » — conversations, entraide pédagogique.</td></tr>
+  </table>
+
+  <div class="callout">
+    <b>📏 Budget de page &amp; performance</b>
+    Objectif ≤ 20 web parts par page (ici ~15). Images servies via le CDN SharePoint (auto), formats <code>webp/jpg</code> optimisés &lt; 300 Ko, pas de web part de recherche « lourde » au-dessus de la ligne de flottaison. Validation systématique avec l'outil <b>Page Diagnostics for SharePoint</b> (score &gt; 75). Le Hero et les Actualités chargent en priorité ; le catalogue SPFx charge en <i>lazy loading</i> sous la ligne de flottaison.
+  </div>
+
+  <h3>3.3 Pages de 2<sup>e</sup> niveau</h3>
+  <table class="t-navy">
+    <tr><th style="width:28%">Page</th><th>Contenu type</th></tr>
+    <tr><td><b>Fiche formation</b> (modèle de page)</td><td>Bandeau + objectifs pédagogiques + programme module par module + publics/prérequis + sessions à venir (Événements filtrée) + supports associés (bbi-secure-documents filtré sur le code formation) + contact référent.</td></tr>
+    <tr><td><b>Espace Formateurs — Accueil</b></td><td>SPFx bbi-trainer-dashboard (« Mes formations », « Mes sessions à venir », « Derniers supports », notifications d'approbation) + planning partagé + actualités pédagogiques.</td></tr>
+    <tr><td><b>Catalogue des Formations — Accueil</b></td><td>Catalogue complet (SPFx en mode liste) + recherche + fiches ; bandeau « zone protégée : consultation en lecture seule ».</td></tr>
+    <tr><td><b>Support &amp; FAQ</b></td><td>FAQ (web part Texte organisée ou liste FAQ filtrable), formulaire de demande (Microsoft Forms intégré), contacts IT.</td></tr>
+  </table>
+</section>
+
+<!-- ================================================== S4 -->
+<section id="s4">
+  <h2><span class="num">4.</span>Expérience utilisateur (UX)</h2>
+
+  <h3>4.1 Principes UX directeurs</h3>
+  <div class="grid3">
+    <div class="card"><div class="icon">🎯</div><h4>Orientation immédiate</h4><small>L'utilisateur sait <i>où il est</i> (logo + nom du site), <i>ce qu'on attend de lui</i> (CTA du Hero) et <i>où aller</i> (tuiles rôles) en moins de 5 secondes.</small></div>
+    <div class="card"><div class="icon">🔁</div><h4>Cohérence Microsoft</h4><small>Nous restons dans les codes SharePoint/Fluent : pas d'« invention » d'UI qui vieillit mal. La personnalisation s'exprime par la couleur, l'imagerie et le vocabulaire — pas par des structures exotiques.</small></div>
+    <div class="card"><div class="icon">📱</div><h4>Mobile &amp; avant-session</h4><small>Un formateur consulte souvent son support <i>juste avant</i> d'animer, parfois sur tablette. Toutes les pages sont responsives nativement ; le catalogue et la visionneuse sont testés sur mobile (§8).</small></div>
+  </div>
+
+  <h3>4.2 Parcours utilisateurs clés</h3>
+  <table>
+    <tr><th style="width:24%">Parcours</th><th>Chemin cible</th></tr>
+    <tr><td><b>P1 — Préparer une session</b> (formatrice)</td><td>Intranet → Espace Formateurs → bbi-trainer-dashboard « Mes sessions à venir » → clic session → supports de la formation (production) → vérification version → animation. <b>≤ 3 clics</b>.</td></tr>
+    <tr><td><b>P2 — Animer avec un support verrouillé</b></td><td>Accueil → tuile « Catalogue » ou ⑦ « Derniers supports » → carte support 🔒 → ouverture <b>dans la visionneuse web</b> plein écran → projection en salle. Aucun téléchargement possible.</td></tr>
+    <tr><td><b>P3 — Publier un support</b> (concepteur)</td><td>Espace Formateurs → bibliothèque Production → dépôt + métadonnées obligatoires → version 0.x → bouton « Soumettre à validation » → approbation responsable pédagogique (Power Automate/Teams) → publication automatique en version verrouillée dans le Catalogue → notification.</td></tr>
+    <tr><td><b>P4 — Choisir une formation</b> (collaborateur)</td><td>Accueil → ⑤ Catalogue filtré par filière/public → fiche formation → programme + sessions → bouton « M'inscrire » (Forms ou liste d'inscription).</td></tr>
+    <tr><td><b>P5 — Piloter</b> (responsable pédagogique)</td><td>Accueil → tuile Power BI → indicateurs d'utilisation et de qualité (vues par support, taux de complétion, supports obsolètes).</td></tr>
+  </table>
+
+  <h3>4.3 Accessibilité &amp; inclusivité</h3>
+  <ul>
+    <li><b>WCAG 2.1 AA / RGAA</b> : contrastes validés (bleu #0E265C sur blanc ≈ 13:1 ; rouge #D21419 réservé aux accents et jamais seul porteur d'information), textes alternatifs sur toutes les images, structure de titres hiérarchique (H1→H4) dans les pages et les web parts SPFx.</li>
+    <li>Vérification native « <b>Accessibilité</b> » de SharePoint avant publication de chaque page ; tests clavier sur les web parts SPFx (navigation tabulaire, focus visible, ARIA appropriés via Fluent UI React v9).</li>
+    <li>Langue française par défaut (paramètre régional des sites) ; l'architecture permet d'ajouter des variantes linguistiques de pages si BBI se déploie à l'international — même modèle que la référence (DashBOARD par langue), sans dupliquer les sites.</li>
+  </ul>
+</section>
+
+<!-- ================================================== S5 -->
+<section id="s5">
+  <h2><span class="num">5.</span>Design visuel (UI) &amp; thème SharePoint</h2>
+
+  <h3>5.1 Charte dérivée du logo BBI</h3>
+  <p>Palette extraite directement du logo (analyse colorimétrique) puis ajustée pour l'accessibilité :</p>
+  <div class="grid3">
+    <div class="card">
+      <h4><span class="dot" style="background:#0E265C;display:inline-block;vertical-align:middle"></span>&nbsp; Bleu nuit — <code>#0E265C</code></h4>
+      <small><b>Couleur primaire.</b> En-tête hub, titres, barre de navigation, boutons principaux, liens.<br>Variantes : <code>#1F3A70</code> (interactif), <code>#2E4A86</code> (survol), <code>#F4F6FA</code> (fonds doux).</small>
+    </div>
+    <div class="card">
+      <h4><span class="dot" style="background:#D21419;display:inline-block;vertical-align:middle"></span>&nbsp; Rouge BBI — <code>#D21419</code></h4>
+      <small><b>Accent.</b> À doser (≤ 10&nbsp;% de la surface) : CTA « Soumettre à validation », badges « Lecture seule 🔒 », chiffres clés, surlignage de section. Jamais en fond plein page (agressif en usage quotidien).</small>
+    </div>
+    <div class="card">
+      <h4><span class="dot" style="background:#21252B;display:inline-block;vertical-align:middle"></span>&nbsp; Neutres</h4>
+      <small>Texte <code>#21252B</code>, secondaire <code>#5A6270</code>, bordures <code>#E1E4EA</code>, fonds <code>#FAFBFC</code>. Blanc dominant — l'espace blanc est la signature d'un intranet « moderne ».</small>
+    </div>
+  </div>
+
+  <h3>5.2 Thème SharePoint personnalisé</h3>
+  <p>Le thème est publié au niveau du <b>tenant</b> puis appliqué au hub (les sites associés l'héritent). Fichier complet en <a href="#annexeA">Annexe A</a> ; publication via PnP PowerShell :</p>
+  <pre><span class="c"># Publication du thème au tenant</span>
+Connect-PnPOnline -Url <span class="s">"https://&lt;tenant&gt;-admin.sharepoint.com"</span> -Interactive
+$palette = Get-Content <span class="s">".\bbi-theme.json"</span> -Raw | ConvertFrom-Json
+Add-PnPTenantTheme -Identity <span class="s">"BBI Bleu nuit"</span> -Palette $palette
+
+<span class="c"># Application au hub (héritée par les sites associés)</span>
+Set-PnPHubSite -Identity <span class="s">"https://&lt;tenant&gt;.sharepoint.com/sites/BBI-Intranet"</span> `
+  -Title <span class="s">"BBI Intranet"</span> `
+  -LogoUrl <span class="s">"https://&lt;tenant&gt;.sharepoint.com/sites/BBI-Intranet/SiteAssets/logo-bbi.png"</span></pre>
+
+  <h3>5.3 Règles d'identité sur SharePoint</h3>
+  <table class="t-navy">
+    <tr><th style="width:30%">Élément</th><th>Règle</th></tr>
+    <tr><td>Logo</td><td>Version horizontale sur fond blanc (fichier fourni) dans l'en-tête du hub ; favicon/icône de site = monogramme « BB » bleu nuit sur fond rouge. Prévoir une variante blanche pour les fonds bleu nuit.</td></tr>
+    <tr><td>Typographie</td><td>Segoe UI (police native Microsoft — zéro coût de chargement, rendu parfait dans Office). Un <i>font package</i> SharePoint peut proposer une police de marque pour les titres si BBI le souhaite (ex. : équivalent de la police du logo) — à tester avant généralisation.</td></tr>
+    <tr><td>Iconographie</td><td>Fluent UI Icons uniquement (cohérence avec la barre de suite et les applications M365). Pour les grilles de liens thématiques, une <b>petite bibliothèque d'icônes BBI</b> (SVG monochromes bleu nuit) est produite par l'UX — comme dans la référence, mais homogène.</td></tr>
+    <tr><td>Imagerie</td><td>Photos réelles des formations BBI (équipes, sessions, certifications) plutôt que banques d'images génériques ; traitement cohérent (légère vignette bleu nuit sur les visuels Hero).</td></tr>
+    <tr><td>Vocabulaire</td><td>Glossaire partagé : « Formation », « Programme », « Module », « Session », « Support », « Parcours ». Jamais « dashboard », « portal » ou anglicismes non assumés — le français est la langue de référence.</td></tr>
+  </table>
+</section>
+
+<!-- ================================================== S6 -->
+<section id="s6">
+  <h2><span class="num">6.</span>Gestion des formations — modèle de contenu &amp; cycle de vie</h2>
+
+  <h3>6.1 Modèle de données métier</h3>
+  <p>Deux objets centralisent la connaissance : la <b>liste Formations</b> (le catalogue) et la <b>bibliothèque Supports de formation</b> (les contenus), liés par le <b>code formation</b>.</p>
+  <table>
+    <tr><th style="width:30%">Objet</th><th>Colonnes clés (site columns, galerie du hub)</th></tr>
+    <tr>
+      <td><b>Liste « Formations »</b><br><small>(site Catalogue — 1 élément = 1 formation)</small></td>
+      <td><code>CodeFormation</code> (ex. BBI-MGT-101, unique) · <code>Intitulé</code> · <code>Filière</code> (choix : Management, Commerce, Coaching, Digital…) · <code>Public</code> (choix) · <code>Prérequis</code> · <code>Objectifs</code> (texte enrichi) · <code>DuréeH</code> · <code>Modalité</code> (Présentiel / Distanciel / Hybride) · <code>Niveau</code> · <code>FormateursRéférents</code> (personnes, multi) · <code>Vignette</code> (image) · <code>StatutCatalogue</code> (Actif / En refonte / Archivé) · <code>SyllabusPDF</code> (lien)</td>
+    </tr>
+    <tr>
+      <td><b>Type de contenu « Support de formation »</b><br><small>(hérité dans les 2 bibliothèques)</small></td>
+      <td><code>CodeFormation</code> (recherche/lookup vers la liste Formations) · <code>ModuleNum</code> · <code>TypeSupport</code> (choix : <i>Slides animateur</i>, <i>Manuel participant</i>, <i>Guide d'animation</i>, <i>Exercice/Atelier</i>, <i>Évaluation/QCM</i>, <i>Fiche programme</i>) · <code>Langue</code> · <code>StatutSupport</code> (Brouillon / En révision / <b>Publié</b> / Obsolète) · <code>FormateurAuteur</code> (personne) · <code>DateValidité</code> · <code>VersionPédagogique</code> (ex. v2026.1)</td>
+    </tr>
+  </table>
+  <div class="callout ok">
+    <b>✅ Métadonnées plutôt que dossiers</b>
+    Contrairement à la référence (arborescence « 00. », « 01. », « 9.1 »… en dossiers et noms de fichiers), BBI porte la structure en <b>colonnes</b>. Bénéfices : recherche fiable, vues par formation/filière/formateur, mise à jour d'une nomenclature sans déplacer des fichiers, alimentation directe des web parts. La numérotation pédagogique reste visible — mais pilotée par les données.
+  </div>
+
+  <h3>6.2 Deux bibliothèques, deux états — un seul flux</h3>
+  <pre><span class="c">── Cycle de vie d'un support ─────────────────────────────────────────────────────</span>
+  Espace Formateurs                      Site Catalogue
+  ┌────────────────────────────┐         ┌──────────────────────────────┐
+  │ 📝 « Production des        │   ⚙️    │ 🔒 « Supports publiés »      │
+  │    supports »              │ ──────► │    Copie verrouillée         │
+  │  co-édition, v0.x,         │  Power  │  lecture seule + chiffrement │
+  │  check-out, co-auteurs     │Automate │  + étiquette sensibilité     │
+  └────────────────────────────┘         └──────────────────────────────┘
+      1. Dépôt + métadonnées      3. Approbation
+      2. « Soumettre à            4. Publication : copie → protections
+         validation »                appliquées → notification Teams
+      5. Toute correction repart de la source (Production) — jamais sur la copie</pre>
+  <ul>
+    <li><b>Versioning</b> : majeur + mineur, 50 versions majeures conservées ; approbation de contenu activée sur « Supports publiés » (l'élément reste « En attente » jusqu'à validation — ceinture + bretelles avec le flux Power Automate).</li>
+    <li><b>Flux Power Automate</b> (détail §7.4) : soumission → tâche d'approbation Teams/mail au responsable pédagogique → si validé : copie vers « Supports publiés », application de l'étiquette de sensibilité, statut <code>Publié</code>, notification aux formateurs référents ; si refusé : commentaire renvoyé à l'auteur.</li>
+    <li><b>Obsolescence</b> : revue trimestrielle automatisée (rapport des supports dont <code>DateValidité</code> &lt; aujourd'hui → statut <code>Obsolète</code>, retrait des vues publiées, archivage conservé dans Production).</li>
+  </ul>
+
+  <h3>6.3 Sessions de formation</h3>
+  <p>La <b>liste « Sessions »</b> (site Catalogue, type Événements enrichi) alimente les web parts Événements : <code>Formation</code> (lookup), <code>Formateur</code> (personne), <code>DateDébut/Fin</code>, <code>Lieu</code>, <code>Modalité</code>, <code>Capacité</code>, <code>LienInscription</code> (Forms). Les inscriptions peuvent tenir dans une liste simple ou passer par Forms/Power Apps selon le volume — à arbitrer en atelier.</p>
+</section>
+
+<!-- ================================================== S7 -->
+<section id="s7">
+  <h2><span class="num">7.</span>Protection des documents — lecture seule, anti-téléchargement, anti-impression</h2>
+  <p class="lead">C'est l'exigence la plus sensible du projet. La stratégie retenue est une <b>défense en profondeur en 4 couches</b>. Aucune couche seule ne suffit ; ensemble, elles couvrent l'essentiel des risques. Nous documentons aussi, en toute transparence, <b>ce que SharePoint ne peut pas empêcher</b>.</p>
+
+  <div class="layers">
+    <div class="layer l1"><span class="l-badge">Couche 1</span><div><b>Périmètre &amp; permissions — « qui peut quoi »</b><small>L'édition n'existe que dans l'Espace Formateurs. Tout ce qui est publié est en niveau d'autorisation <b>Lecture</b> : pas de modification, pas de suppression, pas de check-out.</small></div></div>
+    <div class="layer l2"><span class="l-badge">Couche 2</span><div><b>Chiffrement « afficher uniquement » — étiquettes de sensibilité (Purview) ou IRM</b><small>Le document reste chiffré : pas d'enregistrement local, pas d'impression, pas de copier/coller, dans Office web et bureautique, y compris après téléchargement autorisé.</small></div></div>
+    <div class="layer l3"><span class="l-badge">Couche 3</span><div><b>Accès conditionnel — le téléchargement bloqué à la source</b><small>Sur appareils non gérés : accès web limité (aucun téléchargement, aucune synchro, aperçu navigateur uniquement). MAM Intune sur mobiles : « Enregistrer sous » et copie désactivées.</small></div></div>
+    <div class="layer l4"><span class="l-badge">Couche 4</span><div><b>Traçabilité &amp; dissuasion</b><small>Audit Purview (téléchargements, impressions), filigranes, alertes Defender, CGU d'usage, sensibilisation des formateurs.</small></div></div>
+  </div>
+
+  <h3>7.1 Couche 1 — Permissions : la modification, hors du périmètre</h3>
+  <table>
+    <tr><th style="width:26%">Emplacement</th><th style="width:26%">Audience / niveau</th><th>Effet</th></tr>
+    <tr><td>Espace Formateurs — « Production »</td><td>Groupe <code>BBI-Concepteurs</code> : <b>Contribution/Édition</b><br>Groupe <code>BBI-Formateurs</code> : <b>Lecture</b></td><td>Seuls les concepteurs de contenus modifient les sources. Les formateurs consultent les brouillons.</td></tr>
+    <tr><td>Catalogue — « Supports publiés »</td><td>Groupe <code>BBI-Formateurs</code> + <code>Tous les collaborateurs</code> : <b>Lecture</b><br>Responsable pédagogique : gestion (retrait d'un contenu)</td><td><b>Personne ne peut modifier, y compris les formateurs.</b> Le menu « Modifier » n'apparaît pas ; l'API refuse l'écriture.</td></tr>
+    <tr><td>Bibliothèques publiées — réglages</td><td>Versioning majeur/mineur + approbation ; « Obliger l'extraction » <i>désactivé</i> côté publié ; création de dossiers interdite (métadonnées)</td><td>Verrou de processus : toute évolution repasse par le cycle §6.2.</td></tr>
+    <tr><td>Partage</td><td>Partage externe : <b>désactivé</b> sur le Catalogue ; liens « Tout le monde » désactivés au tenant ; lien « Personnes de l'organisation » uniquement</td><td>Aucune fuite par lien partagé accidentel.</td></tr>
+  </table>
+  <div class="callout red">
+    <b>⚠️ Point d'honnêteté technique</b>
+    Le niveau <b>Lecture</b> empêche la modification mais <b>pas le téléchargement</b> : un fichier lisible en bureautique est techniquement récupérable. C'est précisément le rôle des couches 2 et 3 — ne comptez jamais uniquement sur les permissions pour bloquer un téléchargement.
+  </div>
+
+  <h3>7.2 Couche 2 — Chiffrement « afficher uniquement » (anti-impression, anti-copie, anti-enregistrement)</h3>
+  <p><b>Option recommandée : étiquettes de sensibilité Microsoft Purview</b> (solution moderne, cohérente avec Office, Teams et Exchange) — <b>alternative : IRM sur bibliothèque</b> (Azure Rights Management) si l'étiquetage n'est pas encore déployé.</p>
+  <table>
+    <tr><th style="width:22%"></th><th style="width:39%">Étiquette de sensibilité (recommandé)</th><th>IRM bibliothèque (alternative)</th></tr>
+    <tr><td><b>Configuration</b></td><td>Étiquette <code>BBI – Formations – Lecture seule</code> : chiffrement activé, droits = <b>« Visionneuse » (View Only)</b>. Étiquetage par défaut de la bibliothèque « Supports publiés » (l'utilisateur n'a rien à faire).</td><td>Paramètres de bibliothèque → « Gestion des droits sur les informations » : cocher <i>Empêcher l'impression</i>, <i>Empêcher l'exécution du script/copier-coller</i>, expiration optionnelle.</td></tr>
+    <tr><td><b>Effets pour l'utilisateur</b></td><td>Ouverture web ou Office : lecture possible ; <b>impression ❌, copier/coller ❌, Enregistrer sous ❌, capture via Office ❌</b>. PDF protégés affichés dans le navigateur avec les mêmes restrictions.</td><td>Mêmes restrictions dans les applications compatibles RMS (Office, PDF).</td></tr>
+    <tr><td><b>Force</b></td><td>La protection <b> voyage avec le fichier</b> (même si un téléchargement finit par être autorisé, le fichier reste illisible en dehors du cadre autorisé). Chiffrement géré par Microsoft Entra.</td><td>Simplicité de mise en œuvre, portée limitée à la bibliothèque.</td></tr>
+    <tr><td><b>Prérequis</b></td><td>Purview Information Protection (inclus E3/E5 avec variantes ; chiffrement avancé = add-on ou E5).</td><td>Azure Rights Management activé (inclus dans les licences Office/M365).</td></tr>
+  </table>
+  <div class="callout ok">
+    <b>✅ Recommandation</b>
+    Si le tenant BBI dispose de licences E3/E5 (à vérifier §13), partir sur les <b>étiquettes de sensibilité</b> : plus pérenne, plus large (le fichier reste protégé hors SharePoint), et ça prépare le volet conformité global (DLP, rétention). L'IRM reste le plan B immédiat si l'étiquetage doit être différé.
+  </div>
+
+  <h3>7.3 Couche 3 — Accès conditionnel : bloquer le téléchargement à la source</h3>
+  <ul>
+    <li><b>Appareils non gérés</b> : politique d'accès « appareils non gérés » au niveau site (PowerShell <code>Set-SPOSite -ConditionalAccessPolicy AllowLimitedAccess</code>) et/ou au tenant : l'utilisateur non géré accède aux fichiers <b>en vue web limitée uniquement</b> — pas de téléchargement, pas de synchronisation OneDrive, pas d'impression depuis l'aperçu, pas de copier/coller.</li>
+    <li><b>Contrôles de session Defender for Cloud Apps</b> : pour les sessions navigateur non conformes, politique « <b>Bloquer le téléchargement</b> » (avec message pédagogique) ciblée sur le site Catalogue — l'utilisateur voit, ne récupère pas.</li>
+    <li><b>Mobiles (MAM Intune)</b> : politique de protection applicative Edge/Office : « Enregistrer sous » ❌, copier/coller ❌ (ou « approuvé par stratégie »), impression ❌.</li>
+    <li><b>Synchronisation OneDrive</b> : bloquée sur le site Catalogue (l'accès web limité la supprime de fait ; vérifier aussi la restriction tenant « synchroniser uniquement sur des domaines gérés »).</li>
+    <li><b>Ouverture forcée dans le navigateur</b> : paramètre de bibliothèque « Ouvrir les documents dans le navigateur » — empêche la bascule silencieuse vers le client lourd et ses options d'export.</li>
+  </ul>
+
+  <h3>7.4 Ce que SharePoint ne peut pas empêcher — et les parades</h3>
+  <table>
+    <tr><th style="width:30%">Risque résiduel</th><th>Exposition</th><th>Parade recommandée</th></tr>
+    <tr><td><b>Capture d'écran / photo d'écran</b></td><td>Élevée, impossible à bloquer côté plateforme (aucun SaaS ne le fait de façon fiable)</td><td>Filigrane nominatif (« Confidentiel – usage interne BBI » via marquage de contenu de l'étiquette) ; CGU signées des formateurs ; audit ; pour les contenus à très forte valeur : diffusion en <b>PowerPoint Live dans Teams</b> (présentation en flux, téléchargement désactivé pour les participants) ou solution DRM tierce (Vitrium, Locklizard, Fasoo) si l'exigence est absolue — à chiffrer séparément.</td></tr>
+    <tr><td><b>Reformatage manuel</b> (retaper le contenu)</td><td>Moyenne</td><td>Acceptable : coût très supérieur au gain ; le filigrane et l'audit dissuadent.</td></tr>
+    <tr><td><b>Comptes privilégiés</b> (admin, propriétaire de site)</td><td>Faible mais réelle</td><td>Groupe de gestion restreint, PIM (activations à durée limitée), journalisation des accès admin.</td></tr>
+  </table>
+
+  <h3>7.5 Flux de publication avec protections intégrées</h3>
+  <pre><span class="c"># Principe du flux Power Automate « Publication d'un support » (déclencheur : bouton dans la liste)</span>
+1. Auteur soumet (statut En révision) ─► 2. Approbation Teams/mail — Responsable pédagogique
+   ├─ Validé ──► 3. Copie vers « Supports publiés » (colonnes conservées)
+   │             4. Application étiquette « BBI – Formations – Lecture seule »
+   │             5. Statut = Publié + notification aux FormateursRéférents (Teams)
+   └─ Refusé ──► commentaire renvoyé à l'auteur, statut Brouillon</pre>
+  <div class="callout">
+    <b>🔎 Traçabilité (Couche 4)</b>
+    Purview Audit : journalisation des téléchargements et consultations sur « Supports publiés » ; rapport mensuel automatique aux responsables pédagogiques ; alertes Defender en cas de comportement anormal (volumes inhabituels). Filigrane de contenu configuré dans l'étiquette. Ces journaux sont conservés conformément à la politique de rétention (§10.4).
+  </div>
+</section>
+
+<!-- ================================================== S8 -->
+<section id="s8">
+  <h2><span class="num">8.</span>Composants SPFx</h2>
+  <p>Philosophie : <b>SPFx là où le natif plafonne, natif partout ailleurs</b>. Trois web parts suffisent pour l'expérience cible ; elles partagent une bibliothèque de services (accès données, gestion des droits affichés, i18n).</p>
+
+  <h3>8.1 <code>bbi-training-catalog</code> — Catalogue des formations <span class="tag spfx">SPFx</span></h3>
+  <table>
+    <tr><th style="width:22%">Aspect</th><th>Spécification</th></tr>
+    <tr><td><b>Objectif</b></td><td>Présenter le catalogue sous forme de cartes riches et filtrables (le web part native « Liste » ne permet pas ce niveau de mise en forme ni les filtres fluides).</td></tr>
+    <tr><td><b>Source</b></td><td>Liste « Formations » via <b>PnPjs</b> (<code>@pnp/sp</code>) — requêtes CAML/REST avec pagination ; cache en mémoire 5 min ; aucune donnée locale.</td></tr>
+    <tr><td><b>Comportement</b></td><td>Cartes (vignette, code, intitulé, filière, durée, modalité, niveau) ; barre de filtres par <code>Filière</code> / <code>Modalité</code> / <code>Public</code> + recherche plein texte côté client ; clic → navigation vers la fiche formation (page détail avec query string <code>?code=BBI-MGT-101</code>).</td></tr>
+    <tr><td><b>Propriétés éditeur</b></td><td>Mode liste vs mode cartes, nombre d'éléments, filtres visibles, site/liste source (configurable, défaut = contexte).</td></tr>
+    <tr><td><b>Technique</b></td><td>React + TypeScript strict, <b>Fluent UI React v9</b> (composants accessibles), <code>ClientSideWebPart</code> responsive ; état via React hooks ; aucune dépendance jQuery. Charge différée (dynamic import) tant que la web part n'est pas visible.</td></tr>
+  </table>
+
+  <h3>8.2 <code>bbi-secure-documents</code> — Visionneuse sécurisée <span class="tag spfx">SPFx</span></h3>
+  <table>
+    <tr><th style="width:22%">Aspect</th><th>Spécification</th></tr>
+    <tr><td><b>Objectif</b></td><td>Exposer les supports publiés avec une UX de « contenu protégé » : bouton d'ouverture <b>navigateur uniquement</b>, badge 🔒 <i>Lecture seule</i>, aucune affordance de téléchargement.</td></tr>
+    <tr><td><b>Source</b></td><td>Bibliothèque « Supports publiés » (vue filtrée <code>StatutSupport = Publié</code>, tri <code>Modified desc</code>) ; filtre optionnel <code>CodeFormation</code> depuis l'URL (intégration fiche formation).</td></tr>
+    <tr><td><b>Comportement</b></td><td>Cartes document (icône de type, titre, type de support, version pédagogique, date). Clic → ouverture de la vue web du fichier (URL <code>...?web=1</code> en nouvel onglet) ; les permissions serveur font le reste : l'utilisateur en Lecture + étiquette View-Only ne peut ni imprimer ni télécharger ni copier. Si l'utilisateur n'a pas les droits, message d'erreur propre (pas d'URL cassée).</td></tr>
+    <tr><td><b>Sécurité UX</b></td><td>Pas de lien direct vers l'élément de bibliothèque (qui exposerait le menu « Télécharger ») ; masquage des commandes de la barre de commande via paramètre de vue ; rappel visuel permanent du caractère protégé.</td></tr>
+    <tr><td><b>Important</b></td><td>La web part <b>n'ajoute</b> pas de sécurité : elle <b>révèle</b> ce que le serveur autorise déjà. Toute la protection réelle = §7 (permissions, étiquette, accès conditionnel). UX et sécurité ne doivent jamais se substituer.</td></tr>
+    <tr><td><b>Propriétés éditeur</b></td><td>Bibliothèque source, nombre d'éléments, filtre CodeFormation fixe ou dynamique, affichage badges.</td></tr>
+  </table>
+
+  <h3>8.3 <code>bbi-trainer-dashboard</code> — Tableau de bord formateur <span class="tag spfx">SPFx</span> <span class="tag opt">v2</span></h3>
+  <table>
+    <tr><th style="width:22%">Aspect</th><th>Spécification</th></tr>
+    <tr><td><b>Objectif</b></td><td>Sur l'accueil de l'Espace Formateurs : « Mes formations », « Mes sessions à venir », « Derniers supports publiés », « Actions requises » (approbations en attente si l'utilisateur est approbateur).</td></tr>
+    <tr><td><b>Source</b></td><td>Listes Formations / Sessions / Supports filtrées sur <code>l'utilisateur courant</code> (contexte <code>this.context.pageContext.user</code>) + API Graph pour la photo/calendrier si pertinent.</td></tr>
+    <tr><td><b>Comportement</b></td><td>4 widgets compacts ; liens profonds vers les vues filtrées ; badge rouge sur les actions en attente.</td></tr>
+    <tr><td><b>Priorisation</b></td><td>Livrable de <b>phase 2</b> : la phase 1 s'appuie sur des vues filtrées « Par formateur » (web part Liste native filtrée par <code>[Moi]</code>) — bonne pratique : valider le besoin réel avant de coder.</td></tr>
+  </table>
+
+  <h3>8.4 Socle technique commun</h3>
+  <ul>
+    <li><b>Version SPFx</b> : dernière version en support (famille 1.20/1.21) — cible Node LTS + TypeScript strict ; mise à jour annuelle planifiée (§11).</li>
+    <li><b>Structure de solution</b> : une seule solution SPFx « BBI Intranet » contenant les 3 web parts + une bibliothèque partagée (<code>services/</code> : accès données, formatage, i18n FR) ; versioning sémantique ; thématisation via variables de thème SharePoint (le bleu nuit suit automatiquement le thème).</li>
+    <li><b>Qualité</b> : ESLint, tests unitaires des services (Jest), revue de code obligatoire, analyse de bundle (size &lt; 500 Ko par web part gérée), profiling avec Page Diagnostics.</li>
+    <li><b>Déploiement</b> : catalogue d'applications du tenant ; déploiement « disponible sur tous les sites » ; ALM décrit en §11.2.</li>
+  </ul>
+  <div class="callout">
+    <b>💡 Alternative volontairement retenue contre un « méga-projet »</b>
+    Un intranet entièrement « SPFx » (framework type PnP Modern Search étendu, accueil 100&nbsp;% personnalisé) offre plus de liberté mais coûte 3 à 5× plus cher en construction <i>et en maintenance</i>. L'arbitrage de l'équipe : natif d'abord, SPFx chirurgical. C'est ce qui rend le projet livrable en 16 semaines avec un TCO maîtrisé.
+  </div>
+</section>
+
+<!-- ================================================== S9 -->
+<section id="s9">
+  <h2><span class="num">9.</span>Configurations SharePoint à mettre en place</h2>
+
+  <h3>9.1 Niveau tenant (Centre d'administration SharePoint)</h3>
+  <table>
+    <tr><th style="width:34%">Paramètre</th><th>Valeur recommandée</th></tr>
+    <tr><td>Thème de site</td><td>Thème « BBI Bleu nuit » publié (Annexe A) + masquage des thèmes non conformes dans la galerie.</td></tr>
+    <tr><td>Partage externe</td><td>Tenant : « Personnes existantes » uniquement ; <b>désactivé</b> sur Catalogue et Espace Formateurs ; liens « Tout le monde » bloqués ; expiration des liens à 30 j.</td></tr>
+    <tr><td>Appareils non gérés</td><td>« Autoriser l'accès limité, web uniquement » au niveau tenant <i>ou</i> ciblé par site (§7.3).</td></tr>
+    <tr><td>Ouverture des documents</td><td>« Ouvrir dans le navigateur » sur la bibliothèque publiée ; restriction des clients de synchronisation « domaines gérés uniquement ».</td></tr>
+    <tr><td>Catalogue d'applications</td><td>Catalogue tenant unique (ou par zone DEV/PROD si gouvernance stricte) pour la solution SPFx.</td></tr>
+    <tr><td>Catalogue d'applications organisationnelles (typographies)</td><td>Font package BBI (optionnel, §5.3).</td></tr>
+    <tr><td>Recherche Microsoft</td><td>Plan vertical « Formations » ; mappage des colonnes métier vers les propriétés pouvant être affinées (<code>RefinableString00..09</code>, <code>RefinableInt*</code>) pour alimenter recherche et web parts de contenu en évidence.</td></tr>
+  </table>
+
+  <h3>9.2 Niveau hub « BBI Intranet »</h3>
+  <ul>
+    <li>Association des 3 sites ; navigation hub définie en dur (pas de sous-sites) ; logo et pied de page du hub (liens mentions légales/RGPD/accessibilité).</li>
+    <li><b>Galerie de types de contenu du hub</b> : les types de contenu « Support de formation » et les colonnes de site y sont créés puis <b>publiés (push)</b> vers les sites associés — une seule définition, mise à jour centralisée.</li>
+    <li>Autorisations du hub : seuls 2–3 administrateurs (IT + référent intranet).</li>
+  </ul>
+
+  <h3>9.3 Niveau sites &amp; bibliothèques</h3>
+  <table>
+    <tr><th style="width:26%">Cible</th><th>Configuration</th></tr>
+    <tr><td>Groupes de sécurité Entra</td><td><code>BBI-Formateurs</code>, <code>BBI-Concepteurs</code>, <code>BBI-Direction</code>, <code>BBI-Intranet-Admins</code>. Gérés par les RH/IT ; memberships synchronisés (uniquement des comptes internes — pas d'invités).</td></tr>
+    <tr><td>Site Vitrine</td><td>Autorisations uniques : visiteurs = tous les collaborateurs (Lecture) ; héritage rompu à dessein.</td></tr>
+    <tr><td>Site Catalogue</td><td>Membres = BBI-Concepteurs (contribution), visiteurs = BBI-Formateurs + collaborateurs (Lecture) ; bibliothèque « Supports publiés » : versioning, approbation, étiquette par défaut, IRM/étiquette, ouverture navigateur, pas de dossiers, <b>2 vues structurantes</b> (« Par formation », « Par type de support »).</td></tr>
+    <tr><td>Site Espace Formateurs</td><td>Groupe M365 « BBI – Espace Formateurs » (propriétaires : direction pédagogique ; membres : formateurs) + site Teams couplé (canal général, canaux par filière) ; bibliothèque « Production » : versioning mineur/majeur, co-création autorisée, check-out sur demande.</td></tr>
+    <tr><td>Colonnes obligatoires</td><td><code>CodeFormation</code>, <code>TypeSupport</code>, <code>StatutSupport</code>, <code>FormateurAuteur</code> requis à la création — la qualité des métadonnées conditionne toute l'expérience.</td></tr>
+    <tr><td>Modèles de documents</td><td>Bibliothèque de modèles (PowerPoint/Word BBI avec page de garde normalisée) accessible via « Nouveau » dans Production.</td></tr>
+  </table>
+
+  <h3>9.4 Vues clés à livrer</h3>
+  <div class="grid2">
+    <div class="card"><h4>Bibliothèque « Supports publiés »</h4><small>• <b>Par formation</b> (groupe <code>CodeFormation</code>, tri <code>ModuleNum</code>)<br>• <b>Par type</b> (groupe <code>TypeSupport</code>)<br>• <b>Récemment publiés</b> (tri <code>Modified desc</code>, limite 10 — source web part ⑦)<br>• <b>À revoir</b> (<code>DateValidité</code> &lt; aujourd'hui — usage interne gouvernance)</small></div>
+    <div class="card"><h4>Liste « Formations »</h4><small>• <b>Catalogue actif</b> (<code>StatutCatalogue</code> = Actif)<br>• <b>Par filière</b>, <b>Par modalité</b><br>• <b>En refonte</b> (revue trimestrielle)<br>• Vues « Mes formations » (filtre <code>FormateursRéférents</code> = [Moi]) — sert de phase 1 au dashboard (§8.3)</small></div>
+  </div>
+</section>
+
+<!-- ================================================== S10 -->
+<section id="s10">
+  <h2><span class="num">10.</span>Sécurité &amp; gouvernance</h2>
+
+  <h3>10.1 Sécurité</h3>
+  <table>
+    <tr><th style="width:26%">Domaine</th><th>Mesures</th></tr>
+    <tr><td>Identité &amp; accès</td><td>Comptes internes uniquement ; MFA obligatoire (par défaut Entra) ; accès conditionnel général (localisation/appareil) en cohérence avec la politique M365 existante ; PIM pour les rôles admin SharePoint.</td></tr>
+    <tr><td>Protection des données</td><td>Étiquettes de sensibilité (documents §7 + <b>étiquette de site</b> « Interne » sur Catalogue et Espace Formateurs) ; DLP ciblant les données personnelles (stagiaires) ; rétention §10.4.</td></tr>
+    <tr><td>Supervision</td><td>Purview Audit (consultations, téléchargements, impressions IRM) ; alertes Defender for Cloud Apps sur comportements anormaux ; revue mensuelle automatique.</td></tr>
+    <tr><td>Disponibilité</td><td>Récupération de versions &amp; corbeille (93 j) ; corbeille de collection ; pas d'effacement direct des sources publiées — suppression = retrait logique (statut Obsolète).</td></tr>
+  </table>
+
+  <h3>10.2 Rôles &amp; responsabilités (RACI)</h3>
+  <table class="t-navy">
+    <tr><th>Activité</th><th>Direction BBI</th><th>Resp. pédagogique</th><th>Formateurs</th><th>IT / Prestataire</th></tr>
+    <tr><td>Stratégie éditoriale &amp; priorités</td><td><b>A</b></td><td>R</td><td>C</td><td>I</td></tr>
+    <tr><td>Création des supports</td><td>I</td><td>A</td><td><b>R</b></td><td>—</td></tr>
+    <tr><td>Validation &amp; publication</td><td>I</td><td><b>A/R</b></td><td>C</td><td>—</td></tr>
+    <tr><td>Plateforme, SPFx, thèmes</td><td>I</td><td>C</td><td>I</td><td><b>A/R</b></td></tr>
+    <tr><td>Habilitations &amp; revue des accès</td><td>I</td><td>C</td><td>I</td><td><b>A/R</b></td></tr>
+    <tr><td>Indicateurs &amp; amélioration continue</td><td>A</td><td>R</td><td>C</td><td>R</td></tr>
+  </table>
+
+  <h3>10.3 Gouvernance plateforme</h3>
+  <ul>
+    <li><b>Comité intranet</b> : réunions mensuelles (direction, resp. pédagogique, IT, référent métier) — arbitrages contenus, roadmap, incidents, KPI.</li>
+    <li><b>Charte de nommage &amp; glossaire</b> (Annexe B) — le vocabulaire est gouverné comme le design.</li>
+    <li><b>Demande de site/extension</b> : formulaire Power Apps → revue en comité → provisioning via modèle PnP (jamais de site « sauvage »).</li>
+    <li><b>Revue trimestrielle</b> : permissions (qui peut contribuer où), supports obsolètes, statistiques d'usage, hygiène des métadonnées.</li>
+    <li><b>Documentation vivante</b> : page « Gouvernance » dans l'Espace Formateurs (processus de publication, charte, contacts) ; le wiki est l'outil de pilotage.</li>
+  </ul>
+
+  <h3>10.4 Conformité (RGPD &amp; rétention)</h3>
+  <ul>
+    <li>Données personnelles présentes : liste des apprenants/inscriptions, annuaire. Minimisation : pas de données de stagiaires dans l'intranet si un LMS existant les porte — l'intranet référence les <i>supports</i>, pas les dossiers individuels.</li>
+    <li>Étiquettes de <b>rétention</b> Purview : « Supports BBI – 5 ans » (obligations de preuve des organismes de formation) appliquée aux bibliothèques ; suppression des brouillons après 24 mois d'inactivité.</li>
+    <li>Mentions légales/RGPD/accessibilité dans le pied de page du hub ; registre des traitements à jour si inscription via Forms.</li>
+  </ul>
+</section>
+
+<!-- ================================================== S11 -->
+<section id="s11">
+  <h2><span class="num">11.</span>Maintenance &amp; ALM</h2>
+
+  <h3>11.1 Maintenance courante</h3>
+  <table>
+    <tr><th style="width:28%">Fréquence</th><th>Actions</th></tr>
+    <tr><td><b>Hebdomadaire</b> (automatisé)</td><td>Flux Power Automate : échecs d'approbation, supports en attente &gt; 5 j, alertes d'audit.</td></tr>
+    <tr><td><b>Mensuel</b></td><td>Comité intranet ; rapport d'usage (pages vues, recherches sans résultat — mine d'or d'amélioration) ; revue des actualités de la plateforme Microsoft (message center).</td></tr>
+    <tr><td><b>Trimestriel</b></td><td>Revue des accès ; purge des obsolètes ; test de restauration ; audit accessibilité des nouvelles pages ; revue des quotas de stockage.</td></tr>
+    <tr><td><b>Annuel</b></td><td>Mise à niveau SPFx (runtime + solution), revue du thème face à l'évolution de la charte BBI, enquête de satisfaction utilisateurs (Forms), renouvellement des CGU de diffusion.</td></tr>
+  </table>
+
+  <h3>11.2 ALM de la solution SPFx</h3>
+  <ul>
+    <li><b>Environnements</b> : tenant de développeur (essai M365) → catalogue tenant de recette (ou site « bac à sable ») → catalogue tenant production. Déploiement via pipelines (GitHub Actions ou Azure DevOps) : build → tests → package → publish app catalog → approuver.</li>
+    <li><b>Versioning</b> : version sémantique (<code>1.x.y</code>) ; « Mise à niveau ajoutée au tenant » sans downtime ; les instances de web parts existantes se mettent à jour — prévoir la compatibilité ascendante des propriétés.</li>
+    <li><b>Provisioning</b> : modèle <b>PnP</b> (schéma JSON/PowerShell) pour sites, colonnes, types de contenu, vues, navigation — rejouable, versionné dans Git. Aucune configuration « à la main » sans trace.</li>
+    <li><b>Support</b> : canal Teams « Support intranet » + formulaire de demande ; SLA interne : anomalie bloquante &lt; 1 j ouvré, évolution arbitrée en comité.</li>
+  </ul>
+</section>
+
+<!-- ================================================== S12 -->
+<section id="s12">
+  <h2><span class="num">12.</span>Feuille de route indicative</h2>
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-bar"></div><h4>Phase 0 — Cadrage</h4><small>S0–S2 · Ateliers d'affinage (arbitrages §7), validation maquettes, audit tenant &amp; licences, charte UI validée</small></div>
+    <div class="tl-item"><div class="tl-bar"></div><h4>Phase 1 — Socle</h4><small>S2–S5 · Création hub + sites (PnP), thème, colonnes/CT, groupes, bibliothèques, navigation, étiquettes Purview</small></div>
+    <div class="tl-item"><div class="tl-bar"></div><h4>Phase 2 — Pages &amp; SPFx</h4><small>S5–S10 · Page d'accueil, fiches formation, web parts SPFx (catalogue, visionneuse), flux Power Automate, Power BI</small></div>
+    <div class="tl-item"><div class="tl-bar"></div><h4>Phase 3 — Pilote</h4><small>S10–S12 · Groupe pilote (5–8 formateurs), migration des premiers programmes, ajustements UX, tests protections en conditions réelles</small></div>
+    <div class="tl-item"><div class="tl-bar"></div><h4>Phase 4 — Déploiement</h4><small>S12–S16 · Migration complète du catalogue, communications, formations utilisateurs, bascule, hypercare 4 semaines</small></div>
+  </div>
+  <div class="callout ok">
+    <b>✅ Critères de succès (KPI)</b>
+    • Formateur : &lt; 3 clics vers son support · • 100&nbsp;% des supports publiés qualifiés (métadonnées obligatoires) · • 0 modification de support publié sur 90 j glissants (audit) · • Score Page Diagnostics &gt; 75 sur l'accueil · • Satisfactions pilote &amp; déploiement ≥ 4/5 · • Adoption : 60&nbsp;% des formateurs actifs hebdo à S+3 mois.
+  </div>
+</section>
+
+<!-- ================================================== S13 -->
+<section id="s13">
+  <h2><span class="num">13.</span>Prérequis &amp; licences</h2>
+  <table>
+    <tr><th style="width:36%">Capacité requise</th><th>Licence / composant</th><th>Commentaire</th></tr>
+    <tr><td>Intranet SharePoint, web parts natives, SPFx, Teams, Power Automate standard</td><td>Microsoft 365 <b>E3</b> (ou Business Premium avec limites)</td><td>Le socle du projet. Power Automate : flux d'approbation inclus (connecteurs standard).</td></tr>
+    <tr><td>Étiquettes de sensibilité avec <b>chiffrement</b> « afficher uniquement » (§7.2 — option recommandée)</td><td>Purview Information Protection — inclus E5 ; add-on <i>Protection P1/P2</i> ou plan E5 Compliance sur E3</td><td>À confirmer dès la phase 0 : c'est l'arbitrage clé du §7. Sinon → plan B IRM (inclus E3).</td></tr>
+    <tr><td>Contrôles de session « bloquer le téléchargement » (§7.3)</td><td>Microsoft Defender for Cloud Apps (inclus E5 ; add-on sur E3)</td><td>Alternative sans surcoût : politique « appareils non gérés » native SharePoint (inclus E3) — couvre déjà le cas navigateur non géré.</td></tr>
+    <tr><td>Audit avancé (rapports d'impression, alertes fines)</td><td>Purview Audit Premium (E5) — Audit standard inclus E3</td><td>L'audit standard suffit pour la traçabilité de base (§7.5).</td></tr>
+    <tr><td>Développement SPFx</td><td>Tenant de développeur Microsoft 365 (gratuit via programme partenaire/visual studio)</td><td>Aucun impact production.</td></tr>
+  </table>
+</section>
+
+<!-- ================================================== ANNEXE A -->
+<section id="annexeA">
+  <h2>Annexe A — Thème SharePoint « BBI Bleu nuit » (JSON)</h2>
+  <p>À publier via <code>Add-PnPTenantTheme</code> (§5.2). Le JSON complet est livré dans <code>bbi-theme.json</code> à côté de ce document.</p>
+  <pre>{
+  <span class="s">"name"</span>: <span class="s">"BBI Bleu nuit"</span>,
+  <span class="s">"isInverted"</span>: <span class="k">false</span>,
+  <span class="s">"palette"</span>: {
+    <span class="s">"themePrimary"</span>: <span class="s">"#0E265C"</span>,
+    <span class="s">"themeLighterAlt"</span>: <span class="s">"#F4F6FA"</span>,   <span class="c">/* fonds doux */</span>
+    <span class="s">"themeLighter"</span>: <span class="s">"#D8DEEC"</span>,
+    <span class="s">"themeLight"</span>: <span class="s">"#B4C1DC"</span>,
+    <span class="s">"themeTertiary"</span>: <span class="s">"#6B7FAC"</span>,
+    <span class="s">"themeSecondary"</span>: <span class="s">"#2E4A86"</span>,    <span class="c">/* hover */</span>
+    <span class="s">"themeDarkAlt"</span>: <span class="s">"#0D2253"</span>,
+    <span class="s">"themeDark"</span>: <span class="s">"#0B1C46"</span>,
+    <span class="s">"themeDarker"</span>: <span class="s">"#081534"</span>,
+    <span class="s">"neutralLighterAlt"</span>: <span class="s">"#F8F9FA"</span>,
+    <span class="s">"neutralLighter"</span>: <span class="s">"#F0F2F5"</span>,
+    <span class="s">"neutralLight"</span>: <span class="s">"#E1E4EA"</span>,
+    <span class="s">"neutralQuaternaryAlt"</span>: <span class="s">"#D0D5DC"</span>,
+    <span class="s">"neutralQuaternary"</span>: <span class="s">"#C0C6CF"</span>,
+    <span class="s">"neutralTertiaryAlt"</span>: <span class="s">"#C8CDD5"</span>,
+    <span class="s">"neutralTertiary"</span>: <span class="s">"#9AA1AB"</span>,
+    <span class="s">"neutralSecondary"</span>: <span class="s">"#4A5058"</span>,
+    <span class="s">"neutralPrimaryAlt"</span>: <span class="s">"#2F3339"</span>,
+    <span class="s">"neutralPrimary"</span>: <span class="s">"#21252B"</span>,
+    <span class="s">"neutralDark"</span>: <span class="s">"#14171B"</span>,
+    <span class="s">"black"</span>: <span class="s">"#0B0D0F"</span>,
+    <span class="s">"white"</span>: <span class="s">"#FFFFFF"</span>
+  }
+}</pre>
+  <p class="muted"><small>NB : l'accent rouge <code>#D21419</code> s'utilise via les visuels Hero, les badges SPFx et les éléments éditoriaux — pas dans la palette de thème, pour préserver la cohérence des contrôles Microsoft. Dans les composants SPFx, la couleur est lue depuis les tokens de thème (le composant s'adapte si BBI change de primaire un jour).</small></p>
+</section>
+
+<!-- ================================================== ANNEXE B -->
+<section id="annexeB">
+  <h2>Annexe B — Conventions de nommage &amp; glossaire</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4>Objets plateforme</h4>
+      <small>
+      • Sites : <code>BBI-Intranet</code>, <code>BBI-Catalogue</code>, <code>BBI-EspaceFormateurs</code><br>
+      • Groupes Entra : <code>BBI-&lt;Rôle&gt;</code><br>
+      • Colonnes de site : <code>BBI&lt;PascalCase&gt;</code> (ex. <code>BBIStatutSupport</code>) — préfixe obligatoire pour éviter les collisions<br>
+      • Types de contenu : <code>BBI Support &lt;Type&gt;</code><br>
+      • Web parts SPFx : <code>bbi-&lt;nom&gt;</code> (kebab-case)<br>
+      • Thèmes : <code>BBI &lt;Intitulé&gt;</code>
+      </small>
+    </div>
+    <div class="card">
+      <h4>Documents &amp; données</h4>
+      <small>
+      • Fichiers sources : <code>&lt;TypeSupport&gt; - &lt;Intitulé module&gt; - v&lt;Année.N°&gt;</code> (lisible par un humain ; la machine, elle, lit les colonnes)<br>
+      • Codes formation : <code>BBI-&lt;Filière 3 lettres&gt;-&lt;NNN&gt;</code> (ex. <code>BBI-MGT-101</code>)<br>
+      • Versions pédagogiques : <code>v2026.1</code> (année.cycle)<br>
+      • Glossaire : Formation / Programme / Module / Session / Support / Parcours / Fiche — usage exclusif, liste fermée
+      </small>
+    </div>
+  </div>
+  <p style="margin-top:18px" class="muted"><small>Document de conception v1.0 — rédigé le 28/09/2026 par l'équipe projet (architecte SharePoint, lead SPFx, UX/UI, expert Microsoft 365, consultant gouvernance). Les captures de référence ActionCOACH ont servi d'inspiration structurelle uniquement ; aucune reprise de contenu ou d'identité visuelle.</small></p>
+</section>
+
+<footer class="end">
+  Business Builders International — Intranet SharePoint Online · Dossier de conception v1.0 ·
+  <a href="maquette-accueil.html">Maquette de la page d'accueil</a> · <a href="bbi-theme.json">bbi-theme.json</a>
+</footer>
+</main>
+</div>
+</body>
+</html>

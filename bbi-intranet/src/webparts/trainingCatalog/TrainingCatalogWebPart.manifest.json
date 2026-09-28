@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "d37a426e-48db-484f-bf10-c38675bb7b43",
+  "alias": "TrainingCatalogWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+    "group": { "default": "Advanced" },
+    "title": { "default": "BBI Catalogue des formations" },
+    "description": { "default": "Cartes filtrables et recherchables alimentées par la liste « Formations » (code, filière, modalité, durée)." },
+    "officeFabricIconFontName": "Tiles",
+    "properties": {
+      "siteUrl": "",
+      "listTitle": "Formations",
+      "maxItems": 24
+    }
+  }]
+}

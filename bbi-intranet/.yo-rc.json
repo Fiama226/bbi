@@ -1,0 +1,23 @@
+{
+  "@microsoft/generator-sharepoint": {
+    "whichFolder": "subdir",
+    "solutionName": "bbi-intranet",
+    "environment": "spo",
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "useGulp": false,
+    "componentType": "webpart",
+    "template": "react",
+    "componentName": "Training Catalog",
+    "componentDescription": "Catalogue des formations BBI : cartes filtrables alimentees par la liste Formations",
+    "plusBeta": false,
+    "isCreatingSolution": true,
+    "nodeVersion": "22.22.3",
+    "sdksVersions": {},
+    "version": "1.22.2",
+    "libraryName": "bbi-intranet",
+    "libraryId": "2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3",
+    "packageManager": "npm",
+    "solutionShortDescription": "bbi-intranet description"
+  }
+}

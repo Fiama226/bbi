@@ -1,0 +1,29 @@
+{
+  "name": "BBI Bleu nuit",
+  "isInverted": false,
+  "palette": {
+    "themePrimary": "#0E265C",
+    "themeLighterAlt": "#F4F6FA",
+    "themeLighter": "#D8DEEC",
+    "themeLight": "#B4C1DC",
+    "themeTertiary": "#6B7FAC",
+    "themeSecondary": "#2E4A86",
+    "themeDarkAlt": "#0D2253",
+    "themeDark": "#0B1C46",
+    "themeDarker": "#081534",
+    "neutralLighterAlt": "#F8F9FA",
+    "neutralLighter": "#F0F2F5",
+    "neutralLight": "#E1E4EA",
+    "neutralQuaternaryAlt": "#D0D5DC",
+    "neutralQuaternary": "#C0C6CF",
+    "neutralTertiaryAlt": "#C8CDD5",
+    "neutralTertiary": "#9AA1AB",
+    "neutralSecondaryAlt": "#6E747D",
+    "neutralSecondary": "#4A5058",
+    "neutralPrimaryAlt": "#2F3339",
+    "neutralPrimary": "#21252B",
+    "neutralDark": "#14171B",
+    "black": "#0B0D0F",
+    "white": "#FFFFFF"
+  }
+}
