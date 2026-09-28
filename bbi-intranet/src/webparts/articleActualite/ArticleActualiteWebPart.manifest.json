@@ -1,0 +1,28 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "f769f3df-2c27-4a30-bce2-d4ae5793557b",
+  "alias": "ArticleActualiteWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportsFullBleed": true,
+  "supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage", "TeamsPersonalApp"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+    "group": { "default": "Advanced" },
+    "title": { "default": "BBI Article d'actualité" },
+    "description": { "default": "Modèle de page d'article : l'adresse porte l'actualité (?itemid=12) et la page affiche visuel, chapô, auteur, temps de lecture, partage et actualités liées." },
+    "officeFabricIconFontName": "News",
+    "properties": {
+      "siteUrl": "",
+      "newsListTitle": "Actualites",
+      "defaultItemId": 0,
+      "maxRelated": 3,
+      "shareUrl": "",
+      "showDataNotices": false
+    }
+  }]
+}

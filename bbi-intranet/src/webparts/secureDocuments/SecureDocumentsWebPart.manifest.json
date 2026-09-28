@@ -18,7 +18,8 @@
     "properties": {
       "siteUrl": "",
       "libraryTitle": "Supports publiés",
-      "maxItems": 6
+      "maxItems": 6,
+      "showDataNotices": false
     }
   }]
 }

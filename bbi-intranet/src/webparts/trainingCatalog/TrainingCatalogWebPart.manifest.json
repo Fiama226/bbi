@@ -18,7 +18,8 @@
     "properties": {
       "siteUrl": "",
       "listTitle": "Formations",
-      "maxItems": 24
+      "maxItems": 24,
+      "showDataNotices": false
     }
   }]
 }

@@ -1,0 +1,413 @@
+/* ============================================================
+   BBI — Galerie médias (photos + vidéos)
+   Charte : bleu nuit #0E265C · rouge #D21419
+   ============================================================ */
+
+.bbiGallery {
+  --bbi-navy: #0e265c;
+  --bbi-navy-2: #1f3a70;
+  --bbi-red: #d21419;
+  --bbi-ink: #21252b;
+  --bbi-muted: #5a6270;
+  --bbi-line: #e1e4ea;
+  --bbi-soft: #f4f6fa;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+  color: var(--bbi-ink);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bbiGallery *,
+.bbiGallery *::before,
+.bbiGallery *::after {
+  box-sizing: border-box;
+}
+
+.placeholder {
+  padding: 28px;
+  border: 1px dashed var(--bbi-line);
+  border-radius: 10px;
+  color: var(--bbi-muted);
+  background: var(--bbi-soft);
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bbi-navy);
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1px solid var(--bbi-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 15px;
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--bbi-navy-2);
+  color: var(--bbi-navy);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--bbi-red);
+  outline-offset: 2px;
+}
+
+.chipActive {
+  background: var(--bbi-navy);
+  border-color: var(--bbi-navy);
+  color: #fff;
+  font-weight: 600;
+}
+
+.demoBanner {
+  background: #fff8e6;
+  border: 1px solid #f0dca6;
+  color: #7a5500;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  margin-bottom: 14px;
+}
+
+/* ---------- Grille « masonry » (colonnes CSS) ---------- */
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  column-count: var(--bbi-gallery-cols, 3);
+  column-gap: 14px;
+
+  @media (max-width: 900px) {
+    column-count: 2;
+  }
+
+  @media (max-width: 560px) {
+    column-count: 1;
+  }
+}
+
+.card {
+  break-inside: avoid;
+  margin: 0 0 14px;
+}
+
+.cardButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: zoom-in;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(14, 38, 92, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cardButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(14, 38, 92, 0.2);
+}
+
+.cardButton:focus-visible {
+  outline: 3px solid var(--bbi-red);
+  outline-offset: 2px;
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  padding-top: 66%;
+  background-color: var(--bbi-navy-2);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+/* Visuels de repli livrés avec la web part : utilisés tant que la bibliothèque
+   « Galerie médias » n'existe pas ou ne contient aucune photo. */
+.demoImage0 {
+  background-image: url("../assets/galerie-atelier.jpg");
+  background-position: center;
+}
+.demoImage1 {
+  background-image: url("../assets/galerie-seminaire.jpg");
+  background-position: center;
+}
+.demoImage2 {
+  background-image: url("../assets/galerie-certification.jpg");
+  background-position: center;
+}
+.demoImage3 {
+  background-image: url("../assets/galerie-studio.jpg");
+  background-position: center;
+}
+
+.videoBadge,
+.demoBadge {
+  position: absolute;
+  top: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 5px;
+  padding: 3px 8px;
+}
+
+.videoBadge {
+  left: 10px;
+  background: rgba(14, 38, 92, 0.88);
+  color: #fff;
+}
+
+.demoBadge {
+  right: 10px;
+  background: rgba(11, 18, 38, 0.62);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(2px);
+}
+
+.caption {
+  display: block;
+  padding: 10px 12px 12px;
+  background: #fff;
+}
+
+.caption strong {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--bbi-ink);
+}
+
+.caption small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--bbi-muted);
+}
+
+.empty {
+  border: 1px solid var(--bbi-line);
+  border-radius: 10px;
+  background: var(--bbi-soft);
+  padding: 26px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  color: var(--bbi-navy);
+  margin-bottom: 4px;
+}
+
+.emptyHint {
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+}
+
+/* ---------- Lightbox ---------- */
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(9, 14, 26, 0.92);
+  backdrop-filter: blur(2px);
+  animation: bbiFade 0.18s ease;
+}
+
+@keyframes bbiFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lightboxFigure {
+  margin: 0;
+  max-width: min(1200px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #0e1118;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.lightboxImage {
+  display: block;
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  margin: 0 auto;
+  background: #000;
+}
+
+.lightboxImageCustom {
+  display: block;
+  width: min(1000px, 86vw);
+  height: min(64vh, 620px);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-color: #0e1118;
+}
+
+.lightboxVideo {
+  display: block;
+  width: min(1000px, 88vw);
+  height: min(62vh, 560px);
+  border: none;
+  background: #000;
+}
+
+.lightboxCaption {
+  padding: 14px 18px 16px;
+  background: #fff;
+}
+
+.lightboxCaption strong {
+  display: block;
+  font-size: 15px;
+  color: var(--bbi-navy);
+}
+
+.lightboxCaption small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--bbi-muted);
+}
+
+.lightboxActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.lightboxCounter {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bbi-muted);
+}
+
+.lightboxLink {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--bbi-navy-2);
+  text-decoration: none;
+}
+
+.lightboxLink:hover {
+  text-decoration: underline;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.lightboxClose:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.lightboxClose:focus-visible,
+.lightboxNav:focus-visible {
+  outline: 3px solid var(--bbi-red);
+  outline-offset: 2px;
+}
+
+.lightboxNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lightboxNav:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.lightboxPrev {
+  left: 22px;
+}
+
+.lightboxNext {
+  right: 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardButton,
+  .lightbox {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Thème sombre SharePoint : on conserve une surface blanche lisible. */
+:global(.ms-Fabric--isFocusVisible) .cardButton:focus-visible {
+  outline-offset: 3px;
+}

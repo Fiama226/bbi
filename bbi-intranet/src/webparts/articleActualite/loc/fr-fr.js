@@ -1,0 +1,36 @@
+define([], function () {
+  return {
+    PropertyPaneDescription: "Modèle d'article d'actualité : lecture confortable, partage et actualités liées.",
+    SourceGroupName: "Source de données",
+    DisplayGroupName: "Affichage",
+    SiteUrlFieldLabel: "URL du site (vide = site courant)",
+    SiteUrlFieldDescription: "Site contenant la liste « Actualites ». Laisser vide pour le site courant.",
+    NewsListFieldLabel: "Liste des actualités",
+    DefaultItemIdFieldLabel: "Identifiant d'article par défaut",
+    DefaultItemIdFieldDescription: "Utilisé si l'URL ne contient pas ?itemid=. Laisser vide : le dernier article publié est affiché.",
+    MaxRelatedFieldLabel: "Nombre d'actualités liées",
+    ShowDataNoticesFieldLabel: "Afficher les indicateurs de données de démonstration",
+    ShareUrlFieldLabel: "URL publique de partage",
+    ShareUrlFieldDescription: "Optionnel : adresse utilisée dans les boutons de partage (vide = adresse de la page).",
+
+    WebPartTitle: "Article",
+    BreadcrumbHome: "Accueil",
+    BreadcrumbNews: "Actualités",
+    ReadingTimeSingular: "minute de lecture",
+    ReadingTimePlural: "minutes de lecture",
+    ShareTitle: "Partager cet article",
+    ShareMail: "Envoyer par e-mail",
+    ShareTeams: "Partager dans Teams",
+    CopyLink: "Copier le lien",
+    Copied: "Lien copié",
+    BackToNews: "Toutes les actualités",
+    RelatedTitle: "À lire aussi",
+    ReadMore: "Lire la suite",
+    ExternalLink: "Lien associé",
+    NoContent: "Le contenu détaillé de cet article sera publié prochainement.",
+    EmptyStateTitle: "Article introuvable",
+    EmptyStateHint: "Cet article n'existe plus ou n'est pas encore publié. Retrouvez les dernières nouvelles BBI dans le fil d'actualités.",
+    DemoBanner: "Données de démonstration affichées : la liste « Actualites » n'est pas encore créée, ou elle est vide. Vos articles remplaceront automatiquement cet exemple dès la première publication.",
+    LoadingMessage: "Chargement de l'article…"
+  };
+});

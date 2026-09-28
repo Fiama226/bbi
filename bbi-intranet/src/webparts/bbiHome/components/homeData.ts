@@ -101,7 +101,12 @@ async function loadList<T>(
       throw new Error(`HTTP ${response.status}`);
     }
     const json = await response.json() as { value?: T[] };
-    return { items: json.value || [], isDemo: false };
+    const items = json.value || [];
+    if (items.length === 0) {
+      // Liste créée mais encore vide : la page d'accueil reste complète et crédible.
+      return { items: demoItems, isDemo: true };
+    }
+    return { items, isDemo: false };
   } catch {
     return { items: demoItems, isDemo: true };
   }

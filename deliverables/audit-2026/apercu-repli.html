@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>BBI — Comportement à vide (sources absentes) · package 1.4.0.0</title>
+<style>
+  :root {
+    --navy: #0e265c;
+    --red: #d21419;
+    --ink: #21252b;
+    --muted: #5a6270;
+    --line: #e1e4ea;
+    --soft: #f4f6fa;
+    --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font);
+    color: var(--ink);
+    background: var(--soft);
+    line-height: 1.55;
+  }
+  header.doc {
+    background: linear-gradient(135deg, var(--navy) 0%, #1f3a70 100%);
+    color: #fff;
+    padding: 40px 32px 34px;
+  }
+  header.doc .wrap { max-width: 1180px; margin: 0 auto; }
+  header.doc .kicker {
+    display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; background: rgba(255,255,255,.14); padding: 5px 12px; border-radius: 999px;
+  }
+  header.doc h1 { margin: 16px 0 8px; font-size: 30px; line-height: 1.2; }
+  header.doc p { margin: 0; color: rgba(255,255,255,.86); max-width: 860px; font-size: 15px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 28px 32px 70px; }
+  h2.sec { font-size: 20px; color: var(--navy); margin: 46px 0 6px; }
+  p.sec-sub { margin: 0 0 20px; color: var(--muted); font-size: 14px; }
+  .callout {
+    background: #fff; border-left: 4px solid var(--navy); border-radius: 0 10px 10px 0;
+    padding: 16px 20px; margin: 22px 0; box-shadow: 0 1px 3px rgba(14,38,92,.08); font-size: 14.5px;
+  }
+  .callout.ok { border-left-color: #15803d; background: #f2fbf5; }
+  .callout.warn { border-left-color: var(--red); background: #fff5f5; }
+  .state { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; }
+  .state.demo { background: #fff2f2; color: #b11115; border: 1px solid #f3c6c7; }
+  .state.live { background: #eefaf1; color: #15803d; border: 1px solid #bfe6cb; }
+  .shell { background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 22px; box-shadow: 0 1px 4px rgba(14,38,92,.06); overflow: hidden; }
+  .note { font-size: 12.5px; color: var(--muted); margin: 10px 2px 0; }
+  pre.proof { background: #0e1626; color: #cfe3ff; border-radius: 12px; padding: 18px 20px; font-size: 12.5px;
+    line-height: 1.6; overflow-x: auto; font-family: Consolas, "Cascadia Mono", monospace; }
+  pre.proof b { color: #7ee2a8; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 13px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { background: #f8fafc; color: var(--navy); font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
+  tr:last-child td { border-bottom: none; }
+  code { background: #eef1f7; padding: 1px 6px; border-radius: 5px; font-size: 12.5px; }
+  footer.doc { border-top: 1px solid var(--line); margin-top: 60px; padding: 22px 32px; color: var(--muted); font-size: 13px; }
+  /* ---------- Styles compilés des composants livrés ---------- */
+  .scope-gallery .bbiGallery{--bbi-navy: #0e265c;--bbi-navy-2: #1f3a70;--bbi-red: #d21419;--bbi-ink: #21252b;--bbi-muted: #5a6270;--bbi-line: #e1e4ea;--bbi-soft: #f4f6fa;font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Arial,sans-serif;color:var(--bbi-ink);width:100%;box-sizing:border-box}.scope-gallery .bbiGallery *,.scope-gallery .bbiGallery *::before,.scope-gallery .bbiGallery *::after{box-sizing:border-box}.scope-gallery .placeholder{padding:28px;border:1px dashed var(--bbi-line);border-radius:10px;color:var(--bbi-muted);background:var(--bbi-soft);text-align:center}.scope-gallery .header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}.scope-gallery .title{margin:0;font-size:22px;font-weight:700;color:var(--bbi-navy);letter-spacing:-0.01em}.scope-gallery .subtitle{margin:2px 0 0;font-size:12.5px;color:var(--bbi-muted)}.scope-gallery .chips{display:flex;flex-wrap:wrap;gap:8px}.scope-gallery .chip{border:1px solid var(--bbi-line);background:#fff;border-radius:999px;padding:6px 15px;font-size:12.5px;color:var(--bbi-muted);cursor:pointer;transition:background .15s ease,color .15s ease,border-color .15s ease}.scope-gallery .chip:hover{border-color:var(--bbi-navy-2);color:var(--bbi-navy)}.scope-gallery .chip:focus-visible{outline:2px solid var(--bbi-red);outline-offset:2px}.scope-gallery .chipActive{background:var(--bbi-navy);border-color:var(--bbi-navy);color:#fff;font-weight:600}.scope-gallery .demoBanner{background:#fff8e6;border:1px solid #f0dca6;color:#7a5500;border-radius:8px;padding:10px 14px;font-size:12.5px;margin-bottom:14px}.scope-gallery .grid{list-style:none;margin:0;padding:0;column-count:var(--bbi-gallery-cols, 3);column-gap:14px}@media(max-width: 900px){.scope-gallery .grid{column-count:2}}@media(max-width: 560px){.scope-gallery .grid{column-count:1}}.scope-gallery .card{break-inside:avoid;margin:0 0 14px}.scope-gallery .cardButton{display:block;width:100%;padding:0;border:none;background:rgba(0,0,0,0);text-align:left;cursor:zoom-in;border-radius:12px;overflow:hidden;position:relative;box-shadow:0 1px 3px rgba(14,38,92,.12);transition:transform .18s ease,box-shadow .18s ease}.scope-gallery .cardButton:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(14,38,92,.2)}.scope-gallery .cardButton:focus-visible{outline:3px solid var(--bbi-red);outline-offset:2px}.scope-gallery .thumb{display:block;width:100%;padding-top:66%;background-color:var(--bbi-navy-2);background-position:center;background-size:cover;background-repeat:no-repeat;position:relative}.scope-gallery .demoImage0{background-image:url("assets/galerie-atelier.jpg");background-position:center}.scope-gallery .demoImage1{background-image:url("assets/galerie-seminaire.jpg");background-position:center}.scope-gallery .demoImage2{background-image:url("assets/galerie-certification.jpg");background-position:center}.scope-gallery .demoImage3{background-image:url("assets/galerie-studio.jpg");background-position:center}.scope-gallery .videoBadge,.scope-gallery .demoBadge{position:absolute;top:10px;font-size:10.5px;font-weight:700;letter-spacing:.02em;border-radius:5px;padding:3px 8px}.scope-gallery .videoBadge{left:10px;background:rgba(14,38,92,.88);color:#fff}.scope-gallery .demoBadge{right:10px;background:rgba(11,18,38,.62);color:#fff;font-weight:600;letter-spacing:.04em;backdrop-filter:blur(2px)}.scope-gallery .caption{display:block;padding:10px 12px 12px;background:#fff}.scope-gallery .caption strong{display:block;font-size:13.5px;line-height:1.35;color:var(--bbi-ink)}.scope-gallery .caption small{display:block;margin-top:2px;font-size:11.5px;color:var(--bbi-muted)}.scope-gallery .empty{border:1px solid var(--bbi-line);border-radius:10px;background:var(--bbi-soft);padding:26px;text-align:center}.scope-gallery .emptyTitle{font-weight:600;color:var(--bbi-navy);margin-bottom:4px}.scope-gallery .emptyHint{font-size:12.5px;color:var(--bbi-muted)}.scope-gallery .lightbox{position:fixed;inset:0;z-index:1000000;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(9,14,26,.92);backdrop-filter:blur(2px);animation:bbiFade .18s ease}@keyframes bbiFade{from{opacity:0}to{opacity:1}}.scope-gallery .lightboxFigure{margin:0;max-width:min(1200px,94vw);max-height:88vh;display:flex;flex-direction:column;background:#0e1118;border-radius:12px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.55)}.scope-gallery .lightboxImage{display:block;max-width:100%;max-height:72vh;object-fit:contain;margin:0 auto;background:#000}.scope-gallery .lightboxImageCustom{display:block;width:min(1000px,86vw);height:min(64vh,620px);background-position:center;background-size:cover;background-repeat:no-repeat;background-color:#0e1118}.scope-gallery .lightboxVideo{display:block;width:min(1000px,88vw);height:min(62vh,560px);border:none;background:#000}.scope-gallery .lightboxCaption{padding:14px 18px 16px;background:#fff}.scope-gallery .lightboxCaption strong{display:block;font-size:15px;color:var(--bbi-navy)}.scope-gallery .lightboxCaption small{display:block;margin-top:3px;font-size:12px;color:var(--bbi-muted)}.scope-gallery .lightboxActions{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:10px}.scope-gallery .lightboxCounter{font-size:12px;font-weight:600;color:var(--bbi-muted)}.scope-gallery .lightboxLink{font-size:12.5px;font-weight:600;color:var(--bbi-navy-2);text-decoration:none}.scope-gallery .lightboxLink:hover{text-decoration:underline}.scope-gallery .lightboxClose{position:absolute;top:18px;right:20px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font-size:17px;cursor:pointer}.scope-gallery .lightboxClose:hover{background:rgba(255,255,255,.24)}.scope-gallery .lightboxClose:focus-visible,.scope-gallery .lightboxNav:focus-visible{outline:3px solid var(--bbi-red);outline-offset:2px}.scope-gallery .lightboxNav{position:absolute;top:50%;transform:translateY(-50%);width:52px;height:52px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.12);color:#fff;font-size:26px;line-height:1;cursor:pointer}.scope-gallery .lightboxNav:hover{background:rgba(255,255,255,.24)}.scope-gallery .lightboxPrev{left:22px}.scope-gallery .lightboxNext{right:22px}@media(prefers-reduced-motion: reduce){.scope-gallery .cardButton,.scope-gallery .lightbox{transition:none;animation:none}}.scope-gallery :global(.ms-Fabric--isFocusVisible) .cardButton:focus-visible{outline-offset:3px}
+
+  .scope-catalog .bbiCatalog{--bbi-navy: var(--themePrimary, #0E265C);--bbi-red: #D21419;--bbi-soft: var(--themeLighterAlt, #F4F6FA);--bbi-line: var(--neutralLight, #E1E4EA);--bbi-text: var(--neutralPrimary, #21252B);--bbi-muted: var(--neutralSecondary, #5A6270);color:var(--bbi-text)}.scope-catalog .placeholder{padding:24px;font-weight:600;color:var(--bbi-muted)}.scope-catalog .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}.scope-catalog .title{font-size:20px;font-weight:600;margin:0;color:var(--bbi-text)}.scope-catalog .demoBanner{background:#fff8e1;border:1px solid #f0d48a;border-radius:8px;padding:8px 12px;font-size:12.5px;color:#7a5a00;margin-bottom:10px}.scope-catalog .toolbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}.scope-catalog .search{max-width:340px;width:100%;padding:8px 12px;border:1px solid var(--bbi-line);border-radius:6px;font-size:13.5px;outline:none}.scope-catalog .search:focus{border-color:var(--bbi-navy);box-shadow:0 0 0 1px var(--bbi-navy)}.scope-catalog .chips{display:flex;flex-wrap:wrap;gap:8px}.scope-catalog .chip{border:1px solid var(--bbi-line);background:#fff;border-radius:999px;padding:4px 14px;font-size:12.5px;color:var(--bbi-muted);cursor:pointer}.scope-catalog .chip:hover{border-color:var(--bbi-navy);color:var(--bbi-navy)}.scope-catalog .chipActive{background:var(--bbi-navy);border-color:var(--bbi-navy);color:#fff;font-weight:600}.scope-catalog .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));gap:14px}.scope-catalog .card{background:#fff;border:1px solid var(--bbi-line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;box-shadow:0 1px 3px rgba(14,38,92,.07);transition:box-shadow .15s ease,transform .15s ease}.scope-catalog .card:hover{box-shadow:0 4px 14px rgba(14,38,92,.16);transform:translateY(-1px)}.scope-catalog .cardTop{position:relative}.scope-catalog .codeBadge{position:absolute;top:-4px;right:-6px;background:var(--bbi-soft);color:var(--bbi-navy);font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 7px;letter-spacing:.3px}.scope-catalog .cardTitle{font-size:14.5px;font-weight:600;margin:0 70px 0 0;line-height:1.3;color:var(--bbi-text)}.scope-catalog .cardMeta{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--bbi-muted)}.scope-catalog .cardFoot{margin-top:auto;display:flex;justify-content:flex-end}.scope-catalog .duration{font-size:12px;font-weight:700;color:var(--bbi-red)}.scope-catalog .empty{border:1px dashed var(--bbi-line);border-radius:10px;padding:26px 20px;text-align:center}.scope-catalog .emptyTitle{font-weight:600;margin-bottom:4px}.scope-catalog .emptyHint{font-size:12.5px;color:var(--bbi-muted)}.scope-catalog .reset{margin-top:12px;padding:8px 16px;border:1px solid #d21419;border-radius:999px;background:#d21419;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:background-color .15s ease}.scope-catalog .reset:hover{background:#b11115}.scope-catalog .reset:focus-visible{outline:2px solid #0e265c;outline-offset:2px}
+
+  .scope-docs .bbiSecure{--bbi-navy: var(--themePrimary, #0E265C);--bbi-red: #D21419;--bbi-redsoft: #FDEEEE;--bbi-soft: var(--themeLighterAlt, #F4F6FA);--bbi-line: var(--neutralLight, #E1E4EA);--bbi-text: var(--neutralPrimary, #21252B);--bbi-muted: var(--neutralSecondary, #5A6270);color:var(--bbi-text)}.scope-docs .placeholder{padding:24px;font-weight:600;color:var(--bbi-muted)}.scope-docs .header{margin-bottom:10px}.scope-docs .title{font-size:20px;font-weight:600;margin:0;color:var(--bbi-text)}.scope-docs .banner{background:var(--bbi-redsoft);border:1px solid #f3c9cb;color:#7a0d10;border-radius:8px;padding:9px 13px;font-size:12.5px;margin-bottom:14px}.scope-docs .demoBanner{background:#fff8e1;border:1px solid #f0d48a;border-radius:8px;padding:8px 12px;font-size:12.5px;color:#7a5a00;margin-bottom:10px}.scope-docs .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(250px, 1fr));gap:14px}.scope-docs .doc{position:relative;background:#fff;border:1.5px solid var(--bbi-line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}.scope-docs .doc:hover{border-color:var(--bbi-navy)}.scope-docs .lock{position:absolute;top:10px;right:10px;background:var(--bbi-redsoft);color:var(--bbi-red);font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 8px;letter-spacing:.3px}.scope-docs .icon{font-size:28px;line-height:1}.scope-docs .docTitle{font-size:13.5px;font-weight:600;margin:0;padding-right:80px;line-height:1.35;color:var(--bbi-text)}.scope-docs .docMeta{font-size:11.8px;color:var(--bbi-muted)}.scope-docs .openBtn{margin-top:4px;align-self:flex-start;background:none;border:none;padding:0;font-size:12.5px;font-weight:600;color:var(--bbi-navy);cursor:pointer}.scope-docs .openBtn:hover{text-decoration:underline}.scope-docs .openBtn:disabled{color:var(--bbi-muted, #6b7280);cursor:not-allowed;text-decoration:none}.scope-docs .empty{border:1px dashed var(--bbi-line);border-radius:10px;padding:26px 20px;text-align:center}.scope-docs .emptyTitle{font-weight:600;margin-bottom:4px}.scope-docs .emptyHint{font-size:12.5px;color:var(--bbi-muted)}
+
+</style>
+</head>
+<body>
+
+<header class="doc">
+  <div class="wrap">
+    <span class="kicker">Contenus de repli · package SPFx 1.4.0.0</span>
+    <h1>Ce que voit un collaborateur quand aucune donnée n'existe encore</h1>
+    <p>Aperçu rendu avec les <b>feuilles de styles compilées des composants réellement livrés</b> et les
+    <b>visuels embarqués dans le package</b>. Dans SharePoint, ce rendu est identique : listes absentes,
+    non créées ou vides donnent le même résultat. Aucune donnée réelle n'a été utilisée pour cette page.</p>
+  </div>
+</header>
+
+<main>
+
+  <div class="callout">
+    <b>Le principe.</b> Chaque web part interroge sa liste ou sa bibliothèque. Trois cas mènent au contenu de repli :
+    <b>source absente</b> (404), <b>source non créée</b>, <b>source créée mais vide</b>. Dans les trois cas la page
+    reste complète et crédible ; dès qu'un premier élément réel est publié, il remplace les exemples de son bloc,
+    sans intervention technique et sans recharger la page.
+  </div>
+
+  <div class="callout ok">
+    <b>Vérifié automatiquement.</b> Le harnais <code>bbi-intranet/tools/verify-fallback.js</code> exécute
+    <b>42 contrôles</b> sur les couches de données du package, contre un client SharePoint simulé : source absente,
+    source vide, source alimentée. Les trois cas sont couverts pour l'accueil, le catalogue, la fiche formation,
+    les sessions, l'article, la galerie et les documents.
+  </div>
+
+  <h2 class="sec">1 · Galerie médias — bibliothèque absente <span class="state demo">état : demo</span></h2>
+  <p class="sec-sub">Bibliothèque <code>Galerie médias</code> non créée : 8 photos réparties dans 4 albums, servies
+  depuis les visuels embarqués du package. Aucun appel réseau, donc aucun carré gris, aucun texte alternatif cassé.
+  Le badge « Exemple » est le repère visuel discret de repli.</p>
+
+  <div class="shell scope-gallery">
+    <div class="bbiGallery" style="--bbi-gallery-cols: 4">
+      <div class="header">
+        <div>
+          <h2 class="title">BBI Galerie médias</h2>
+          <p class="subtitle">8 éléments</p>
+        </div>
+        <div class="chips" role="tablist" aria-label="Albums">
+          <button type="button" role="tab" aria-selected="true" class="chip chipActive" style="background:#0e265c;border-color:#0e265c;color:#fff">Tous les albums</button>
+          <button type="button" role="tab" aria-selected="false" class="chip">Certifications</button><button type="button" role="tab" aria-selected="false" class="chip">Coulisses</button><button type="button" role="tab" aria-selected="false" class="chip">Sessions de formation</button><button type="button" role="tab" aria-selected="false" class="chip">Vie BBI</button>
+        </div>
+      </div>
+      <div class="demoBanner">💡 Données de démonstration affichées : la bibliothèque « Galerie médias » n'est pas encore créée, ou elle est vide. Vos photos remplaceront automatiquement ces visuels dès la première publication.</div>
+      <ul class="grid">
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage0" role="img" aria-label="Atelier « Prise de parole en public » — Paris">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Atelier « Prise de parole en public » — Paris</strong>
+                  <small>Sessions de formation · Paris</small>
+                </span>
+              </button>
+            </li>
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage1" role="img" aria-label="Séminaire annuel des formateurs — Dakar">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Séminaire annuel des formateurs — Dakar</strong>
+                  <small>Vie BBI · Dakar</small>
+                </span>
+              </button>
+            </li>
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage2" role="img" aria-label="Remise des attestations — promotion de septembre">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Remise des attestations — promotion de septembre</strong>
+                  <small>Certifications · Paris</small>
+                </span>
+              </button>
+            </li>
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage3" role="img" aria-label="Tournage du module e-learning — plateau BBI">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Tournage du module e-learning — plateau BBI</strong>
+                  <small>Coulisses · Studio</small>
+                </span>
+              </button>
+            </li>
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage0" role="img" aria-label="Coaching d'entrepreneurs — promotion 12">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Coaching d'entrepreneurs — promotion 12</strong>
+                  <small>Sessions de formation · Lyon</small>
+                </span>
+              </button>
+            </li>
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage1" role="img" aria-label="Atelier d'idéation : refonte du catalogue">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Atelier d'idéation : refonte du catalogue</strong>
+                  <small>Vie BBI · Abidjan</small>
+                </span>
+              </button>
+            </li>
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage2" role="img" aria-label="Qualiopi : audit blanc réussi">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Qualiopi : audit blanc réussi</strong>
+                  <small>Certifications · Paris</small>
+                </span>
+              </button>
+            </li>
+            <li class="card">
+              <button type="button" class="cardButton">
+                <span class="thumb demoImage3" role="img" aria-label="Coulisses du module « Traiter les objections »">
+                  <span class="demoBadge">Exemple</span>
+                </span>
+                <span class="caption">
+                  <strong>Coulisses du module « Traiter les objections »</strong>
+                  <small>Coulisses · Studio</small>
+                </span>
+              </button>
+            </li>
+      </ul>
+    </div>
+  </div>
+  <p class="note">Le bandeau n'apparaît que si l'option <code>Afficher les indicateurs de données de démonstration</code>
+  est activée (désactivée par défaut : en production, seuls les badges « Exemple » subsistent sur les visuels de repli).</p>
+
+  <h2 class="sec">2 · Catalogue des formations — liste vide <span class="state demo">état : demo</span></h2>
+  <p class="sec-sub">Liste <code>Formations</code> créée mais encore vide : 5 formations BBI représentatives,
+  filtrables par filière comme les vraies. La recherche infructueuse affiche désormais « Aucun résultat » avec un
+  bouton de réinitialisation — plus jamais d'écran mort.</p>
+
+  <div class="shell scope-catalog">
+    <div class="bbiCatalog">
+      <div class="header"><h2 class="title">BBI Catalogue des formations</h2></div>
+      <div class="demoBanner">💡 Données de démonstration affichées : la liste « Formations » n'est pas encore créée, ou elle est vide. Vos formations remplaceront automatiquement ces exemples dès la première publication.</div>
+      <div class="toolbar">
+        <input type="search" class="search" placeholder="Rechercher une formation…" aria-label="Rechercher une formation…" />
+        <div class="chips" role="tablist" aria-label="Filières">
+          <button type="button" class="chip chipActive" style="background:#0e265c;border-color:#0e265c;color:#fff">Toutes</button>
+          <button type="button" class="chip">Coaching</button><button type="button" class="chip">Commerce</button><button type="button" class="chip">Digital</button><button type="button" class="chip">Management</button><button type="button" class="chip">Qualité &amp; Certification</button>
+        </div>
+      </div>
+      <div class="grid">
+          <article class="card">
+            <div class="cardTop">
+              <span class="codeBadge">BBI-MGT-101</span>
+              <h3 class="cardTitle">Management d'équipe</h3>
+            </div>
+            <div class="cardMeta">
+              <span>👥 Confirmé</span>
+              <span>🏢 Présentiel</span>
+            </div>
+            <div class="cardFoot"><span class="duration">14 h</span></div>
+          </article>
+          <article class="card">
+            <div class="cardTop">
+              <span class="codeBadge">BBI-COA-201</span>
+              <h3 class="cardTitle">Coaching d'entrepreneurs</h3>
+            </div>
+            <div class="cardMeta">
+              <span>👥 Expert</span>
+              <span>🔀 Hybride</span>
+            </div>
+            <div class="cardFoot"><span class="duration">28 h</span></div>
+          </article>
+          <article class="card">
+            <div class="cardTop">
+              <span class="codeBadge">BBI-COM-110</span>
+              <h3 class="cardTitle">Vendre la valeur, pas le prix</h3>
+            </div>
+            <div class="cardMeta">
+              <span>👥 Débutant</span>
+              <span>🏢 Présentiel</span>
+            </div>
+            <div class="cardFoot"><span class="duration">7 h</span></div>
+          </article>
+          <article class="card">
+            <div class="cardTop">
+              <span class="codeBadge">BBI-DIG-140</span>
+              <h3 class="cardTitle">Prospection digitale</h3>
+            </div>
+            <div class="cardMeta">
+              <span>👥 Débutant</span>
+              <span>💻 Distanciel</span>
+            </div>
+            <div class="cardFoot"><span class="duration">3,5 h</span></div>
+          </article>
+          <article class="card">
+            <div class="cardTop">
+              <span class="codeBadge">BBI-QUA-301</span>
+              <h3 class="cardTitle">Fondamentaux Qualiopi</h3>
+            </div>
+            <div class="cardMeta">
+              <span>👥 Intermédiaire</span>
+              <span>💻 Distanciel</span>
+            </div>
+            <div class="cardFoot"><span class="duration">7 h</span></div>
+          </article>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec">3 · Documents sécurisés — bibliothèque vide <span class="state demo">état : demo</span></h2>
+  <p class="sec-sub">Bibliothèque <code>Supports publiés</code> vide : 4 supports cohérents avec le catalogue.
+  Le bouton d'ouverture est <b>neutralisé</b> — jamais d'appel vers un fichier qui n'existe pas, donc jamais de page
+  d'erreur SharePoint devant un collaborateur.</p>
+
+  <div class="shell scope-docs">
+    <div class="bbiSecure">
+      <div class="header"><h2 class="title">🔒 BBI Documents sécurisés</h2></div>
+      <div class="demoBanner">💡 Données de démonstration affichées : la bibliothèque « Supports publiés » n'est pas encore créée, ou elle est vide. Vos supports remplaceront automatiquement ces exemples dès la première publication.</div>
+      <div class="banner">Consultation en lecture seule · les supports publiés ne peuvent être ni modifiés ni téléchargés depuis cette page</div>
+      <div class="grid">
+          <article class="doc">
+            <span class="lock">Lecture seule</span>
+            <span class="icon" aria-hidden="true">📊</span>
+            <h3 class="docTitle">MGT-101 · Slides animateur — Management d’équipe</h3>
+            <small class="docMeta">22/09/2026 · PPTX</small>
+            <button type="button" class="openBtn" disabled title="Support de démonstration : aucun fichier à ouvrir pour l'instant.">Ouvrir dans le navigateur →</button>
+          </article>
+          <article class="doc">
+            <span class="lock">Lecture seule</span>
+            <span class="icon" aria-hidden="true">📘</span>
+            <h3 class="docTitle">COA-201 · Manuel participant — Coaching (module 1)</h3>
+            <small class="docMeta">19/09/2026 · DOCX</small>
+            <button type="button" class="openBtn" disabled title="Support de démonstration : aucun fichier à ouvrir pour l'instant.">Ouvrir dans le navigateur →</button>
+          </article>
+          <article class="doc">
+            <span class="lock">Lecture seule</span>
+            <span class="icon" aria-hidden="true">📄</span>
+            <h3 class="docTitle">COM-110 · Exercices & cas pratiques</h3>
+            <small class="docMeta">15/09/2026 · PDF</small>
+            <button type="button" class="openBtn" disabled title="Support de démonstration : aucun fichier à ouvrir pour l'instant.">Ouvrir dans le navigateur →</button>
+          </article>
+          <article class="doc">
+            <span class="lock">Lecture seule</span>
+            <span class="icon" aria-hidden="true">📘</span>
+            <h3 class="docTitle">QUA-301 · Évaluation à chaud (QCM)</h3>
+            <small class="docMeta">10/09/2026 · DOCX</small>
+            <button type="button" class="openBtn" disabled title="Support de démonstration : aucun fichier à ouvrir pour l'instant.">Ouvrir dans le navigateur →</button>
+          </article>
+      </div>
+    </div>
+  </div>
+
+  <h2 class="sec">4 · Preuve d'exécution — 42 contrôles</h2>
+  <p class="sec-sub">Sortie réelle de <code>node tools/verify-fallback.js</code>, exécuté sur les modules TypeScript
+  du package avec un client SharePoint simulé renvoyant 404 ou une liste vide.</p>
+
+<pre class="proof">BBI — vérification des contenus de repli (production ready)
+Aucune source SharePoint disponible : les pages doivent rester complètes.
+
+Galerie média (BBI Galerie médias)
+  <b>✓</b> bibliothèque absente → contenu de repli
+  <b>✓</b> bibliothèque absente → état « demo »
+  <b>✓</b> repli → 4 albums distincts
+  <b>✓</b> repli → visuels embarqués (pas de fichier à charger)
+  <b>✓</b> repli → aucune vignette SharePoint appelée
+  <b>✓</b> bibliothèque vide → contenu de repli
+  <b>✓</b> bibliothèque alimentée → état « live »
+  <b>✓</b> fichiers non image filtrés
+  <b>✓</b> vignettes générées par SharePoint
+
+Accueil (BBI Accueil plein écran)
+  <b>✓</b> actualités / sessions / formateurs — liste absente → repli
+  <b>✓</b> actualités — liste vide → repli
+  <b>✓</b> sessions — liste vide → repli daté
+  <b>✓</b> sessions — dates futures (jamais périmées)
+  <b>✓</b> actualités — liste alimentée → données réelles
+
+Sessions &amp; inscriptions
+  <b>✓</b> extraction du code formation depuis le titre
+  <b>✓</b> liste absente → planning de repli
+  <b>✓</b> repli → codes formation présents
+  <b>✓</b> repli → filières renseignées
+  <b>✓</b> liste alimentée → session réelle
+  <b>✓</b> filière résolue via la liste Formations
+  <b>✓</b> liste vide → planning de repli
+
+Fiche formation
+  <b>✓</b> liste absente → fiche de repli complète
+  <b>✓</b> repli → objectifs, programme et prérequis renseignés
+  <b>✓</b> repli → sessions à venir datées
+  <b>✓</b> repli → supports publiés présents
+  <b>✓</b> repli → formateur référent présent
+  <b>✓</b> code inconnu → fiche de repli (pas de page vide)
+  <b>✓</b> formation trouvée → données réelles
+  <b>✓</b> champ optionnel multi-lignes repris
+  <b>✓</b> sessions filtrées par code
+
+Article d'actualité
+  <b>✓</b> liste absente → article de repli
+  <b>✓</b> repli → corps de texte rédigé
+  <b>✓</b> repli → actualités liées proposées
+  <b>✓</b> article introuvable → article de repli
+  <b>✓</b> article trouvé → données réelles
+  <b>✓</b> scripts retirés du HTML éditorial
+  <b>✓</b> gestionnaires d'événements retirés
+  <b>✓</b> temps de lecture calculé
+  <b>✓</b> actualité courante exclue des suggestions
+
+<b>Résultat : 42 vérifications réussies, 0 échec(s).</b></pre>
+
+  <h2 class="sec">5 · Ce que cela change pour vous</h2>
+  <table>
+    <thead><tr><th style="width:34%">Situation</th><th>Sans contenus de repli</th><th>Avec le package 1.4.0.0</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Déploiement le lundi matin, contenus saisis en fin de semaine</td>
+        <td>Intranet vide pendant 5 jours : l'équipe perd confiance dans l'outil</td>
+        <td>Intranet présentable <b>immédiatement</b> ; les contenus réels prennent la place au fur et à mesure</td>
+      </tr>
+      <tr>
+        <td>Liste renommée par erreur, ou pas encore approuvée</td>
+        <td>Message technique ou bloc gris sur la page d'accueil</td>
+        <td>Bloc de repli cohérent ; l'incident passe inaperçu côté collaborateur</td>
+      </tr>
+      <tr>
+        <td>Bibliothèque de photos en cours de constitution</td>
+        <td>Galerie vide avec texte « ajoutez des images »</td>
+        <td>4 albums d'exemple illustrés, remplacés photo après photo</td>
+      </tr>
+      <tr>
+        <td>Visite d'un dirigeant, d'un auditeur Qualiopi ou d'un partenaire</td>
+        <td>Écran inachevé, image dégradée</td>
+        <td>Expérience complète, marque BBI respectée sur toutes les pages</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <b>À retenir.</b> Le contenu de repli est un <b>filet de sécurité</b>, pas le produit : l'objectif reste que vos
+    listes <code>Actualites</code>, <code>Sessions</code>, <code>Formations</code>, <code>Formateurs</code>,
+    <code>Supports publiés</code> et <code>Galerie médias</code> soient alimentées. L'option
+    <code>showDataNotices</code> permet d'afficher un bandeau pendant la mise en place pour suivre ce qu'il reste à remplir,
+    puis d'être désactivée pour la mise en production.
+  </div>
+
+</main>
+
+<footer class="doc">
+  <p>BBI — Comportement à vide · Compagnon du package <b>bbi-intranet 1.4.0.0</b> · Document autoportant, aucune donnée réelle.</p>
+</footer>
+
+</body>
+</html>

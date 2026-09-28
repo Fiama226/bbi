@@ -17,6 +17,7 @@ export interface ISecureDocumentsWebPartProps {
   siteUrl: string;
   libraryTitle: string;
   maxItems: number;
+  showDataNotices: boolean;
 }
 
 export default class SecureDocumentsWebPart extends BaseClientSideWebPart<ISecureDocumentsWebPartProps> {
@@ -37,6 +38,7 @@ export default class SecureDocumentsWebPart extends BaseClientSideWebPart<ISecur
         siteUrl: this.properties.siteUrl,
         libraryTitle: this.properties.libraryTitle,
         maxItems: this.properties.maxItems,
+        showDataNotices: this.properties.showDataNotices === true,
         spHttpClient: this.context.spHttpClient,
         isDarkTheme: this._isDarkTheme,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,

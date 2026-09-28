@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "f0f19a37-2c11-4812-9006-8aa71a9254f1",
+  "packageName": "com.businessbuildersinternational.bbi.gallery",
+  "developer": {
+    "name": "Business Builders International",
+    "websiteUrl": "https://businessbuildersinternational.com",
+    "privacyUrl": "https://businessbuildersinternational.com/confidentialite",
+    "termsOfUseUrl": "https://businessbuildersinternational.com/confidentialite"
+  },
+  "name": {
+    "short": "BBI Galerie",
+    "full": "BBI Intranet — Galerie médias"
+  },
+  "description": {
+    "short": "BBI Intranet — Galerie médias — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint.",
+    "full": "BBI Intranet — Galerie médias — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint."
+  },
+  "icons": {
+    "outline": "f0f19a37-2c11-4812-9006-8aa71a9254f1_outline.png",
+    "color": "f0f19a37-2c11-4812-9006-8aa71a9254f1_color.png"
+  },
+  "accentColor": "#0E265C",
+  "staticTabs": [
+    {
+      "entityId": "bbi-gallery",
+      "name": "Galerie médias",
+      "contentUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/galerie.aspx",
+      "websiteUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/galerie.aspx",
+      "scopes": [
+        "personal"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity"
+  ],
+  "validDomains": [
+    "businessbuilderinter.sharepoint.com"
+  ]
+}

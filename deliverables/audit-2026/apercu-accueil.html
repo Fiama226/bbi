@@ -1,0 +1,1613 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBI — Aperçu de la page d'accueil « plein écran »</title>
+<style>@charset "UTF-8";
+/* ============================================================
+   BBI — Page d'accueil « plein écran »
+   Charte : bleu nuit #0E265C · rouge #D21419
+   Technique bord-à-bord : débordement mesuré (--bbi-bleed) + héros 100svh
+   ============================================================ */
+.home {
+  --bbi-navy: #0e265c;
+  --bbi-navy-2: #1f3a70;
+  --bbi-navy-3: #2e4a86;
+  --bbi-red: #d21419;
+  --bbi-soft: #f4f6fa;
+  --bbi-line: #e1e4ea;
+  --bbi-ink: #21252b;
+  --bbi-muted: #5a6270;
+  --bbi-chrome-offset: 0px;
+  --bbi-bleed: 0px;
+  --bbi-shell: 1280px;
+  position: relative;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+  color: var(--bbi-ink);
+  background: #fff;
+  overflow-x: clip;
+}
+
+.home *,
+.home *::before,
+.home *::after {
+  box-sizing: border-box;
+}
+
+.home h1,
+.home h2,
+.home h3 {
+  letter-spacing: -0.015em;
+}
+
+/* ---------- Bandeau d'information ---------- */
+.announcement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 32px;
+  background: var(--bbi-navy);
+  color: #fff;
+  font-size: 13px;
+}
+
+.announcementDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--bbi-red);
+  flex: 0 0 auto;
+}
+
+.announcementText {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.announcementLink {
+  color: #fff;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+  flex: 0 0 auto;
+}
+
+.announcementLink:hover {
+  border-bottom-color: #fff;
+}
+
+/* ---------- Barre de navigation ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 60;
+  width: 100%;
+  background: transparent;
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.topbarSolid {
+  background: rgba(14, 38, 92, 0.98);
+  box-shadow: 0 6px 22px rgba(9, 20, 48, 0.28);
+  backdrop-filter: blur(6px);
+}
+
+.topbarInner {
+  max-width: var(--bbi-shell);
+  margin: 0 auto;
+  padding: 12px 32px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #fff;
+  flex: 0 0 auto;
+}
+
+.logoImage {
+  display: block;
+  flex: 0 0 76px;
+  width: 76px;
+  height: 38px;
+  border-radius: 6px;
+  background: #fff url("../assets/img/logo.png") center/contain no-repeat;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+}
+
+.brandText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.brandText strong {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.brandText small {
+  font-size: 11.5px;
+  color: #c9d3e8;
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+}
+
+.navLink {
+  position: relative;
+  padding: 9px 14px;
+  color: #dce4f5;
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 7px;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.navLink:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--bbi-red);
+  outline-offset: 2px;
+}
+
+.navActive {
+  color: #fff;
+  box-shadow: inset 0 -3px 0 0 var(--bbi-red);
+}
+
+.navCta {
+  background: var(--bbi-red);
+  color: #fff !important;
+  margin-left: 6px;
+}
+
+.navCta:hover {
+  background: #b81015;
+}
+
+.menuButton {
+  display: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 8px;
+  width: 40px;
+  height: 38px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.searchForm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  padding: 3px 4px 3px 12px;
+  max-width: 260px;
+}
+
+.searchForm input {
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+  padding: 7px 0;
+  width: 150px;
+  outline: none;
+}
+
+.searchForm input::placeholder {
+  color: #c9d3e8;
+}
+
+.searchForm button {
+  border: none;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.searchForm button:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Héros plein écran ---------- */
+.hero {
+  position: relative;
+  margin-top: 0;
+  padding-top: 64px;
+  min-height: calc(100vh - 96px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+}
+
+.heroCompact {
+  min-height: 460px;
+}
+
+.heroImage,
+.heroImageCustom {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-position: center 42%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  transform: scale(1.04);
+  animation: bbiKenBurns 24s ease-in-out infinite alternate;
+}
+
+.heroImage {
+  background-image: url("../assets/img/hero-formation.jpg");
+}
+
+.heroVeil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(100deg, rgba(9, 20, 48, 0.94) 0%, rgba(14, 38, 92, 0.76) 42%, rgba(14, 38, 92, 0.2) 78%, rgba(14, 38, 92, 0.05) 100%);
+}
+
+@keyframes bbiKenBurns {
+  from {
+    transform: scale(1.02) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
+  }
+}
+.heroInner {
+  position: relative;
+  z-index: 2;
+  max-width: var(--bbi-shell);
+  margin: 0 auto;
+  padding: 56px 32px 120px;
+  width: 100%;
+}
+
+.heroEyebrow {
+  margin: 0 0 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #9fb4dd;
+}
+
+.heroTitle {
+  margin: 0 0 16px;
+  font-size: clamp(30px, 4.4vw, 56px);
+  line-height: 1.06;
+  font-weight: 700;
+  max-width: 18ch;
+  text-wrap: balance;
+}
+
+.heroSubtitle {
+  margin: 0 0 28px;
+  font-size: clamp(15px, 1.2vw, 18px);
+  line-height: 1.55;
+  color: #dce4f5;
+  max-width: 58ch;
+}
+
+.heroActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.heroPrimary,
+.heroSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border-radius: 8px;
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.heroPrimary {
+  background: var(--bbi-red);
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(210, 20, 25, 0.35);
+}
+
+.heroPrimary:hover {
+  background: #b81015;
+  transform: translateY(-2px);
+}
+
+.heroSecondary {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+}
+
+.heroSecondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  transform: translateY(-2px);
+}
+
+.heroPrimary:focus-visible,
+.heroSecondary:focus-visible,
+.textLink:focus-visible,
+.quickLink:focus-visible,
+.topicLink:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+/* ---------- Bande de chiffres clés ---------- */
+.kpiBand {
+  position: relative;
+  z-index: 3;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px;
+  margin: 0 auto;
+  padding: 0 32px;
+  max-width: var(--bbi-shell);
+  width: 100%;
+  transform: translateY(58px);
+}
+
+.kpi {
+  background: rgba(255, 255, 255, 0.97);
+  padding: 20px 22px;
+  border-left: 4px solid var(--bbi-red);
+  box-shadow: 0 14px 34px rgba(9, 20, 48, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kpi strong {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--bbi-navy);
+  line-height: 1;
+}
+
+.kpi span {
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+  line-height: 1.35;
+}
+
+.scrollCue {
+  position: absolute;
+  bottom: 26px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: 30px;
+  height: 48px;
+  border-radius: 16px;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+  cursor: pointer;
+}
+
+.scrollCueDot {
+  position: absolute;
+  left: 50%;
+  top: 9px;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: #fff;
+  animation: bbiCue 1.8s ease-in-out infinite;
+}
+
+@keyframes bbiCue {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(18px);
+    opacity: 0.25;
+  }
+}
+/* ---------- Sections ---------- */
+.content {
+  display: block;
+  background: #fff;
+}
+
+.section,
+.newsSessions,
+.resourcesPeople,
+.topicLinks {
+  max-width: var(--bbi-shell);
+  margin: 0 auto;
+  padding: 64px 32px;
+  width: 100%;
+}
+
+/* La bande de chiffres clés dépasse du héros de 58 px : on réserve la place. */
+.hero + .section {
+  padding-top: 118px;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bbi-red);
+}
+
+.sectionHeading h2 {
+  margin: 0;
+  font-size: clamp(21px, 2vw, 27px);
+  font-weight: 700;
+  color: var(--bbi-navy);
+}
+
+.textLink {
+  color: var(--bbi-navy-2);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.textLink:hover {
+  text-decoration: underline;
+}
+
+.sectionFooterLink {
+  margin-top: 18px;
+  text-align: right;
+}
+
+/* ---------- Accès rapides ---------- */
+.quickGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+}
+
+.quickLink {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--bbi-line);
+  border-radius: 12px;
+  background: #fff;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.quickLink:hover {
+  transform: translateY(-3px);
+  border-color: transparent;
+  box-shadow: 0 14px 30px rgba(14, 38, 92, 0.16);
+}
+
+.quickIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--bbi-navy);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+}
+
+.quickLink strong {
+  font-size: 14.5px;
+  color: var(--bbi-ink);
+}
+
+.quickLink small {
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+  line-height: 1.45;
+}
+
+/* ---------- Actualités & sessions ---------- */
+.newsSessions {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 34px;
+  background: var(--bbi-soft);
+  max-width: 100%;
+  /* Fond pleine largeur, contenu aligné sur la colonne de 1280 px */
+  padding: 64px max(32px, (100% - var(--bbi-shell)) / 2);
+}
+
+.newsColumn,
+.sessionsColumn {
+  min-width: 0;
+}
+
+.featuredNews {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(14, 38, 92, 0.1);
+}
+
+.newsImage {
+  height: 240px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.newsImageFallback {
+  background-image: url("../assets/img/news-certification.jpg");
+}
+
+.newsBody {
+  padding: 22px 24px 24px;
+}
+
+.category {
+  display: inline-block;
+  background: #fdeeef;
+  color: var(--bbi-red);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+
+.newsBody h3 {
+  margin: 0 0 8px;
+  font-size: 19px;
+  line-height: 1.3;
+  color: var(--bbi-ink);
+}
+
+.newsBody p {
+  margin: 0 0 10px;
+  font-size: 13.8px;
+  line-height: 1.55;
+  color: var(--bbi-muted);
+}
+
+.newsBody small {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: var(--bbi-muted);
+}
+
+.sessionList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(14, 38, 92, 0.1);
+}
+
+.session {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--bbi-line);
+}
+
+.session:last-child {
+  border-bottom: none;
+}
+
+.sessionDate {
+  flex: 0 0 54px;
+  text-align: center;
+  border: 1px solid var(--bbi-line);
+  border-radius: 9px;
+  background: var(--bbi-soft);
+  padding: 6px 0;
+}
+
+.sessionDate strong {
+  display: block;
+  font-size: 19px;
+  line-height: 1.1;
+  color: var(--bbi-navy);
+}
+
+.sessionDate span {
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--bbi-red);
+}
+
+.sessionInfo {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sessionInfo h3 {
+  margin: 0 0 3px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.sessionInfo p {
+  margin: 0;
+  font-size: 12.3px;
+  color: var(--bbi-muted);
+}
+
+.sessionStatus {
+  flex: 0 0 auto;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--bbi-navy-2);
+  background: #eef2fb;
+  border-radius: 6px;
+  padding: 6px 10px;
+  text-decoration: none;
+}
+
+a.sessionStatus:hover {
+  background: var(--bbi-navy);
+  color: #fff;
+}
+
+/* ---------- Ressources & équipe ---------- */
+.resourcesPeople {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 34px;
+}
+
+.resources {
+  min-width: 0;
+}
+
+.people {
+  min-width: 0;
+}
+
+.peopleList {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 0;
+  background: #fff;
+  border: 1px solid var(--bbi-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--bbi-line);
+}
+
+.person:last-child {
+  border-bottom: none;
+}
+
+.person strong {
+  display: block;
+  font-size: 13.8px;
+}
+
+.person small {
+  font-size: 12px;
+  color: var(--bbi-muted);
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+
+.avatar0 {
+  background: var(--bbi-navy);
+}
+
+.avatar1 {
+  background: var(--bbi-navy-3);
+}
+
+.avatar2 {
+  background: var(--bbi-red);
+}
+
+.avatar3 {
+  background: #4a5f94;
+}
+
+.community {
+  background: linear-gradient(135deg, var(--bbi-navy) 0%, var(--bbi-navy-3) 100%);
+  border-radius: 14px;
+  padding: 22px;
+  color: #fff;
+}
+
+.community h3 {
+  margin: 0 0 8px;
+  font-size: 17px;
+  color: #fff;
+}
+
+.community p {
+  margin: 0 0 12px;
+  font-size: 13.2px;
+  line-height: 1.55;
+  color: #dce4f5;
+}
+
+.community .eyebrow {
+  color: #9fb4dd;
+}
+
+.community .textLink {
+  color: #fff;
+}
+
+/* ---------- Grille thématique ---------- */
+.topicLinks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.topicLink {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 22px;
+  border-radius: 14px;
+  background: var(--bbi-soft);
+  border: 1px solid var(--bbi-line);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.topicLink:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(14, 38, 92, 0.14);
+}
+
+.topicLink > span {
+  font-size: 23px;
+  color: var(--bbi-red);
+}
+
+.topicLink strong {
+  font-size: 15px;
+  color: var(--bbi-navy);
+}
+
+.topicLink small {
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+  line-height: 1.45;
+}
+
+/* ---------- Pied de page ---------- */
+.footer {
+  background: #091430;
+  color: #c9d3e8;
+  padding: 40px 32px 28px;
+}
+
+.footerInner {
+  max-width: var(--bbi-shell);
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 28px;
+}
+
+.footerBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.footerLogo {
+  width: 62px;
+  height: 32px;
+  border-radius: 5px;
+  background: #fff url("../assets/img/logo.png") center/contain no-repeat;
+}
+
+.footerNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  flex: 1 1 auto;
+}
+
+.footerNav a {
+  color: #c9d3e8;
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+.footerNav a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footerCopy {
+  flex: 1 1 100%;
+  font-size: 11.5px;
+  color: #8fa0c4;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  padding-top: 16px;
+}
+
+/* ---------- Bouton « haut de page » ---------- */
+.backToTop {
+  position: fixed;
+  right: 26px;
+  bottom: 26px;
+  z-index: 90;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  background: var(--bbi-navy);
+  color: #fff;
+  font-size: 19px;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+  box-shadow: 0 10px 24px rgba(9, 20, 48, 0.35);
+}
+
+.backToTopVisible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+/* ---------- États ---------- */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  padding: 64px 24px;
+  color: var(--bbi-muted);
+  font-size: 13.5px;
+}
+
+.loadingSpinner {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--bbi-line);
+  border-top-color: var(--bbi-navy);
+  animation: bbiSpin 0.9s linear infinite;
+}
+
+@keyframes bbiSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.demoNote {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: #7a5500;
+  background: #fff8e6;
+  border: 1px solid #f0dca6;
+  border-radius: 8px;
+  padding: 9px 13px;
+}
+
+.emptyState {
+  margin: 0;
+  padding: 26px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--bbi-muted);
+  background: #fff;
+  border: 1px dashed var(--bbi-line);
+  border-radius: 12px;
+}
+
+/* ---------- Adaptations ---------- */
+@media (max-width: 1100px) {
+  .newsSessions,
+  .resourcesPeople {
+    grid-template-columns: 1fr;
+    gap: 26px;
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+  .newsSessions {
+    padding: 44px 32px;
+  }
+  .newsColumn,
+  .sessionsColumn {
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+@media (max-width: 900px) {
+  .menuButton {
+    display: block;
+  }
+  .navigation {
+    display: none;
+  }
+  .navigationOpen {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: calc(100% + 6px);
+    background: var(--bbi-navy);
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 18px 40px rgba(9, 20, 48, 0.4);
+  }
+  .navCta {
+    margin-left: 0;
+    text-align: center;
+  }
+  .topbarInner {
+    position: relative;
+    flex-wrap: wrap;
+    padding: 10px 20px;
+  }
+  .brandText small {
+    display: none;
+  }
+  .searchForm {
+    order: 3;
+    max-width: 100%;
+    width: 100%;
+    margin-top: 6px;
+  }
+  .searchForm input {
+    width: 100%;
+  }
+  .heroInner {
+    padding: 40px 20px 140px;
+  }
+  .kpiBand {
+    grid-template-columns: repeat(2, 1fr);
+    padding: 0 20px;
+    transform: translateY(46px);
+  }
+  .section,
+  .newsSessions,
+  .resourcesPeople,
+  .topicLinks {
+    padding: 44px 20px;
+  }
+  .hero + .section {
+    padding-top: 96px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heroImage,
+  .heroImageCustom,
+  .scrollCueDot,
+  .loadingSpinner {
+    animation: none !important;
+  }
+  .quickLink,
+  .topicLink,
+  .heroPrimary,
+  .heroSecondary {
+    transition: none;
+  }
+}
+
+/* ===== Styles compilés depuis BbiGallery.module.scss (web part SPFx livrée) ===== */
+@charset "UTF-8";
+/* ============================================================
+   BBI — Galerie médias (photos + vidéos)
+   Charte : bleu nuit #0E265C · rouge #D21419
+   ============================================================ */
+.bbiGallery {
+  --bbi-navy: #0e265c;
+  --bbi-navy-2: #1f3a70;
+  --bbi-red: #d21419;
+  --bbi-ink: #21252b;
+  --bbi-muted: #5a6270;
+  --bbi-line: #e1e4ea;
+  --bbi-soft: #f4f6fa;
+  font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif;
+  color: var(--bbi-ink);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.bbiGallery *,
+.bbiGallery *::before,
+.bbiGallery *::after {
+  box-sizing: border-box;
+}
+
+.placeholder {
+  padding: 28px;
+  border: 1px dashed var(--bbi-line);
+  border-radius: 10px;
+  color: var(--bbi-muted);
+  background: var(--bbi-soft);
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bbi-navy);
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  border: 1px solid var(--bbi-line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 15px;
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  border-color: var(--bbi-navy-2);
+  color: var(--bbi-navy);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--bbi-red);
+  outline-offset: 2px;
+}
+
+.chipActive {
+  background: var(--bbi-navy);
+  border-color: var(--bbi-navy);
+  color: #fff;
+  font-weight: 600;
+}
+
+.demoBanner {
+  background: #fff8e6;
+  border: 1px solid #f0dca6;
+  color: #7a5500;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  margin-bottom: 14px;
+}
+
+/* ---------- Grille « masonry » (colonnes CSS) ---------- */
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  column-count: var(--bbi-gallery-cols, 3);
+  column-gap: 14px;
+}
+@media (max-width: 900px) {
+  .grid {
+    column-count: 2;
+  }
+}
+@media (max-width: 560px) {
+  .grid {
+    column-count: 1;
+  }
+}
+
+.card {
+  break-inside: avoid;
+  margin: 0 0 14px;
+}
+
+.cardButton {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: zoom-in;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 1px 3px rgba(14, 38, 92, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.cardButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(14, 38, 92, 0.2);
+}
+
+.cardButton:focus-visible {
+  outline: 3px solid var(--bbi-red);
+  outline-offset: 2px;
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  padding-top: 66%;
+  background-color: var(--bbi-navy-2);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.demoImage0 {
+  background-image: url("../assets/img/hero-formation.jpg");
+}
+
+.demoImage1 {
+  background-image: url("../assets/img/tuile-management.jpg");
+}
+
+.demoImage2 {
+  background-image: url("../assets/img/tuile-coaching.jpg");
+}
+
+.demoImage3 {
+  background-image: url("../assets/img/news-certification.jpg");
+}
+
+.videoBadge,
+.demoBadge {
+  position: absolute;
+  top: 10px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border-radius: 5px;
+  padding: 3px 8px;
+}
+
+.videoBadge {
+  left: 10px;
+  background: rgba(14, 38, 92, 0.88);
+  color: #fff;
+}
+
+.demoBadge {
+  right: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--bbi-navy);
+}
+
+.caption {
+  display: block;
+  padding: 10px 12px 12px;
+  background: #fff;
+}
+
+.caption strong {
+  display: block;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: var(--bbi-ink);
+}
+
+.caption small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--bbi-muted);
+}
+
+.empty {
+  border: 1px solid var(--bbi-line);
+  border-radius: 10px;
+  background: var(--bbi-soft);
+  padding: 26px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-weight: 600;
+  color: var(--bbi-navy);
+  margin-bottom: 4px;
+}
+
+.emptyHint {
+  font-size: 12.5px;
+  color: var(--bbi-muted);
+}
+
+/* ---------- Lightbox ---------- */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(9, 14, 26, 0.92);
+  backdrop-filter: blur(2px);
+  animation: bbiFade 0.18s ease;
+}
+
+@keyframes bbiFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.lightboxFigure {
+  margin: 0;
+  max-width: min(1200px, 94vw);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  background: #0e1118;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.lightboxImage {
+  display: block;
+  max-width: 100%;
+  max-height: 72vh;
+  object-fit: contain;
+  margin: 0 auto;
+  background: #000;
+}
+
+.lightboxVideo {
+  display: block;
+  width: min(1000px, 88vw);
+  height: min(62vh, 560px);
+  border: none;
+  background: #000;
+}
+
+.lightboxCaption {
+  padding: 14px 18px 16px;
+  background: #fff;
+}
+
+.lightboxCaption strong {
+  display: block;
+  font-size: 15px;
+  color: var(--bbi-navy);
+}
+
+.lightboxCaption small {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--bbi-muted);
+}
+
+.lightboxActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.lightboxCounter {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--bbi-muted);
+}
+
+.lightboxLink {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--bbi-navy-2);
+  text-decoration: none;
+}
+
+.lightboxLink:hover {
+  text-decoration: underline;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.lightboxClose:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.lightboxClose:focus-visible,
+.lightboxNav:focus-visible {
+  outline: 3px solid var(--bbi-red);
+  outline-offset: 2px;
+}
+
+.lightboxNav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lightboxNav:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.lightboxPrev {
+  left: 22px;
+}
+
+.lightboxNext {
+  right: 22px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardButton,
+  .lightbox {
+    transition: none;
+    animation: none;
+  }
+}
+/* Thème sombre SharePoint : on conserve une surface blanche lisible. */
+:global(.ms-Fabric--isFocusVisible) .cardButton:focus-visible {
+  outline-offset: 3px;
+}
+
+/* ===== Chrome de l'aperçu (informatif, absent de la web part) ===== */
+  body { margin:0; background:#fff; }
+  .preview-bar{position:sticky;top:0;z-index:200;background:#0B1226;color:#C9D3E8;font:600 12px "Segoe UI",sans-serif;padding:8px 18px;display:flex;gap:14px;align-items:center;justify-content:space-between}
+  .preview-bar b{color:#fff}
+  .preview-bar span.tag{background:#D21419;color:#fff;border-radius:4px;padding:2px 8px;font-size:10.5px}
+  .suite-sim{background:#F3F3F3;border-bottom:1px solid #E1E4EA;color:#4A5058;font:600 12.5px "Segoe UI",sans-serif;padding:9px 18px;display:flex;gap:16px;align-items:center}
+  .suite-sim .dot{width:20px;height:20px;border-radius:4px;background:#0E265C;display:inline-block}
+  .suite-sim .searchbox{flex:1;max-width:420px;margin:0 auto;background:#fff;border:1px solid #E1E4EA;border-radius:4px;padding:4px 12px;color:#9AA1AB;font-weight:400}
+
+/* ===== Styles compilés depuis TrainingCatalog.module.scss (portée .cat-scope) ===== */
+.cat-scope .bbiCatalog{}.cat-scope .placeholder{}.cat-scope .header{}.cat-scope .title{}.cat-scope .demoBanner{}.cat-scope .toolbar{}.cat-scope .search{}.cat-scope .search:focus{}.cat-scope .chips{}.cat-scope .chip{}.cat-scope .chip:hover{}.cat-scope .chipActive{}.cat-scope .grid{}.cat-scope .card{}.cat-scope .card:hover{}.cat-scope .cardTop{}.cat-scope .codeBadge{}.cat-scope .cardTitle{}.cat-scope .cardMeta{}.cat-scope .cardFoot{}.cat-scope .duration{}.cat-scope .empty{}.cat-scope .emptyTitle{}.cat-scope .emptyHint{}
+/* ===== Styles compilés depuis SecureDocuments.module.scss (portée .doc-scope) ===== */
+.doc-scope .bbiSecure{}.doc-scope .placeholder{}.doc-scope .header{}.doc-scope .title{}.doc-scope .banner{}.doc-scope .demoBanner{}.doc-scope .grid{}.doc-scope .doc{}.doc-scope .doc:hover{}.doc-scope .lock{}.doc-scope .icon{}.doc-scope .docTitle{}.doc-scope .docMeta{}.doc-scope .openBtn{}.doc-scope .openBtn:hover{}.doc-scope .empty{}.doc-scope .emptyTitle{}.doc-scope .emptyHint{}
+</style>
+</head>
+<body>
+
+<div class="preview-bar">
+  <span><b>Aperçu statique</b> — web part SPFx « BBI Accueil (plein écran) » · styles compilés depuis le composant livré</span>
+  <span class="tag">Page applicative · SingleWebPartAppPage</span>
+</div>
+
+<!-- Barre de suite Microsoft : seule partie du chrome qui reste visible (non masquable, non supporté) -->
+<div class="suite-sim">
+  <span class="dot"></span><span>SharePoint</span>
+  <span class="searchbox">Rechercher dans BBI Intranet</span>
+  <span>⚙</span><span>?</span><span style="width:22px;height:22px;border-radius:50%;background:#D21419;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px">SH</span>
+</div>
+
+<div class="home">
+  <div class="announcement" role="region" aria-label="Information à la une">
+    <span class="announcementDot"></span>
+    <span class="announcementText">Certification — 12 nouveaux formateurs certifiés en septembre, 100 % de réussite</span>
+    <a class="announcementLink" href="#actualites">Lire →</a>
+  </div>
+  <header class="topbar topbarSolid"><div class="topbarInner">
+    <a class="brand" href="#accueil"><span class="logoImage" role="img" aria-label="BBI"></span><span class="brandText"><strong>BBI Intranet</strong><small>Propulseur de croissance · Créateur d’impacts</small></span></a>
+    <button class="menuButton" aria-label="Navigation">☰</button>
+    <nav class="navigation" aria-label="Navigation principale">
+      <a class="navLink navActive" href="#accueil">Accueil</a>
+      <a class="navLink" href="#accueil">Accès directs</a>
+      <a class="navLink" href="#accueil">Actualités</a>
+      <a class="navLink" href="#accueil">Catalogue</a>
+      <a class="navLink" href="#accueil">Galerie</a>
+      <a class="navLink" href="#accueil">Ressources</a>
+      <a class="navLink navCta" href="#formateurs">Espace formateurs</a>
+    </nav>
+    <form class="searchForm" role="search"><input type="search" placeholder="Rechercher" aria-label="Rechercher"><button type="submit" aria-label="Rechercher">⌕</button></form>
+  </div></header>
+  <main class="content">
+    <section class="hero" id="accueil">
+      <div class="heroImage" aria-hidden="true"></div><div class="heroVeil" aria-hidden="true"></div>
+      <div class="heroInner">
+        <p class="heroEyebrow">Business Builders International</p>
+        <h1 class="heroTitle" id="bbi-home-title">Faites grandir vos talents,<br>propulsez vos projets.</h1>
+        <p class="heroSubtitle">Le catalogue des formations BBI, vos prochaines sessions et tous vos supports pédagogiques, au même endroit.</p>
+        <div class="heroActions"><a class="heroPrimary" href="#formations">Explorer le catalogue<span aria-hidden="true"> →</span></a><a class="heroSecondary" href="#galerie">Voir la galerie</a></div>
+      </div>
+      <ul class="kpiBand" aria-label="Chiffres clés BBI">
+        <li class="kpi"><strong>1 500</strong><span>Professionnels formés</span></li>
+        <li class="kpi"><strong>120</strong><span>Sessions par an</span></li>
+        <li class="kpi"><strong>40</strong><span>Formateurs certifiés</span></li>
+        <li class="kpi"><strong>96 %</strong><span>Taux de recommandation</span></li>
+      </ul>
+      <button class="scrollCue" aria-label="Défiler"><span class="scrollCueDot"></span></button>
+    </section>
+    <section class="section" id="acces">
+      <div class="sectionHeading"><div><p class="eyebrow">Accès directs</p><h2>Vos espaces</h2></div></div>
+      <div class="quickGrid">
+        <a class="quickLink" href="#formations"><span class="quickIcon" aria-hidden="true">▦</span><strong>Catalogue des formations</strong><small>Parcours, modalités et durées</small></a>
+        <a class="quickLink" href="#formations"><span class="quickIcon" aria-hidden="true">▣</span><strong>Prochaines sessions</strong><small>Planning et inscriptions</small></a>
+        <a class="quickLink" href="#formations"><span class="quickIcon" aria-hidden="true">▤</span><strong>Supports publiés</strong><small>Consultation en lecture seule</small></a>
+        <a class="quickLink" href="#formations"><span class="quickIcon" aria-hidden="true">◈</span><strong>Galerie médias</strong><small>Photos et vidéos BBI</small></a>
+        <a class="quickLink" href="#formations"><span class="quickIcon" aria-hidden="true">◎</span><strong>Formateurs référents</strong><small>Votre réseau d’experts</small></a>
+        <a class="quickLink" href="#formations"><span class="quickIcon" aria-hidden="true">✆</span><strong>Support & FAQ</strong><small>Une question, une demande</small></a>
+      </div></section>
+    <section class="newsSessions" id="actualites">
+      <div class="newsColumn"><div class="sectionHeading"><div><p class="eyebrow">À la une</p><h2>Actualités BBI</h2></div><a class="textLink" href="#actualites">Toutes les actualités →</a></div>
+        <article class="featuredNews"><div class="newsImage" role="img" aria-label="Certification"></div><div class="newsBody"><span class="category">Certification</span><h3>12 nouveaux formateurs certifiés</h3><p>La session de certification de septembre s’est achevée avec 100 % de réussite. Retour sur trois jours d’apprentissage collectif.</p><small>25 septembre 2026 · Direction pédagogique</small><a class="textLink" href="#actualites">Lire l’actualité →</a></div></article>
+      </div>
+      <div class="sessionsColumn"><div class="sectionHeading"><div><p class="eyebrow">À venir</p><h2>Prochaines sessions</h2></div><a class="textLink" href="#actualites">Tout voir →</a></div><ul class="sessionList">
+        <li class="session"><div class="sessionDate"><strong>18</strong><span>oct</span></div><div class="sessionInfo"><h3>Management d’équipe — Cohorte 7</h3><p>⌂ Présentiel · Paris</p></div><span class="sessionStatus">Inscriptions ouvertes</span></li>
+        <li class="session"><div class="sessionDate"><strong>25</strong><span>oct</span></div><div class="sessionInfo"><h3>Coaching d’entrepreneurs — Module 1</h3><p>◉ Distanciel · Teams</p></div><span class="sessionStatus">Webinaire</span></li>
+        <li class="session"><div class="sessionDate"><strong>01</strong><span>nov</span></div><div class="sessionInfo"><h3>Atelier « Traiter les objections »</h3><p>⌂ Présentiel · Lyon</p></div><span class="sessionStatus">3 places</span></li>
+      </ul></div></section>
+    <section class="section" id="formations"><div class="sectionHeading"><div><p class="eyebrow">Se former</p><h2>Catalogue des formations</h2></div><a class="textLink" href="#formations">Voir tout le catalogue →</a></div>
+      <div class="bbiCatalog cat-scope"><div class="header"><h2 class="title">Catalogue des formations</h2></div><div class="toolbar"><input class="search" type="search" placeholder="Rechercher une formation…" readonly><div class="chips"><button class="chip chipActive">Toutes</button><button class="chip">Management</button><button class="chip">Coaching</button><button class="chip">Commerce</button><button class="chip">Digital</button><button class="chip">Qualité</button></div></div><div class="grid">
+        <article class="card"><div class="cardTop"><span class="codeBadge">BBI-MGT-101</span><h3 class="cardTitle">Management d’équipe</h3></div><div class="cardMeta"><span>👥 Confirmé</span><span>🏢 Présentiel</span></div><div class="cardFoot"><span class="duration">14h</span></div></article>
+        <article class="card"><div class="cardTop"><span class="codeBadge">BBI-COA-201</span><h3 class="cardTitle">Coaching d’entrepreneurs</h3></div><div class="cardMeta"><span>👥 Expert</span><span>🔀 Hybride</span></div><div class="cardFoot"><span class="duration">28h</span></div></article>
+        <article class="card"><div class="cardTop"><span class="codeBadge">BBI-COM-110</span><h3 class="cardTitle">Vendre la valeur, pas le prix</h3></div><div class="cardMeta"><span>👥 Débutant</span><span>🏢 Présentiel</span></div><div class="cardFoot"><span class="duration">7h</span></div></article>
+        <article class="card"><div class="cardTop"><span class="codeBadge">BBI-DIG-140</span><h3 class="cardTitle">Prospection digitale</h3></div><div class="cardMeta"><span>👥 Débutant</span><span>💻 Distanciel</span></div><div class="cardFoot"><span class="duration">3.5h</span></div></article>
+      </div></div></section>
+    <section class="section" id="galerie"><div class="bbiGallery"><div class="header"><div><h2 class="title">Galerie médias</h2><p class="subtitle">6 médias</p></div><div class="chips"><button class="chip chipActive">Tous les albums</button><button class="chip">Sessions de formation</button><button class="chip">Vie BBI</button><button class="chip">Certifications</button><button class="chip">Coulisses</button></div></div><ul class="grid">
+        <li class="card"><button class="cardButton"><span class="thumb demoImage0" role="img" aria-label="Session « Management d’équipe » — Paris"></span><span class="caption"><strong>Session « Management d’équipe » — Paris</strong><small>Sessions de formation · Paris</small></span></button></li>
+        <li class="card"><button class="cardButton"><span class="thumb demoImage1" role="img" aria-label="Atelier coaching — promotion entrepreneurs"></span><span class="caption"><strong>Atelier coaching — promotion entrepreneurs</strong><small>Sessions de formation · Lyon</small></span></button></li>
+        <li class="card"><button class="cardButton"><span class="thumb demoImage2" role="img" aria-label="Certification des formateurs"></span><span class="caption"><strong>Certification des formateurs</strong><small>Vie BBI · Abidjan</small></span></button></li>
+        <li class="card"><button class="cardButton"><span class="thumb demoImage3" role="img" aria-label="Remise des attestations Qualiopi"></span><span class="caption"><strong>Remise des attestations Qualiopi</strong><small>Certifications · Paris</small></span></button></li>
+        <li class="card"><button class="cardButton"><span class="thumb demoImage0" role="img" aria-label="Tournage du module e-learning"></span><span class="caption"><strong>Tournage du module e-learning</strong><small>Coulisses · Studio</small></span></button></li>
+        <li class="card"><button class="cardButton"><span class="thumb demoImage1" role="img" aria-label="Séminaire annuel des formateurs"></span><span class="caption"><strong>Séminaire annuel des formateurs</strong><small>Vie BBI · Dakar</small></span></button></li>
+      </ul></div><div class="sectionFooterLink"><a class="textLink" href="#galerie">Toute la galerie →</a></div></section>
+    <section class="resourcesPeople" id="ressources">
+      <div class="resources"><div class="sectionHeading"><div><p class="eyebrow">Ressources</p><h2>Derniers supports publiés</h2></div><a class="textLink" href="#ressources">Bibliothèque →</a></div><div class="bbiSecure doc-scope"><div class="header"><h2 class="title">🔒 Supports publiés</h2></div><div class="banner">Accès en lecture seule — ouverture dans le navigateur uniquement, téléchargement et impression restreints par la plateforme.</div><div class="grid">
+        <article class="doc"><span class="lock">Lecture seule</span><span class="icon" aria-hidden="true">📊</span><h3 class="docTitle">MGT-101 · Slides animateur</h3><small class="docMeta">22 sept. 2026 · PPTX</small><button class="openBtn">Ouvrir dans le navigateur →</button></article>
+        <article class="doc"><span class="lock">Lecture seule</span><span class="icon" aria-hidden="true">📘</span><h3 class="docTitle">COA-201 · Manuel participant</h3><small class="docMeta">22 sept. 2026 · PPTX</small><button class="openBtn">Ouvrir dans le navigateur →</button></article>
+        <article class="doc"><span class="lock">Lecture seule</span><span class="icon" aria-hidden="true">📄</span><h3 class="docTitle">COM-110 · Exercices & cas pratiques</h3><small class="docMeta">22 sept. 2026 · PPTX</small><button class="openBtn">Ouvrir dans le navigateur →</button></article>
+        <article class="doc"><span class="lock">Lecture seule</span><span class="icon" aria-hidden="true">📗</span><h3 class="docTitle">QUA-301 · Évaluation à chaud</h3><small class="docMeta">22 sept. 2026 · PPTX</small><button class="openBtn">Ouvrir dans le navigateur →</button></article>
+      </div></div></div>
+      <div class="people" id="formateurs"><div class="sectionHeading"><div><p class="eyebrow">Votre réseau</p><h2>Formateurs référents</h2></div><a class="textLink" href="#formateurs">Annuaire →</a></div><ul class="peopleList">
+        <li class="person"><span class="avatar avatar0">AM</span><span><strong>Amélie Martin</strong><small>Responsable pédagogique · Management & Qualité</small></span></li>
+        <li class="person"><span class="avatar avatar1">SL</span><span><strong>Stéphane Laurent</strong><small>Coach certifié · Coaching & leadership</small></span></li>
+        <li class="person"><span class="avatar avatar2">KD</span><span><strong>Khadija Diallo</strong><small>Formatrice · Commerce & négociation</small></span></li>
+      </ul><div class="community"><p class="eyebrow">Communauté</p><h3>Réseau des formateurs</h3><p>Échanges de pratiques, entraide pédagogique et veille : rejoignez la communauté BBI sur Teams et Viva Engage.</p><a class="textLink" href="#vie-bbi">En savoir plus →</a></div></div>
+    </section>
+    <section class="topicLinks" id="vie-bbi">
+      <a class="topicLink" href="#ressources"><span aria-hidden="true">⌘</span><strong>Méthodes & outils d’animation</strong><small>Kits, modèles et trames de séquence</small></a>
+      <a class="topicLink" href="#ressources"><span aria-hidden="true">✳</span><strong>Qualité & certification</strong><small>Qualiopi, évaluations, preuves de conformité</small></a>
+      <a class="topicLink" href="#ressources"><span aria-hidden="true">◈</span><strong>Vie d’entreprise</strong><small>Événements, séminaires et temps forts</small></a>
+    </section></main>
+  <footer class="footer"><div class="footerInner"><span class="footerBrand"><span class="footerLogo" role="img" aria-label="BBI"></span><span>Business Builders International — Intranet collaboratif</span></span><nav class="footerNav"><a href="#accueil">Accueil</a><a href="#support">Support &amp; FAQ</a><a href="#ressources">Confidentialité &amp; supports</a><a href="#accueil">Mentions légales</a></nav><small class="footerCopy">© 2026 Business Builders International · Tous droits réservés</small></div></footer>
+  <button class="backToTop backToTopVisible" aria-label="Revenir en haut">↑</button>
+</div>
+</body></html>

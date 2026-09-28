@@ -1,0 +1,19 @@
+{
+  "_lisezMoi": "Environnement BBI — source unique de vérité. Modifiez ce fichier si le tenant ou le site change : les scripts deploy/ et teams/ le lisent automatiquement, plus rien n'est à ressaisir en ligne de commande.",
+  "_tenant": "Domaine SharePoint Online du client.",
+  "tenantHost": "businessbuilderinter.sharepoint.com",
+  "tenantUrl": "https://businessbuilderinter.sharepoint.com",
+
+  "_site": "Site d'équipe qui héberge l'intranet BBI (listes, bibliothèques, pages).",
+  "sitePath": "/sites/intranet",
+  "siteUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet",
+
+  "_donnees": "Site contenant les listes métier si différent du site intranet. Laisser vide pour utiliser siteUrl.",
+  "dataSiteUrl": "",
+
+  "_concepteurs": "Groupe SharePoint autorisé à modifier les supports publiés et à utiliser les modèles de page.",
+  "editorsGroup": "BBI-Concepteurs",
+
+  "_workbench": "Page de test « workbench hébergé » utilisée en développement (SPFx 1.20+ : plus de workbench local).",
+  "workbenchUrl": "https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx"
+}

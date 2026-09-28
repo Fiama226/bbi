@@ -6,6 +6,8 @@ declare interface ISecureDocumentsWebPartStrings {
   LibraryFieldLabel: string;
   LibraryFieldDescription: string;
   MaxItemsFieldLabel: string;
+  ShowDataNoticesFieldLabel: string;
+  DemoOpenDisabled: string;
   WebPartTitle: string;
   ProtectionBanner: string;
   ReadOnlyBadge: string;

@@ -1,0 +1,36 @@
+define([], function () {
+  return {
+    PropertyPaneDescription: "News article template: comfortable reading, sharing and related news.",
+    SourceGroupName: "Data source",
+    DisplayGroupName: "Display",
+    SiteUrlFieldLabel: "Site URL (empty = current site)",
+    SiteUrlFieldDescription: "Site hosting the News list. Leave empty for the current site.",
+    NewsListFieldLabel: "News list",
+    DefaultItemIdFieldLabel: "Default article id",
+    DefaultItemIdFieldDescription: "Used when the URL has no ?itemid=. Leave empty to show the latest published article.",
+    MaxRelatedFieldLabel: "Related articles",
+    ShowDataNoticesFieldLabel: "Show sample-data indicators",
+    ShareUrlFieldLabel: "Public share URL",
+    ShareUrlFieldDescription: "Optional: URL used by the share buttons (empty = page URL).",
+
+    WebPartTitle: "Article",
+    BreadcrumbHome: "Home",
+    BreadcrumbNews: "News",
+    ReadingTimeSingular: "minute read",
+    ReadingTimePlural: "minute read",
+    ShareTitle: "Share this article",
+    ShareMail: "Send by email",
+    ShareTeams: "Share in Teams",
+    CopyLink: "Copy link",
+    Copied: "Link copied",
+    BackToNews: "All news",
+    RelatedTitle: "Read next",
+    ReadMore: "Read more",
+    ExternalLink: "Related link",
+    NoContent: "The full article will be published soon.",
+    EmptyStateTitle: "Article not found",
+    EmptyStateHint: "This article is no longer available or not published yet. Browse the news feed for the latest BBI stories.",
+    DemoBanner: "Sample data shown: the news list is not created yet, or still empty. Your articles will replace this sample automatically as soon as you publish them.",
+    LoadingMessage: "Loading the article…"
+  };
+});

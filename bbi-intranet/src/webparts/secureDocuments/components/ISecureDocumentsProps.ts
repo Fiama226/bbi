@@ -6,6 +6,7 @@ export interface ISecureDocumentsProps {
   libraryTitle: string;
   maxItems: number;
   spHttpClient: SPHttpClient;
+  showDataNotices: boolean;
   isDarkTheme: boolean;
   hasTeamsContext: boolean;
   themeVariant?: IReadonlyTheme;

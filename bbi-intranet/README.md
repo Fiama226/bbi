@@ -4,11 +4,36 @@ Solution **SPFx 1.22.2** contenant les trois web parts métier de l'intranet Bus
 
 | Web part | ID | Rôle |
 |---|---|---|
-| **BBI Accueil** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | Page d'accueil responsive : actualités, sessions, accès rapides, formateurs, catalogue et supports. Chaque liste absente affiche des données d'exemple. |
+| **BBI Accueil (plein écran)** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | Page d'accueil type « site web » : héros 100 % de la hauteur visible (mesure du chrome SharePoint, y compris en workbench), bandeau d'information, chiffres clés, accès directs, actualités, sessions, catalogue intégré, galerie, supports publiés, formateurs, pied de page. `supportsFullBleed: true` + `SharePointFullPage`. |
 | **BBI Catalogue des formations** | `d37a426e-48db-484f-bf10-c38675bb7b43` | Cartes filtrables (filière) + recherche, alimentées par la liste `Formations`. Affiche des données d'exemple si la liste n'existe pas encore. |
+| **BBI Galerie médias** | `f0f19a37-2c11-4812-9006-8aa71a9254f1` | Galerie photos/vidéos alimentée par la bibliothèque d'images « Galerie médias » : albums filtrables, mosaïque, visionneuse plein écran accessible (clavier, focus, `aria-modal`), vidéos mp4, vignettes générées par SharePoint. |
+| **BBI Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
+| **BBI Fiche formation** *(modèle)* | `a9c99e25-db18-4419-894b-08bc9c5b9081` | Modèle de page : la page lit `?code=BBI-MGT-101` et affiche présentation, objectifs, programme, prérequis, public visé, prochaines sessions (Événements de la liste Sessions, filtrées par code), supports publiés et formateurs référents. |
+| **BBI Sessions & inscriptions** | `96216ee2-85b1-473b-aaec-e5b646a151ee` | Planning groupé par mois : recherche, filtres filière/modalité, statut d'inscription, lien « Ajouter à mon agenda » (Outlook) et lien vers la fiche formation (code extrait du titre). |
+| **BBI Article d'actualité** *(modèle)* | `f769f3df-2c27-4a30-bce2-d4ae5793557b` | Modèle de page : lit `?itemid=12`, affiche visuel, chapô, auteur, temps de lecture, partage (e-mail/Teams/copie du lien) et actualités liées. Le HTML éditorial est nettoyé (scripts et événements retirés). |
 | **BBI Documents sécurisés** | `c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41` | Visionneuse des supports publiés : badge 🔒 *Lecture seule*, ouverture **navigateur uniquement** (`?web=1`). La protection réelle (anti-téléchargement / anti-impression) est appliquée par la plateforme : permissions *Lecture*, étiquette de sensibilité ou IRM, accès conditionnel — voir `../deliverables/index.html` §7. |
 
-Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** (assets embarqués, déploiement tenant autorisé).
+Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.4.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
+
+### Contenus de repli (production ready)
+
+Toutes les sources sont tolérantes : liste absente (404), liste non créée, **ou liste créée mais vide** → la page reste complète.
+
+| Composant | Source | Si absente / vide |
+|---|---|---|
+| BBI Accueil | `Actualites`, `Sessions`, `Formateurs` | Actualités, sessions à venir et formateurs d'exemple (dates calculées relativement, jamais périmées) |
+| BBI Catalogue | `Formations` | 5 formations BBI représentatives |
+| BBI Fiche formation | `Formations`, `Sessions`, `Supports publiés`, `Formateurs` | Fiche complète (objectifs, programme, prérequis, sessions, supports, référent) — y compris pour un code inconnu |
+| BBI Sessions | `Sessions`, `Formations` | Planning de 6 sessions réparties sur les mois à venir |
+| BBI Article | `Actualites` | Article rédigé (corps > 300 caractères) + 3 actualités liées + visuel embarqué |
+| BBI Galerie | `Galerie médias` | 8 photos réparties dans 4 albums (4 visuels embarqués) |
+| BBI Documents | `Supports publiés` | 4 supports ; le bouton d'ouverture est neutralisé (aucun fichier inexistant n'est appelé) |
+
+Les bandeaux « données de démonstration » sont masqués par défaut : option `showDataNotices` dans le volet de propriétés (manifeste : `false`).
+
+**Vérification :** `node tools/verify-fallback.js` — 42 contrôles exécutés sur les couches de données réelles (aucun accès réseau requis).
+
+> **Provisionnement** : `../deploy/provision-bbi-intranet.ps1` crée les listes, bibliothèques (dont « Galerie médias »), pages, web parts et la custom action « plein écran ». Guide : `../deploy/README.md`. Audit et recommandations : `../deliverables/audit-2026/index.html`.
 
 ---
 
@@ -20,13 +45,14 @@ Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** (asse
 4. Ouvrir une page moderne → **Éditer** → **+** → catégorie *Advanced* (ou recherche « BBI ») → ajouter **BBI Accueil**. Il peut être placé seul sur une page pleine largeur.
 5. Republisher la page. Les web parts affichent des exemples tant que les listes n'existent pas (§5).
 
-> Vous pouvez aussi tester dans le **workbench hébergé** : `https://<votretenant>.sharepoint.com/_layouts/15/workbench.aspx` → ajouter les web parts.
+> Vous pouvez aussi tester dans le **workbench hébergé** : `https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx` → ajouter les web parts.
 
 ---
 
 ## 2. Développement avec Docker (workbench)
 
-⚠️ **À savoir** : depuis SPFx 1.20+ (pipeline Heft), le *workbench local* (`localhost:4321/temp/workbench.html`) **n'existe plus**. Le conteneur Docker héberge le **serveur de debug** (code compilé en continu sur `https://localhost:4321`), et la page de test est le **workbench hébergé de votre tenant** (`https://<tenant>.sharepoint.com/_layouts/15/workbench.aspx`). Il vous faut donc un tenant M365 (le tenant développeur gratuit du *Microsoft 365 Developer Program* convient parfaitement).
+⚠️ **À savoir** : depuis SPFx 1.20+ (pipeline Heft), le *workbench local* (`localhost:4321/temp/workbench.html`) **n'existe plus**. Le conteneur Docker héberge le **serveur de debug** (code compilé en continu sur `https://localhost:4321`), et la page de test est le **workbench hébergé de votre tenant** — pour BBI : `https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx`
+(également renseigné dans `config/serve.json` et `.vscode/launch.json`). Il vous faut donc un tenant M365 (le tenant développeur gratuit du *Microsoft 365 Developer Program* convient parfaitement).
 
 ### Démarrage
 
@@ -44,7 +70,7 @@ docker compose logs -f          # attendre « Started Webpack Dev Server » puis
 2. Ouvrir :
 
 ```
-https://<VOTRE-TENANT>.sharepoint.com/_layouts/15/workbench.aspx?debug=true&noredir=true&loadSPFX=true&debugManifestsFile=https://localhost:4321/temp/build/manifests.js
+https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx?debug=true&noredir=true&loadSPFX=true&debugManifestsFile=https://localhost:4321/temp/build/manifests.js
 ```
 
 3. **+** → *Advanced* → ajouter **BBI Accueil** (ou les web parts individuelles) → les versions de *debug* (hot-reload) s'affichent.

@@ -113,6 +113,14 @@
   &:hover {
     text-decoration: underline;
   }
+
+  /* Supports de repli : aucun fichier à ouvrir, le bouton est neutralisé
+     plutôt que de renvoyer une erreur. */
+  &:disabled {
+    color: var(--bbi-muted, #6b7280);
+    cursor: not-allowed;
+    text-decoration: none;
+  }
 }
 
 .empty {

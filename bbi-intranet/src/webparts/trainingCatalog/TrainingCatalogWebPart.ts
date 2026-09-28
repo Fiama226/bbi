@@ -2,7 +2,8 @@ import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
   PropertyPaneTextField,
-  PropertyPaneSlider
+  PropertyPaneSlider,
+  PropertyPaneToggle
 } from '@microsoft/sp-property-pane';
 import { BaseClientSideWebPart } from '@microsoft/sp-webpart-base';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
@@ -17,6 +18,7 @@ export interface ITrainingCatalogWebPartProps {
   siteUrl: string;
   listTitle: string;
   maxItems: number;
+  showDataNotices: boolean;
 }
 
 export default class TrainingCatalogWebPart extends BaseClientSideWebPart<ITrainingCatalogWebPartProps> {
@@ -37,6 +39,7 @@ export default class TrainingCatalogWebPart extends BaseClientSideWebPart<ITrain
         siteUrl: this.properties.siteUrl,
         listTitle: this.properties.listTitle,
         maxItems: this.properties.maxItems,
+        showDataNotices: this.properties.showDataNotices === true,
         spHttpClient: this.context.spHttpClient,
         isDarkTheme: this._isDarkTheme,
         hasTeamsContext: !!this.context.sdks.microsoftTeams,
@@ -85,6 +88,10 @@ export default class TrainingCatalogWebPart extends BaseClientSideWebPart<ITrain
                 PropertyPaneTextField('listTitle', {
                   label: strings.ListTitleFieldLabel,
                   description: strings.ListTitleFieldDescription
+                }),
+                PropertyPaneToggle('showDataNotices', {
+                  label: strings.ShowDataNoticesFieldLabel,
+                  checked: this.properties.showDataNotices === true
                 }),
                 PropertyPaneSlider('maxItems', {
                   label: strings.MaxItemsFieldLabel,

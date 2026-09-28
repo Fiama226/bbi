@@ -7,12 +7,16 @@ define([], function () {
     ListTitleFieldLabel: "Titre de la liste des formations",
     ListTitleFieldDescription: "Liste SharePoint alimentant le catalogue (défaut : Formations).",
     MaxItemsFieldLabel: "Nombre maximum de formations affichées",
+    ShowDataNoticesFieldLabel: "Afficher les indicateurs de données de démonstration",
     WebPartTitle: "Catalogue des formations",
     SearchPlaceholder: "Rechercher une formation…",
     FilterAll: "Toutes",
-    DemoBanner: "Liste « Formations » introuvable : affichage des données d'exemple. Créez la liste puis rafraîchissez la page.",
+    DemoBanner: "Données de démonstration affichées : la liste « Formations » n'est pas encore créée, ou elle est vide. Vos formations remplaceront automatiquement ces exemples dès la première publication.",
     EmptyStateTitle: "Aucune formation au catalogue",
     EmptyStateHint: "Ajoutez des éléments à la liste « Formations » (colonne StatutCatalogue = Actif) pour alimenter cette web part.",
+    NoResultTitle: "Aucun résultat",
+    NoResultHint: "Aucune formation ne correspond à « {QUERY} ». Élargissez la recherche ou changez de filière.",
+    ResetFilters: "Réinitialiser les filtres",
     SessionsUpcoming: "session(s) à venir",
     HoursSuffix: "h"
   };
