@@ -3,7 +3,7 @@
   "solution": {
     "name": "bbi-intranet-client-side-solution",
     "id": "2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3",
-    "version": "1.0.0.0",
+    "version": "1.1.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "Composants web BBI : catalogue des formations (cartes filtrables) et visionneuse des supports publi\u00e9s (lecture seule, navigateur uniquement)."
+        "default": "Intranet BBI : accueil, catalogue filtrable des formations et visionneuse des supports publi\u00e9s."
       },
       "longDescription": {
-        "default": "Solution SPFx de l'intranet Business Builders International. Contient : 1) BBI Catalogue des formations \u2014 cartes filtrables aliment\u00e9es par la liste \u00ab Formations \u00bb ; 2) BBI Documents s\u00e9curis\u00e9s \u2014 visionneuse des supports publi\u00e9s (ouverture navigateur uniquement ; la protection anti-t\u00e9l\u00e9chargement / anti-impression est appliqu\u00e9e par la plateforme : permissions Lecture seule, \u00e9tiquette de sensibilit\u00e9 ou IRM, acc\u00e8s conditionnel)."
+        "default": "Solution SPFx de l'intranet Business Builders International. Contient : 1) BBI Accueil — actualités, sessions, liens rapides, formateurs référents, catalogue et supports ; 2) BBI Catalogue des formations — cartes filtrables alimentées par la liste Formations ; 3) BBI Documents sécurisés — visionneuse des supports publiés, protégés par les permissions et politiques SharePoint."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -28,9 +28,9 @@
     "features": [
       {
         "title": "bbi-intranet Feature",
-        "description": "D\u00e9ploie les composants web BBI (Catalogue des formations, Documents s\u00e9curis\u00e9s).",
+        "description": "D\u00e9ploie les composants web BBI (Accueil, Catalogue des formations, Documents s\u00e9curis\u00e9s).",
         "id": "ebc798de-cab3-4872-9f1d-5f95d19f2052",
-        "version": "1.0.0.0"
+        "version": "1.1.0.0"
       }
     ]
   },

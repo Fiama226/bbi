@@ -17,11 +17,20 @@
           "manifest": "./src/webparts/secureDocuments/SecureDocumentsWebPart.manifest.json"
         }
       ]
+    },
+    "bbi-home-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/bbiHome/BbiHomeWebPart.js",
+          "manifest": "./src/webparts/bbiHome/BbiHomeWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "TrainingCatalogWebPartStrings": "lib/webparts/trainingCatalog/loc/{locale}.js",
-    "SecureDocumentsWebPartStrings": "lib/webparts/secureDocuments/loc/{locale}.js"
+    "SecureDocumentsWebPartStrings": "lib/webparts/secureDocuments/loc/{locale}.js",
+    "BbiHomeWebPartStrings": "lib/webparts/bbiHome/loc/{locale}.js"
   }
 }
