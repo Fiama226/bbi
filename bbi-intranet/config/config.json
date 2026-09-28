@@ -2,6 +2,46 @@
   "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
   "version": "2.0",
   "bundles": {
+    "home-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/home/HomeWebPart.js",
+          "manifest": "./src/webparts/home/HomeWebPart.manifest.json"
+        }
+      ]
+    },
+    "hero-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/hero/HeroWebPart.js",
+          "manifest": "./src/webparts/hero/HeroWebPart.manifest.json"
+        }
+      ]
+    },
+    "news-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/news/NewsWebPart.js",
+          "manifest": "./src/webparts/news/NewsWebPart.manifest.json"
+        }
+      ]
+    },
+    "sessions-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/sessions/SessionsWebPart.js",
+          "manifest": "./src/webparts/sessions/SessionsWebPart.manifest.json"
+        }
+      ]
+    },
+    "quick-links-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/quickLinks/QuickLinksWebPart.js",
+          "manifest": "./src/webparts/quickLinks/QuickLinksWebPart.manifest.json"
+        }
+      ]
+    },
     "training-catalog-web-part": {
       "components": [
         {
@@ -17,11 +57,56 @@
           "manifest": "./src/webparts/secureDocuments/SecureDocumentsWebPart.manifest.json"
         }
       ]
+    },
+    "directory-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/directory/DirectoryWebPart.js",
+          "manifest": "./src/webparts/directory/DirectoryWebPart.manifest.json"
+        }
+      ]
+    },
+    "metrics-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/metrics/MetricsWebPart.js",
+          "manifest": "./src/webparts/metrics/MetricsWebPart.manifest.json"
+        }
+      ]
+    },
+    "resources-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/resources/ResourcesWebPart.js",
+          "manifest": "./src/webparts/resources/ResourcesWebPart.manifest.json"
+        }
+      ]
+    },
+    "community-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/community/CommunityWebPart.js",
+          "manifest": "./src/webparts/community/CommunityWebPart.manifest.json"
+        }
+      ]
+    },
+    "trainer-dashboard-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/trainerDashboard/TrainerDashboardWebPart.js",
+          "manifest": "./src/webparts/trainerDashboard/TrainerDashboardWebPart.manifest.json"
+        }
+      ]
+    },
+    "support-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/support/SupportWebPart.js",
+          "manifest": "./src/webparts/support/SupportWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
-  "localizedResources": {
-    "TrainingCatalogWebPartStrings": "lib/webparts/trainingCatalog/loc/{locale}.js",
-    "SecureDocumentsWebPartStrings": "lib/webparts/secureDocuments/loc/{locale}.js"
-  }
+  "localizedResources": {}
 }

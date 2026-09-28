@@ -1,35 +1,41 @@
-# BBI — Intranet SharePoint Online · Livrables de conception
+# BBI — Intranet SharePoint Online
 
-Livrables produits à partir du logo, des captures d'inspiration et des besoins fonctionnels BBI
-(organisme de formation professionnelle).
+## Version 1.1 : accueil complet et modules réutilisables
 
-## 🚀 Application SPFx prête à installer
+La solution comprend **13 webparts SPFx** : **BBI Accueil**, qui compose une page complète, et 12 modules autonomes : bienvenue, actualités, sessions/planning, liens rapides, catalogue, documents, annuaire, indicateurs, ressources/qualité, communauté, espace formateur, support/FAQ.
 
-- **Package** : `deliverables/spfx/bbi-intranet.sppkg` — à téléverser dans l'App Catalog SharePoint Online
-- **Sources** : `bbi-intranet/` (SPFx 1.22.2, TypeScript 5.8, React 17)
-  - `BBI Catalogue des formations` — cartes filtrables alimentées par la liste `Formations` (mode démo auto si la liste est absente)
-  - `BBI Documents sécurisés` — visionneuse lecture seule des supports publiés (`?web=1`, badge 🔒)
-- **Dev sous Docker** : `cd bbi-intranet && cp .env.example .env && docker compose up --build -d` — instructions complètes dans `bbi-intranet/README.md` (le workbench utilisé est celui du tenant SPO, le workbench local n'existe plus depuis SPFx 1.20+/Heft).
+- **[Package installable 1.1.0.0](deliverables/spfx/bbi-intranet.sppkg)** — assets embarqués, IDs existants conservés.
+- **[Installation, configuration et données](bbi-intranet/README.md)** — commencer ici.
+- **[Diagnostic workbench / Docker / manifests.js](bbi-intranet/docs/DEBUG-WORKBENCH.md)** — correction réseau, certificat, erreurs et outils de diagnostic.
+- **[Script PnP de création des listes et de la page](bbi-intranet/scripts/Provision-Bbi.ps1)** — ne remplace l’accueil existant que sur demande explicite.
+- **[Rapport de validation](bbi-intranet/docs/VALIDATION.md)** — tests exécutés et vérifications restant à réaliser sur le tenant.
 
-## Contenu
+### Utilisation
+
+Déployer le package dans l’App Catalog, créer une page moderne puis ajouter **BBI Accueil** : les modules se composent automatiquement. **Le déploiement du package seul ne remplace pas votre page d’accueil.** Pour alimenter la page, créer les listes via le script PnP et renseigner les contenus. Le mode démo est explicite, désactivé par défaut, et n’écrit aucune donnée.
+
+Aperçu interactif hors SharePoint (mêmes composants React, données fictives et simulations) :
+
+```bash
+cd bbi-intranet
+npm ci
+npm run preview:build
+npm run preview
+```
+
+Ouvrir `http://localhost:3000`. Cet aperçu ne se substitue pas au workbench authentifié du tenant.
+
+### Identité visuelle
+
+Logo BBI existant ; bleu nuit **#0E265C**, rouge **#D21419**, texte #21252B, bordures #E1E4EA et fonds #F4F6FA. Mise en page responsive, cartes, navigation, filtres, états vides/erreur et prise en charge des colonnes SharePoint étroites.
+
+## Livrables de conception initiaux (référence historique)
 
 | Fichier | Rôle |
 |---|---|
-| `deliverables/index.html` | **Dossier de conception complet** (13 sections + 2 annexes) : architecture hub, page d'accueil, UX, UI/thème, gestion des formations, protection des documents (lecture seule / anti-téléchargement / anti-impression), SPFx, configurations, gouvernance, ALM, feuille de route, licences. |
-| `deliverables/maquette-accueil.html` | **Maquette haute-fidélité** de la page d'accueil (rendu statique non contractuel, pour atelier de validation UX/UI). |
-| `deliverables/bbi-theme.json` | Thème SharePoint personnalisé BBI (bleu nuit #0E265C) à publier via `Add-PnPTenantTheme`. |
-| `deliverables/spfx/bbi-intranet.sppkg` | **Package installable** (web parts ci-dessus, assets embarqués). |
-| `bbi-intranet/` | Projet SPFx source (Dockerfile + docker-compose inclus). |
-| `deliverables/assets/img/` | Logo BBI (converti en PNG) + visuels d'illustration générés pour la maquette. |
+| `deliverables/index.html` | Dossier de conception : architecture, gouvernance, sécurité documentaire, licences et feuille de route. |
+| `deliverables/maquette-accueil.html` | Première maquette statique non contractuelle ; la solution React/SPFx est désormais la référence de l’implémentation. |
+| `deliverables/bbi-theme.json` | Thème SharePoint BBI à publier séparément via `Add-PnPTenantTheme`. |
+| `deliverables/assets/img/` | Logo et illustrations utilisés dans la conception. |
 
-## Palette dérivée du logo
-
-- Bleu nuit : `#0E265C` (primaire)
-- Rouge BBI : `#D21419` (accent)
-- Neutres : texte `#21252B`, bordures `#E1E4EA`, fonds `#F4F6FA`
-
-## Points d'attention clés
-
-1. **Architecture** : 1 hub + 3 sites (vitrine / catalogue / espace formateurs) — l'édition est confinée à l'Espace Formateurs, la publication est une copie verrouillée.
-2. **Protection documentaire** : défense en profondeur (permissions Lecture → étiquette/IRM « afficher uniquement » → accès conditionnel web-only → audit). La capture d'écran reste impossible à bloquer nativement — parades documentées (§7.4).
-3. **SPFx chirurgical** : 2–3 web parts seulement (`bbi-training-catalog`, `bbi-secure-documents`, `bbi-trainer-dashboard` en v2) — le reste en web parts natives.
+Ces documents décrivent aussi des pistes de configuration/intégration, pas toutes automatisées dans le package. **`web=1` n’est pas une protection anti-téléchargement ou anti-impression** : permissions, labels/IRM, accès conditionnel et audit doivent être configurés côté Microsoft 365. Les indicateurs sont éditoriaux ; les liens communautaires ouvrent Teams/Viva Engage sans simuler un flux intégré.

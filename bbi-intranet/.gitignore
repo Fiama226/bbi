@@ -40,3 +40,8 @@ obj
 # docker / secrets
 .env
 sharepoint
+
+# Local test reports and development certificates
+playwright-report/
+test-results/
+certs/

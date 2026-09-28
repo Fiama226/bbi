@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "d90ac066-fb2e-52d3-a5be-6da2df402b5f",
+  "alias": "ResourcesWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart",
+    "SharePointFullPage"
+  ],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "BBI Intranet"
+      },
+      "title": {
+        "default": "BBI Ressources et qualité"
+      },
+      "description": {
+        "default": "Méthodes pédagogiques et référentiels qualité."
+      },
+      "officeFabricIconFontName": "Library",
+      "properties": {
+        "demoMode": false,
+        "maxItems": 6,
+        "title": "",
+        "sourcesJson": "{}"
+      }
+    }
+  ]
+}

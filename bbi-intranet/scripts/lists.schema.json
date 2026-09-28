@@ -1,0 +1,217 @@
+[
+  {
+    "title": "BBI Actualités",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "Description",
+        "type": "Note"
+      },
+      {
+        "name": "Categorie",
+        "type": "Text"
+      },
+      {
+        "name": "Lien",
+        "type": "Note"
+      },
+      {
+        "name": "ImageUrl",
+        "type": "Note"
+      },
+      {
+        "name": "DatePublication",
+        "type": "DateTime"
+      }
+    ]
+  },
+  {
+    "title": "Sessions",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "DateDebut",
+        "type": "DateTime"
+      },
+      {
+        "name": "DateFin",
+        "type": "DateTime"
+      },
+      {
+        "name": "Lieu",
+        "type": "Text"
+      },
+      {
+        "name": "Modalite",
+        "type": "Text"
+      },
+      {
+        "name": "Lien",
+        "type": "Note"
+      },
+      {
+        "name": "FormateurEmail",
+        "type": "Text"
+      }
+    ]
+  },
+  {
+    "title": "BBI Liens",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "Description",
+        "type": "Note"
+      },
+      {
+        "name": "Categorie",
+        "type": "Text"
+      },
+      {
+        "name": "Lien",
+        "type": "Note"
+      },
+      {
+        "name": "Ordre",
+        "type": "Number"
+      }
+    ]
+  },
+  {
+    "title": "Formations",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "CodeFormation",
+        "type": "Text"
+      },
+      {
+        "name": "Filiere",
+        "type": "Text"
+      },
+      {
+        "name": "Modalite",
+        "type": "Text"
+      },
+      {
+        "name": "DureeH",
+        "type": "Number"
+      },
+      {
+        "name": "Niveau",
+        "type": "Text"
+      },
+      {
+        "name": "StatutCatalogue",
+        "type": "Text"
+      }
+    ]
+  },
+  {
+    "title": "Supports publiés",
+    "template": "DocumentLibrary",
+    "fields": []
+  },
+  {
+    "title": "BBI Annuaire",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "Fonction",
+        "type": "Text"
+      },
+      {
+        "name": "Email",
+        "type": "Text"
+      },
+      {
+        "name": "Categorie",
+        "type": "Text"
+      },
+      {
+        "name": "Ordre",
+        "type": "Number"
+      }
+    ]
+  },
+  {
+    "title": "BBI Indicateurs",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "Valeur",
+        "type": "Text"
+      },
+      {
+        "name": "Periode",
+        "type": "Text"
+      },
+      {
+        "name": "Ordre",
+        "type": "Number"
+      }
+    ]
+  },
+  {
+    "title": "BBI Ressources",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "Description",
+        "type": "Note"
+      },
+      {
+        "name": "Categorie",
+        "type": "Text"
+      },
+      {
+        "name": "Lien",
+        "type": "Note"
+      },
+      {
+        "name": "Ordre",
+        "type": "Number"
+      }
+    ]
+  },
+  {
+    "title": "BBI Communauté",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "Description",
+        "type": "Note"
+      },
+      {
+        "name": "Categorie",
+        "type": "Text"
+      },
+      {
+        "name": "Lien",
+        "type": "Note"
+      },
+      {
+        "name": "DatePublication",
+        "type": "DateTime"
+      }
+    ]
+  },
+  {
+    "title": "BBI FAQ",
+    "template": "GenericList",
+    "fields": [
+      {
+        "name": "Description",
+        "type": "Note"
+      },
+      {
+        "name": "Categorie",
+        "type": "Text"
+      },
+      {
+        "name": "Ordre",
+        "type": "Number"
+      }
+    ]
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "14c863bb-f163-54b0-94ee-66e868f4a8e7",
+  "alias": "CommunityWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart",
+    "SharePointFullPage"
+  ],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "BBI Intranet"
+      },
+      "title": {
+        "default": "BBI Communauté"
+      },
+      "description": {
+        "default": "Liens et sujets de la communauté, vers Teams ou Viva Engage."
+      },
+      "officeFabricIconFontName": "Chat",
+      "properties": {
+        "demoMode": false,
+        "maxItems": 6,
+        "title": "",
+        "sourcesJson": "{}"
+      }
+    }
+  ]
+}

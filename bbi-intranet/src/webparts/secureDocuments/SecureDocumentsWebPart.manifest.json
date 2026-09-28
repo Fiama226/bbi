@@ -6,19 +6,32 @@
   "version": "*",
   "manifestVersion": 2,
   "requiresCustomScript": false,
-  "supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage"],
-  "supportsThemeVariants": true,
-
-  "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-    "group": { "default": "Advanced" },
-    "title": { "default": "BBI Documents sécurisés" },
-    "description": { "default": "Visionneuse des supports de formation publiés — ouverture navigateur uniquement (lecture seule, anti-téléchargement appliqué par la plateforme)." },
-    "officeFabricIconFontName": "Lock",
-    "properties": {
-      "siteUrl": "",
-      "libraryTitle": "Supports publiés",
-      "maxItems": 6
+  "supportedHosts": [
+    "SharePointWebPart",
+    "SharePointFullPage",
+    "TeamsTab"
+  ],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "BBI Intranet"
+      },
+      "title": {
+        "default": "BBI Documents sécurisés"
+      },
+      "description": {
+        "default": "Documents SharePoint ouverts dans le navigateur ; restrictions gérées par Microsoft 365."
+      },
+      "officeFabricIconFontName": "Document",
+      "properties": {
+        "demoMode": false,
+        "maxItems": 6,
+        "title": "",
+        "sourcesJson": "{}"
+      }
     }
-  }]
+  ]
 }

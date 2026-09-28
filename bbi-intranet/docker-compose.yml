@@ -3,17 +3,21 @@ services:
     build: .
     container_name: bbi-spfx
     ports:
-      - "4321:4321"    # serveur de dev SPFx (HTTPS — manifests de debug pour le workbench hébergé)
-      - "35729:35729"  # livereload
+      - "127.0.0.1:4321:4321"
     volumes:
       - ./:/bbi
-      - bbi_node_modules:/bbi/node_modules   # conserve node_modules de l'image (non écrasé par le bind mount)
+      - bbi_node_modules:/bbi/node_modules
+      - bbi_dev_certs:/root/.rushstack
     environment:
       NODE_OPTIONS: "--max-old-space-size=3072"
-      # Domaine de votre tenant SPO (remplacé dans config/serve.json) — sinon créer un fichier .env
       SPFX_SERVE_TENANT_DOMAIN: ${SPFX_TENANT_DOMAIN:-votretenant.sharepoint.com}
-    stdin_open: true
-    tty: true
-
+    command: sh -c "npm ci --no-audit --no-fund && npm run start"
+    healthcheck:
+      test: ["CMD", "node", "scripts/doctor.cjs", "--container", "--allow-untrusted"]
+      interval: 30s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
 volumes:
   bbi_node_modules:
+  bbi_dev_certs:

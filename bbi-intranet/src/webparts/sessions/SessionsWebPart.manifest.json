@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "ea30c565-a275-535a-9aff-9e66cc99f77a",
+  "alias": "SessionsWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart",
+    "SharePointFullPage"
+  ],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "BBI Intranet"
+      },
+      "title": {
+        "default": "BBI Sessions et planning"
+      },
+      "description": {
+        "default": "Prochaines sessions de formation."
+      },
+      "officeFabricIconFontName": "Calendar",
+      "properties": {
+        "demoMode": false,
+        "maxItems": 6,
+        "title": "",
+        "sourcesJson": "{}"
+      }
+    }
+  ]
+}

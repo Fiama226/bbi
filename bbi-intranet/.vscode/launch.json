@@ -1,23 +1,16 @@
 {
   "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "Hosted workbench",
-      "type": "msedge",
-      "request": "launch",
-      "url": "https://{tenantDomain}/_layouts/workbench.aspx",
-      "webRoot": "${workspaceRoot}",
-      "sourceMaps": true,
-      "sourceMapPathOverrides": {
-        "webpack:///.././src/*": "${webRoot}/src/*",
-        "webpack:///../../../src/*": "${webRoot}/src/*",
-        "webpack:///../../../../src/*": "${webRoot}/src/*",
-        "webpack:///../../../../../src/*": "${webRoot}/src/*"
-      },
-      "runtimeArgs": [
-        "--remote-debugging-port=9222",
-        "-incognito"
-      ]
-    }
+  "configurations": [{
+    "name": "BBI — workbench hébergé (Edge)",
+    "type": "msedge",
+    "request": "launch",
+    "url": "https://${input:tenantDomain}/sites/${input:siteName}/_layouts/15/workbench.aspx?debug=true&noredir=true&loadSPFX=true&debugManifestsFile=https://localhost:4321/temp/build/manifests.js",
+    "webRoot": "${workspaceFolder}",
+    "sourceMaps": true,
+    "sourceMapPathOverrides": { "webpack:///*": "${webRoot}/*" }
+  }],
+  "inputs": [
+    { "id": "tenantDomain", "type": "promptString", "description": "Domaine SharePoint (ex. contoso.sharepoint.com)" },
+    { "id": "siteName", "type": "promptString", "description": "Nom du site sous /sites/ (ex. bbi)" }
   ]
 }

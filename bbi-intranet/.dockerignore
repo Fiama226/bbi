@@ -1,0 +1,10 @@
+node_modules
+lib*
+dist
+release
+temp
+.heft
+sharepoint
+.env
+*.log
+preview/dist

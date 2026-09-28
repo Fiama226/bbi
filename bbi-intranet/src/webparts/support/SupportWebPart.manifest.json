@@ -1,0 +1,36 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "55da5ac5-be5b-5535-9e66-e33ff46dc8c5",
+  "alias": "SupportWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": [
+    "SharePointWebPart",
+    "SharePointFullPage"
+  ],
+  "supportsFullBleed": true,
+  "supportsThemeVariants": false,
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "BBI Intranet"
+      },
+      "title": {
+        "default": "BBI Support et FAQ"
+      },
+      "description": {
+        "default": "Questions fréquentes et accès au support."
+      },
+      "officeFabricIconFontName": "Help",
+      "properties": {
+        "demoMode": false,
+        "maxItems": 6,
+        "title": "",
+        "sourcesJson": "{}"
+      }
+    }
+  ]
+}
