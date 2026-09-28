@@ -1,0 +1,19 @@
+services:
+  spfx:
+    build: .
+    container_name: bbi-spfx
+    ports:
+      - "4321:4321"    # serveur de dev SPFx (HTTPS — manifests de debug pour le workbench hébergé)
+      - "35729:35729"  # livereload
+    volumes:
+      - ./:/bbi
+      - bbi_node_modules:/bbi/node_modules   # conserve node_modules de l'image (non écrasé par le bind mount)
+    environment:
+      NODE_OPTIONS: "--max-old-space-size=3072"
+      # Domaine de votre tenant SPO (remplacé dans config/serve.json) — sinon créer un fichier .env
+      SPFX_SERVE_TENANT_DOMAIN: ${SPFX_TENANT_DOMAIN:-votretenant.sharepoint.com}
+    stdin_open: true
+    tty: true
+
+volumes:
+  bbi_node_modules:

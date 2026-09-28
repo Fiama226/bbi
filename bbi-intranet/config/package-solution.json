@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "bbi-intranet-client-side-solution",
+    "id": "2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "Business Builders International",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.22.2"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "Composants web BBI : catalogue des formations (cartes filtrables) et visionneuse des supports publi\u00e9s (lecture seule, navigateur uniquement)."
+      },
+      "longDescription": {
+        "default": "Solution SPFx de l'intranet Business Builders International. Contient : 1) BBI Catalogue des formations \u2014 cartes filtrables aliment\u00e9es par la liste \u00ab Formations \u00bb ; 2) BBI Documents s\u00e9curis\u00e9s \u2014 visionneuse des supports publi\u00e9s (ouverture navigateur uniquement ; la protection anti-t\u00e9l\u00e9chargement / anti-impression est appliqu\u00e9e par la plateforme : permissions Lecture seule, \u00e9tiquette de sensibilit\u00e9 ou IRM, acc\u00e8s conditionnel)."
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "bbi-intranet Feature",
+        "description": "D\u00e9ploie les composants web BBI (Catalogue des formations, Documents s\u00e9curis\u00e9s).",
+        "id": "ebc798de-cab3-4872-9f1d-5f95d19f2052",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/bbi-intranet.sppkg"
+  }
+}

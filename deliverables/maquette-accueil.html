@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maquette — Accueil BBI Intranet (SharePoint Online)</title>
+<style>
+  :root{
+    --navy:#0E265C; --navy2:#1F3A70; --navy3:#2E4A86; --navysoft:#F4F6FA;
+    --red:#D21419; --redsoft:#FDEEEE;
+    --ink:#21252B; --muted:#5A6270; --line:#E1E4EA; --card:#fff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:#F0F2F5;color:var(--ink);font-size:14.5px;line-height:1.5}
+  a{color:inherit;text-decoration:none}
+  .mocknote{background:#1a1a1a;color:#ffd;text-align:center;font-size:12px;padding:6px 12px}
+  /* ---------- Suite bar ---------- */
+  .suite{background:var(--navy);color:#fff;height:48px;display:flex;align-items:center;padding:0 16px;gap:14px;position:sticky;top:0;z-index:50}
+  .suite .waffle{font-size:17px;opacity:.95;cursor:pointer}
+  .suite .appname{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+  .suite .searchbox{flex:1;max-width:560px;margin:0 auto;background:rgba(255,255,255,.12);border-radius:4px;height:32px;display:flex;align-items:center;padding:0 12px;color:#C9D3E8;font-size:13px;gap:8px}
+  .suite .right{display:flex;align-items:center;gap:14px;font-size:14px}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
+  /* ---------- Header hub ---------- */
+  .hub{background:var(--navy);color:#fff;padding:10px 28px 0;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+  .hub-top{display:flex;align-items:center;gap:14px;padding-bottom:8px}
+  .hub-top img{height:42px;background:#fff;border-radius:4px;padding:3px 8px}
+  .hub-top .t{line-height:1.25}
+  .hub-top .t b{font-size:17px;display:block}
+  .hub-top .t small{color:#C9D3E8;font-size:12px}
+  .hubnav{display:flex;gap:2px;margin-top:2px;flex-wrap:wrap}
+  .hubnav a{padding:9px 16px;font-size:13.5px;color:#DCE4F5;border-bottom:3px solid transparent;font-weight:600}
+  .hubnav a.on{color:#fff;border-bottom-color:var(--red)}
+  .hubnav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+  /* ---------- Canvas ---------- */
+  .canvas{max-width:1200px;margin:26px auto 60px;padding:0 20px}
+  .zone-label{font-size:11px;color:#8a93a3;margin:26px 2px 8px;text-transform:uppercase;letter-spacing:.6px;display:flex;gap:8px;align-items:center}
+  .zone-label::after{content:"";flex:1;height:1px;background:var(--line)}
+  .card{background:var(--card);border-radius:10px;box-shadow:0 1px 4px rgba(14,38,92,.09)}
+  /* Hero */
+  .hero{position:relative;border-radius:12px;overflow:hidden;min-height:320px;display:flex;align-items:flex-end;box-shadow:0 2px 10px rgba(14,38,92,.18)}
+  .hero .bg{position:absolute;inset:0;background:url('assets/img/hero-formation.jpg') center/cover}
+  .hero .veil{position:absolute;inset:0;background:linear-gradient(90deg,rgba(14,38,92,.88) 0%,rgba(14,38,92,.55) 45%,rgba(14,38,92,.05) 80%)}
+  .hero .content{position:relative;padding:34px 38px;color:#fff;max-width:640px}
+  .hero h1{font-size:31px;line-height:1.18;margin-bottom:8px}
+  .hero p{color:#DCE4F5;font-size:15px;margin-bottom:18px}
+  .cta{display:inline-block;background:var(--red);color:#fff;font-weight:600;padding:10px 22px;border-radius:6px;margin-right:10px;font-size:14px}
+  .cta.ghost{background:transparent;border:2px solid #fff;color:#fff}
+  .cta:hover{filter:brightness(1.12)}
+  /* Grid helpers */
+  .row{display:grid;gap:18px;margin-top:18px}
+  .c-23{grid-template-columns:2fr 1fr}
+  .c-4{grid-template-columns:repeat(4,1fr)}
+  .c-3{grid-template-columns:repeat(3,1fr)}
+  /* Section header (comme webpart SharePoint) */
+  .sec{display:flex;align-items:center;justify-content:space-between;margin:30px 2px -6px}
+  .sec h2{font-size:20px;color:var(--ink);font-weight:600}
+  .sec .lnk{color:var(--navy2);font-size:13px;font-weight:600}
+  .sec .lnk:hover{text-decoration:underline}
+  /* News */
+  .news-main{overflow:hidden}
+  .news-main .img{height:210px;background:url('assets/img/news-certification.jpg') center/cover}
+  .news-main .body{padding:18px 20px}
+  .kicker{display:inline-block;background:var(--redsoft);color:var(--red);font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px}
+  .news-main h3{font-size:17px;margin-bottom:6px}
+  .news-main p{color:var(--muted);font-size:13.5px}
+  .news-item{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line);align-items:flex-start}
+  .news-item:last-child{border-bottom:none}
+  .news-item .thumb{width:64px;height:48px;border-radius:6px;background:linear-gradient(135deg,var(--navy2),var(--navy3));flex:0 0 auto;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}
+  .news-item b{font-size:13.5px;display:block;line-height:1.35}
+  .news-item small{color:var(--muted);font-size:11.5px}
+  /* Events */
+  .ev{display:flex;gap:14px;padding:13px 16px;border-bottom:1px solid var(--line)}
+  .ev:last-child{border-bottom:none}
+  .ev .date{background:var(--navysoft);border:1px solid var(--line);border-radius:8px;width:52px;text-align:center;padding:6px 0;flex:0 0 auto}
+  .ev .date b{display:block;font-size:19px;color:var(--navy);line-height:1.1}
+  .ev .date small{font-size:10.5px;text-transform:uppercase;color:var(--red);font-weight:700}
+  .ev b{font-size:13.5px;display:block}
+  .ev small{color:var(--muted);font-size:12px;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:4px}
+  .badge.pres{background:#E4F4EA;color:#0E7A3D}
+  .badge.dist{background:#E8F0FE;color:#1F3A70}
+  /* Quick links */
+  .ql{padding:18px;display:flex;flex-direction:column;gap:10px;align-items:flex-start;transition:box-shadow .15s}
+  .ql:hover{box-shadow:0 4px 14px rgba(14,38,92,.16)}
+  .ql .ic{width:42px;height:42px;border-radius:9px;background:var(--navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px}
+  .ql b{font-size:14px}
+  .ql small{color:var(--muted);font-size:12.2px;line-height:1.4}
+  /* Catalogue */
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin:0 2px 14px}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 14px;font-size:12.5px;color:var(--muted);cursor:pointer}
+  .chip.on{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+  .fcard{overflow:hidden;transition:box-shadow .15s;display:flex;flex-direction:column}
+  .fcard:hover{box-shadow:0 4px 14px rgba(14,38,92,.16)}
+  .fcard .top{height:104px;position:relative;display:flex;align-items:flex-end;padding:10px 12px;color:#fff}
+  .fcard .top .code{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.92);color:var(--navy);font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 7px}
+  .fcard .top h4{font-size:14.5px;line-height:1.25;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+  .fcard .meta{padding:12px 14px 14px;flex:1;display:flex;flex-direction:column;gap:6px}
+  .fcard .meta small{color:var(--muted);font-size:12px;display:flex;gap:10px;flex-wrap:wrap}
+  .fcard .meta .dur{margin-top:auto;color:var(--red);font-weight:700;font-size:12px}
+  .g-mgt{background:linear-gradient(120deg,#0E265C,#2E4A86),url('assets/img/tuile-management.jpg') center/cover}
+  .g-mgt{background-blend-mode:multiply}
+  .g-coa{background:linear-gradient(120deg,#7a0d10,#c23a3e),url('assets/img/tuile-coaching.jpg') center/cover;background-blend-mode:multiply}
+  .g-com{background:linear-gradient(120deg,#1F3A70,#4A5F94),url('assets/img/hero-formation.jpg') center/cover;background-blend-mode:multiply}
+  .g-dig{background:linear-gradient(120deg,#23272E,#4A5058)}
+  .g-qua{background:linear-gradient(120deg,#0B1C3A,#31456f)}
+  /* Secure docs */
+  .doc{display:flex;flex-direction:column;gap:10px;padding:16px;border:1.5px solid var(--line);border-radius:10px;background:#fff;position:relative}
+  .doc:hover{border-color:var(--navy3)}
+  .doc .flock{position:absolute;top:12px;right:12px}
+  .lock{background:var(--redsoft);color:var(--red);font-size:10.5px;font-weight:700;border-radius:4px;padding:2px 8px}
+  .doc .ic{font-size:30px}
+  .doc b{font-size:13.5px;line-height:1.3}
+  .doc small{color:var(--muted);font-size:11.8px}
+  .doc .open{margin-top:2px;font-size:12.5px;color:var(--navy2);font-weight:600}
+  .doc .open:hover{text-decoration:underline}
+  .banner-ro{display:flex;align-items:center;gap:10px;background:var(--redsoft);border:1px solid #F3C9CB;color:#7a0d10;border-radius:8px;padding:10px 14px;font-size:12.5px;margin-bottom:14px}
+  /* People */
+  .ppl{display:flex;gap:12px;padding:13px 16px;border-bottom:1px solid var(--line);align-items:center}
+  .ppl:last-child{border-bottom:none}
+  .ppl .ava{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex:0 0 auto}
+  .ppl b{font-size:13.5px;display:block}
+  .ppl small{color:var(--muted);font-size:11.8px;display:block}
+  .a1{background:#0E265C}.a2{background:#7a0d10}.a3{background:#2E4A86}.a4{background:#B01215}
+  /* KPI tiles */
+  .kpi{padding:16px 18px;display:flex;flex-direction:column;gap:2px}
+  .kpi .n{font-size:26px;font-weight:700;color:var(--red)}
+  .kpi small{color:var(--muted);font-size:12px}
+  /* Engage */
+  .engage{padding:16px 18px}
+  .engage p{font-size:13px;color:var(--muted);margin:6px 0 10px}
+  .thread{border:1px solid var(--line);border-radius:8px;padding:10px 12px;margin-bottom:8px;font-size:12.5px}
+  .thread b{display:block;font-size:12.8px}
+  .thread small{color:var(--muted)}
+  /* Footer */
+  .foot{background:var(--navy);color:#C9D3E8;padding:26px 28px;margin-top:44px;border-radius:12px;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;font-size:12.5px}
+  .foot a{color:#fff;margin-right:16px}
+  .foot a:hover{text-decoration:underline}
+  @media(max-width:900px){.row{grid-template-columns:1fr!important}.hub .searchbox{display:none}}
+</style>
+</head>
+<body>
+<div class="mocknote">📐 MAQUETTE NON CONTRACTUELLE — Rendu cible de la page d'accueil BBI (SharePoint Online) · à projeter en atelier de validation UX/UI · v1.0</div>
+
+<!-- Suite bar M365 -->
+<div class="suite">
+  <span class="waffle">⠿</span>
+  <span class="appname">SharePoint</span>
+  <div class="searchbox">🔍&nbsp; Rechercher dans BBI Intranet</div>
+  <div class="right"><span>🔔</span><span>⚙️</span><span>?</span><div class="avatar">SL</div></div>
+</div>
+
+<!-- Hub header -->
+<div class="hub">
+  <div class="hub-top">
+    <img src="assets/img/logo.png" alt="BBI">
+    <div class="t"><b>BBI Intranet</b><small>Propulseur de croissance · Créateur d'impacts</small></div>
+  </div>
+  <nav class="hubnav">
+    <a class="on" href="#">Accueil</a>
+    <a href="#">Catalogue des formations</a>
+    <a href="#">Espace Formateurs</a>
+    <a href="#">Actualités</a>
+    <a href="#">Annuaire</a>
+    <a href="#">Support &amp; FAQ</a>
+  </nav>
+</div>
+
+<div class="canvas">
+
+  <!-- ① HERO -->
+  <div class="zone-label">① Web part Héro (native) — image mission + CTA</div>
+  <div class="hero">
+    <div class="bg"></div><div class="veil"></div>
+    <div class="content">
+      <h1>Faites grandir vos talents,<br>propulsez vos projets.</h1>
+      <p>Le catalogue des formations BBI, vos sessions à venir et tous vos supports pédagogiques — au même endroit, toujours à jour.</p>
+      <a class="cta" href="#">Explorer le catalogue</a>
+      <a class="cta ghost" href="#">Espace Formateurs</a>
+    </div>
+  </div>
+
+  <!-- ②③ News + Events -->
+  <div class="zone-label">② Actualités (native) &nbsp;·&nbsp; ③ Événements (native — liste Sessions)</div>
+  <div class="row c-23">
+    <div class="card news-main">
+      <div class="img"></div>
+      <div class="body">
+        <span class="kicker">Certification</span>
+        <h3>Promotion 2026 : 12 nouveaux formateurs certifiés 🎓</h3>
+        <p>La session de certification de septembre s'est achevée avec 100&nbsp;% de réussite. Retour en images sur trois jours intenses…</p>
+        <small style="color:#8a93a3">Publié le 25 septembre · Direction Pédagogique</small>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec" style="margin:14px 16px 0"><h2 style="font-size:15.5px">Prochaines sessions</h2><a class="lnk" href="#">Tout voir</a></div>
+      <div class="ev"><div class="date"><b>05</b><small>oct</small></div><div><b>Management d'équipe — Cohorte 7</b><small>Presentiel · Paris <span class="badge pres">Inscriptions ouvertes</span></small></div></div>
+      <div class="ev"><div class="date"><b>12</b><small>oct</small></div><div><b>Coaching d'entrepreneurs (module 1)</b><small>Distanciel · Teams <span class="badge dist">Webinaire</span></small></div></div>
+      <div class="ev"><div class="date"><b>19</b><small>oct</small></div><div><b>Atelier « Traiter les objections »</b><small>Présentiel · Lyon <span class="badge pres">3 places</span></small></div></div>
+      <div class="ev"><div class="date"><b>02</b><small>nov</small></div><div><b>Fondamentaux Qualiopi — revue</b><small>Distanciel · Teams <span class="badge dist">Webinaire</span></small></div></div>
+    </div>
+  </div>
+
+  <!-- ④ Quick links -->
+  <div class="zone-label">④ Liens rapides (native) — accès par rôle</div>
+  <div class="row c-4">
+    <a class="card ql" href="#"><span class="ic">📚</span><b>Catalogue des formations</b><small>Toutes les formations, fiches et programmes à jour</small></a>
+    <a class="card ql" href="#"><span class="ic">👩‍🏫</span><b>Espace Formateurs</b><small>Production, planning et échanges de la communauté</small></a>
+    <a class="card ql" href="#"><span class="ic">🗓️</span><b>Mon planning</b><small>Mes sessions d'animation et mes formations</small></a>
+    <a class="card ql" href="#"><span class="ic">💬</span><b>Support &amp; FAQ</b><small>Une question ? Le formulaire et les réponses utiles</small></a>
+  </div>
+
+  <!-- ⑤ Catalogue -->
+  <div class="sec"><h2>Catalogue des formations</h2><a class="lnk" href="#">Voir tout le catalogue →</a></div>
+  <div class="zone-label">⑤ Web part SPFx « bbi-training-catalog » — alimentée par la liste Formations</div>
+  <div class="filters">
+    <span class="chip on">Toutes</span><span class="chip">Management</span><span class="chip">Coaching</span><span class="chip">Commerce</span><span class="chip">Digital</span><span class="chip">Qualité &amp; Certification</span><span class="chip">· · ·</span>
+  </div>
+  <div class="row" style="grid-template-columns:repeat(5,1fr)">
+    <div class="card fcard"><div class="top g-mgt"><span class="code">BBI-MGT-101</span><h4>Management d'équipe</h4></div><div class="meta"><small><span>👥 Manager confirmé</span><span>🏢 Présentiel</span></small><small>2 jours · 14 h</small><span class="dur">5 sessions à venir</span></div></div>
+    <div class="card fcard"><div class="top g-coa"><span class="code">BBI-COA-201</span><h4>Coaching d'entrepreneurs</h4></div><div class="meta"><small><span>👥 Coach / consultant</span><span>💻 Hybride</span></small><small>4 jours · 28 h</small><span class="dur">2 sessions à venir</span></div></div>
+    <div class="card fcard"><div class="top g-com"><span class="code">BBI-COM-110</span><h4>Vendre la valeur, pas le prix</h4></div><div class="meta"><small><span>👥 Commerciaux</span><span>🏢 Présentiel</span></small><small>1 jour · 7 h</small><span class="dur">3 sessions à venir</span></div></div>
+    <div class="card fcard"><div class="top g-dig"><span class="code">BBI-DIG-140</span><h4>Prospection digitale</h4></div><div class="meta"><small><span>👥 Dirigeants TPE</span><span>💻 Distanciel</span></small><small>0,5 jour · 3,5 h</small><span class="dur">1 session à venir</span></div></div>
+    <div class="card fcard"><div class="top g-qua"><span class="code">BBI-QUA-301</span><h4>Fondamentaux Qualiopi</h4></div><div class="meta"><small><span>👥 Responsables qualité</span><span>💻 Distanciel</span></small><small>1 jour · 7 h</small><span class="dur">2 sessions à venir</span></div></div>
+  </div>
+
+  <!-- ⑦ Secure docs + ⑥ People -->
+  <div class="zone-label">⑦ Web part SPFx « bbi-secure-documents » &nbsp;·&nbsp; ⑥ Personnes (native)</div>
+  <div class="row c-23" style="margin-top:8px">
+    <div>
+      <div class="sec" style="margin-top:0"><h2 style="font-size:18px">Derniers supports publiés</h2><a class="lnk" href="#">Tout voir →</a></div>
+      <div class="banner-ro">🔒 <span><b>Zone protégée :</b> consultation en lecture seule dans le navigateur — impression, copie et téléchargement désactivés pour les supports publiés.</span></div>
+      <div class="row" style="grid-template-columns:1fr 1fr;margin-top:0">
+        <div class="doc"><span class="flock lock">🔒 Lecture seule</span><span class="ic">📊</span><b>MGT-101 · Slides animateur — Management d'équipe</b><small>v2026.2 · publié le 22 sept. par A. Martin</small><span class="open">Ouvrir dans le navigateur →</span></div>
+        <div class="doc"><span class="flock lock">🔒 Lecture seule</span><span class="ic">📘</span><b>COA-201 · Manuel participant — Coaching (module 1)</b><small>v2026.1 · publié le 19 sept. par S. Laurent</small><span class="open">Ouvrir dans le navigateur →</span></div>
+        <div class="doc"><span class="flock lock">🔒 Lecture seule</span><span class="ic">📝</span><b>COM-110 · Exercices &amp; cas pratiques</b><small>v2026.1 · publié le 15 sept. par K. Diallo</small><span class="open">Ouvrir dans le navigateur →</span></div>
+        <div class="doc"><span class="flock lock">🔒 Lecture seule</span><span class="ic">✅</span><b>QUA-301 · Évaluation à chaud (QCM)</b><small>v2025.4 · publié le 10 sept. par A. Martin</small><span class="open">Ouvrir dans le navigateur →</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="sec" style="margin:14px 16px 0"><h2 style="font-size:15.5px">Vos formateurs référents</h2><a class="lnk" href="#">Annuaire</a></div>
+      <div class="ppl"><div class="ava a1">AM</div><div><b>Amélie Martin</b><small>Responsable pédagogique · Management &amp; Qualité</small></div></div>
+      <div class="ppl"><div class="ava a2">SL</div><div><b>Stéphane Laurent</b><small>Coach certifié · Coaching &amp; leadership</small></div></div>
+      <div class="ppl"><div class="ava a3">KD</div><div><b>Khadija Diallo</b><small>Formatrice · Commerce &amp; négociation</small></div></div>
+      <div class="ppl"><div class="ava a4">TB</div><div><b>Thomas Bernard</b><small>Formateur · Digital &amp; prospection</small></div></div>
+    </div>
+  </div>
+
+  <!-- ⑧⑨⑩⑪ -->
+  <div class="zone-label">⑧ Power BI (native) &nbsp;·&nbsp; ⑨⑩ Liens rapides thématiques (native) &nbsp;·&nbsp; ⑪ Viva Engage (native)</div>
+  <div class="row c-4">
+    <div class="card kpi"><span class="n">24</span><small>sessions animées ce trimestre</small></div>
+    <div class="card kpi"><span class="n">96&nbsp;%</span><small>de satisfaction à chaud (S1 2026)</small></div>
+    <div class="card kpi"><span class="n">137</span><small>stagiaires formés depuis janvier</small></div>
+    <div class="card kpi"><span class="n">18</span><small>formations actives au catalogue</small></div>
+  </div>
+  <div class="row c-3">
+    <div class="card ql"><span class="ic">🧩</span><b>Méthodes &amp; outils d'animation</b><small>Parcours numérotés, kits d'animation, templates de modules — consultables en lecture seule</small></div>
+    <div class="card ql"><span class="ic">🏅</span><b>Certification &amp; qualité</b><small>Référentiel Qualiopi, évaluations, preuves, veille réglementaire</small></div>
+    <div class="card engage"><b>💬 Communauté Formateurs</b><p>Derniers échanges du réseau BBI :</p>
+      <div class="thread"><b>« Votre astuce pour gérer un groupe hétérogène ? »</b><small>K. Diallo · 12 réponses</small></div>
+      <div class="thread"><b>Retour d'expérience — atelier 6 étapes à Lyon</b><small>T. Bernard · 5 réponses</small></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="foot">
+    <div>© 2026 Business Builders International — Intranet interne</div>
+    <div><a href="#">Mentions légales</a><a href="#">Confidentialité (RGPD)</a><a href="#">Accessibilité</a><a href="#">Support IT</a></div>
+  </div>
+</div>
+</body>
+</html>

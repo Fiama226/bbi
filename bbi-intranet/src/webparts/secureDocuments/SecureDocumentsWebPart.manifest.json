@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41",
+  "alias": "SecureDocumentsWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+    "group": { "default": "Advanced" },
+    "title": { "default": "BBI Documents sécurisés" },
+    "description": { "default": "Visionneuse des supports de formation publiés — ouverture navigateur uniquement (lecture seule, anti-téléchargement appliqué par la plateforme)." },
+    "officeFabricIconFontName": "Lock",
+    "properties": {
+      "siteUrl": "",
+      "libraryTitle": "Supports publiés",
+      "maxItems": 6
+    }
+  }]
+}

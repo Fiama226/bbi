@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "training-catalog-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/trainingCatalog/TrainingCatalogWebPart.js",
+          "manifest": "./src/webparts/trainingCatalog/TrainingCatalogWebPart.manifest.json"
+        }
+      ]
+    },
+    "secure-documents-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/secureDocuments/SecureDocumentsWebPart.js",
+          "manifest": "./src/webparts/secureDocuments/SecureDocumentsWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "TrainingCatalogWebPartStrings": "lib/webparts/trainingCatalog/loc/{locale}.js",
+    "SecureDocumentsWebPartStrings": "lib/webparts/secureDocuments/loc/{locale}.js"
+  }
+}
