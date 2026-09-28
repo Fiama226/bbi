@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "6a9b6e3b-44f1-4a70-8f0a-45c82b29126d",
+  "packageName": "com.businessbuildersinternational.bbi.home",
+  "developer": {
+    "name": "Business Builders International",
+    "websiteUrl": "https://businessbuildersinternational.com",
+    "privacyUrl": "https://businessbuildersinternational.com/confidentialite",
+    "termsOfUseUrl": "https://businessbuildersinternational.com/confidentialite"
+  },
+  "name": {
+    "short": "BBI Accueil",
+    "full": "BBI Intranet — Accueil"
+  },
+  "description": {
+    "short": "BBI Intranet — Accueil — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint.",
+    "full": "BBI Intranet — Accueil — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint."
+  },
+  "icons": {
+    "outline": "6a9b6e3b-44f1-4a70-8f0a-45c82b29126d_outline.png",
+    "color": "6a9b6e3b-44f1-4a70-8f0a-45c82b29126d_color.png"
+  },
+  "accentColor": "#0E265C",
+  "staticTabs": [
+    {
+      "entityId": "bbi-home",
+      "name": "Accueil",
+      "contentUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/accueil.aspx",
+      "websiteUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/accueil.aspx",
+      "scopes": [
+        "personal"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity"
+  ],
+  "validDomains": [
+    "businessbuilderinter.sharepoint.com"
+  ]
+}

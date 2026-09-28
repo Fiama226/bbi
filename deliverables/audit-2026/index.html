@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBI — Audit intranet &amp; recommandations 2026</title>
+<style>
+  :root{
+    --navy:#0E265C; --navy2:#1F3A70; --navy3:#2E4A86; --soft:#F4F6FA;
+    --red:#D21419; --redsoft:#FDEEEE; --ink:#21252B; --muted:#5A6270;
+    --line:#E1E4EA; --ok:#0E7A3D; --oksoft:#E4F4EA; --warn:#8A5A00; --warnsoft:#FFF8E6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:#F0F2F5;color:var(--ink);font-size:15px;line-height:1.58}
+  a{color:var(--navy2)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px 90px}
+
+  /* ---------- Hero du dossier ---------- */
+  header.doc{background:linear-gradient(115deg,#081534 0%,var(--navy) 48%,var(--navy3) 100%);color:#fff;padding:52px 0 44px;margin-bottom:34px;position:relative;overflow:hidden}
+  header.doc::after{content:"";position:absolute;right:-90px;top:-60px;width:340px;height:340px;border-radius:50%;background:rgba(210,20,25,.22)}
+  header.doc .wrap{padding-bottom:0;position:relative;z-index:1}
+  .kicker{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:999px;margin-bottom:16px}
+  header.doc h1{font-size:38px;line-height:1.1;letter-spacing:-.02em;max-width:20ch}
+  header.doc p.lead{margin-top:14px;font-size:15.5px;color:#CBD8EF;max-width:72ch}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:26px;font-size:12.5px;color:#AFC0E0}
+  .meta-row b{color:#fff}
+
+  /* ---------- Sections ---------- */
+  section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:30px 32px;margin-bottom:22px;box-shadow:0 1px 3px rgba(14,38,92,.06)}
+  h2{font-size:23px;color:var(--navy);letter-spacing:-.015em;display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
+  h2 .num{background:var(--navy);color:#fff;font-size:13px;border-radius:8px;padding:4px 10px;flex:0 0 auto}
+  h3{font-size:16.5px;color:var(--ink);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--soft)}
+  h4{font-size:14.5px;color:var(--navy);margin:16px 0 6px}
+  p{margin:9px 0}
+  .sub{color:var(--muted);font-size:13.5px}
+  ul,ol{margin:10px 0 10px 22px}
+  li{margin:5px 0}
+  code{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.8px;font-family:"Cascadia Code",Consolas,monospace}
+  pre{background:#0E1424;color:#DCE4F5;border-radius:10px;padding:16px 18px;overflow:auto;font-size:12.6px;line-height:1.5;margin:12px 0}
+  pre .c{color:#7E8CA8}
+
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.6px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--soft);font-size:12.4px;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);font-weight:700}
+  tbody tr:hover{background:#FAFBFD}
+  td.n{font-weight:700;color:var(--red);white-space:nowrap;width:52px}
+
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 7px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  .tag.spfx{background:var(--redsoft);color:var(--red)}
+  .tag.natif{background:#E8F0FE;color:var(--navy2)}
+  .tag.p0{background:var(--oksoft);color:var(--ok)}
+  .tag.p1{background:var(--warnsoft);color:var(--warn)}
+  .tag.p2{background:#EEF0F4;color:var(--muted)}
+  .tag.livré{background:var(--navy);color:#fff}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}header.doc h1{font-size:30px}}
+
+  .card{border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h4{margin-top:0}
+  .card small{color:var(--muted);font-size:12.8px;display:block;line-height:1.5}
+  .icon{font-size:22px;margin-bottom:8px}
+
+  .callout{border-left:4px solid var(--navy2);background:var(--soft);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;font-size:13.8px}
+  .callout.ok{border-color:var(--ok);background:var(--oksoft)}
+  .callout.warn{border-color:#D9A400;background:var(--warnsoft)}
+  .callout.stop{border-color:var(--red);background:var(--redsoft)}
+
+  /* ---------- Wireframe ---------- */
+  .wf{border:1px dashed var(--line);border-radius:12px;padding:14px;background:#FBFCFE;margin:16px 0}
+  .wf-box{border-radius:9px;padding:11px 13px;font-size:12.8px;margin-bottom:9px;background:#fff;border:1px solid var(--line)}
+  .wf-box b{display:block;font-size:13px}
+  .wf-box small{color:var(--muted);font-size:11.8px}
+  .wf-box.navy{background:var(--navy);border-color:var(--navy);color:#fff}
+  .wf-box.navy small{color:#C9D3E8}
+  .wf-box.red{background:var(--red);border-color:var(--red);color:#fff}
+  .wf-box.red small{color:#FBD9DA}
+  .wf-box.brand{background:linear-gradient(120deg,var(--navy),var(--navy3));border-color:var(--navy);color:#fff}
+  .wf-box.brand small{color:#C9D3E8}
+  .wf-row{display:grid;gap:9px;margin-bottom:9px}
+  .wf-row.c1{grid-template-columns:1fr}
+  .wf-row.c2{grid-template-columns:1fr 1fr}
+  .wf-row.c3{grid-template-columns:repeat(3,1fr)}
+  .wf-row.c4{grid-template-columns:repeat(4,1fr)}
+  .wf-row.c23{grid-template-columns:2fr 1fr}
+  @media(max-width:760px){.wf-row.c2,.wf-row.c3,.wf-row.c4,.wf-row.c23{grid-template-columns:1fr}}
+  .ruler{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin:2px 0 8px}
+  .ruler::before,.ruler::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  footer.doc{text-align:center;color:var(--muted);font-size:12.5px;padding:26px 0 0}
+  @media print{body{background:#fff}section{box-shadow:none;break-inside:avoid}header.doc{background:#0E265C !important;-webkit-print-color-adjust:exact}}
+</style>
+</head>
+<body>
+
+<header class="doc">
+  <div class="wrap">
+    <span class="kicker">Agence SPFx · Audit &amp; recommandations</span>
+    <h1>Votre intranet BBI peut ressembler à un vrai site web — voici comment.</h1>
+    <p class="lead">Audit de l'existant, refonte de la page d'accueil en <b>page applicative plein écran</b>,
+    catalogue des pages à créer (#00 → #26), modèle de contenu à provisionner et feuille de route 90 jours.
+    Tout est adossé à du <b>SharePoint natif supporté</b> et à de l'<b>SPFx réellement déployable</b> — pas de maquette.</p>
+    <div class="meta-row">
+      <span><b>Client</b> Business Builders International</span>
+      <span><b>Plateforme</b> SharePoint Online / M365</span>
+      <span><b>Solution</b> bbi-intranet 1.2.0.0</span>
+      <span><b>Langue</b> Français (interne)</span>
+      <span><b>Priorités</b> Pédagogie &amp; formations · Communication interne</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ============================================================ 0 -->
+<section id="s0">
+  <h2><span class="num">0</span>Synthèse exécutive — 60 secondes</h2>
+  <p>Votre intranet actuel est <b>fonctionnel mais « enfermé » dans les gabarits SharePoint</b> : la page d'accueil
+  s'affiche dans une zone de contenu étroite, encadrée par la barre de suite Microsoft, l'en-tête de site et la
+  navigation du hub. Résultat : environ 30 % de la hauteur d'écran est consommée avant le premier contenu utile,
+  et l'ensemble lit comme « un site SharePoint », pas comme « le site BBI ».</p>
+
+  <h3>Les 5 décisions qui changent tout</h3>
+  <div class="grid3">
+    <div class="card"><div class="icon">🖥️</div><h4>1 · Accueil en page applicative</h4><small>Convertir <code>accueil.aspx</code> en <b>SingleWebPartAppPage</b> : plus d'en-tête, plus de navigation, plus de titre de page. Un héros de 100 % de la hauteur visible, bord à bord.</small></div>
+    <div class="card"><div class="icon">📐</div><h4>2 · Extension « BBI Plein écran »</h4><small>Un <b>Application Customizer</b> supprime les marges résiduelles du canevas, expose la charte en variables CSS et n'agit <i>que</i> sur les pages applicatives.</small></div>
+    <div class="card"><div class="icon">🧭</div><h4>3 · Navigation dans la page</h4><small>La barre de navigation devient <b>partie intégrante du site</b> (logo, ancres, recherche, CTA) au lieu d'être imposée par le hub.</small></div>
+    <div class="card"><div class="icon">🖼️</div><h4>4 · Galerie médias native</h4><small>Une bibliothèque d'images + une web part <b>BBI Galerie médias</b> (albums, visionneuse plein écran accessible) : la vie d'entreprise devient visible.</small></div>
+    <div class="card"><div class="icon">🗂️</div><h4>5 · Contenu provisionné par script</h4><small>Listes, colonnes, vues, pages et web parts créées par un script idempotent : <b>zéro saisie manuelle</b>, zéro écart entre le design et la réalité.</small></div>
+    <div class="card"><div class="icon">🏷️</div><h4>Bonus · Marque cohérente</h4><small>Thème « BBI Bleu nuit », logo, en-tête, pied de page et (option) police institutionnelle via le <b>Brand center</b>.</small></div>
+  </div>
+
+  <div class="callout ok">
+    <b>✅ Ce qui est déjà livré dans cette itération</b> — la web part <b>BBI Accueil (plein écran)</b> réécrite,
+    la web part <b>BBI Galerie médias</b>, l'extension <b>BBI Plein écran</b>, le script de provisionnement
+    (<code>deploy/provision-bbi-intranet.ps1</code>), les <b>trois modèles de page</b> (fiche formation, sessions,
+    article d'actualité), les <b>packages Teams / Viva Connections</b> et le package <code>bbi-intranet.sppkg</code> en
+    version 1.4.0.0 (7 web parts + 1 extension). Voir §9.
+  </div>
+</section>
+
+<!-- ============================================================ 1 -->
+<section id="s1">
+  <h2><span class="num">1</span>Audit de l'existant — ce qui freine</h2>
+  <p class="sub">Constats issus de l'analyse de vos captures SharePoint, de la structure du site et du code SPFx déjà en place.</p>
+
+  <table>
+    <thead><tr><th style="width:30%">Constat</th><th style="width:34%">Impact</th><th>Correctif</th></tr></thead>
+    <tbody>
+      <tr><td><b>Accueil dans un canevas standard</b><br><small>Le web part est posé dans une section classique : largeur limitée, marges latérales, barre de commandes visible.</small></td><td>Perception « outil interne » plutôt que « site institutionnel ». La marque s'exprime mal.</td><td>Page applicative + <code>supportsFullBleed</code> + extension plein écran (§2).</td></tr>
+      <tr><td><b>Trois barres empilées</b><br><small>Suite bar Microsoft + en-tête de site + navigation du hub ≈ 190–230 px.</small></td><td>Le message d'accueil passe sous la ligne de flottaison sur portable.</td><td>Navigation intégrée à la page ; en-tête masqué sur la page applicative.</td></tr>
+      <tr><td><b>Actualités et sessions en listes brutes</b><br><small>Lecture peu engageante, pas de mise en avant visuelle.</small></td><td>Faible circulation de l'information interne (priorité « Communication »).</td><td>Sections « À la une » + sessions datées, cartes, visuels, bandeau d'information.</td></tr>
+      <tr><td><b>Aucun média</b><br><small>Pas de photos des sessions, certifications, événements.</small></td><td>Impossible de montrer la vie de l'entreprise : l'intranet reste abstrait.</td><td>Bibliothèque <code>Galerie médias</code> + web part galerie (livrée).</td></tr>
+      <tr><td><b>Contenus métier non provisionnés</b><br><small>Les web parts affichent des exemples tant que les listes n'existent pas.</small></td><td>Risque de confusion entre démo et données réelles ; adoption freinée.</td><td>Script de provisionnement + jeu de données d'exemple + rapport d'audit (<code>-VerifyOnly</code>).</td></tr>
+      <tr><td><b>Documents sans parcours balisé</b><br><small>Bibliothèque unique sans colonnes métier exploitables.</small></td><td>Recherche documentaire inefficace ; preuves Qualiopi dispersées.</td><td>Colonnes <code>Code formation</code>, <code>Type de support</code>, <code>Statut</code>, vues « Récemment publiés » / « Par formation ».</td></tr>
+      <tr><td><b>Expérience mobile non pensée</b><br><small>Beaucoup de blocs, peu de hiérarchie.</small></td><td>Les formateurs en mobilité décrochent.</td><td>Grille responsive, bandeau KPI 2×2, navigation repliable, cibles tactiles ≥ 44 px.</td></tr>
+      <tr><td><b>Marque non systématisée</b><br><small>Couleurs appliquées « au cas par cas ».</small></td><td>Sentiment d'amateurisme à chaque nouvelle page créée.</td><td>Thème tenant + règles de marque + modèles de pages (§6).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Classification des chantiers</h3>
+  <div class="grid3">
+    <div class="card"><h4>🟢 Gains immédiats (cette semaine)</h4><small>Page applicative, extension plein écran, bandeau d'information, chiffres clés, chiffres d'accès rapides, galerie.</small></div>
+    <div class="card"><h4>🟠 Moyen terme (30–60 jours)</h4><small>Fiches formation, plan du site, FAQ, espace formateurs, recherche verticale « Formations », métadonnées documentaires.</small></div>
+    <div class="card"><h4>🔴 Structurel (60–90 jours)</h4><small>Espace apprenant, évaluations, gouvernance éditoriale, mesure d'adoption, Viva Connections.</small></div>
+  </div>
+</section>
+
+<!-- ============================================================ 2 -->
+<section id="s2">
+  <h2><span class="num">2</span>« Page plein écran, comme un vrai site web » — la réponse honnête</h2>
+  <p>Votre demande initiale : <i>« je veux la page d'accueil complètement pleine page, même masquer la barre de
+  navigation SharePoint, plein écran comme un site web, y compris dans le workbench »</i>. Voici les trois routes
+  possibles, ce qu'elles donnent réellement, et ce que nous recommandons.</p>
+
+  <table>
+    <thead><tr><th style="width:20%">Route</th><th style="width:26%">Ce que vous obtenez</th><th style="width:26%">Ce que vous ne pouvez pas avoir</th><th>Support Microsoft</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>A · Page applicative</b><br><span class="tag livré">LIVRÉ</span></td>
+        <td>Plus d'en-tête de site, plus de navigation, plus de titre, plus de barre de commandes. Contenu bord à bord, héros 100 % écran, ancres, recherche dans la page.</td>
+        <td>La barre de suite Microsoft (waffle, recherche, avatar) reste visible : elle appartient au cadre M365, pas au site.</td>
+        <td><b>Natif &amp; supporté</b> — <code>SingleWebPartAppPage</code> + <code>supportsFullBleed</code>.</td>
+      </tr>
+      <tr>
+        <td><b>B · CSS « pirate »</b></td>
+        <td>Masquage visuel de la barre de suite.</td>
+        <td>Rien de fiable : casse à chaque mise à jour SharePoint, brise la recherche/notifications, non supporté, risque de sécurité perçu.</td>
+        <td><b>Interdit par Microsoft</b> (personnalisation du cadre M365 non supportée). Nous ne le livrons pas.</td>
+      </tr>
+      <tr>
+        <td><b>C · Teams / Viva Connections</b><br><span class="tag livré">LIVRÉ</span></td>
+        <td><b>Zéro chrome SharePoint</b> : la page est rendue dans Teams (onglet personnel ou expérience Viva). Idéal formateurs mobiles, tablette en salle.</td>
+        <td>Il faut Teams installé ; l'apparence dépend du client Teams.</td>
+        <td><b>Natif &amp; supporté</b> — mêmes web parts, hôte Teams déclaré dans les manifestes.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout stop">
+    <b>⚠️ Le point qu'il faut assumer</b> — « 100 % sans aucune barre Microsoft » n'est pas atteignable <i>dans un navigateur</i>
+    sans hack non supporté. La combinaison <b>A + C</b> vous donne : navigateur = expérience plein écran propre, sans en-tête
+    SharePoint ; Teams/Viva = écran réellement intégral. C'est le maximum défendable, et celui que nous avons implémenté.
+  </div>
+
+  <h3>2.1 · Comment ça marche techniquement (les 4 leviers)</h3>
+  <ol>
+    <li><b>Déclarer le web part « full page » et « full bleed »</b> dans son manifeste :
+      <pre>"supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage", "TeamsPersonalApp"],
+"supportsFullBleed": true</pre></li>
+    <li><b>Basculer la page en page applicative</b> :
+      <pre><span class="c"># PnP PowerShell</span>
+Set-PnPClientSidePage -Identity "accueil.aspx" -LayoutType SingleWebPartAppPage</pre>
+      Ou via l'interface : <i>Pages du site</i> → page → <i>Type de mise en page</i>.</li>
+    <li><b>Supprimer les marges résiduelles du canevas</b> avec l'extension livrée
+      (<code>BbiFullScreenApplicationCustomizer</code>). Elle détecte le type de la page par API,
+      n'agit que sur les pages applicatives, et expose la charte en variables CSS
+      (<code>--bbi-navy</code>, <code>--bbi-red</code>…). Elle redimensionne les web parts après coup.</li>
+    <li><b>Calculer un héros réellement plein écran</b> : la web part mesure la hauteur réelle du chrome
+      au-dessus d'elle et la publie en <code>--bbi-chrome-offset</code>, puis se dimensionne en
+      <code>calc(100vh - var(--bbi-chrome-offset))</code>. <b>C'est ce qui fait que ça marche aussi dans le workbench</b>
+      (où le chrome est bien plus haut qu'en production).</li>
+  </ol>
+
+  <div class="callout">
+    <b>🧪 Workbench</b> — depuis SPFx 1.20+, il n'existe plus de workbench local : on teste dans le
+    <b>workbench hébergé</b> du tenant (<code>/_layouts/15/workbench.aspx</code>). La mesure de chrome et le bord-à-bord
+    ont été conçus pour ce contexte : pas de « saut » visuel entre le test et la page publiée.
+  </div>
+</section>
+
+<!-- ============================================================ 3 -->
+<section id="s3">
+  <h2><span class="num">3</span>La page d'accueil refondue — bloc par bloc</h2>
+  <p>Principe directeur : <b>« on comprend qui est BBI en 5 secondes, on agit en 2 clics »</b>. Le contenu respire
+  dans une colonne de 1280 px max, mais les fonds vont d'un bord à l'autre de l'écran.</p>
+
+  <h3>3.1 · Trame de la page</h3>
+  <div class="wf">
+    <div class="wf-box navy"><b>Bandeau d'information / annonce</b><small>Dernière actualité à la une ou message de campagne · 1 ligne, refermable</small></div>
+    <div class="wf-box brand"><b>Barre de navigation intégrée</b><small>Logo BBI · ancres (Accès, Actualités, Catalogue, Galerie, Ressources) · recherche du site · CTA « Espace formateurs »</small></div>
+    <div class="wf-box red"><b>① HÉROS PLEIN ÉCRAN</b><small>Image métier + dégradé de marque · sur-titre · H1 (2 lignes max) · accroche · 2 boutons · indice de défilement</small></div>
+    <div class="wf-row c4">
+      <div class="wf-box"><b>② Chiffres clés</b><small>Bande chevauchante, 4 indicateurs</small></div>
+      <div class="wf-box"><b>②</b><small>Professionnels formés</small></div>
+      <div class="wf-box"><b>②</b><small>Sessions / an</small></div>
+      <div class="wf-box"><b>②</b><small>Taux de recommandation</small></div>
+    </div>
+    <div class="ruler">accès directs</div>
+    <div class="wf-row c3">
+      <div class="wf-box"><b>③ Catalogue</b><small>Tuile iconique</small></div>
+      <div class="wf-box"><b>③ Sessions</b><small>Tuile iconique</small></div>
+      <div class="wf-box"><b>③ Supports</b><small>Tuile iconique</small></div>
+    </div>
+    <div class="ruler">actualités &amp; planning</div>
+    <div class="wf-row c23">
+      <div class="wf-box"><b>④ Actualités BBI</b><small>Article en avant (visuel + rubrique + résumé) · mise à jour continue</small></div>
+      <div class="wf-box"><b>⑤ Prochaines sessions</b><small>Date · modalité · lieu · statut d'inscription</small></div>
+    </div>
+    <div class="ruler">offre de formation</div>
+    <div class="wf-box"><b>⑥ CATALOGUE DES FORMATIONS <span class="tag spfx">SPFx</span></b><small>Recherche + filtres par filière · code, durée, modalité, niveau</small></div>
+    <div class="ruler">preuves &amp; vie d'entreprise</div>
+    <div class="wf-box"><b>⑦ GALERIE MÉDIAS <span class="tag spfx">SPFx</span></b><small>Mosaïque + albums · visionneuse plein écran accessible · vidéos</small></div>
+    <div class="wf-row c2">
+      <div class="wf-box"><b>⑧ Derniers supports publiés <span class="tag spfx">SPFx</span></b><small>Lecture seule, ouverture navigateur</small></div>
+      <div class="wf-box"><b>⑨ Formateurs référents</b><small>Pastilles, rôle, filière · + carte communauté</small></div>
+    </div>
+    <div class="wf-row c3">
+      <div class="wf-box"><b>⑩ Méthodes &amp; outils</b></div>
+      <div class="wf-box"><b>⑩ Qualité &amp; certification</b></div>
+      <div class="wf-box"><b>⑩ Vie d'entreprise</b></div>
+    </div>
+    <div class="wf-box navy"><b>Pied de page</b><small>Marque · support · confidentialité · mentions légales · copyright</small></div>
+  </div>
+
+  <h3>3.2 · Les 12 améliorations concrètes (et pourquoi)</h3>
+  <table>
+    <thead><tr><th style="width:4%">N°</th><th style="width:30%">Amélioration</th><th>Bénéfice</th></tr></thead>
+    <tbody>
+      <tr><td class="n">1</td><td><b>Héros plein écran</b> avec image métier et dégradé de marque</td><td>Identification immédiate ; l'intranet ressemble au site vitrine BBI.</td></tr>
+      <tr><td class="n">2</td><td><b>Barre de navigation collante</b> dans la page, avec surbrillance de la section active</td><td>L'utilisateur sait toujours où il est ; navigation à un clic sans remonter.</td></tr>
+      <tr><td class="n">3</td><td><b>Recherche intégrée</b> à la barre, redirigée vers la recherche SharePoint du site</td><td>Recherche accessible depuis n'importe quel point de la page.</td></tr>
+      <tr><td class="n">4</td><td><b>Bandeau d'information</b> issu de la dernière actualité</td><td>Canal de communication interne instantané (rentrée, certification, incident).</td></tr>
+      <tr><td class="n">5</td><td><b>Bande de chiffres clés</b> sur carte blanche, en chevauchement du héros</td><td>Crédibilité : la preuve chiffrée est visible sans scroller.</td></tr>
+      <tr><td class="n">6</td><td><b>Six tuiles d'accès direct</b> avec icônes et sous-titres</td><td>Réduction du nombre de clics vers les tâches fréquentes (personas formateur/apprenant/admin).</td></tr>
+      <tr><td class="n">7</td><td><b>Actualité mise en avant</b> + liste chronologique</td><td>La communication interne devient lisible sur mobile.</td></tr>
+      <tr><td class="n">8</td><td><b>Sessions avec pastille de date</b> et code couleur de modalité</td><td>Le planning est compréhensible en un coup d'œil (présentiel/distanciel/hybride).</td></tr>
+      <tr><td class="n">9</td><td><b>Catalogue intégré</b> (recherche + filtres) au lieu d'un simple lien</td><td>L'offre de formation est explorable sans quitter l'accueil.</td></tr>
+      <tr><td class="n">10</td><td><b>Galerie médias</b> avec albums et visionneuse</td><td>Preuve sociale : la vie de l'entreprise se voit ; matière pour les réseaux et les recrutements.</td></tr>
+      <tr><td class="n">11</td><td><b>Bloc « Formateurs référents » + carte communauté</b></td><td>Le réseau humain devient visible : qui contacter, sur quelle expertise.</td></tr>
+      <tr><td class="n">12</td><td><b>Pied de page complet + bouton retour haut</b> + fil d'accessibilité (skip, focus visibles, <code>prefers-reduced-motion</code>)</td><td>Conformité RGAA/WCAG 2.2 AA et confort de lecture.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout warn">
+    <b>⚠️ Ce que nous retirons volontairement</b> — les liens rapides génériques « en vrac », le doublon « activité du site »
+    (peu utile hors administration), et les blocs de plus de 4 colonnes. La règle : <b>une intention = un bloc</b>.
+  </div>
+</section>
+
+<!-- ============================================================ 4 -->
+<section id="s4">
+  <h2><span class="num">4</span>Catalogue des pages à créer — #00 → #26</h2>
+  <p class="sub">Priorité <span class="tag p0">P0</span> immédiat · <span class="tag p1">P1</span> 30–60 jours · <span class="tag p2">P2</span> 60–90 jours.
+  Effort : S (&lt; 1 j) · M (1–3 j) · L (&gt; 3 j). <span class="tag livré">LIVRÉ</span> = créé par <code>deploy/provision-bbi-intranet.ps1</code>.</p>
+
+  <table>
+    <thead><tr><th style="width:5%">N°</th><th style="width:19%">Page</th><th style="width:12%">Public</th><th style="width:26%">Objectif &amp; contenu clé</th><th style="width:22%">Briques</th><th style="width:6%">Prio</th><th style="width:5%">Eff.</th></tr></thead>
+    <tbody>
+      <tr><td class="n">#00</td><td><b>Accueil</b> <span class="tag livré">LIVRÉ</span></td><td>Tous</td><td>Vitrine du réseau : promesse, offre, preuves, actualités, accès directs.</td><td>BBI Accueil <span class="tag spfx">SPFx</span> + extension plein écran</td><td><span class="tag p0">P0</span></td><td>M</td></tr>
+      <tr><td class="n">#01</td><td><b>Catalogue des formations</b> <span class="tag livré">LIVRÉ</span></td><td>Tous</td><td>Rechercher et filtrer l'offre (filière, modalité, niveau, durée).</td><td>BBI Catalogue <span class="tag spfx">SPFx</span> + 2 vues de liste</td><td><span class="tag p0">P0</span></td><td>M</td></tr>
+      <tr><td class="n">#02</td><td><b>Fiche formation</b> (modèle) <span class="tag livré">LIVRÉ</span></td><td>Tous</td><td>Objectifs pédagogiques, programme module par module, prérequis, sessions liées, supports associés, contact référent.</td><td>BBI Fiche formation <span class="tag spfx">SPFx</span> — pilotée par <code>?code=BBI-XXX</code></td><td><span class="tag p0">P0</span></td><td>M</td></tr>
+      <tr><td class="n">#03</td><td><b>Sessions &amp; inscriptions</b> <span class="tag livré">LIVRÉ</span></td><td>Apprenants, formateurs</td><td>Planning complet filtrable (filière, modalité), regroupé par mois, statut d'inscription, ajout à l'agenda, lien vers la fiche formation.</td><td>BBI Sessions &amp; inscriptions <span class="tag spfx">SPFx</span></td><td><span class="tag p0">P0</span></td><td>S</td></tr>
+      <tr><td class="n">#04</td><td><b>Galerie médias</b> <span class="tag livré">LIVRÉ</span></td><td>Tous</td><td>Albums photo/vidéo des sessions, certifications et événements.</td><td>BBI Galerie <span class="tag spfx">SPFx</span> + bibliothèque d'images</td><td><span class="tag p0">P0</span></td><td>S</td></tr>
+      <tr><td class="n">#05</td><td><b>Vie d'entreprise / Actualités</b> <span class="tag livré">LIVRÉ</span></td><td>Tous</td><td>Fil d'actualités hiérarchisé, rubriques, mise en avant.</td><td>BBI Accueil (compact) <span class="tag spfx">SPFx</span> + liste <code>Actualites</code></td><td><span class="tag p0">P0</span></td><td>S</td></tr>
+      <tr><td class="n">#06</td><td><b>Article d'actualité</b> (modèle) <span class="tag livré">LIVRÉ</span></td><td>Tous</td><td>Visuel, chapô, auteur, temps de lecture, partage (e-mail / Teams / lien), actualités liées.</td><td>BBI Article d'actualité <span class="tag spfx">SPFx</span> — piloté par <code>?itemid=12</code></td><td><span class="tag p0">P0</span></td><td>S</td></tr>
+      <tr><td class="n">#07</td><td><b>Annuaire des formateurs</b></td><td>Tous</td><td>Profils, filières, expertises, langues, lien de contact.</td><td>Web part Personnes ou BBI (liste <code>Formateurs</code>)</td><td><span class="tag p1">P1</span></td><td>M</td></tr>
+      <tr><td class="n">#08</td><td><b>Support &amp; FAQ</b> <span class="tag livré">LIVRÉ</span></td><td>Tous</td><td>Réponses rapides par thème + formulaire de demande + contacts IT.</td><td>Liste FAQ + Microsoft Forms + Texte</td><td><span class="tag p0">P0</span></td><td>S</td></tr>
+      <tr><td class="n">#09</td><td><b>Méthodes &amp; outils d'animation</b></td><td>Formateurs</td><td>Kits, trames de séquence, checklists, jeux de rôle, bibliothèque de modèles.</td><td>Liens rapides + BBI Documents <span class="tag spfx">SPFx</span></td><td><span class="tag p1">P1</span></td><td>M</td></tr>
+      <tr><td class="n">#10</td><td><b>Qualité &amp; certification</b></td><td>Formateurs, direction</td><td>Preuves Qualiopi, référentiels, évaluations, plan d'amélioration continue.</td><td>Vues de bibliothèque + KPI + Bloc de texte</td><td><span class="tag p1">P1</span></td><td>M</td></tr>
+      <tr><td class="n">#11</td><td><b>Espace apprenant</b></td><td>Apprenants</td><td>Mes sessions, mes supports, mes attestations, mes évaluations.</td><td>Listes filtrées « [Moi] » + BBI Documents <span class="tag spfx">SPFx</span></td><td><span class="tag p1">P1</span></td><td>L</td></tr>
+      <tr><td class="n">#12</td><td><b>Évaluations &amp; satisfaction</b></td><td>Direction, qualité</td><td>Résultats à chaud / à froid, NPS, verbatims, plans d'action.</td><td>Power BI / Listes + KPI</td><td><span class="tag p2">P2</span></td><td>M</td></tr>
+      <tr><td class="n">#13</td><td><b>Onboarding nouvel arrivant</b></td><td>Nouveaux</td><td>Parcours 30-60-90, documents RH, contacts clés, culture BBI.</td><td>Liens rapides + BBI Accueil (compact)</td><td><span class="tag p1">P1</span></td><td>M</td></tr>
+      <tr><td class="n">#14</td><td><b>Bibliothèque de modèles</b></td><td>Tous</td><td>Modèles PPT/Word/Excel aux couleurs BBI, page de garde normalisée.</td><td>Bibliothèque + BBI Documents <span class="tag spfx">SPFx</span></td><td><span class="tag p1">P1</span></td><td>S</td></tr>
+      <tr><td class="n">#15</td><td><b>Veille &amp; ressources externes</b></td><td>Formateurs</td><td>Curation d'articles, études, webinaires ; veille pédagogique.</td><td>Liens rapides + Actualités</td><td><span class="tag p2">P2</span></td><td>S</td></tr>
+      <tr><td class="n">#16</td><td><b>Communauté &amp; entraide</b></td><td>Formateurs</td><td>Conversations, questions/réponses, bonnes pratiques.</td><td>Viva Engage / canal Teams intégré</td><td><span class="tag p2">P2</span></td><td>S</td></tr>
+      <tr><td class="n">#17</td><td><b>Rituels &amp; événements</b></td><td>Tous</td><td>Webinaires, séminaires, temps forts, agenda annuel.</td><td>Événements + BBI Accueil (compact)</td><td><span class="tag p1">P1</span></td><td>S</td></tr>
+      <tr><td class="n">#18</td><td><b>RSE &amp; engagements</b></td><td>Tous, externe</td><td>Démarche, indicateurs, actions terrain : matière de communication externe.</td><td>Texte + Images + KPI</td><td><span class="tag p2">P2</span></td><td>S</td></tr>
+      <tr><td class="n">#19</td><td><b>Direction &amp; pilotage</b></td><td>Direction</td><td>Comptes rendus, plans d'action, KPI, budget formation.</td><td>Listes + Power BI + accès restreint</td><td><span class="tag p2">P2</span></td><td>M</td></tr>
+      <tr><td class="n">#20</td><td><b>Espace formateurs (production)</b></td><td>Formateurs</td><td>Zone de co-édition des supports (brouillons) + planning + discussions.</td><td>Site d'équipe + bibliothèque en écriture</td><td><span class="tag p1">P1</span></td><td>L</td></tr>
+      <tr><td class="n">#21</td><td><b>Fiche formateur</b> (modèle)</td><td>Tous</td><td>Bio, expertises, formations animées, références, contact.</td><td>Modèle de page + liste <code>Formateurs</code></td><td><span class="tag p1">P1</span></td><td>S</td></tr>
+      <tr><td class="n">#22</td><td><b>Fiche filière</b></td><td>Tous</td><td>Landing par domaine (Management, Commerce, Digital, Qualité…) + parcours recommandés.</td><td>BBI Catalogue filtré <span class="tag spfx">SPFx</span></td><td><span class="tag p1">P1</span></td><td>S</td></tr>
+      <tr><td class="n">#23</td><td><b>Plan du site &amp; aide à la navigation</b></td><td>Tous</td><td>Vue d'ensemble, raccourcis clavier, accessibilité, contacts.</td><td>Liens rapides + Texte</td><td><span class="tag p1">P1</span></td><td>S</td></tr>
+      <tr><td class="n">#24</td><td><b>Mentions légales, RGPD &amp; accessibilité</b> <span class="tag livré">LIVRÉ</span></td><td>Tous, externe</td><td>Obligations légales, déclaration d'accessibilité, contact DPO.</td><td>Texte + pied de page du hub</td><td><span class="tag p0">P0</span></td><td>S</td></tr>
+      <tr><td class="n">#25</td><td><b>Recherche &amp; résultats</b></td><td>Tous</td><td>Recherche personnalisée avec plan vertical « Formations » et affinage par filière.</td><td>Recherche Microsoft + colonnes <code>RefinableString</code></td><td><span class="tag p1">P1</span></td><td>M</td></tr>
+      <tr><td class="n">#26</td><td><b>Tableau de bord d'adoption</b></td><td>Intranet admins</td><td>Pages vues, contenus publiés, fraîcheur, recherche sans résultat.</td><td>Power BI + Analyse d'usage</td><td><span class="tag p2">P2</span></td><td>M</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <b>💡 Conseil de mise en œuvre</b> — le <b>premier cercle est livré</b> : #00, #01, #02, #03, #04, #05, #06, #08, #24
+    (pages créées et web parts posées par le script, dont deux <b>modèles de page</b>). Laissez-les vivre 3 semaines,
+    mesurez, puis ouvrez le second cercle (#07, #09, #10, #13, #14…). Une page vide qui traîne fait plus de mal à
+    l'image de marque qu'une page absente.
+  </div>
+</section>
+
+<!-- ============================================================ 5 -->
+<section id="s5">
+  <h2><span class="num">5</span>Modèle de contenu à provisionner (listes, documents, galerie)</h2>
+  <p>Le script <code>deploy/provision-bbi-intranet.ps1</code> crée tout ce qui suit, <b>au format exact attendu par le code SPFx</b>.
+  Renommer une colonne sans mettre à jour le code = la donnée disparaît de l'écran : d'où l'intérêt de tout automatiser.</p>
+
+  <h3>5.1 · Listes</h3>
+  <table>
+    <thead><tr><th style="width:16%">Liste</th><th style="width:42%">Colonnes</th><th>Consommée par</th></tr></thead>
+    <tbody>
+      <tr><td><code>Actualites</code></td><td>Titre · Résumé · <b>Corps de l'article</b> · Rubrique (choix) · Date de publication · Auteur · Image (URL) · Lien (URL)</td><td>Accueil · Vie d'entreprise · page Article</td></tr>
+      <tr><td><code>Sessions</code></td><td>Titre <b>(avec le code formation)</b> · Date de début · Date de fin · Modalité (Présentiel/Distanciel/Hybride) · Lieu · Statut · Inscription (URL)</td><td>Accueil · page Sessions &amp; inscriptions · fiche formation</td></tr>
+      <tr><td><code>Formations</code></td><td>Titre · Code formation · Filière · Modalité · Durée (heures) · Niveau · Statut catalogue · <b>Description</b> · <b>Objectifs</b> · <b>Programme</b> · <b>Prérequis</b> · <b>Public visé</b> · <b>Formateurs référents</b> · <b>Contact pédagogique</b></td><td>Catalogue · fiche formation (les champs en gras alimentent la fiche)</td></tr>
+      <tr><td><code>Formateurs</code></td><td>Titre (nom) · Rôle · Filière · Initiales</td><td>Accueil §Formateurs référents · annuaire</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 · Bibliothèques</h3>
+  <table>
+    <thead><tr><th style="width:20%">Bibliothèque</th><th style="width:46%">Colonnes &amp; vues</th><th>Rôle</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><code>Supports publiés</code><br><small>bibliothèque de documents</small></td>
+        <td><b>Colonnes</b> : Code formation · Type de support · Statut · Date de validité · Formateur auteur<br>
+            <b>Vues</b> : « Récemment publiés » (10) · « Par formation »</td>
+        <td>Distribution des supports en <b>lecture seule</b> : permissions Lecture, étiquette de sensibilité, ouverture navigateur.</td>
+      </tr>
+      <tr>
+        <td><code>Galerie médias</code><br><small>bibliothèque d'images</small></td>
+        <td><b>Colonnes</b> : Album (choix) · Lieu · Crédit photo · Date de la photo · Lien vidéo (URL)<br>
+            <b>Vues</b> : « Albums » (groupé) · « Derniers ajouts »</td>
+        <td>Alimente la web part <b>BBI Galerie médias</b> : albums filtrables, vignettes générées par SharePoint (<code>?width=800</code>), vidéos mp4.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>5.3 · Pièges à éviter</h3>
+  <ul>
+    <li><b>Accents et espaces dans les noms de colonnes</b> → les noms internes divergent. Le script les fixe explicitement (<code>InternalName</code>).</li>
+    <li><b>Colonne <code>Album</code> non renseignée</b> → tous les médias tombent dans « Tous les albums ». C'est le premier réflexe éditorial à donner aux équipes.</li>
+    <li><b>Images non optimisées</b> → visez 1600–2000 px de large et &lt; 300 Ko ; la galerie génère les vignettes à la volée.</li>
+    <li><b>Oublier les vues</b> → sans vue « Prochaines sessions », la page affiche les sessions passées.</li>
+    <li><b>Renommer une liste</b> après coup → mettez à jour le volet Propriétés des web parts (le titre est configurable, pas codé en dur).</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 6 -->
+<section id="s6">
+  <h2><span class="num">6</span>Identité &amp; système de design</h2>
+  <div class="grid2">
+    <div class="card">
+      <h4>Palette de marque (dérivée de votre logo)</h4>
+      <small>
+        <b>Bleu nuit #0E265C</b> — primaire (en-tête, titres, boutons ghost)<br>
+        <b>Rouge BBI #D21419</b> — accent (CTA, surlignage, pastille d'info)<br>
+        <b>Bleu #1F3A70 / #2E4A86</b> — dégradés, illustratif<br>
+        <b>Encre #21252B</b> · <b>Bordure #E1E4EA</b> · <b>Fond doux #F4F6FA</b>
+      </small>
+    </div>
+    <div class="card">
+      <h4>Règles simples à faire respecter</h4>
+      <small>
+        1 · Le bleu nuit porte, le rouge souligne : jamais deux fois le rouge dans le même bloc.<br>
+        2 · Un titre, une idée. Pas de phrase-titre de plus de 12 mots.<br>
+        3 · Les photos montrent des <i>personnes en action</i>, pas des salles vides.<br>
+        4 · Icônes en trait, jamais mélangées avec des emoji dans la même section.<br>
+        5 · Contraste minimum 4,5:1 (AA) pour tout texte.
+      </small>
+    </div>
+    <div class="card">
+      <h4>Typographie</h4>
+      <small>Segoe UI (natif, disponible partout) en attendant l'installation de la police institutionnelle.
+      Mise en œuvre du <b>Brand center</b> : téléverser la police (woff2/ttf, &lt; 10 Mo), créer un <i>jeu de polices</i>
+      (Titre / Corps), l'appliquer via ⚙️ → <i>Modifier l'apparence</i> → <i>Police</i>. Avantage : cohérence inter-sites, sans code.</small>
+    </div>
+    <div class="card">
+      <h4>Bibliothèque visuelle à constituer</h4>
+      <small>10 à 15 photos haute définition (sessions, certifications, séminaires, portraits de formateurs),
+      un jeu d'illustrations cohérent, le logo en PNG transparent (couleur + blanc).
+      À ranger dans <code>SiteAssets/marque/</code> — puis la galerie les diffuse.</small>
+    </div>
+  </div>
+
+  <h3>6.1 · Ce qu'il faut verrouiller côté thème</h3>
+  <ul>
+    <li>Publier le thème <b>« BBI Bleu nuit »</b> au niveau tenant (<code>Add-PnPTenantTheme</code> / Brand center) et <b>masquer</b> les thèmes non conformes dans la galerie.</li>
+    <li>En-tête de site : <b>Compact</b> + <i>Strong</i> + logo BBI ; sur la page d'accueil applicative, l'en-tête est de toute façon masqué.</li>
+    <li>Pied de page du hub : mentions légales, RGPD, accessibilité, contact support.</li>
+    <li>Navigation du hub : <code>Accueil</code> · <code>Catalogue</code> · <code>Espace formateurs</code> · <code>Actualités</code> · <code>Support</code> (masquée automatiquement aux non-membres par le cache de sécurité).</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 7 -->
+<section id="s7">
+  <h2><span class="num">7</span>Qualité, performance &amp; gouvernance</h2>
+  <div class="grid3">
+    <div class="card"><h4>⚡ Performance</h4><small>≤ 20 web parts par page · images &lt; 300 Ko · gribouillage JS mesuré · <b>Page Diagnostics for SharePoint</b> &gt; 75 · pas de web part lourde au-dessus de la ligne de flottaison. Le héros anime son image en CSS (pas de vidéo lourde), et la galerie charge ses vignettes en différé.</small></div>
+    <div class="card"><h4>♿ Accessibilité</h4><small>Structure de titres h1→h3 · focus visible partout · navigation clavier dans la visionneuse (Échap, ← →) · <code>aria-modal</code> et restitution du focus · <code>prefers-reduced-motion</code> respecté · contraste AA · cibles tactiles ≥ 44 px.</small></div>
+    <div class="card"><h4>🔐 Sécurité documentaire</h4><small>Modification confinée à l'espace de production · publication d'une copie verrouillée · étiquette de sensibilité « afficher uniquement » · accès conditionnel navigateur · journal d'audit. <b>Le seul point non bloquable : la capture d'écran</b> (à traiter par la sensibilisation + filigrane).</small></div>
+    <div class="card"><h4>🧑‍⚖️ Gouvernance éditoriale</h4><small>1 propriétaire par rubrique · revue trimestrielle du catalogue · SLA de publication à 3 jours ouvrés · relecture obligatoire pour les pages publiques · journal des évolutions par version.</small></div>
+    <div class="card"><h4>📆 Rythme</h4><small>Actualités : 1 à 2 par semaine · Galerie : après chaque temps fort · Catalogue : revue trimestrielle · KPI : revue mensuelle.</small></div>
+    <div class="card"><h4>🧮 Indicateurs (objectif marque)</h4><small>% de contenus à jour · taux de rebond sur l'accueil · temps avant premier clic · satisfaction via micro-sondage (« avez-vous trouvé ? ») · nombre de pages consultées par visiteur · mentions « intranet professionnel » en entretien collaborateur.</small></div>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section id="s8">
+  <h2><span class="num">8</span>Feuille de route 90 jours</h2>
+  <table>
+    <thead><tr><th style="width:14%">Vague</th><th style="width:22%">Objectif</th><th style="width:38%">Livrables</th><th>Indicateur de réussite</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><b>J+0 → J+15</b><br><small>Fondations</small></td>
+        <td>L'intranet ressemble à BBI</td>
+        <td>Déploiement <code>bbi-intranet.sppkg</code> 1.2.0.0 · exécution du script de provisionnement · page <code>accueil.aspx</code> en applicatif plein écran · extension activée · thème + logo + en-tête</td>
+        <td>Accueil plein écran validé sur poste, tablette et mobile ; 0 marge résiduelle ; contenu réel partout (plus d'exemples)</td>
+      </tr>
+      <tr>
+        <td><b>J+15 → J+45</b><br><small>Amplification</small></td>
+        <td>Le contenu devient vivant</td>
+        <td>Galerie alimentée (30+ médias, 4 albums) · fiches formation renseignées (objectifs, programme) · sessions publiées · FAQ · actualités en rythme · annuaire formateurs · applications Teams déployées</td>
+        <td>≥ 3 actualités/mois · ≥ 20 médias publiés · ≥ 10 fiches formation complètes</td>
+      </tr>
+      <tr>
+        <td><b>J+45 → J+90</b><br><small>Profondeur</small></td>
+        <td>L'intranet devient un outil</td>
+        <td>Espace formateurs · espace apprenant · évaluations · recherche verticale « Formations » · publication dans Teams / Viva Connections · tableau de bord d'adoption</td>
+        <td>Sessions animées tracées · supports distribués en lecture seule · ≥ 60 % des formateurs actifs mensuels</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 9 -->
+<section id="s9">
+  <h2><span class="num">9</span>Ce qui vous est livré dans cette itération</h2>
+  <table>
+    <thead><tr><th style="width:34%">Livrable</th><th style="width:30%">Chemin</th><th>Contenu</th></tr></thead>
+    <tbody>
+      <tr><td><b>Package SPFx 1.4.0.0</b></td><td><code>deliverables/spfx/bbi-intranet.sppkg</code></td><td><b>7 web parts + 1 extension</b>, visuels de repli embarqués, prêt à téléverser dans le catalogue d'applications</td></tr>
+      <tr><td><b>Contenus de repli (production ready)</b> <span class="tag spfx">SPFx</span></td><td><code>bbi-intranet/src/webparts/*/components/*Data.ts</code></td><td>Chaque composant reste complet si sa source est <b>absente, non créée ou encore vide</b> : contenus et visuels BBI embarqués, dates calculées relativement, bouton d'ouverture neutralisé sur les supports d'exemple. Option <code>Afficher les indicateurs de données de démonstration</code> (masquée par défaut)</td></tr>
+      <tr><td><b>Harnais de vérification</b></td><td><code>bbi-intranet/tools/verify-fallback.js</code></td><td><b>42 contrôles automatisés</b> exécutés sur les couches de données réelles (source absente, source vide, source alimentée) — <code>node tools/verify-fallback.js</code></td></tr>
+      <tr><td><b>Web part BBI Accueil (plein écran)</b> <span class="tag spfx">SPFx</span></td><td><code>bbi-intranet/src/webparts/bbiHome/</code></td><td>Héros plein écran, bandeau, navigation collante, KPI, accès directs, actualités, sessions, catalogue, galerie, supports, formateurs, pied de page</td></tr>
+      <tr><td><b>Web part BBI Galerie médias</b> <span class="tag spfx">SPFx</span></td><td><code>bbi-intranet/src/webparts/bbiGallery/</code></td><td>Albums, mosaïque, visionneuse accessible (clavier, focus, <code>aria-modal</code>), vidéos, vignettes optimisées</td></tr>
+      <tr><td><b>Extension BBI Plein écran</b> <span class="tag spfx">SPFx</span></td><td><code>bbi-intranet/src/extensions/bbiFullScreen/</code></td><td>Bord à bord des pages applicatives, variables de charte, bandeau optionnel, détection automatique du type de page</td></tr>
+      <tr><td><b>Modèles de page Fiche formation</b> <span class="tag spfx">SPFx</span></td><td><code>bbi-intranet/src/webparts/ficheFormation/</code></td><td>Page dynamique pilotée par <code>?code=BBI-XXX</code> : présentation, objectifs, programme numéroté, prérequis, public visé, sessions à venir, supports publiés, formateurs référents, contact — colonne latérale « en un coup d'œil »</td></tr>
+      <tr><td><b>Web part BBI Sessions &amp; inscriptions</b> <span class="tag spfx">SPFx</span></td><td><code>bbi-intranet/src/webparts/sessionsInscription/</code></td><td>Planning groupé par mois, recherche, filtres filière/modélité, statut d'inscription, ajout à l'agenda Outlook, lien fiche formation</td></tr>
+      <tr><td><b>Modèle de page Article d'actualité</b> <span class="tag spfx">SPFx</span></td><td><code>bbi-intranet/src/webparts/articleActualite/</code></td><td>Page dynamique pilotée par <code>?itemid=12</code> : visuel, chapô, auteur, temps de lecture, partage e-mail/Teams/lien, actualités liées, HTML éditorial assaini</td></tr>
+      <tr><td><b>Packages Teams / Viva Connections</b></td><td><code>teams/New-BbiTeamsPackage.ps1</code></td><td>Génère les 3 applications Teams (Accueil, Galerie, Fiche) avec manifestes 1.16 et icônes aux couleurs BBI — expérience <b>sans aucun chrome SharePoint</b>. Guide : <code>teams/README.md</code></td></tr>
+      <tr><td><b>Script de provisionnement</b></td><td><code>deploy/provision-bbi-intranet.ps1</code></td><td>Listes, colonnes, vues, bibliothèques, pages (dont 2 modèles), web parts, custom action, thème, navigation, données d'exemple, mode audit (<code>-DryRun</code>, <code>-VerifyOnly</code>)</td></tr>
+      <tr><td><b>Guide de mise en place</b></td><td><code>deploy/README.md</code></td><td>Prérequis, commandes, réglages de conformité, dépannage, cycle de vie</td></tr>
+      <tr><td><b>Aperçu visuel des modèles de page</b></td><td><code>deliverables/audit-2026/apercu-modeles-pages.html</code></td><td>Fiche formation, sessions et article rendus avec les styles compilés des composants livrés</td></tr>
+      <tr><td><b>Aperçu du comportement à vide</b></td><td><code>deliverables/audit-2026/apercu-repli.html</code></td><td>Galerie, catalogue et documents rendus <b>sources absentes ou vides</b>, avec les styles compilés et les visuels embarqués — plus la sortie des 42 contrôles</td></tr>
+      <tr><td><b>Manifestes Teams de référence</b></td><td><code>teams/examples/manifest-*.sample.json</code></td><td>Structure des trois applications Teams, à relire avant génération</td></tr>
+      <tr><td><b>Ce dossier</b></td><td><code>deliverables/audit-2026/index.html</code></td><td>Audit, comparatif plein écran, catalogue des pages #00 → #26, modèle de contenu, design, gouvernance, feuille de route</td></tr>
+      <tr><td><b>Catalogue des pages (tableur)</b></td><td><code>deliverables/audit-2026/catalogue-pages.csv</code></td><td>Le catalogue §4 exportable pour votre suivi projet</td></tr>
+    </tbody>
+  </table>
+
+  <h3>9.1 · Identifiants techniques (à conserver)</h3>
+  <pre><span class="c">// Web parts &amp; extension — IDs de composant (identiques dans les manifestes Teams)</span>
+BBI Accueil (plein écran)     6a9b6e3b-44f1-4a70-8f0a-45c82b29126d
+BBI Catalogue des formations  d37a426e-48db-484f-bf10-c38675bb7b43
+BBI Fiche formation (modèle)  a9c99e25-db18-4419-894b-08bc9c5b9081
+BBI Sessions &amp; inscriptions   96216ee2-85b1-473b-aaec-e5b646a151ee
+BBI Article (modèle)          f769f3df-2c27-4a30-bce2-d4ae5793557b
+BBI Galerie médias            f0f19a37-2c11-4812-9006-8aa71a9254f1
+BBI Documents sécurisés       c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41
+BBI Plein écran (extension)   ae430672-9740-4b5a-ace1-fd5d5ab6e9bf
+
+<span class="c">// Solution</span>
+ProductID  2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3  ·  Version 1.4.0.0  ·  skipFeatureDeployment: true</pre>
+
+  <h3>9.2 · Comportement à vide — garantie « aucune page cassée »</h3>
+  <p>Le package se comporte comme un site en production dès la fin du déploiement : <b>aucune page blanche,
+  aucun message d'erreur technique</b>, même si vous n'avez encore rien saisi. L'installation peut donc se faire
+  en une seule fois, puis les contenus réels arrivent progressivement.</p>
+  <table>
+    <thead><tr><th style="width:24%">Web part</th><th style="width:22%">Source surveillée</th><th>Si absente, non créée ou vide</th></tr></thead>
+    <tbody>
+      <tr><td>BBI Accueil</td><td><code>Actualites</code>, <code>Sessions</code>, <code>Formateurs</code></td><td>Actualités, sessions à venir et formateurs d'exemple, dates calculées relativement (jamais périmées)</td></tr>
+      <tr><td>BBI Catalogue des formations</td><td><code>Formations</code></td><td>5 formations BBI représentatives, filtrables</td></tr>
+      <tr><td>BBI Fiche formation</td><td><code>Formations</code>, <code>Sessions</code>, <code>Supports publiés</code>, <code>Formateurs</code></td><td>Fiche complète (objectifs, programme, prérequis, sessions, supports, référent) — y compris pour un code inconnu</td></tr>
+      <tr><td>BBI Sessions &amp; inscriptions</td><td><code>Sessions</code>, <code>Formations</code></td><td>Planning de 6 sessions réparties sur les mois à venir, filières renseignées</td></tr>
+      <tr><td>BBI Article d'actualité</td><td><code>Actualites</code></td><td>Article rédigé, visuel embarqué, 3 actualités liées</td></tr>
+      <tr><td>BBI Galerie médias</td><td><code>Galerie médias</code></td><td>8 photos dans 4 albums (4 visuels embarqués au format 1400 px)</td></tr>
+      <tr><td>BBI Documents sécurisés</td><td><code>Supports publiés</code></td><td>4 supports ; le bouton d'ouverture est neutralisé (aucun appel à un fichier inexistant)</td></tr>
+    </tbody>
+  </table>
+  <p><small>Le basculement se fait source par source : vous pouvez publier les actualités avant les sessions,
+  l'accueil reste cohérent à chaque étape. Un bandeau « données de démonstration » peut être affiché pendant la
+  mise en place via l'option <code>showDataNotices</code> (masquée par défaut dans les manifestes).</small></p>
+
+  <div class="callout ok">
+    <b>Prochaine étape recommandée</b> — déployer le package puis exécuter
+    <code>.\provision-bbi-intranet.ps1 -SiteUrl &lt;votre site&gt; -DryRun</code> pour visualiser le plan de provisionnement,
+    puis la même commande sans <code>-DryRun</code>. La page d'accueil est présentable immédiatement ; remplacez ensuite
+    les contenus de repli par vos contenus réels, bloc par bloc. Comptez une demi-journée pour la mise en service,
+    hors réglages de conformité (étiquettes, IRM) qui relèvent de votre administrateur Purview.
+  </div>
+</section>
+
+<footer class="doc">
+  <p>BBI — Audit intranet &amp; recommandations · Dossier d'agence SPFx · Compagnon de la solution <b>bbi-intranet 1.4.0.0</b></p>
+  <p>Document autoportant : ouvrez-le dans un navigateur et imprimez-le en PDF si besoin (mise en page respectée).</p>
+</footer>
+
+</div>
+</body>
+</html>

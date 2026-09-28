@@ -3,7 +3,7 @@
   "solution": {
     "name": "bbi-intranet-client-side-solution",
     "id": "2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3",
-    "version": "1.1.0.0",
+    "version": "1.4.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "Intranet BBI : accueil, catalogue filtrable des formations et visionneuse des supports publi\u00e9s."
+        "default": "Intranet BBI production : accueil plein écran, catalogue, fiches formation, sessions, galerie, articles et supports — contenus de repli intégrés."
       },
       "longDescription": {
-        "default": "Solution SPFx de l'intranet Business Builders International. Contient : 1) BBI Accueil — actualités, sessions, liens rapides, formateurs référents, catalogue et supports ; 2) BBI Catalogue des formations — cartes filtrables alimentées par la liste Formations ; 3) BBI Documents sécurisés — visionneuse des supports publiés, protégés par les permissions et politiques SharePoint."
+        "default": "Solution SPFx de l'intranet Business Builders International (7 web parts + 1 extension). Toutes les sources sont tolérantes : si une liste, une bibliothèque ou la galerie est absente, non créée ou encore vide, la page affiche un contenu de repli professionnel (visuels et données BBI embarqués) au lieu d'un état vide. 1) BBI Accueil plein écran — héros, chiffres clés, accès directs, actualités, sessions, catalogue, galerie, supports. 2) BBI Catalogue des formations — cartes filtrables. 3) BBI Fiche formation — page pilotée par ?code=BBI-XXX. 4) BBI Sessions & inscriptions — planning groupé par mois, filtres, agenda. 5) BBI Article d'actualité — page pilotée par ?itemid=12. 6) BBI Galerie médias — albums et visionneuse plein écran. 7) BBI Documents sécurisés — visionneuse lecture seule. 8) Extension BBI Plein écran — mise en page bord à bord des pages applicatives."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -28,9 +28,9 @@
     "features": [
       {
         "title": "bbi-intranet Feature",
-        "description": "D\u00e9ploie les composants web BBI (Accueil, Catalogue des formations, Documents s\u00e9curis\u00e9s).",
+        "description": "Déploie les composants web BBI (Accueil plein écran, Catalogue des formations, Documents sécurisés, Galerie médias) et l'extension de mise en page plein écran.",
         "id": "ebc798de-cab3-4872-9f1d-5f95d19f2052",
-        "version": "1.1.0.0"
+        "version": "1.4.0.0"
       }
     ]
   },

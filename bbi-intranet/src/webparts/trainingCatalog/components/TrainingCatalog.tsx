@@ -14,7 +14,7 @@ const DEMO_FORMATIONS: IFormation[] = [
 ];
 
 export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
-  const { siteUrl, listTitle, maxItems, spHttpClient, strings } = props;
+  const { siteUrl, listTitle, maxItems, showDataNotices, spHttpClient, strings } = props;
 
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [items, setItems] = React.useState<IFormation[]>([]);
@@ -36,17 +36,24 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
         if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
         const json = await response.json();
         if (cancelled) { return; }
-        setItems((json && json.value ? json.value : []) as IFormation[]);
-        setIsDemo(false);
+        const loaded = (json && json.value ? json.value : []) as IFormation[];
+        if (loaded.length === 0) {
+          // Liste créée mais encore vide : on sert le catalogue de démonstration.
+          setItems(DEMO_FORMATIONS);
+          setIsDemo(true);
+        } else {
+          setItems(loaded);
+          setIsDemo(false);
+        }
         setStatus('ready');
-      } catch (error) {
+      } catch {
         if (cancelled) { return; }
         setItems(DEMO_FORMATIONS);
         setIsDemo(true);
         setStatus('ready');
       }
     };
-    void load();
+    load().catch(() => { /* géré dans load() */ });
     return () => { cancelled = true; };
   }, [siteUrl, listTitle, spHttpClient]);
 
@@ -88,7 +95,7 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
         <h2 className={styles.title}>{strings.WebPartTitle}</h2>
       </div>
 
-      {isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
+      {showDataNotices && isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
 
       <div className={styles.toolbar}>
         <input
@@ -122,8 +129,15 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
 
       {filtered.length === 0 ? (
         <div className={styles.empty}>
-          <div className={styles.emptyTitle}>{isDemo ? strings.EmptyStateTitle : strings.EmptyStateTitle}</div>
-          <div className={styles.emptyHint}>{strings.EmptyStateHint}</div>
+          <div className={styles.emptyTitle}>{strings.NoResultTitle}</div>
+          <div className={styles.emptyHint}>{strings.NoResultHint.replace('{QUERY}', query.trim())}</div>
+          <button
+            type="button"
+            className={styles.reset}
+            onClick={() => { setQuery(''); setFiliere(''); }}
+          >
+            {strings.ResetFilters}
+          </button>
         </div>
       ) : (
         <div className={styles.grid}>

@@ -6,6 +6,7 @@ export interface ITrainingCatalogProps {
   listTitle: string;
   maxItems: number;
   spHttpClient: SPHttpClient;
+  showDataNotices: boolean;
   isDarkTheme: boolean;
   hasTeamsContext: boolean;
   themeVariant?: IReadonlyTheme;

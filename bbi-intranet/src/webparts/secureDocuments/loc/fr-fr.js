@@ -7,11 +7,13 @@ define([], function () {
     LibraryFieldLabel: "Titre de la bibliothèque",
     LibraryFieldDescription: "Bibliothèque des supports publiés et verrouillés (défaut : Supports publiés).",
     MaxItemsFieldLabel: "Nombre maximum de documents affichés",
+    ShowDataNoticesFieldLabel: "Afficher les indicateurs de données de démonstration",
+    DemoOpenDisabled: "Support de démonstration : ajoutez vos fichiers dans la bibliothèque pour activer l'ouverture.",
     WebPartTitle: "Derniers supports publiés",
     ProtectionBanner: "Zone protégée : consultation en lecture seule dans le navigateur — impression, copie et téléchargement désactivés pour les supports publiés.",
     ReadOnlyBadge: "Lecture seule",
     OpenInBrowser: "Ouvrir dans le navigateur",
-    DemoBanner: "Bibliothèque « Supports publiés » introuvable : affichage d'exemples. Créez la bibliothèque puis rafraîchissez la page.",
+    DemoBanner: "Données de démonstration affichées : la bibliothèque « Supports publiés » n'est pas encore créée, ou elle est vide. Vos supports remplaceront automatiquement ces exemples dès la première publication.",
     EmptyStateTitle: "Aucun support publié",
     EmptyStateHint: "Publiez des supports via l'Espace Formateurs (cycle de validation) pour alimenter cette web part."
   };

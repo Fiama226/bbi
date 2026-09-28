@@ -1,0 +1,30 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "f0f19a37-2c11-4812-9006-8aa71a9254f1",
+  "alias": "BbiGalleryWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportsFullBleed": true,
+  "supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage", "TeamsPersonalApp"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+    "group": { "default": "Advanced" },
+    "title": { "default": "BBI Galerie médias" },
+    "description": { "default": "Galerie photos et vidéos BBI : albums filtrables, vignettes optimisées et visionneuse plein écran accessible. Affiche un jeu de visuels BBI tant que la bibliothèque d'images est vide ou non créée." },
+    "officeFabricIconFontName": "PhotoCollection",
+    "properties": {
+      "siteUrl": "",
+      "libraryTitle": "Galerie médias",
+      "maxItems": 24,
+      "columns": 3,
+      "showCaptions": true,
+      "allowDownload": true,
+      "showDataNotices": false,
+      "albumFilter": ""
+    }
+  }]
+}

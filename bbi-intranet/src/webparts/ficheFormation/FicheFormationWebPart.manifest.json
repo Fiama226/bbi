@@ -1,0 +1,32 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx/client-side-web-part-manifest.schema.json",
+  "id": "a9c99e25-db18-4419-894b-08bc9c5b9081",
+  "alias": "FicheFormationWebPart",
+  "componentType": "WebPart",
+  "version": "*",
+  "manifestVersion": 2,
+  "requiresCustomScript": false,
+  "supportsFullBleed": true,
+  "supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage", "TeamsPersonalApp"],
+  "supportsThemeVariants": true,
+
+  "preconfiguredEntries": [{
+    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+    "group": { "default": "Advanced" },
+    "title": { "default": "BBI Fiche formation" },
+    "description": { "default": "Modèle de fiche formation : la page reçoit le code formation dans l'adresse (?code=BBI-MGT-101) et affiche présentation, objectifs, programme, sessions, supports et formateurs référents." },
+    "officeFabricIconFontName": "ReadingMode",
+    "properties": {
+      "siteUrl": "",
+      "formationsListTitle": "Formations",
+      "sessionsListTitle": "Sessions",
+      "documentsLibraryTitle": "Supports publiés",
+      "trainersListTitle": "Formateurs",
+      "defaultCode": "",
+      "showSessions": true,
+      "showDocuments": true,
+      "showTrainer": true,
+      "showDataNotices": false
+    }
+  }]
+}

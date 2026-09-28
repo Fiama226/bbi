@@ -25,12 +25,57 @@
           "manifest": "./src/webparts/bbiHome/BbiHomeWebPart.manifest.json"
         }
       ]
+    },
+    "bbi-gallery-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/bbiGallery/BbiGalleryWebPart.js",
+          "manifest": "./src/webparts/bbiGallery/BbiGalleryWebPart.manifest.json"
+        }
+      ]
+    },
+    "bbi-fiche-formation-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/ficheFormation/FicheFormationWebPart.js",
+          "manifest": "./src/webparts/ficheFormation/FicheFormationWebPart.manifest.json"
+        }
+      ]
+    },
+    "bbi-sessions-inscription-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/sessionsInscription/SessionsInscriptionWebPart.js",
+          "manifest": "./src/webparts/sessionsInscription/SessionsInscriptionWebPart.manifest.json"
+        }
+      ]
+    },
+    "bbi-article-actualite-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/articleActualite/ArticleActualiteWebPart.js",
+          "manifest": "./src/webparts/articleActualite/ArticleActualiteWebPart.manifest.json"
+        }
+      ]
+    },
+    "bbi-full-screen-extension": {
+      "components": [
+        {
+          "entrypoint": "./lib/extensions/bbiFullScreen/BbiFullScreenApplicationCustomizer.js",
+          "manifest": "./src/extensions/bbiFullScreen/BbiFullScreenApplicationCustomizer.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "TrainingCatalogWebPartStrings": "lib/webparts/trainingCatalog/loc/{locale}.js",
     "SecureDocumentsWebPartStrings": "lib/webparts/secureDocuments/loc/{locale}.js",
-    "BbiHomeWebPartStrings": "lib/webparts/bbiHome/loc/{locale}.js"
+    "BbiHomeWebPartStrings": "lib/webparts/bbiHome/loc/{locale}.js",
+    "BbiGalleryWebPartStrings": "lib/webparts/bbiGallery/loc/{locale}.js",
+    "BbiFicheFormationWebPartStrings": "lib/webparts/ficheFormation/loc/{locale}.js",
+    "BbiSessionsInscriptionWebPartStrings": "lib/webparts/sessionsInscription/loc/{locale}.js",
+    "BbiArticleActualiteWebPartStrings": "lib/webparts/articleActualite/loc/{locale}.js",
+    "BbiFullScreenApplicationCustomizerStrings": "lib/extensions/bbiFullScreen/loc/{locale}.js"
   }
 }

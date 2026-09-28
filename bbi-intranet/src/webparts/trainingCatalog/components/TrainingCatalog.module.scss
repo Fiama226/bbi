@@ -174,3 +174,27 @@
   font-size: 12.5px;
   color: var(--bbi-muted);
 }
+
+/* Aucun résultat de recherche : on propose de repartir de la vue complète
+   plutôt que de laisser l'utilisateur devant un écran vide. */
+.reset {
+  margin-top: 12px;
+  padding: 8px 16px;
+  border: 1px solid #d21419;
+  border-radius: 999px;
+  background: #d21419;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: #b11115;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #0e265c;
+    outline-offset: 2px;
+  }
+}

@@ -6,7 +6,7 @@ import { SPHttpClient } from '@microsoft/sp-http';
 type LoadStatus = 'loading' | 'ready';
 
 const DEMO_DOCS: ISecureDocument[] = [
-  { Id: 1, Title: 'MGT-101 · Slides animateur — Management d\\u2019équipe', FileRef: '#', FileLeafRef: 'MGT-101 Slides animateur v2026.2.pptx', Modified: '2026-09-22T10:00:00Z' },
+  { Id: 1, Title: 'MGT-101 · Slides animateur — Management d’équipe', FileRef: '#', FileLeafRef: 'MGT-101 Slides animateur v2026.2.pptx', Modified: '2026-09-22T10:00:00Z' },
   { Id: 2, Title: 'COA-201 · Manuel participant — Coaching (module 1)', FileRef: '#', FileLeafRef: 'COA-201 Manuel participant v2026.1.docx', Modified: '2026-09-19T10:00:00Z' },
   { Id: 3, Title: 'COM-110 · Exercices & cas pratiques', FileRef: '#', FileLeafRef: 'COM-110 Exercices v2026.1.pdf', Modified: '2026-09-15T10:00:00Z' },
   { Id: 4, Title: 'QUA-301 · Évaluation à chaud (QCM)', FileRef: '#', FileLeafRef: 'QUA-301 Evaluation v2025.4.docx', Modified: '2026-09-10T10:00:00Z' }
@@ -43,13 +43,13 @@ const formatDate = (iso?: string): string => {
   if (!iso) { return ''; }
   try {
     return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
-  } catch (error) {
+  } catch {
     return '';
   }
 };
 
 export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
-  const { siteUrl, libraryTitle, maxItems, spHttpClient, strings } = props;
+  const { siteUrl, libraryTitle, maxItems, showDataNotices, spHttpClient, strings } = props;
 
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [docs, setDocs] = React.useState<ISecureDocument[]>([]);
@@ -68,17 +68,24 @@ export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
         if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
         const json = await response.json();
         if (cancelled) { return; }
-        setDocs((json && json.value ? json.value : []) as ISecureDocument[]);
-        setIsDemo(false);
+        const loaded = (json && json.value ? json.value : []) as ISecureDocument[];
+        if (loaded.length === 0) {
+          // Bibliothèque créée mais encore vide : on sert les supports de démonstration.
+          setDocs(DEMO_DOCS);
+          setIsDemo(true);
+        } else {
+          setDocs(loaded);
+          setIsDemo(false);
+        }
         setStatus('ready');
-      } catch (error) {
+      } catch {
         if (cancelled) { return; }
         setDocs(DEMO_DOCS);
         setIsDemo(true);
         setStatus('ready');
       }
     };
-    void load();
+    load().catch(() => { /* géré dans load() */ });
     return () => { cancelled = true; };
   }, [siteUrl, libraryTitle, maxItems, spHttpClient]);
 
@@ -103,7 +110,7 @@ export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
         <h2 className={styles.title}>🔒 {strings.WebPartTitle}</h2>
       </div>
 
-      {isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
+      {showDataNotices && isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
 
       <div className={styles.banner}>{strings.ProtectionBanner}</div>
 
@@ -123,7 +130,13 @@ export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
                 {formatDate(doc.Modified)}
                 {doc.FileLeafRef ? <> · {doc.FileLeafRef.split('.').pop()?.toUpperCase()}</> : null}
               </small>
-              <button type="button" className={styles.openBtn} onClick={() => { openDoc(doc); }}>
+              <button
+                type="button"
+                className={styles.openBtn}
+                onClick={() => { openDoc(doc); }}
+                disabled={!doc.FileRef || doc.FileRef === '#'}
+                title={!doc.FileRef || doc.FileRef === '#' ? strings.DemoOpenDisabled : undefined}
+              >
                 {strings.OpenInBrowser} →
               </button>
             </article>

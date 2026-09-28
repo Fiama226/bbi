@@ -1,0 +1,43 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.16/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.16",
+  "version": "1.0.0",
+  "id": "a9c99e25-db18-4419-894b-08bc9c5b9081",
+  "packageName": "com.businessbuildersinternational.bbi.fiche",
+  "developer": {
+    "name": "Business Builders International",
+    "websiteUrl": "https://businessbuildersinternational.com",
+    "privacyUrl": "https://businessbuildersinternational.com/confidentialite",
+    "termsOfUseUrl": "https://businessbuildersinternational.com/confidentialite"
+  },
+  "name": {
+    "short": "BBI Fiche formation",
+    "full": "BBI Intranet — Fiche formation"
+  },
+  "description": {
+    "short": "BBI Intranet — Fiche formation — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint.",
+    "full": "BBI Intranet — Fiche formation — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint."
+  },
+  "icons": {
+    "outline": "a9c99e25-db18-4419-894b-08bc9c5b9081_outline.png",
+    "color": "a9c99e25-db18-4419-894b-08bc9c5b9081_color.png"
+  },
+  "accentColor": "#0E265C",
+  "staticTabs": [
+    {
+      "entityId": "bbi-fiche-formation",
+      "name": "Fiche formation",
+      "contentUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/formation.aspx",
+      "websiteUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/formation.aspx",
+      "scopes": [
+        "personal"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity"
+  ],
+  "validDomains": [
+    "businessbuilderinter.sharepoint.com"
+  ]
+}

@@ -1,0 +1,6 @@
+define([], function () {
+  return {
+    Title: "BBI Full screen",
+    InitMessage: "BBI Full screen application customizer initialized."
+  };
+});

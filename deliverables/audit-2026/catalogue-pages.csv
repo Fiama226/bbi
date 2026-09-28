@@ -1,0 +1,28 @@
+N°;Page;Site;Public;Objectif;Web parts / briques;Techno;Priorité;Effort;Statut
+#00;Accueil;Hub / vitrine;Tous;Vitrine du réseau : promesse, offre, preuves, actualités, accès directs;Héros plein écran, chiffres clés, accès directs, actualités, sessions, catalogue, galerie, supports, formateurs;SPFx + extension;P0;M;Livré (script)
+#01;Catalogue des formations;Hub / vitrine;Tous;Rechercher et filtrer l'offre (filière, modalité, niveau, durée);BBI Catalogue des formations + vues de liste;SPFx;P0;M;Livré (script)
+#02;Fiche formation (modèle);Hub / vitrine;Tous;Objectifs, programme module par module, prérequis, sessions liées, supports, contact;BBI Fiche formation — pilotée par ?code=BBI-XXX;SPFx;P0;M;Livré (script)
+#03;Sessions & inscriptions;Hub / vitrine;Apprenants, formateurs;Planning filtrable (filière, modalité) groupé par mois, agenda, lien fiche formation;BBI Sessions & inscriptions;SPFx;P0;S;Livré (script)
+#04;Galerie médias;Hub / vitrine;Tous;Albums photo/vidéo des sessions, certifications et événements;BBI Galerie médias + bibliothèque d'images;SPFx;P0;S;Livré (script)
+#05;Vie d'entreprise / Actualités;Hub / vitrine;Tous;Fil d'actualités hiérarchisé par rubriques;BBI Accueil (compact) + liste Actualites;SPFx;P0;S;Livré (script)
+#06;Article d'actualité (modèle);Hub / vitrine;Tous;Visuel, chapô, auteur, temps de lecture, partage, actualités liées;BBI Article d'actualité — piloté par ?itemid=12;SPFx;P0;S;Livré (script)
+#07;Annuaire des formateurs;Hub / vitrine;Tous;Profils, filières, expertises, liens de contact;Web part Personnes ou liste Formateurs;Natif;P1;M;À créer
+#08;Support & FAQ;Hub / vitrine;Tous;Réponses rapides + formulaire de demande + contacts IT;Liste FAQ + Microsoft Forms + Texte;Natif;P0;S;Livré (script)
+#09;Méthodes & outils d'animation;Hub / vitrine;Formateurs;Kits, trames de séquence, checklists, modèles;Liens rapides + BBI Documents;Natif + SPFx;P1;M;À créer
+#10;Qualité & certification;Hub / vitrine;Formateurs, direction;Preuves Qualiopi, référentiels, évaluations, amélioration continue;Vues de bibliothèque + KPI;Natif;P1;M;À créer
+#11;Espace apprenant;Hub / vitrine;Apprenants;Mes sessions, mes supports, mes attestations, mes évaluations;Listes filtrées [Moi] + BBI Documents;Natif + SPFx;P1;L;À créer
+#12;Évaluations & satisfaction;Hub / pilotage;Direction, qualité;Résultats à chaud / à froid, NPS, verbatims, plans d'action;Power BI + Listes;Natif;P2;M;À créer
+#13;Onboarding nouvel arrivant;Hub / RH;Nouveaux;Parcours 30-60-90, documents RH, contacts clés, culture BBI;Liens rapides + BBI Accueil compact;Natif;P1;M;À créer
+#14;Bibliothèque de modèles;Hub / vitrine;Tous;Modèles PPT/Word/Excel aux couleurs BBI;Bibliothèque + BBI Documents;Natif + SPFx;P1;S;À créer
+#15;Veille & ressources externes;Hub / vitrine;Formateurs;Curation d'articles, études, webinaires;Liens rapides + Actualités;Natif;P2;S;À créer
+#16;Communauté & entraide;Hub / vitrine;Formateurs;Conversations, questions/réponses, bonnes pratiques;Viva Engage / canal Teams;Natif;P2;S;À créer
+#17;Rituels & événements;Hub / vitrine;Tous;Webinaires, séminaires, temps forts, agenda annuel;Événements + BBI Accueil compact;Natif + SPFx;P1;S;À créer
+#18;RSE & engagements;Hub / vitrine;Tous, externe;Démarche, indicateurs, actions terrain;Texte + Images + KPI;Natif;P2;S;À créer
+#19;Direction & pilotage;Hub / pilotage;Direction;Comptes rendus, plans d'action, KPI, budget formation;Listes + Power BI + accès restreint;Natif;P2;M;À créer
+#20;Espace formateurs (production);Site d'équipe;Formateurs;Zone de co-édition des supports + planning + discussions;Site d'équipe + bibliothèque en écriture;Natif;P1;L;À créer
+#21;Fiche formateur (modèle);Hub / vitrine;Tous;Bio, expertises, formations animées, contact;Modèle de page + liste Formateurs;Natif;P1;S;À créer
+#22;Fiche filière;Hub / vitrine;Tous;Landing par domaine + parcours recommandés;BBI Catalogue filtré;SPFx;P1;S;À créer
+#23;Plan du site & aide à la navigation;Hub / vitrine;Tous;Vue d'ensemble, raccourcis, accessibilité, contacts;Liens rapides + Texte;Natif;P1;S;À créer
+#24;Mentions légales, RGPD & accessibilité;Hub / vitrine;Tous, externe;Obligations légales, déclaration d'accessibilité, contact DPO;Texte + pied de page du hub;Natif;P0;S;Livré (script)
+#25;Recherche & résultats;Hub / vitrine;Tous;Recherche personnalisée avec plan vertical Formations;Recherche Microsoft + RefinableString;Natif;P1;M;À créer
+#26;Tableau de bord d'adoption;Hub / pilotage;Intranet admins;Pages vues, contenus publiés, fraîcheur, recherches sans résultat;Power BI + Analyse d'usage;Natif;P2;M;À créer

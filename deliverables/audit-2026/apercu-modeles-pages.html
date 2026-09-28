@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBI — Aperçu des modèles de page (fiche formation, sessions, article)</title>
+<style>
+.p-fiche @charset "UTF-8";
+/* ============================================================
+   BBI — Fiche formation (modèle de page dynamique)
+   Charte : bleu nuit #0E265C · rouge #D21419
+   ============================================================ */
+.fiche{}.p-fiche .fiche *, .p-fiche .fiche *::before, .p-fiche .fiche *::after{}.p-fiche .loading{}.p-fiche .empty{}.p-fiche .empty h3{}.p-fiche .empty p{}.p-fiche .demoBanner{}.p-fiche /* ---------- En-tête ---------- */
+.hero{}.p-fiche .heroInner{}.p-fiche .breadcrumb{}.p-fiche .breadcrumb a{}.p-fiche .breadcrumb a:hover{}.p-fiche .eyebrow{}.p-fiche .title{}.p-fiche .subtitle{}.p-fiche .heroActions{}.p-fiche .primaryAction, .p-fiche .secondaryAction{}.p-fiche .primaryAction{}.p-fiche .primaryAction:hover{}.p-fiche .secondaryAction{}.p-fiche .secondaryAction:hover{}.p-fiche .primaryAction:focus-visible, .p-fiche .secondaryAction:focus-visible, .p-fiche .document:focus-visible, .p-fiche .sessionAction:focus-visible{}.p-fiche /* ---------- Corps ---------- */
+.body{}.p-fiche .main{}.p-fiche .block{}.p-fiche .block h2{}.p-fiche .paragraph{}.p-fiche .bullets{}.p-fiche .bullets li{}.p-fiche .bullets li::before{}.p-fiche .program{}.p-fiche .program li{}.p-fiche .program li:last-child{}.p-fiche .programIndex{}.p-fiche .muted{}.p-fiche /* ---------- Sessions ---------- */
+.sessionList{}.p-fiche .session{}.p-fiche .session:last-child{}.p-fiche .sessionWhen strong{}.p-fiche .sessionWhen small{}.p-fiche .sessionAction{}.p-fiche .sessionAction:hover{}.p-fiche .sessionBadge{}.p-fiche /* ---------- Supports ---------- */
+.secureNote{}.p-fiche .documentGrid{}.p-fiche .document{}.p-fiche .document:hover{}.p-fiche .documentIcon{}.p-fiche .document strong{}.p-fiche .document small{}.p-fiche /* ---------- Colonne latérale ---------- */
+.sidebar{}.p-fiche .card{}.p-fiche .cardAccent{}.p-fiche .cardAccent .cardTitle{}.p-fiche .cardAccent a{}.p-fiche .cardTitle{}.p-fiche .cardText{}.p-fiche .facts{}.p-fiche .facts li{}.p-fiche .facts li:last-child{}.p-fiche .facts span{}.p-fiche .facts strong{}.p-fiche .trainerList{}.p-fiche .trainerList li{}.p-fiche .trainerList strong{}.p-fiche .trainerList small{}.p-fiche .avatar{}.p-fiche /* ---------- Adaptations ---------- */
+@media (max-width: 940px){.p-fiche .body{}.p-fiche .sidebar{}.p-fiche .hero{}}@media (prefers-reduced-motion: reduce){.p-fiche .document{}}.p-sess @charset "UTF-8";
+/* ============================================================
+   BBI — Sessions & inscriptions (planning)
+   ============================================================ */
+.sessions{}.p-sess .sessions *, .p-sess .sessions *::before, .p-sess .sessions *::after{}.p-sess .loading{}.p-sess .demoBanner{}.p-sess /* ---------- En-tête ---------- */
+.head{}.p-sess .head > div:first-child{}.p-sess .eyebrow{}.p-sess .title{}.p-sess .subtitle{}.p-sess .headActions{}.p-sess .primaryAction, .p-sess .ghostAction{}.p-sess .primaryAction{}.p-sess .primaryAction:hover{}.p-sess .ghostAction{}.p-sess .ghostAction:hover{}.p-sess .primaryAction:focus-visible, .p-sess .ghostAction:focus-visible, .p-sess .chip:focus-visible, .p-sess .register:focus-visible, .p-sess .secondary:focus-visible, .p-sess .tertiary:focus-visible{}.p-sess /* ---------- Barre d'outils ---------- */
+.toolbar{}.p-sess .field{}.p-sess .fieldLabel, .p-sess .chipsLabel{}.p-sess .field input{}.p-sess .field input:focus{}.p-sess .chips{}.p-sess .chipsLabel{}.p-sess .chip{}.p-sess .chip:hover{}.p-sess .chipActive{}.p-sess .toggle{}.p-sess .toggle input{}.p-sess /* ---------- Planning ---------- */
+.group{}.p-sess .groupTitle{}.p-sess .list{}.p-sess .row{}.p-sess .row:last-child{}.p-sess .rowPast{}.p-sess .date{}.p-sess .date strong{}.p-sess .date span{}.p-sess .info{}.p-sess .info h3{}.p-sess .meta{}.p-sess .dateText{}.p-sess .tags{}.p-sess .tag, .p-sess .tagCode, .p-sess .tagPast{}.p-sess .tag{}.p-sess .tagCode{}.p-sess .tagPast{}.p-sess .actions{}.p-sess .register, .p-sess .status, .p-sess .secondary, .p-sess .tertiary{}.p-sess .register{}.p-sess .register:hover{}.p-sess .status{}.p-sess .secondary{}.p-sess .secondary:hover{}.p-sess .tertiary{}.p-sess .tertiary:hover{}.p-sess /* ---------- États & pied ---------- */
+.empty{}.p-sess .empty h3{}.p-sess .empty p{}.p-sess .footNote{}.p-sess .footNote a{}.p-sess /* ---------- Adaptations ---------- */
+@media (max-width: 860px){.p-sess .head{}.p-sess .toolbar, .p-sess .group, .p-sess .footNote{}.p-sess .row{}.p-sess .actions{}.p-sess .register, .p-sess .status, .p-sess .secondary, .p-sess .tertiary{}.p-sess .toggle{}}@media (prefers-reduced-motion: reduce){.p-sess .chip{}}.p-article @charset "UTF-8";
+/* ============================================================
+   BBI — Article d'actualité (modèle de page)
+   ============================================================ */
+.article{}.p-article .article *, .p-article .article *::before, .p-article .article *::after{}.p-article .loading{}.p-article .demoBanner{}.p-article .empty{}.p-article .empty h3{}.p-article .empty p{}.p-article .backAction{}.p-article .backAction:hover{}.p-article /* ---------- Structure ---------- */
+.shell{}.p-article .breadcrumb{}.p-article .breadcrumb a{}.p-article .breadcrumb a:hover{}.p-article .head{}.p-article .category{}.p-article .title{}.p-article .standfirst{}.p-article .byline{}.p-article .author{}.p-article .avatar{}.p-article .dot{}.p-article .figure{}.p-article .image{}.p-article /* ---------- Corps de l'article ---------- */
+.layout{}.p-article .content{}.p-article .rich{}.p-article .richFallback{}.p-article .rich h2{}.p-article .rich h3{}.p-article .rich p{}.p-article .rich ul, .p-article .rich ol{}.p-article .rich li{}.p-article .rich a{}.p-article .rich img{}.p-article .rich blockquote{}.p-article .rich strong{}.p-article .externalLink{}.p-article .externalLink a{}.p-article .externalLink a:hover{}.p-article /* ---------- Partage ---------- */
+.sidebar{}.p-article .shareCard{}.p-article .shareCard h3{}.p-article .shareActions{}.p-article .shareButton{}.p-article .shareButton:hover{}.p-article .shareButton:focus-visible, .p-article .relatedCard:focus-visible, .p-article .newsLink:focus-visible{}.p-article .newsLink{}.p-article .newsLink:hover{}.p-article /* ---------- Actualités liées ---------- */
+.related{}.p-article .related h2{}.p-article .relatedList{}.p-article .relatedCard{}.p-article .relatedCard:hover{}.p-article .relatedCategory{}.p-article .relatedCard strong{}.p-article .relatedCard small{}.p-article .relatedMore{}.p-article /* ---------- Adaptations ---------- */
+@media (max-width: 940px){.p-article .shell{}.p-article .layout{}.p-article .sidebar{}.p-article .related{}}@media (prefers-reduced-motion: reduce){.p-article .relatedCard, .p-article .shareButton{}}
+  body{margin:0;background:#EEF1F6;font-family:"Segoe UI",system-ui,sans-serif}
+  .review-bar{position:sticky;top:0;z-index:300;background:#0B1226;color:#C9D3E8;font:600 12px "Segoe UI",sans-serif;padding:9px 18px;display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .review-bar b{color:#fff}
+  .review-bar .tag{background:#D21419;color:#fff;border-radius:4px;padding:2px 8px;font-size:10.5px}
+  .sheet{max-width:1400px;margin:0 auto;padding:26px 18px 60px}
+  .sheet > h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:#5A6270;margin:34px 4px 10px}
+  .sheet > h2 span{color:#D21419}
+  .frame{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(14,38,92,.14)}
+  .note{font-size:12.5px;color:#5A6270;margin:8px 6px 0}
+  .note code{background:#fff;border:1px solid #E1E4EA;border-radius:5px;padding:1px 6px}
+</style>
+</head>
+<body>
+<div class="review-bar">
+  <span><b>Aperçu des modèles de page</b> — styles compilés depuis les composants SPFx livrés (v1.3.0.0)</span>
+  <span class="tag">Fiche formation · Sessions · Article</span>
+</div>
+<div class="sheet">
+
+<h2>Modèle 1 · <span>Fiche formation</span> — la page reçoit le code dans l'adresse</h2>
+<p class="note">Lien réel : <code>…/SitePages/formation.aspx?code=BBI-MGT-101</code> — la page affiche la formation correspondante. Aucune page à dupliquer.</p>
+<div class="frame p-fiche"><div class="fiche">
+  <header class="hero"><div class="heroInner">
+    <nav class="breadcrumb"><a href="#">Accueil</a><span aria-hidden="true">›</span><a href="#">Catalogue</a><span aria-hidden="true">›</span><span>Management d'équipe</span></nav>
+    <p class="eyebrow">Fiche formation · Management</p>
+    <h1 class="title">Management d'équipe</h1>
+    <p class="subtitle">BBI-MGT-101 · Confirmé · Présentiel</p>
+    <div class="heroActions"><a class="primaryAction" href="#">S'inscrire à une session</a><a class="secondaryAction" href="#">Voir les supports <span aria-hidden="true">(3)</span></a></div>
+  </div></header>
+  <div class="body">
+    <section class="main">
+      <div class="block"><h2>Présentation</h2><p class="paragraph">Un parcours intensif de deux jours pour structurer son rôle de manager, gagner en clarté dans la délégation et installer un cadre de confiance avec son équipe.</p></div>
+      <div class="block"><h2>Objectifs pédagogiques</h2><ul class="bullets">
+<li>Poser un cadre de fonctionnement lisible et partagé</li>
+<li>Adapter son style de management à chaque collaborateur</li>
+<li>Conduire un entretien de recadrage sans conflit</li>
+<li>Fixer des objectifs mesurables et suivre leur atteinte</li>
+      </ul></div>
+      <div class="block"><h2>Programme</h2><ol class="program">
+<li><span class="programIndex" aria-hidden="true">1</span><span>Jour 1 — Les fondamentaux du leadership ; cartographie de son style ; la délégation progressive</span></li>
+<li><span class="programIndex" aria-hidden="true">2</span><span>Jour 1 — Le feedback structuré : méthode et mise en pratique filmée</span></li>
+<li><span class="programIndex" aria-hidden="true">3</span><span>Jour 2 — Entretiens difficiles : préparer, conduire, conclure</span></li>
+<li><span class="programIndex" aria-hidden="true">4</span><span>Jour 2 — Plan d'action individuel à 90 jours et engagements réciproques</span></li>
+      </ol></div>
+      <div class="block"><h2>Prérequis</h2><ul class="bullets"><li>Aucun prérequis. Exercer une responsabilité d'encadrement ou la préparer.</li></ul></div>
+      <div class="block" id="sessions"><h2>Prochaines sessions</h2><ul class="sessionList">
+<li class="session"><div class="sessionWhen"><strong>vendredi 18 octobre 2026</strong><small>Présentiel · Paris</small></div><a class="sessionAction" href="#">Inscriptions ouvertes</a></li>
+<li class="session"><div class="sessionWhen"><strong>vendredi 25 octobre 2026</strong><small>Hybride · Lyon</small></div><a class="sessionAction" href="#">3 places</a></li>
+      </ul></div>
+      <div class="block" id="supports"><h2>Supports de la formation</h2><p class="secureNote">🔒 Consultation en lecture seule — supports publiés, ouverture dans le navigateur.</p><div class="documentGrid">
+<a class="document" href="#"><span class="documentIcon" aria-hidden="true">📊</span><span><strong>MGT-101 · Slides animateur</strong><small>Slides animateur</small></span></a>
+<a class="document" href="#"><span class="documentIcon" aria-hidden="true">📘</span><span><strong>MGT-101 · Manuel participant</strong><small>Manuel participant</small></span></a>
+<a class="document" href="#"><span class="documentIcon" aria-hidden="true">📄</span><span><strong>MGT-101 · Grille d'évaluation à chaud</strong><small>Évaluation</small></span></a>
+      </div></div>
+    </section>
+    <aside class="sidebar">
+      <div class="card"><h3 class="cardTitle">En un coup d'œil</h3><ul class="facts">
+<li><span>Filière</span><strong>Management</strong></li>
+<li><span>Modalité</span><strong>Présentiel</strong></li>
+<li><span>Durée</span><strong>14 h</strong></li>
+<li><span>Niveau</span><strong>Confirmé</strong></li>
+      </ul></div>
+      <div class="card"><h3 class="cardTitle">Public visé</h3><p class="cardText">Managers de proximité, chefs de projet, futurs encadrants</p></div>
+      <div class="card"><h3 class="cardTitle">Formateurs référents</h3><ul class="trainerList"><li><span class="avatar">AM</span><span><strong>Amélie Martin</strong><small>Responsable pédagogique · Management &amp; Qualité</small></span></li></ul></div>
+      <div class="card cardAccent"><h3 class="cardTitle">Contact pédagogique</h3><p class="cardText"><a href="#">pedagogie@bbi.example</a></p></div>
+    </aside>
+  </div>
+</div></div>
+<h2>Modèle 2 · <span>Sessions &amp; inscriptions</span> — planning groupé par mois</h2>
+<p class="note">La filière et le lien vers la fiche sont déduits du code présent dans le titre de la session.</p>
+<div class="frame p-sess"><div class="sessions">
+  <header class="head">
+    <div><p class="eyebrow">Planning de formation</p><h1 class="title">Sessions &amp; inscriptions</h1><p class="subtitle">4 sessions affichées</p></div>
+    <div class="headActions"><a class="ghostAction" href="#">Ouvrir la liste</a><button class="primaryAction" type="button">Mon agenda Outlook</button></div>
+  </header>
+  <div class="toolbar">
+    <label class="field"><span class="fieldLabel">Recherche</span><input type="search" placeholder="Formation, code, ville…" readonly></label>
+    <div class="chips"><span class="chipsLabel">Filière</span><button class="chip chipActive" type="button">Toutes</button><button class="chip" type="button">Management</button><button class="chip" type="button">Coaching</button><button class="chip" type="button">Commerce</button></div>
+    <div class="chips"><span class="chipsLabel">Modalité</span><button class="chip chipActive" type="button">Toutes</button><button class="chip" type="button">Présentiel</button><button class="chip" type="button">Distanciel</button></div>
+    <label class="toggle"><input type="checkbox" checked> <span>Inclure les sessions passées</span></label>
+  </div>
+  <section class="group"><h2 class="groupTitle">Octobre 2026</h2><ul class="list">
+<li class="row">
+      <div class="date"><strong>18</strong><span>oct</span></div>
+      <div class="info"><h3>Management d'équipe — Cohorte 7</h3><p class="meta">Présentiel · Paris</p><p class="dateText">vendredi 18 oct 2026</p>
+      <div class="tags"><span class="tag">Management</span><span class="tagCode">BBI-MGT-101</span></div></div>
+      <div class="actions"><a class="register" href="#">Inscriptions ouvertes</a><a class="secondary" href="#">Voir la fiche</a><a class="tertiary" href="#">Ajouter à mon agenda</a></div>
+    </li>
+<li class="row">
+      <div class="date"><strong>25</strong><span>oct</span></div>
+      <div class="info"><h3>Coaching d'entrepreneurs — Module 1</h3><p class="meta">Distanciel · Teams</p><p class="dateText">samedi 25 oct 2026</p>
+      <div class="tags"><span class="tag">Coaching</span><span class="tagCode">BBI-COA-201</span></div></div>
+      <div class="actions"><a class="register" href="#">Webinaire</a><a class="secondary" href="#">Voir la fiche</a><a class="tertiary" href="#">Ajouter à mon agenda</a></div>
+    </li>
+<li class="row">
+      <div class="date"><strong>01</strong><span>nov</span></div>
+      <div class="info"><h3>Atelier « Traiter les objections »</h3><p class="meta">Présentiel · Lyon</p><p class="dateText">samedi 01 nov 2026</p>
+      <div class="tags"><span class="tag">Commerce</span><span class="tagCode">BBI-COM-110</span></div></div>
+      <div class="actions"><a class="register" href="#">3 places</a><a class="secondary" href="#">Voir la fiche</a><a class="tertiary" href="#">Ajouter à mon agenda</a></div>
+    </li>
+</ul></section><section class="group"><h2 class="groupTitle">Septembre 2026</h2><ul class="list">
+<li class="row rowPast">
+      <div class="date"><strong>14</strong><span>sept</span></div>
+      <div class="info"><h3>Management d'équipe — Cohorte 6</h3><p class="meta">Présentiel · Lille</p><p class="dateText">lundi 14 sept 2026</p>
+      <div class="tags"><span class="tag">Management</span><span class="tagCode">BBI-MGT-101</span><span class="tagPast">Passée</span></div></div>
+      <div class="actions"><span class="status">Clôturée</span><a class="secondary" href="#">Voir la fiche</a></div>
+    </li>
+</ul></section>
+  <p class="footNote">Les inscriptions sont traitées par l'équipe pédagogique. Une question ? Écrivez au <a href="#">support BBI</a>.</p>
+</div></div>
+<h2>Modèle 3 · <span>Article d'actualité</span> — piloté par l'identifiant de l'actualité</h2>
+<p class="note">Lien réel : <code>…/SitePages/article.aspx?itemid=12</code> — visuel, chapô, auteur, temps de lecture et partage sont générés automatiquement.</p>
+<div class="frame p-article"><div class="article"><article class="shell">
+  <nav class="breadcrumb"><a href="#">Accueil</a><span aria-hidden="true">›</span><a href="#">Actualités</a><span aria-hidden="true">›</span><span>Certification</span></nav>
+  <header class="head">
+    <span class="category">Certification</span>
+    <h1 class="title">12 nouveaux formateurs certifiés</h1>
+    <p class="standfirst">La session de certification de septembre s'est achevée avec 100 % de réussite. Retour sur trois jours d'apprentissage collectif et sur ce que cela change pour nos clients.</p>
+    <div class="byline">
+      <span class="author"><span class="avatar" aria-hidden="true">DP</span>Direction pédagogique</span>
+      <span class="dot" aria-hidden="true">·</span><span>vendredi 25 septembre 2026</span>
+      <span class="dot" aria-hidden="true">·</span><span>2 minutes de lecture</span>
+    </div>
+  </header>
+  <figure class="figure"><img class="image" src="../assets/img/news-certification.jpg" alt=""></figure>
+  <div class="layout">
+    <div class="content">
+      <div class="rich">
+        <p>Trois jours, douze formateurs, un seul objectif : garantir la même qualité d'animation sur l'ensemble du réseau BBI.</p>
+        <h2>Un parcours exigeant</h2>
+        <p>La certification BBI repose sur trois piliers : la maîtrise du contenu pédagogique, la posture d'animation et l'évaluation continue des acquis. Chaque candidat a animé une séquence filmée en conditions réelles, puis reçu un retour structuré de ses pairs.</p>
+        <blockquote>« On ne certifie pas un savoir, on certifie une capacité à le transmettre. »</blockquote>
+        <p>Cette promotion affiche <strong>100 % de réussite</strong> au premier passage — un niveau jamais atteint depuis la création du parcours.</p>
+        <h2>Et maintenant ?</h2>
+        <p>Douze nouvelles signatures de qualité pour les prochains trimestres, et une prochaine cohorte annoncée pour février. Les candidatures internes sont ouvertes dans l'espace formateurs.</p>
+      </div>
+    </div>
+    <aside class="sidebar"><div class="shareCard">
+      <h3>Partager cet article</h3>
+      <div class="shareActions">
+        <button class="shareButton" type="button">✉ Envoyer par e-mail</button>
+        <button class="shareButton" type="button">⬦ Partager dans Teams</button>
+        <button class="shareButton" type="button">⌘ Copier le lien</button>
+      </div>
+      <a class="newsLink" href="#">Toutes les actualités <span aria-hidden="true">→</span></a>
+    </div></aside>
+  </div>
+</article>
+<section class="related"><h2>À lire aussi</h2><ul class="relatedList">
+<li><a class="relatedCard" href="#"><span class="relatedCategory">Formations</span><strong>Le catalogue des formations évolue</strong><small>18 septembre 2026</small><span class="relatedMore">Lire la suite <span aria-hidden="true">→</span></span></a></li>
+<li><a class="relatedCard" href="#"><span class="relatedCategory">Vie BBI</span><strong>Retour sur les ateliers de rentrée</strong><small>10 septembre 2026</small><span class="relatedMore">Lire la suite <span aria-hidden="true">→</span></span></a></li>
+<li><a class="relatedCard" href="#"><span class="relatedCategory">Certification</span><strong>Qualiopi : notre audit blanc est une réussite</strong><small>2 septembre 2026</small><span class="relatedMore">Lire la suite <span aria-hidden="true">→</span></span></a></li>
+</ul></section></div></div></div></body></html>
