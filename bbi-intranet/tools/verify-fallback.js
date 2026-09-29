@@ -173,11 +173,30 @@ async function testHome() {
   const filled = fakeClient([
     {
       match: /items/,
-      json: { value: [{ Id: 1, Title: 'Vraie actualité', Published: '2026-09-20T09:00:00Z', Category: 'Vie BBI' }] }
+      json: {
+        value: [{
+          Id: 1,
+          Title: 'Vraie actualité',
+          Published: '2026-09-20T09:00:00Z',
+          Category: 'Vie BBI',
+          ImageUrl: { Url: '/sites/intranet/SiteAssets/news.jpg', Description: 'Visuel' },
+          LinkUrl: { Url: '/sites/intranet/SitePages/article.aspx?itemid=1', Description: 'Lire' }
+        }]
+      }
     }
   ]);
   const liveNews = await loadHomeNews(filled, SITE, 'Actualites', 5);
   check('actualités — liste alimentée → données réelles', liveNews.isDemo === false && liveNews.items[0].Title === 'Vraie actualité');
+  check(
+    'actualités — liens Hyperlink SharePoint normalisés',
+    liveNews.items[0].ImageUrl === '/sites/intranet/SiteAssets/news.jpg' &&
+      liveNews.items[0].LinkUrl === '/sites/intranet/SitePages/article.aspx?itemid=1'
+  );
+  check(
+    'actualités — URL de visuel résolue sans erreur',
+    new URL(liveNews.items[0].ImageUrl, SITE).toString() ===
+      'https://tenant.sharepoint.com/sites/intranet/SiteAssets/news.jpg'
+  );
 }
 
 /* ------------------------------------------------------------------ */

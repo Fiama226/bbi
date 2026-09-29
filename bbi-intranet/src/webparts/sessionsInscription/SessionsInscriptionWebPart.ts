@@ -10,7 +10,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import * as strings from 'BbiSessionsInscriptionWebPartStrings';
+import strings from 'BbiSessionsInscriptionWebPartStrings';
 import SessionsInscription from './components/SessionsInscription';
 import { ISessionsInscriptionProps } from './components/ISessionsInscriptionProps';
 

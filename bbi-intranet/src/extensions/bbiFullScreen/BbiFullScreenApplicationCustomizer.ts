@@ -8,7 +8,7 @@ import {
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
 
-import * as strings from 'BbiFullScreenApplicationCustomizerStrings';
+import strings from 'BbiFullScreenApplicationCustomizerStrings';
 
 const LOG_SOURCE: string = 'BbiFullScreenApplicationCustomizer';
 

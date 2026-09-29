@@ -1,6 +1,6 @@
-import * as React from 'react';
-import styles from './BbiHome.module.scss';
-import { IKpi } from './homeLayout';
+import * as React from "react";
+import styles from "./BbiHome.module.scss";
+import { IKpi } from "./homeLayout";
 
 export interface IHomeHeroProps {
   eyebrow: string;
@@ -28,14 +28,16 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
     secondaryUrl,
     kpis,
     compact,
-    onExplore
+    onExplore,
   } = props;
 
   const backgroundStyle: React.CSSProperties | undefined = imageUrl
-    ? { backgroundImage: `linear-gradient(100deg, rgba(9,20,48,.92) 0%, rgba(14,38,92,.72) 46%, rgba(14,38,92,.18) 100%), url("${imageUrl}")` }
+    ? {
+        backgroundImage: `linear-gradient(100deg, rgba(9,20,48,.92) 0%, rgba(14,38,92,.72) 46%, rgba(14,38,92,.18) 100%), url("${imageUrl}")`,
+      }
     : undefined;
 
-  const titleLines = (title || '').split('\n');
+  const titleLines = (title || "").split("\n");
 
   return (
     <section
@@ -64,13 +66,19 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
 
         <div className={styles.heroActions}>
           {primaryLabel && (
-            <a className={styles.heroPrimary} href={primaryUrl || '#formations'}>
+            <a
+              className={styles.heroPrimary}
+              href={primaryUrl || "#formations"}
+            >
               {primaryLabel}
               <span aria-hidden="true"> →</span>
             </a>
           )}
           {secondaryLabel && (
-            <a className={styles.heroSecondary} href={secondaryUrl || '#galerie'}>
+            <a
+              className={styles.heroSecondary}
+              href={secondaryUrl || "#ressources"}
+            >
               {secondaryLabel}
             </a>
           )}
@@ -88,7 +96,12 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
         </ul>
       )}
 
-      <button type="button" className={styles.scrollCue} onClick={onExplore} aria-label="Faire défiler la page">
+      <button
+        type="button"
+        className={styles.scrollCue}
+        onClick={onExplore}
+        aria-label="Faire défiler la page"
+      >
         <span className={styles.scrollCueDot} aria-hidden="true" />
       </button>
     </section>

@@ -1,6 +1,6 @@
-import * as React from 'react';
-import styles from './BbiHome.module.scss';
-import { IBbiHomeProps } from './IBbiHomeProps';
+import * as React from "react";
+import styles from "./BbiHome.module.scss";
+import { IBbiHomeProps } from "./IBbiHomeProps";
 import {
   IHomeNews,
   IHomeSession,
@@ -8,8 +8,8 @@ import {
   IHomeListResult,
   loadHomeNews,
   loadHomeSessions,
-  loadHomeTrainers
-} from './homeData';
+  loadHomeTrainers,
+} from "./homeData";
 import {
   IQuickLink,
   INavLink,
@@ -19,54 +19,51 @@ import {
   parseQuickLinks,
   useActiveSection,
   useChromeOffset,
-  useScrolled
-} from './homeLayout';
-import HomeHero from './HomeHero';
-import TrainingCatalog from '../../trainingCatalog/components/TrainingCatalog';
-import { ITrainingCatalogProps } from '../../trainingCatalog/components/ITrainingCatalogProps';
-import * as trainingStrings from 'TrainingCatalogWebPartStrings';
-import SecureDocuments from '../../secureDocuments/components/SecureDocuments';
-import { ISecureDocumentsProps } from '../../secureDocuments/components/ISecureDocumentsProps';
-import * as documentStrings from 'SecureDocumentsWebPartStrings';
-import BbiGallery from '../../bbiGallery/components/BbiGallery';
-import { IBbiGalleryProps } from '../../bbiGallery/components/IBbiGalleryProps';
-import * as galleryStrings from 'BbiGalleryWebPartStrings';
+  useScrolled,
+} from "./homeLayout";
+import HomeHero from "./HomeHero";
+import TrainingCatalog from "../../trainingCatalog/components/TrainingCatalog";
+import { ITrainingCatalogProps } from "../../trainingCatalog/components/ITrainingCatalogProps";
+import trainingStrings from "TrainingCatalogWebPartStrings";
+import SecureDocuments from "../../secureDocuments/components/SecureDocuments";
+import { ISecureDocumentsProps } from "../../secureDocuments/components/ISecureDocumentsProps";
+import documentStrings from "SecureDocumentsWebPartStrings";
 
-type HomeStatus = 'loading' | 'ready';
+type HomeStatus = "loading" | "ready";
 
 const emptyResult = <T,>(): IHomeListResult<T> => ({
   items: [],
-  isDemo: false
+  isDemo: false,
 });
 
 const formatDate = (value?: string): string => {
   if (!value) {
-    return '';
+    return "";
   }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return '';
+    return "";
   }
-  return new Intl.DateTimeFormat('fr-FR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   }).format(date);
 };
 
 const formatDay = (value?: string): { day: string; month: string } => {
   if (!value) {
-    return { day: '—', month: '' };
+    return { day: "—", month: "" };
   }
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return { day: '—', month: '' };
+    return { day: "—", month: "" };
   }
   return {
-    day: new Intl.DateTimeFormat('fr-FR', { day: '2-digit' }).format(date),
-    month: new Intl.DateTimeFormat('fr-FR', { month: 'short' })
+    day: new Intl.DateTimeFormat("fr-FR", { day: "2-digit" }).format(date),
+    month: new Intl.DateTimeFormat("fr-FR", { month: "short" })
       .format(date)
-      .replace('.', '')
+      .replace(".", ""),
   };
 };
 
@@ -77,48 +74,81 @@ const initialsOf = (trainer: IHomeTrainer): string => {
   return trainer.Title.split(/\s+/)
     .slice(0, 2)
     .map((part) => part.charAt(0))
-    .join('')
+    .join("")
     .toUpperCase();
 };
 
 const iconForModality = (modality?: string): string => {
-  const value = (modality || '').toLowerCase();
-  if (value.indexOf('distanciel') !== -1 || value.indexOf('web') !== -1) {
-    return '◉';
+  const value = (modality || "").toLowerCase();
+  if (value.indexOf("distanciel") !== -1 || value.indexOf("web") !== -1) {
+    return "◉";
   }
-  if (value.indexOf('hybride') !== -1) {
-    return '◐';
+  if (value.indexOf("hybride") !== -1) {
+    return "◐";
   }
-  return '⌂';
+  return "⌂";
 };
 
 const DEFAULT_NAV: INavLink[] = [
-  { label: 'Accueil', url: '#accueil' },
-  { label: 'Accès directs', url: '#acces' },
-  { label: 'Actualités', url: '#actualites' },
-  { label: 'Catalogue', url: '#formations' },
-  { label: 'Galerie', url: '#galerie' },
-  { label: 'Ressources', url: '#ressources' },
-  { label: 'Espace formateurs', url: '#formateurs' }
+  { label: "Accueil", url: "#accueil" },
+  { label: "Accès directs", url: "#acces" },
+  { label: "Actualités", url: "#actualites" },
+  { label: "Catalogue", url: "#formations" },
+  { label: "Ressources", url: "#ressources" },
+  { label: "Espace formateurs", url: "#formateurs" },
 ];
 
 const DEFAULT_QUICK_LINKS: IQuickLink[] = [
-  { icon: '▦', title: 'Catalogue des formations', subtitle: 'Parcours, modalités et durées', url: '#formations' },
-  { icon: '▣', title: 'Prochaines sessions', subtitle: 'Planning et inscriptions', url: '#actualites' },
-  { icon: '▤', title: 'Supports publiés', subtitle: 'Consultation en lecture seule', url: '#ressources' },
-  { icon: '◈', title: 'Galerie médias', subtitle: 'Photos et vidéos BBI', url: '#galerie' },
-  { icon: '◎', title: 'Formateurs référents', subtitle: 'Votre réseau d’experts', url: '#formateurs' },
-  { icon: '✆', title: 'Support & FAQ', subtitle: 'Une question, une demande', url: '#support' }
+  {
+    icon: "▦",
+    title: "Catalogue des formations",
+    subtitle: "Parcours, modalités et durées",
+    url: "#formations",
+  },
+  {
+    icon: "▣",
+    title: "Prochaines sessions",
+    subtitle: "Planning et inscriptions",
+    url: "#actualites",
+  },
+  {
+    icon: "▤",
+    title: "Supports publiés",
+    subtitle: "Consultation en lecture seule",
+    url: "#ressources",
+  },
+  {
+    icon: "◎",
+    title: "Formateurs référents",
+    subtitle: "Votre réseau d’experts",
+    url: "#formateurs",
+  },
+  {
+    icon: "✆",
+    title: "Support & FAQ",
+    subtitle: "Une question, une demande",
+    url: "#support",
+  },
 ];
 
-const SECTION_IDS: string[] = ['accueil', 'acces', 'actualites', 'formations', 'galerie', 'ressources', 'vie-bbi'];
+const SECTION_IDS: string[] = [
+  "accueil",
+  "acces",
+  "actualites",
+  "formations",
+  "ressources",
+  "vie-bbi",
+];
 
 const BbiHome: React.FC<IBbiHomeProps> = (props) => {
-  const [status, setStatus] = React.useState<HomeStatus>('loading');
-  const [news, setNews] = React.useState<IHomeListResult<IHomeNews>>(emptyResult<IHomeNews>());
-  const [sessions, setSessions] = React.useState<IHomeListResult<IHomeSession>>(emptyResult<IHomeSession>());
-  const [trainers, setTrainers] = React.useState<IHomeListResult<IHomeTrainer>>(emptyResult<IHomeTrainer>());
-  const [search, setSearch] = React.useState('');
+  const [status, setStatus] = React.useState<HomeStatus>("loading");
+  const [news, setNews] =
+    React.useState<IHomeListResult<IHomeNews>>(emptyResult<IHomeNews>());
+  const [sessions, setSessions] =
+    React.useState<IHomeListResult<IHomeSession>>(emptyResult<IHomeSession>());
+  const [trainers, setTrainers] =
+    React.useState<IHomeListResult<IHomeTrainer>>(emptyResult<IHomeTrainer>());
+  const [search, setSearch] = React.useState("");
   const [menuOpen, setMenuOpen] = React.useState(false);
   const rootRef = React.useRef<HTMLDivElement>(null);
 
@@ -128,11 +158,26 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
 
   React.useEffect(() => {
     let cancelled = false;
-    setStatus('loading');
+    setStatus("loading");
     Promise.all([
-      loadHomeNews(props.spHttpClient, props.siteUrl, props.newsListTitle, props.maxItems),
-      loadHomeSessions(props.spHttpClient, props.siteUrl, props.sessionsListTitle, props.maxItems),
-      loadHomeTrainers(props.spHttpClient, props.siteUrl, props.trainersListTitle, props.maxItems)
+      loadHomeNews(
+        props.spHttpClient,
+        props.siteUrl,
+        props.newsListTitle,
+        props.maxItems,
+      ),
+      loadHomeSessions(
+        props.spHttpClient,
+        props.siteUrl,
+        props.sessionsListTitle,
+        props.maxItems,
+      ),
+      loadHomeTrainers(
+        props.spHttpClient,
+        props.siteUrl,
+        props.trainersListTitle,
+        props.maxItems,
+      ),
     ])
       .then(([loadedNews, loadedSessions, loadedTrainers]) => {
         if (cancelled) {
@@ -141,14 +186,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         setNews(loadedNews);
         setSessions(loadedSessions);
         setTrainers(loadedTrainers);
-        setStatus('ready');
+        setStatus("ready");
       })
       .catch(() => {
         if (!cancelled) {
           setNews(emptyResult<IHomeNews>());
           setSessions(emptyResult<IHomeSession>());
           setTrainers(emptyResult<IHomeTrainer>());
-          setStatus('ready');
+          setStatus("ready");
         }
       });
     return () => {
@@ -160,13 +205,16 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     props.newsListTitle,
     props.sessionsListTitle,
     props.trainersListTitle,
-    props.maxItems
+    props.maxItems,
   ]);
 
-  const navLinks = React.useMemo(() => parseNavLinks(props.navLinks, DEFAULT_NAV), [props.navLinks]);
+  const navLinks = React.useMemo(
+    () => parseNavLinks(props.navLinks, DEFAULT_NAV),
+    [props.navLinks],
+  );
   const quickLinks = React.useMemo(
     () => parseQuickLinks(props.quickLinks, DEFAULT_QUICK_LINKS),
-    [props.quickLinks]
+    [props.quickLinks],
   );
   const kpis: IKpi[] = React.useMemo(() => parseKpis(props.kpis), [props.kpis]);
 
@@ -174,13 +222,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     event.preventDefault();
     const query = search.trim();
     if (query) {
-      window.location.href = `${props.siteUrl.replace(/\/+$/, '')}/_layouts/15/search.aspx?q=${encodeURIComponent(query)}`;
+      window.location.href = `${props.siteUrl.replace(/\/+$/, "")}/_layouts/15/search.aspx?q=${encodeURIComponent(query)}`;
     }
   };
 
   const currentNews = news.items[0];
   const upcomingSessions = sessions.items
-    .filter((session) => !session.StartDate || new Date(session.StartDate).getTime() >= Date.now())
+    .filter(
+      (session) =>
+        !session.StartDate ||
+        new Date(session.StartDate).getTime() >= Date.now(),
+    )
     .slice(0, props.maxItems);
 
   const catalogProps: ITrainingCatalogProps = {
@@ -191,7 +243,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     showDataNotices: props.showDataNotices,
     isDarkTheme: false,
     hasTeamsContext: false,
-    strings: trainingStrings
+    strings: trainingStrings,
   };
   const documentsProps: ISecureDocumentsProps = {
     siteUrl: props.siteUrl,
@@ -201,29 +253,23 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     showDataNotices: props.showDataNotices,
     isDarkTheme: false,
     hasTeamsContext: false,
-    strings: documentStrings
+    strings: documentStrings,
   };
-  const galleryProps: IBbiGalleryProps = {
-    siteUrl: props.siteUrl,
-    libraryTitle: props.galleryLibraryTitle,
-    maxItems: props.maxItems * 4,
-    columns: 3,
-    showCaptions: true,
-    allowDownload: true,
-    showDataNotices: props.showDataNotices,
-    albumFilter: '',
-    spHttpClient: props.spHttpClient,
-    isDarkTheme: false,
-    hasTeamsContext: false,
-    strings: galleryStrings
-  };
-  const avatarStyles: string[] = [styles.avatar0, styles.avatar1, styles.avatar2, styles.avatar3];
+  const avatarStyles: string[] = [
+    styles.avatar0,
+    styles.avatar1,
+    styles.avatar2,
+    styles.avatar3,
+  ];
 
-  const announcement = (props.announcementText || '').trim() ||
-    (currentNews ? `${currentNews.Category || 'À la une'} — ${currentNews.Title}` : '');
+  const announcement =
+    (props.announcementText || "").trim() ||
+    (currentNews
+      ? `${currentNews.Category || "À la une"} — ${currentNews.Title}`
+      : "");
   const showAnnouncement = props.enableAnnouncement !== false && !!announcement;
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className={styles.loading} role="status">
         <span className={styles.loadingSpinner} aria-hidden="true" />
@@ -235,7 +281,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   return (
     <div className={styles.home} ref={rootRef} id="bbi-home-root">
       {showAnnouncement && (
-        <div className={styles.announcement} role="region" aria-label="Information à la une">
+        <div
+          className={styles.announcement}
+          role="region"
+          aria-label="Information à la une"
+        >
           <span className={styles.announcementDot} aria-hidden="true" />
           <span className={styles.announcementText}>{announcement}</span>
           {currentNews && currentNews.LinkUrl && (
@@ -246,9 +296,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         </div>
       )}
 
-      <header className={scrolled ? `${styles.topbar} ${styles.topbarSolid}` : styles.topbar}>
+      <header
+        className={
+          scrolled ? `${styles.topbar} ${styles.topbarSolid}` : styles.topbar
+        }
+      >
         <div className={styles.topbarInner}>
-          <a className={styles.brand} href="#accueil" aria-label="BBI Intranet, accueil">
+          <a
+            className={styles.brand}
+            href="#accueil"
+            aria-label="BBI Intranet, accueil"
+          >
             <span className={styles.logoImage} role="img" aria-label="BBI" />
             <span className={styles.brandText}>
               <strong>BBI Intranet</strong>
@@ -266,30 +324,36 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               setMenuOpen(!menuOpen);
             }}
           >
-            <span aria-hidden="true">{menuOpen ? '✕' : '☰'}</span>
+            <span aria-hidden="true">{menuOpen ? "✕" : "☰"}</span>
           </button>
 
           <nav
             id="bbi-home-nav"
-            className={menuOpen ? `${styles.navigation} ${styles.navigationOpen}` : styles.navigation}
+            className={
+              menuOpen
+                ? `${styles.navigation} ${styles.navigationOpen}`
+                : styles.navigation
+            }
             aria-label="Navigation principale"
           >
             {navLinks.map((link) => {
               const isActive =
-                link.url.indexOf('#') === 0 && link.url.length > 1 && `#${activeSection}` === link.url;
+                link.url.indexOf("#") === 0 &&
+                link.url.length > 1 &&
+                `#${activeSection}` === link.url;
               const className = [
                 styles.navLink,
-                isActive ? styles.navActive : '',
-                link.emphasis ? styles.navCta : ''
+                isActive ? styles.navActive : "",
+                link.emphasis ? styles.navCta : "",
               ]
                 .filter((part) => !!part)
-                .join(' ');
+                .join(" ");
               return (
                 <a
                   key={`${link.label}-${link.url}`}
                   href={link.url}
                   className={className}
-                  aria-current={isActive ? 'true' : undefined}
+                  aria-current={isActive ? "true" : undefined}
                   onClick={() => {
                     setMenuOpen(false);
                   }}
@@ -300,7 +364,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             })}
           </nav>
 
-          <form className={styles.searchForm} onSubmit={searchSite} role="search">
+          <form
+            className={styles.searchForm}
+            onSubmit={searchSite}
+            role="search"
+          >
             <label className={styles.visuallyHidden} htmlFor="bbi-home-search">
               Rechercher dans BBI Intranet
             </label>
@@ -322,28 +390,35 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
 
       <main className={styles.content}>
         <HomeHero
-          eyebrow={props.heroEyebrow || 'Business Builders International'}
-          title={props.heroTitle || 'Faites grandir vos talents,\npropulsez vos projets.'}
+          eyebrow={props.heroEyebrow || "Business Builders International"}
+          title={
+            props.heroTitle ||
+            "Faites grandir vos talents,\npropulsez vos projets."
+          }
           subtitle={
             props.heroSubtitle ||
-            'Le catalogue des formations BBI, vos prochaines sessions et tous vos supports pédagogiques, au même endroit.'
+            "Le catalogue des formations BBI, vos prochaines sessions et tous vos supports pédagogiques, au même endroit."
           }
-          imageUrl={props.heroImageUrl || ''}
-          primaryLabel={props.primaryCtaLabel || 'Explorer le catalogue'}
-          primaryUrl={props.primaryCtaUrl || '#formations'}
-          secondaryLabel={props.secondaryCtaLabel || 'Voir la galerie'}
-          secondaryUrl={props.secondaryCtaUrl || '#galerie'}
+          imageUrl={props.heroImageUrl || ""}
+          primaryLabel={props.primaryCtaLabel || "Explorer le catalogue"}
+          primaryUrl={props.primaryCtaUrl || "#formations"}
+          secondaryLabel={props.secondaryCtaLabel || "Consulter les ressources"}
+          secondaryUrl={props.secondaryCtaUrl || "#ressources"}
           kpis={kpis}
           compact={props.layoutCompact === true}
           onExplore={() => {
-            const target = document.getElementById('acces');
+            const target = document.getElementById("acces");
             if (target) {
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
             }
           }}
         />
 
-        <section className={styles.section} id="acces" aria-labelledby="bbi-quick-title">
+        <section
+          className={styles.section}
+          id="acces"
+          aria-labelledby="bbi-quick-title"
+        >
           <div className={styles.sectionHeading}>
             <div>
               <p className={styles.eyebrow}>Accès directs</p>
@@ -352,7 +427,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           </div>
           <div className={styles.quickGrid}>
             {quickLinks.map((link) => (
-              <a className={styles.quickLink} href={link.url} key={`${link.title}-${link.url}`}>
+              <a
+                className={styles.quickLink}
+                href={link.url}
+                key={`${link.title}-${link.url}`}
+              >
                 <span className={styles.quickIcon} aria-hidden="true">
                   {link.icon}
                 </span>
@@ -363,20 +442,28 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           </div>
         </section>
 
-        <section className={styles.newsSessions} id="actualites" aria-label="Actualités et prochaines sessions">
+        <section
+          className={styles.newsSessions}
+          id="actualites"
+          aria-label="Actualités et prochaines sessions"
+        >
           <div className={styles.newsColumn}>
             <div className={styles.sectionHeading}>
               <div>
                 <p className={styles.eyebrow}>À la une</p>
                 <h2>Actualités BBI</h2>
               </div>
-              <a className={styles.textLink} href={`${props.siteUrl}/SitePages/vie-bbi.aspx`}>
+              <a
+                className={styles.textLink}
+                href={`${props.siteUrl}/SitePages/vie-bbi.aspx`}
+              >
                 Toutes les actualités <span aria-hidden="true">→</span>
               </a>
             </div>
             {props.showDataNotices && news.isDemo && (
               <p className={styles.demoNote}>
-                Données de démonstration : la liste « {props.newsListTitle} » est absente, non créée ou vide.
+                Données de démonstration : la liste « {props.newsListTitle} »
+                est absente, non créée ou vide.
               </p>
             )}
             {currentNews ? (
@@ -389,22 +476,28 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                   }
                   style={
                     currentNews.ImageUrl
-                      ? { backgroundImage: `url("${new URL(currentNews.ImageUrl, props.siteUrl).toString()}")` }
+                      ? {
+                          backgroundImage: `url("${new URL(currentNews.ImageUrl, props.siteUrl).toString()}")`,
+                        }
                       : undefined
                   }
                   role="img"
                   aria-label={currentNews.Title}
                 />
                 <div className={styles.newsBody}>
-                  <span className={styles.category}>{currentNews.Category || 'Vie BBI'}</span>
+                  <span className={styles.category}>
+                    {currentNews.Category || "Vie BBI"}
+                  </span>
                   <h3>{currentNews.Title}</h3>
                   <p>
                     {currentNews.Summary ||
-                      'Retrouvez les dernières nouvelles de votre réseau BBI.'}
+                      "Retrouvez les dernières nouvelles de votre réseau BBI."}
                   </p>
                   <small>
                     {formatDate(currentNews.Published)}
-                    {currentNews.AuthorName ? ` · ${currentNews.AuthorName}` : ''}
+                    {currentNews.AuthorName
+                      ? ` · ${currentNews.AuthorName}`
+                      : ""}
                   </small>
                   {currentNews.LinkUrl && (
                     <a href={currentNews.LinkUrl} className={styles.textLink}>
@@ -433,7 +526,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             </div>
             {props.showDataNotices && sessions.isDemo && (
               <p className={styles.demoNote}>
-                Données de démonstration : la liste « {props.sessionsListTitle} » est absente, non créée ou vide.
+                Données de démonstration : la liste « {props.sessionsListTitle}{" "}
+                » est absente, non créée ou vide.
               </p>
             )}
             {upcomingSessions.length > 0 ? (
@@ -449,17 +543,24 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                       <div className={styles.sessionInfo}>
                         <h3>{session.Title}</h3>
                         <p>
-                          <span aria-hidden="true">{iconForModality(session.Modality)}</span>{' '}
-                          {session.Modality || 'Modalité à préciser'}
-                          {session.Location ? ` · ${session.Location}` : ''}
+                          <span aria-hidden="true">
+                            {iconForModality(session.Modality)}
+                          </span>{" "}
+                          {session.Modality || "Modalité à préciser"}
+                          {session.Location ? ` · ${session.Location}` : ""}
                         </p>
                       </div>
                       {session.RegistrationUrl ? (
-                        <a className={styles.sessionStatus} href={session.RegistrationUrl}>
-                          {session.Status || 'S’inscrire'}
+                        <a
+                          className={styles.sessionStatus}
+                          href={session.RegistrationUrl}
+                        >
+                          {session.Status || "S’inscrire"}
                         </a>
                       ) : (
-                        <span className={styles.sessionStatus}>{session.Status || 'À venir'}</span>
+                        <span className={styles.sessionStatus}>
+                          {session.Status || "À venir"}
+                        </span>
                       )}
                     </li>
                   );
@@ -471,7 +572,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           </div>
         </section>
 
-        <section className={styles.section} id="formations" aria-label="Catalogue des formations">
+        <section
+          className={styles.section}
+          id="formations"
+          aria-label="Catalogue des formations"
+        >
           <div className={styles.sectionHeading}>
             <div>
               <p className={styles.eyebrow}>Se former</p>
@@ -487,18 +592,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           <TrainingCatalog {...catalogProps} />
         </section>
 
-        {props.enableGallery !== false && (
-          <section className={styles.section} id="galerie" aria-label="Galerie médias">
-            <BbiGallery {...galleryProps} />
-            <div className={styles.sectionFooterLink}>
-              <a className={styles.textLink} href={`${props.siteUrl}/SitePages/galerie.aspx`}>
-                Toute la galerie <span aria-hidden="true">→</span>
-              </a>
-            </div>
-          </section>
-        )}
-
-        <section className={styles.resourcesPeople} id="ressources" aria-label="Supports publiés et formateurs référents">
+        <section
+          className={styles.resourcesPeople}
+          id="ressources"
+          aria-label="Supports publiés et formateurs référents"
+        >
           <div className={styles.resources}>
             <div className={styles.sectionHeading}>
               <div>
@@ -507,7 +605,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               </div>
               <a
                 className={styles.textLink}
-                href={`${props.siteUrl.replace(/\/+$/, '')}/${encodeURIComponent(props.documentsLibraryTitle)}/Forms/AllItems.aspx`}
+                href={`${props.siteUrl.replace(/\/+$/, "")}/${encodeURIComponent(props.documentsLibraryTitle)}/Forms/AllItems.aspx`}
               >
                 Bibliothèque <span aria-hidden="true">→</span>
               </a>
@@ -529,35 +627,42 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             </div>
             {props.showDataNotices && trainers.isDemo && (
               <p className={styles.demoNote}>
-                Données de démonstration : la liste « {props.trainersListTitle} » est absente, non créée ou vide.
+                Données de démonstration : la liste « {props.trainersListTitle}{" "}
+                » est absente, non créée ou vide.
               </p>
             )}
             {trainers.items.length > 0 ? (
               <ul className={styles.peopleList}>
-                {trainers.items.slice(0, props.maxItems).map((trainer, index) => (
-                  <li className={styles.person} key={trainer.Id}>
-                    <span className={`${styles.avatar} ${avatarStyles[index % 4]}`}>
-                      {initialsOf(trainer)}
-                    </span>
-                    <span>
-                      <strong>{trainer.Title}</strong>
-                      <small>
-                        {trainer.Role || 'Formateur'}
-                        {trainer.Filiere ? ` · ${trainer.Filiere}` : ''}
-                      </small>
-                    </span>
-                  </li>
-                ))}
+                {trainers.items
+                  .slice(0, props.maxItems)
+                  .map((trainer, index) => (
+                    <li className={styles.person} key={trainer.Id}>
+                      <span
+                        className={`${styles.avatar} ${avatarStyles[index % 4]}`}
+                      >
+                        {initialsOf(trainer)}
+                      </span>
+                      <span>
+                        <strong>{trainer.Title}</strong>
+                        <small>
+                          {trainer.Role || "Formateur"}
+                          {trainer.Filiere ? ` · ${trainer.Filiere}` : ""}
+                        </small>
+                      </span>
+                    </li>
+                  ))}
               </ul>
             ) : (
-              <p className={styles.emptyState}>Aucun formateur référent publié.</p>
+              <p className={styles.emptyState}>
+                Aucun formateur référent publié.
+              </p>
             )}
             <div className={styles.community} id="support">
               <p className={styles.eyebrow}>Communauté</p>
               <h3>Réseau des formateurs</h3>
               <p>
-                Échanges de pratiques, entraide pédagogique et veille : rejoignez la communauté BBI
-                sur Teams et Viva Engage.
+                Échanges de pratiques, entraide pédagogique et veille :
+                rejoignez la communauté BBI sur Teams et Viva Engage.
               </p>
               <a className={styles.textLink} href="#vie-bbi">
                 En savoir plus <span aria-hidden="true">→</span>
@@ -566,7 +671,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           </div>
         </section>
 
-        <section className={styles.topicLinks} id="vie-bbi" aria-label="Vie d'entreprise et ressources pédagogiques">
+        <section
+          className={styles.topicLinks}
+          id="vie-bbi"
+          aria-label="Vie d'entreprise et ressources pédagogiques"
+        >
           <a href="#ressources" className={styles.topicLink}>
             <span aria-hidden="true">⌘</span>
             <strong>Méthodes &amp; outils d&apos;animation</strong>
@@ -577,7 +686,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             <strong>Qualité &amp; certification</strong>
             <small>Qualiopi, évaluations, preuves de conformité</small>
           </a>
-          <a href="#galerie" className={styles.topicLink}>
+          <a href="#actualites" className={styles.topicLink}>
             <span aria-hidden="true">◈</span>
             <strong>Vie d&apos;entreprise</strong>
             <small>Événements, séminaires et temps forts</small>
@@ -590,26 +699,34 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           <span className={styles.footerBrand}>
             <span className={styles.footerLogo} role="img" aria-label="BBI" />
             <span>
-              {props.footerNote || 'Business Builders International — Intranet collaboratif'}
+              {props.footerNote ||
+                "Business Builders International — Intranet collaboratif"}
             </span>
           </span>
           <nav className={styles.footerNav} aria-label="Informations légales">
             <a href="#accueil">Accueil</a>
             <a href="#support">Support &amp; FAQ</a>
             <a href="#ressources">Confidentialité &amp; supports</a>
-            <a href={`${props.siteUrl}/SitePages/mentions-legales.aspx`}>Mentions légales</a>
+            <a href={`${props.siteUrl}/SitePages/mentions-legales.aspx`}>
+              Mentions légales
+            </a>
           </nav>
           <small className={styles.footerCopy}>
-            © {new Date().getFullYear()} Business Builders International · Tous droits réservés
+            © {new Date().getFullYear()} Business Builders International · Tous
+            droits réservés
           </small>
         </div>
       </footer>
 
       <button
         type="button"
-        className={scrolled ? `${styles.backToTop} ${styles.backToTopVisible}` : styles.backToTop}
+        className={
+          scrolled
+            ? `${styles.backToTop} ${styles.backToTopVisible}`
+            : styles.backToTop
+        }
         onClick={() => {
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          window.scrollTo({ top: 0, behavior: "smooth" });
         }}
         aria-label="Revenir en haut de la page"
       >

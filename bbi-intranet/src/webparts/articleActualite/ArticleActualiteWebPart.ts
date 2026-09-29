@@ -10,7 +10,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import * as strings from 'BbiArticleActualiteWebPartStrings';
+import strings from 'BbiArticleActualiteWebPartStrings';
 import ArticleActualite from './components/ArticleActualite';
 import { IArticleActualiteProps } from './components/IArticleActualiteProps';
 

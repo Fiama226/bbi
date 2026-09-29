@@ -10,7 +10,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import * as strings from 'TrainingCatalogWebPartStrings';
+import strings from 'TrainingCatalogWebPartStrings';
 import TrainingCatalog from './components/TrainingCatalog';
 import { ITrainingCatalogProps } from './components/ITrainingCatalogProps';
 

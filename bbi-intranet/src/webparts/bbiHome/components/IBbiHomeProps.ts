@@ -9,7 +9,6 @@ export interface IBbiHomeProps {
   trainersListTitle: string;
   formationsListTitle: string;
   documentsLibraryTitle: string;
-  galleryLibraryTitle: string;
   maxItems: number;
 
   /* --- Héros --- */
@@ -30,7 +29,6 @@ export interface IBbiHomeProps {
   footerNote: string;
 
   /* --- Options d'affichage --- */
-  enableGallery: boolean;
   showDataNotices: boolean;
   enableAnnouncement: boolean;
   layoutCompact: boolean;

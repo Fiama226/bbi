@@ -41,6 +41,17 @@ const dateInDays = (days: number): string => {
   return date.toISOString();
 };
 
+const hyperlinkUrlOf = (value: unknown): string | undefined => {
+  if (typeof value === 'string') {
+    return value.trim() || undefined;
+  }
+  if (value && typeof value === 'object') {
+    const url = (value as { Url?: unknown }).Url;
+    return typeof url === 'string' ? url.trim() || undefined : undefined;
+  }
+  return undefined;
+};
+
 export const DEMO_NEWS: IHomeNews[] = [
   {
     Id: 1,
@@ -125,7 +136,14 @@ export const loadHomeNews = (
   'Published desc',
   maxItems,
   DEMO_NEWS
-);
+).then((result) => ({
+  ...result,
+  items: result.items.map((item) => ({
+    ...item,
+    ImageUrl: hyperlinkUrlOf(item.ImageUrl),
+    LinkUrl: hyperlinkUrlOf(item.LinkUrl)
+  }))
+}));
 
 export const loadHomeSessions = (
   spHttpClient: SPHttpClient,

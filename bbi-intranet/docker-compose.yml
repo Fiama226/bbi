@@ -11,7 +11,7 @@ services:
     environment:
       NODE_OPTIONS: "--max-old-space-size=3072"
       # Domaine de votre tenant SPO (remplacé dans config/serve.json) — sinon créer un fichier .env
-      SPFX_SERVE_TENANT_DOMAIN: ${SPFX_TENANT_DOMAIN:-votretenant.sharepoint.com}
+      SPFX_SERVE_TENANT_DOMAIN: ${SPFX_TENANT_DOMAIN:-https://businessbuilderinter.sharepoint.com/}
     stdin_open: true
     tty: true
 

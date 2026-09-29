@@ -13,7 +13,7 @@
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
     "title": { "default": "BBI Accueil (plein écran)" },
-    "description": { "default": "Page d'accueil BBI immersive : héros plein écran, chiffres clés, actualités, sessions, catalogue, galerie et supports publiés." },
+    "description": { "default": "Page d'accueil BBI immersive : héros plein écran, chiffres clés, actualités, sessions, catalogue et supports publiés." },
     "officeFabricIconFontName": "Home",
     "properties": {
       "siteUrl": "",
@@ -22,7 +22,6 @@
       "trainersListTitle": "Formateurs",
       "formationsListTitle": "Formations",
       "documentsLibraryTitle": "Supports publiés",
-      "galleryLibraryTitle": "Galerie médias",
       "maxItems": 5,
       "heroEyebrow": "",
       "heroTitle": "",
@@ -37,7 +36,6 @@
       "kpis": "",
       "announcementText": "",
       "footerNote": "",
-      "enableGallery": true,
       "showDataNotices": false,
       "enableAnnouncement": true,
       "layoutCompact": false

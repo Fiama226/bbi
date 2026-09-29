@@ -11,7 +11,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import * as strings from 'BbiHomeWebPartStrings';
+import strings from 'BbiHomeWebPartStrings';
 import BbiHome from './components/BbiHome';
 import { IBbiHomeProps } from './components/IBbiHomeProps';
 
@@ -22,7 +22,6 @@ export interface IBbiHomeWebPartProps {
   trainersListTitle: string;
   formationsListTitle: string;
   documentsLibraryTitle: string;
-  galleryLibraryTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
@@ -37,7 +36,6 @@ export interface IBbiHomeWebPartProps {
   kpis: string;
   announcementText: string;
   footerNote: string;
-  enableGallery: boolean;
   showDataNotices: boolean;
   enableAnnouncement: boolean;
   layoutCompact: boolean;
@@ -48,7 +46,6 @@ const DEFAULT_NAV_LINKS: string = [
   '# Accès directs | #acces',
   '# Actualités | #actualites',
   '# Catalogue | #formations',
-  '# Galerie | #galerie',
   '# Ressources | #ressources',
   '# Espace formateurs* | #formateurs'
 ].join('\n');
@@ -57,7 +54,6 @@ const DEFAULT_QUICK_LINKS: string = [
   '▦ | Catalogue des formations | Parcours, modalités et durées | #formations',
   '▣ | Prochaines sessions | Planning et inscriptions | #actualites',
   '▤ | Supports publiés | Consultation en lecture seule | #ressources',
-  '◈ | Galerie médias | Photos et vidéos BBI | #galerie',
   '◎ | Formateurs référents | Votre réseau d’experts | #formateurs',
   '✆ | Support & FAQ | Une question, une demande | #support'
 ].join('\n');
@@ -83,9 +79,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     if (!this.properties.kpis) {
       this.properties.kpis = DEFAULT_KPIS;
     }
-    if (!this.properties.galleryLibraryTitle) {
-      this.properties.galleryLibraryTitle = 'Galerie médias';
-    }
     return Promise.resolve();
   }
 
@@ -107,7 +100,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       trainersListTitle: this.properties.trainersListTitle,
       formationsListTitle: this.properties.formationsListTitle,
       documentsLibraryTitle: this.properties.documentsLibraryTitle,
-      galleryLibraryTitle: this.properties.galleryLibraryTitle || 'Galerie médias',
       maxItems: this.properties.maxItems || 5,
       heroEyebrow: this.properties.heroEyebrow || '',
       heroTitle: this.properties.heroTitle || '',
@@ -122,7 +114,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       kpis: this.properties.kpis || '',
       announcementText: this.properties.announcementText || '',
       footerNote: this.properties.footerNote || '',
-      enableGallery: this.properties.enableGallery !== false,
       showDataNotices: this.properties.showDataNotices === true,
       enableAnnouncement: this.properties.enableAnnouncement !== false,
       layoutCompact: this.properties.layoutCompact === true,
@@ -160,7 +151,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('trainersListTitle', { label: strings.TrainersListFieldLabel }),
               PropertyPaneTextField('formationsListTitle', { label: strings.FormationsListFieldLabel }),
               PropertyPaneTextField('documentsLibraryTitle', { label: strings.DocumentsLibraryFieldLabel }),
-              PropertyPaneTextField('galleryLibraryTitle', { label: strings.GalleryLibraryFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,
@@ -249,10 +239,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneToggle('enableAnnouncement', {
                 label: strings.EnableAnnouncementFieldLabel,
                 checked: this.properties.enableAnnouncement !== false
-              }),
-              PropertyPaneToggle('enableGallery', {
-                label: strings.EnableGalleryFieldLabel,
-                checked: this.properties.enableGallery !== false
               }),
               PropertyPaneToggle('showDataNotices', {
                 label: strings.ShowDataNoticesFieldLabel,

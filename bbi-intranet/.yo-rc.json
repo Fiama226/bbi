@@ -18,6 +18,7 @@
     "libraryName": "bbi-intranet",
     "libraryId": "2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3",
     "packageManager": "npm",
-    "solutionShortDescription": "bbi-intranet description"
+    "solutionShortDescription": "bbi-intranet description",
+    "ejected": true
   }
 }

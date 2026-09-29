@@ -10,7 +10,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import * as strings from 'BbiGalleryWebPartStrings';
+import strings from 'BbiGalleryWebPartStrings';
 import BbiGallery from './components/BbiGallery';
 import { IBbiGalleryProps } from './components/IBbiGalleryProps';
 

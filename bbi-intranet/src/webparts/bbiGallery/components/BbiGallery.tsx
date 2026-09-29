@@ -1,17 +1,17 @@
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import styles from './BbiGallery.module.scss';
-import { IBbiGalleryProps, IGalleryItem } from './IBbiGalleryProps';
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+import styles from "./BbiGallery.module.scss";
+import { IBbiGalleryProps, IGalleryItem } from "./IBbiGalleryProps";
 import {
   formatDateFr,
   isDemoItem,
   isVideo,
   loadGallery,
   previewUrlOf,
-  thumbUrlOf
-} from './galleryData';
+  thumbUrlOf,
+} from "./galleryData";
 
-type LoadStatus = 'loading' | 'ready';
+type LoadStatus = "loading" | "ready";
 
 const demoImageClass = (index: number | undefined): string => {
   switch ((index || 0) % 4) {
@@ -37,20 +37,22 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
     showDataNotices,
     albumFilter,
     spHttpClient,
-    strings
+    strings,
   } = props;
 
-  const [status, setStatus] = React.useState<LoadStatus>('loading');
+  const [status, setStatus] = React.useState<LoadStatus>("loading");
   const [items, setItems] = React.useState<IGalleryItem[]>([]);
   const [isDemo, setIsDemo] = React.useState(false);
-  const [album, setAlbum] = React.useState('');
+  const [album, setAlbum] = React.useState("");
   const [lightboxIndex, setLightboxIndex] = React.useState<number>(-1);
-  const closeButtonRef = React.useRef<HTMLButtonElement>(undefined as unknown as HTMLButtonElement);
+  const closeButtonRef = React.useRef<HTMLButtonElement>(
+    undefined as unknown as HTMLButtonElement,
+  );
   const lastFocusedRef = React.useRef<HTMLElement | undefined>(undefined);
 
   React.useEffect(() => {
     let cancelled = false;
-    setStatus('loading');
+    setStatus("loading");
     loadGallery(spHttpClient, siteUrl, libraryTitle, maxItems, albumFilter)
       .then((result) => {
         if (cancelled) {
@@ -58,12 +60,12 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
         }
         setItems(result.items);
         setIsDemo(result.isDemo);
-        setStatus('ready');
+        setStatus("ready");
       })
       .catch(() => {
         if (!cancelled) {
           setItems([]);
-          setStatus('ready');
+          setStatus("ready");
         }
       });
     return () => {
@@ -74,17 +76,18 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
   const albums: string[] = React.useMemo(() => {
     const unique: { [key: string]: boolean } = {};
     items.forEach((item) => {
-      const value = (item.Album || '').trim();
+      const value = (item.Album || "").trim();
       if (value) {
         unique[value] = true;
       }
     });
-    return Object.keys(unique).sort((a, b) => a.localeCompare(b, 'fr'));
+    return Object.keys(unique).sort((a, b) => a.localeCompare(b, "fr"));
   }, [items]);
 
   const visibleItems: IGalleryItem[] = React.useMemo(
-    () => (album ? items.filter((item) => (item.Album || '') === album) : items),
-    [items, album]
+    () =>
+      album ? items.filter((item) => (item.Album || "") === album) : items,
+    [items, album],
   );
 
   const closeLightbox = React.useCallback((): void => {
@@ -97,37 +100,38 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
         if (current < 0 || visibleItems.length === 0) {
           return current;
         }
-        const next = (current + delta + visibleItems.length) % visibleItems.length;
+        const next =
+          (current + delta + visibleItems.length) % visibleItems.length;
         return next;
       });
     },
-    [visibleItems.length]
+    [visibleItems.length],
   );
 
   // Navigation clavier + verrouillage du défilement pendant l'affichage plein écran.
   React.useEffect(() => {
     if (lightboxIndex < 0) {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
       return undefined;
     }
     lastFocusedRef.current = document.activeElement as HTMLElement;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     const onKeyDown = (event: KeyboardEvent): void => {
-      if (event.key === 'Escape') {
+      if (event.key === "Escape") {
         closeLightbox();
-      } else if (event.key === 'ArrowRight') {
+      } else if (event.key === "ArrowRight") {
         step(1);
-      } else if (event.key === 'ArrowLeft') {
+      } else if (event.key === "ArrowLeft") {
         step(-1);
       }
     };
-    window.addEventListener('keydown', onKeyDown);
+    window.addEventListener("keydown", onKeyDown);
     if (closeButtonRef.current) {
       closeButtonRef.current.focus();
     }
     return () => {
-      window.removeEventListener('keydown', onKeyDown);
-      document.body.style.overflow = '';
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = "";
       if (lastFocusedRef.current && lastFocusedRef.current.focus) {
         lastFocusedRef.current.focus();
       }
@@ -149,7 +153,7 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
     const date = formatDateFr(activeItem.DatePhoto);
     const meta = [activeItem.Album, activeItem.Lieu, activeItem.Credit, date]
       .filter((part) => !!part)
-      .join(' · ');
+      .join(" · ");
 
     return ReactDOM.createPortal(
       <div
@@ -201,7 +205,7 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
             <div
               className={`${styles.lightboxImageCustom} ${demoImageClass(activeItem.DemoIndex as number)}`}
               role="img"
-              aria-label={activeItem.Title || ''}
+              aria-label={activeItem.Title || ""}
             />
           ) : isVideo(activeItem) && !poster ? (
             activeItem.VideoUrl ? (
@@ -213,7 +217,11 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
                 allowFullScreen
               />
             ) : (
-              <video className={styles.lightboxVideo} src={activeItem.FileRef} controls>
+              <video
+                className={styles.lightboxVideo}
+                src={activeItem.FileRef}
+                controls
+              >
                 {strings.VideoBadge}
               </video>
             )
@@ -221,7 +229,7 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
             <img
               className={styles.lightboxImage}
               src={poster || activeItem.FileRef}
-              alt={activeItem.Title || ''}
+              alt={activeItem.Title || ""}
             />
           )}
           <figcaption className={styles.lightboxCaption}>
@@ -231,7 +239,7 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
               <span className={styles.lightboxCounter}>
                 {lightboxIndex + 1} / {visibleItems.length}
               </span>
-              {allowDownload && activeItem.FileRef.indexOf('demo:') !== 0 && (
+              {allowDownload && activeItem.FileRef.indexOf("demo:") !== 0 && (
                 <a
                   className={styles.lightboxLink}
                   href={activeItem.FileRef}
@@ -245,11 +253,11 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
           </figcaption>
         </figure>
       </div>,
-      document.body
+      document.body,
     );
   };
 
-  if (status === 'loading') {
+  if (status === "loading") {
     return (
       <div className={styles.bbiGallery}>
         <div className={styles.placeholder} role="status">
@@ -260,13 +268,16 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
   }
 
   return (
-    <div className={styles.bbiGallery} style={{ ['--bbi-gallery-cols' as string]: String(columns || 3) }}>
+    <div
+      className={styles.bbiGallery}
+      style={{ ["--bbi-gallery-cols" as string]: String(columns || 3) }}
+    >
       <div className={styles.header}>
         <div>
           <h2 className={styles.title}>{strings.WebPartTitle}</h2>
           <p className={styles.subtitle}>
             {visibleItems.length} {strings.CounterLabel}
-            {visibleItems.length > 1 ? 's' : ''}
+            {visibleItems.length > 1 ? "s" : ""}
           </p>
         </div>
         {albums.length > 0 && !albumFilter && (
@@ -274,10 +285,14 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
             <button
               type="button"
               role="tab"
-              aria-selected={album === ''}
-              className={album === '' ? `${styles.chip} ${styles.chipActive}` : styles.chip}
+              aria-selected={album === ""}
+              className={
+                album === ""
+                  ? `${styles.chip} ${styles.chipActive}`
+                  : styles.chip
+              }
               onClick={() => {
-                setAlbum('');
+                setAlbum("");
               }}
             >
               {strings.AllAlbums}
@@ -288,7 +303,11 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
                 type="button"
                 role="tab"
                 aria-selected={album === value}
-                className={album === value ? `${styles.chip} ${styles.chipActive}` : styles.chip}
+                className={
+                  album === value
+                    ? `${styles.chip} ${styles.chipActive}`
+                    : styles.chip
+                }
                 onClick={() => {
                   setAlbum(value);
                 }}
@@ -300,7 +319,9 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
         )}
       </div>
 
-      {showDataNotices && isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
+      {showDataNotices && isDemo && (
+        <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>
+      )}
 
       {visibleItems.length === 0 ? (
         <div className={styles.empty}>
@@ -311,7 +332,9 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
         <ul className={styles.grid}>
           {visibleItems.map((item, index) => {
             const thumb = thumbUrlOf(item, 800);
-            const demoClass = isDemo ? demoImageClass(item.DemoIndex as number) : '';
+            const demoClass = isDemo
+              ? demoImageClass(item.DemoIndex as number)
+              : "";
             return (
               <li className={styles.card} key={item.Id}>
                 <button
@@ -320,23 +343,35 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
                   onClick={() => {
                     openItem(index);
                   }}
-                  aria-label={`${strings.OpenLabel} : ${item.Title || item.FileLeafRef || ''}`}
+                  aria-label={`${strings.OpenLabel} : ${item.Title || item.FileLeafRef || ""}`}
                 >
                   <span
-                    className={`${styles.thumb} ${thumb ? '' : demoClass}`}
-                    style={thumb ? { backgroundImage: `url("${thumb}")` } : undefined}
+                    className={`${styles.thumb} ${thumb ? "" : demoClass}`}
+                    style={
+                      thumb ? { backgroundImage: `url("${thumb}")` } : undefined
+                    }
                     role="img"
-                    aria-label={item.Title || ''}
+                    aria-label={item.Title || ""}
                   >
-                    {isVideo(item) && <span className={styles.videoBadge}>▶ {strings.VideoBadge}</span>}
-                    {isDemoItem(item) && <span className={styles.demoBadge}>{strings.DemoBadge}</span>}
+                    {isVideo(item) && (
+                      <span className={styles.videoBadge}>
+                        ▶ {strings.VideoBadge}
+                      </span>
+                    )}
+                    {isDemoItem(item) && (
+                      <span className={styles.demoBadge}>
+                        {strings.DemoBadge}
+                      </span>
+                    )}
                   </span>
                   {showCaptions && (
                     <span className={styles.caption}>
                       <strong>{item.Title || item.FileLeafRef}</strong>
                       {(item.Album || item.Lieu) && (
                         <small>
-                          {[item.Album, item.Lieu].filter((part) => !!part).join(' · ')}
+                          {[item.Album, item.Lieu]
+                            .filter((part) => !!part)
+                            .join(" · ")}
                         </small>
                       )}
                     </span>

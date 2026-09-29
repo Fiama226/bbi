@@ -1,7 +1,0 @@
-{
-  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json",
-  "port": 4321,
-  "ipAddress": "0.0.0.0",
-  "https": true,
-  "initialPage": "https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx"
-}

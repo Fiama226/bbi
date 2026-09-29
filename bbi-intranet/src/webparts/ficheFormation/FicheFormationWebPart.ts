@@ -9,7 +9,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import * as strings from 'BbiFicheFormationWebPartStrings';
+import strings from 'BbiFicheFormationWebPartStrings';
 import FicheFormation from './components/FicheFormation';
 import { IFicheFormationProps } from './components/IFicheFormationProps';
 

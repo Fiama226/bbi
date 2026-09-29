@@ -9,7 +9,7 @@ import { IReadonlyTheme } from '@microsoft/sp-component-base';
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 
-import * as strings from 'SecureDocumentsWebPartStrings';
+import strings from 'SecureDocumentsWebPartStrings';
 import SecureDocuments from './components/SecureDocuments';
 import { ISecureDocumentsProps } from './components/ISecureDocumentsProps';
 
