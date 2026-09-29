@@ -14,6 +14,7 @@ import * as ReactDom from 'react-dom';
 import strings from 'BbiHomeWebPartStrings';
 import BbiHome from './components/BbiHome';
 import { IBbiHomeProps } from './components/IBbiHomeProps';
+import { parseKpis } from './components/homeLayout';
 
 export interface IBbiHomeWebPartProps {
   siteUrl: string;
@@ -60,8 +61,11 @@ const DEFAULT_QUICK_LINKS: string = [
 ].join('\n');
 
 const DEFAULT_KPIS: string = [
-  '# Une ligne par chiffre : valeur | libellé',
-  '# ex. 1 500 | Professionnels formés depuis 2012'
+  '# Une ligne par chiffre : valeur | libellé (modifiez librement ci-dessous)',
+  '1 500+ | Professionnels accompagnés',
+  '10+ | Formations au catalogue',
+  '9 | Pays couverts par le réseau',
+  '96 % | De satisfaction constatée'
 ].join('\n');
 
 const IMMERSIVE_HOME_STYLES: string = `
@@ -97,7 +101,9 @@ const IMMERSIVE_HOME_STYLES: string = `
   body.bbi-home-immersive .CanvasZone,
   body.bbi-home-immersive .CanvasSection,
   body.bbi-home-immersive .ControlZone,
-  body.bbi-home-immersive [data-automation-id="CanvasZone"] {
+  body.bbi-home-immersive [data-automation-id="CanvasZone"],
+  body.bbi-home-immersive .WebPart,
+  body.bbi-home-immersive [data-control-type="webPart"] {
     box-sizing: border-box !important;
     width: 100% !important;
     max-width: 100% !important;
@@ -132,7 +138,10 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     if (!this.properties.quickLinks) {
       this.properties.quickLinks = DEFAULT_QUICK_LINKS;
     }
-    if (!this.properties.kpis) {
+    // Migration : les anciennes instances n'avaient que des lignes de
+    // commentaire dans « kpis » → bandeau de chiffres clés vide et vide
+    // sous le héros. On réhydrate la valeur par défaut.
+    if (!this.properties.kpis || parseKpis(this.properties.kpis).length === 0) {
       this.properties.kpis = DEFAULT_KPIS;
     }
     if (!this.properties.galleryLibraryTitle) {
@@ -157,6 +166,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     console.info('[BBI-HOME] properties', typeof this.properties, Object.keys(this.properties || {}));
     console.info('[BBI-HOME] context', !!this.context, !!this.context?.spHttpClient);
     const properties = this.properties || ({} as IBbiHomeWebPartProps);
+    const connectedUser = this.context.pageContext.user;
     const element: React.ReactElement<IBbiHomeProps> = React.createElement(BbiHome, {
       siteUrl: properties.siteUrl || this.context.pageContext.web.absoluteUrl,
       newsListTitle: properties.newsListTitle || 'Actualites',
@@ -182,6 +192,10 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       showDataNotices: properties.showDataNotices === true,
       enableAnnouncement: properties.enableAnnouncement !== false,
       layoutCompact: properties.layoutCompact === true,
+      userName:
+        (connectedUser &&
+          (connectedUser.displayName || connectedUser.loginName || connectedUser.email)) ||
+        "",
       spHttpClient: this.context.spHttpClient,
       isDarkTheme: this._themeVariant ? !!this._themeVariant.isInverted : false,
       hasTeamsContext: !!this.context.sdks.microsoftTeams,

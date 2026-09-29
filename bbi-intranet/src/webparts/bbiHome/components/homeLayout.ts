@@ -91,11 +91,38 @@ export const parseKpis = (text: string): IKpi[] => {
  * Mesure la hauteur du « chrome » SharePoint situé au-dessus de la web part
  * (barre de suite Microsoft, en-tête de site…) afin de calculer une hauteur
  * de héros réellement plein écran, y compris dans le workbench.
+ *
+ * Expose aussi `--bbi-sticky-top` : le positionnement de la barre de
+ * navigation collante. Sur le workbench hébergé, le bandeau supérieur défile
+ * avec la page → la barre remonte progressivement jusqu'en haut de l'écran,
+ * comme sur un site classique. Sur une page moderne, le chrome SharePoint
+ * reste visible → offset constant.
  */
 export const useChromeOffset = (
   ref: React.RefObject<HTMLElement>
 ): void => {
   React.useEffect(() => {
+    if (!ref.current) {
+      return undefined;
+    }
+
+    const isWorkbench =
+      /workbench\.aspx/i.test(window.location.href) ||
+      !!document.getElementById('workbenchPageContent');
+
+    let chromeTop = 0;
+
+    const applyStickyTop = (): void => {
+      const node = ref.current;
+      if (!node) {
+        return;
+      }
+      const stickyTop = isWorkbench
+        ? Math.max(0, Math.round(chromeTop - window.scrollY))
+        : chromeTop;
+      node.style.setProperty('--bbi-sticky-top', `${stickyTop}px`);
+    };
+
     const measure = (): void => {
       const node = ref.current;
       if (!node) {
@@ -105,10 +132,13 @@ export const useChromeOffset = (
 
       // 1) Hauteur du « chrome » SharePoint au-dessus de la web part.
       const top = Math.round(rect.top + window.scrollY);
-      node.style.setProperty('--bbi-chrome-offset', `${Math.max(0, Math.min(140, top))}px`);
+      chromeTop = Math.max(0, Math.min(140, top));
+      node.style.setProperty('--bbi-chrome-offset', `${chromeTop}px`);
 
       // 2) Débordement latéral bord-à-bord : on mesure la marge naturelle
-      //    (hors débordement déjà appliqué) et on la neutralise.
+      //    (hors débordement déjà appliqué) et on la neutralise. Plafond
+      //    volontairement large : même sur écran ultra-large, le portail
+      //    doit occuper toute la largeur comme un site classique.
       const applied = parseFloat(node.style.getPropertyValue('--bbi-bleed')) || 0;
       const naturalLeft = rect.left + applied;
       const innerWidth = window.innerWidth;
@@ -121,8 +151,10 @@ export const useChromeOffset = (
           : rightFromClient;
       const symmetric = Math.abs(naturalLeft - naturalRight) <= 40;
       const candidate = Math.round(Math.min(naturalLeft, naturalRight));
-      const bleed = symmetric && candidate > 0 && candidate <= 260 ? candidate : 0;
+      const bleed = symmetric && candidate > 0 && candidate <= 1200 ? candidate : 0;
       node.style.setProperty('--bbi-bleed', `${bleed}px`);
+
+      applyStickyTop();
     };
 
     measure();
@@ -131,12 +163,27 @@ export const useChromeOffset = (
       window.setTimeout(measure, 600),
       window.setTimeout(measure, 1600)
     ];
+    let frame = 0;
+    const onScroll = (): void => {
+      if (frame) {
+        return;
+      }
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        applyStickyTop();
+      });
+    };
     window.addEventListener('resize', measure);
     window.addEventListener('load', measure);
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('resize', measure);
       window.removeEventListener('load', measure);
+      window.removeEventListener('scroll', onScroll);
+      if (frame) {
+        window.cancelAnimationFrame(frame);
+      }
     };
   }, [ref]);
 };

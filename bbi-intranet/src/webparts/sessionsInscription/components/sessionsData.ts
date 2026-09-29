@@ -38,13 +38,21 @@ const demoItem = (
   };
 };
 
-export const demoResult = (): ISessionsResult => ({
+export const demoResult = (showPast: boolean = false): ISessionsResult => ({
   items: [
+    ...(showPast
+      ? [
+          demoItem(101, "Management d'équipe — Cohorte 6", -21, 'Présentiel', 'Paris', 'Session clôturée', 'BBI-MGT-101', 'Management'),
+          demoItem(102, 'Fondamentaux Qualiopi — session de juin', -45, 'Distanciel', 'Teams', 'Session clôturée', 'BBI-QUA-301', 'Qualité & Certification')
+        ]
+      : []),
     demoItem(1, "Management d'équipe — Cohorte 7", 7, 'Présentiel', 'Paris', 'Inscriptions ouvertes', 'BBI-MGT-101', 'Management'),
     demoItem(2, "Coaching d'entrepreneurs — Module 1", 14, 'Distanciel', 'Teams', 'Webinaire', 'BBI-COA-201', 'Coaching'),
     demoItem(3, 'Atelier « Traiter les objections »', 21, 'Présentiel', 'Lyon', '3 places', 'BBI-COM-110', 'Commerce'),
     demoItem(4, 'Prospection digitale — promo 12', 30, 'Distanciel', 'Teams', 'Inscriptions ouvertes', 'BBI-DIG-140', 'Digital'),
-    demoItem(5, 'Fondamentaux Qualiopi — revue annuelle', 45, 'Distanciel', 'Teams', 'Complet', 'BBI-QUA-301', 'Qualité & Certification')
+    demoItem(5, 'Fondamentaux Qualiopi — revue annuelle', 45, 'Distanciel', 'Teams', 'Complet', 'BBI-QUA-301', 'Qualité & Certification'),
+    demoItem(6, 'Négociation commerciale avancée', 60, 'Présentiel', 'Dakar', 'Inscriptions ouvertes', 'BBI-COM-220', 'Commerce'),
+    demoItem(7, 'Leadership & gestion du changement', 75, 'Hybride', 'Paris / Teams', 'Liste d’attente', 'BBI-LDR-210', 'Management')
   ],
   isDemo: true,
   empty: false
@@ -86,7 +94,7 @@ export const loadSessions = async (
     const rawItems = json.value || [];
     if (rawItems.length === 0) {
       // Liste créée mais encore vide : le planning reste servi pour que la page soit présentable.
-      return demoResult();
+      return demoResult(showPast);
     }
 
     // Filières : on mappe code formation → filière depuis la liste Formations.
@@ -142,6 +150,6 @@ export const loadSessions = async (
 
     return { items, isDemo: false, empty: items.length === 0 };
   } catch {
-    return demoResult();
+    return demoResult(showPast);
   }
 };

@@ -14,6 +14,7 @@
   --bbi-ink: #21252b;
   --bbi-muted: #5a6270;
   --bbi-chrome-offset: 0px;
+  --bbi-sticky-top: 0px;
   --bbi-bleed: 0px;
   --bbi-shell: 1280px;
 
@@ -25,6 +26,13 @@
   color: var(--bbi-ink);
   background: #fff;
   overflow-x: clip;
+
+  /* Comportement « site classique » : le portail occupe toujours toute la
+     hauteur de l'écran (moins le chrome au-dessus) et le pied de page reste
+     ancré en bas même quand une vue est courte. */
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--bbi-chrome-offset));
 }
 
 .home *,
@@ -84,7 +92,9 @@
 
 .topbar {
   position: sticky;
-  top: var(--bbi-chrome-offset);
+  /* Sur le workbench, la valeur descend vers 0 au défilement (le bandeau
+     workbench défile) ; sur une page moderne elle reste sous le chrome. */
+  top: var(--bbi-sticky-top, var(--bbi-chrome-offset));
   z-index: 60;
   width: 100%;
   background: transparent;
@@ -316,6 +326,28 @@
   width: 100%;
 }
 
+.heroGreeting {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  margin: 0 0 16px;
+  padding: 7px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(4px);
+}
+
+.heroGreetingWave {
+  font-size: 15px;
+  line-height: 1;
+}
+
 .heroEyebrow {
   margin: 0 0 14px;
   font-size: 12px;
@@ -472,8 +504,16 @@
 /* ---------- Sections ---------- */
 
 .content {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  /* Le contenu principal occupe toute la hauteur disponible : le pied de
+     page reste ancré en bas de l'écran, même quand une vue est courte. */
+  flex: 1 1 auto;
   background: #fff;
+}
+
+.content > * {
+  min-width: 0;
 }
 
 .section,
@@ -1125,66 +1165,69 @@ a.sessionStatus:hover {
 
 /* ============================================================
    Portail unifié : des vues d'application dans une seule page SPFx
+
+   Attention : les sélecteurs par ID ne fonctionnent PAS ici —
+   css-loader (CSS Modules) « localise » les ids (ex. #formations
+   devient #formations-abc12) alors que le JSX conserve des ids
+   bruts. On bascule donc sur des attributs data-bbi-view, que
+   css-loader ne touche jamais.
    ============================================================ */
 
-.home[data-view="formations"] .content > :not(#formations),
-.home[data-view="sessions"] .content > :not(#actualites),
-.home[data-view="actualites"] .content > :not(#actualites),
-.home[data-view="ressources"] .content > :not(#ressources),
-.home[data-view="communaute"] .content > :not(#ressources),
-.home[data-view="recherche"] .content > :not(#recherche) {
+.home[data-view="formations"] .content > :not([data-bbi-view="formations"]),
+.home[data-view="sessions"] .content > :not([data-bbi-view="actualites"]),
+.home[data-view="actualites"] .content > :not([data-bbi-view="actualites"]),
+.home[data-view="ressources"] .content > :not([data-bbi-view="ressources"]),
+.home[data-view="communaute"] .content > :not([data-bbi-view="ressources"]),
+.home[data-view="recherche"] .content > :not([data-bbi-view="recherche"]) {
   display: none !important;
 }
 
-.home[data-view="accueil"] #recherche,
-.home[data-view="formations"] #recherche,
-.home[data-view="sessions"] #recherche,
-.home[data-view="actualites"] #recherche,
-.home[data-view="ressources"] #recherche,
-.home[data-view="communaute"] #recherche {
+/* La recherche n'existe que dans la vue « recherche » :
+   jamais de « Résultats pour « » » vide sur l'accueil. */
+.home:not([data-view="recherche"]) [data-bbi-view="recherche"] {
   display: none !important;
 }
 
-.home[data-view="sessions"] #actualites,
-.home[data-view="actualites"] #actualites {
+.home[data-view="sessions"] [data-bbi-view="actualites"],
+.home[data-view="actualites"] [data-bbi-view="actualites"] {
   grid-template-columns: minmax(0, 1fr);
-  min-height: calc(100vh - 90px);
+  flex: 1 1 auto;
   align-content: start;
 }
 
-.home[data-view="sessions"] #actualites .newsColumn,
-.home[data-view="actualites"] #actualites .sessionsColumn {
+.home[data-view="sessions"] [data-bbi-view="actualites"] .newsColumn,
+.home[data-view="actualites"] [data-bbi-view="actualites"] .sessionsColumn {
   display: none !important;
 }
 
-.home[data-view="sessions"] #actualites .sessionsColumn,
-.home[data-view="actualites"] #actualites .newsColumn {
+.home[data-view="sessions"] [data-bbi-view="actualites"] .sessionsColumn,
+.home[data-view="actualites"] [data-bbi-view="actualites"] .newsColumn {
   display: block !important;
   max-width: 900px;
   width: 100%;
   margin: 0 auto;
 }
 
-.home[data-view="formations"] #formations,
-.home[data-view="ressources"] #ressources,
-.home[data-view="communaute"] #ressources,
-.home[data-view="recherche"] #recherche {
-  min-height: calc(100vh - 90px);
+.home[data-view="formations"] [data-bbi-view="formations"],
+.home[data-view="ressources"] [data-bbi-view="ressources"],
+.home[data-view="communaute"] [data-bbi-view="ressources"],
+.home[data-view="recherche"] [data-bbi-view="recherche"] {
+  flex: 1 1 auto;
   align-content: start;
 }
 
-.home[data-view="ressources"] #ressources,
-.home[data-view="communaute"] #ressources {
+.home[data-view="ressources"] [data-bbi-view="ressources"],
+.home[data-view="communaute"] [data-bbi-view="ressources"] {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.home[data-view="ressources"] #ressources .people,
-.home[data-view="communaute"] #ressources .resources {
+.home[data-view="ressources"] [data-bbi-view="ressources"] .people,
+.home[data-view="communaute"] [data-bbi-view="ressources"] .resources {
   display: none !important;
 }
 
-.home[data-view="ressources"] #ressources .resources,
-.home[data-view="communaute"] #ressources .people {
+.home[data-view="ressources"] [data-bbi-view="ressources"] .resources,
+.home[data-view="communaute"] [data-bbi-view="ressources"] .people {
   display: block !important;
   max-width: 1000px;
   width: 100%;
@@ -1298,6 +1341,54 @@ a.sessionStatus:hover {
 
 .searchCatalogButton:hover {
   background: var(--bbi-red);
+}
+
+.searchIntro {
+  margin: 0 0 18px;
+  max-width: 640px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--bbi-muted);
+}
+
+.searchSuggestionsLabel {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bbi-navy-2);
+}
+
+.searchSuggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.searchSuggestionChip {
+  padding: 7px 16px;
+  border: 1px solid var(--bbi-line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--bbi-navy-2);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.searchSuggestionChip:hover {
+  background: var(--bbi-navy);
+  border-color: var(--bbi-navy);
+  color: #fff;
+}
+
+.searchSuggestionChip:focus-visible {
+  outline: 2px solid var(--bbi-red);
+  outline-offset: 2px;
 }
 
 @media (max-width: 600px) {

@@ -164,7 +164,11 @@ const DEMO_SEED: IDemoSeed[] = [
   { Title: "Coaching d'entrepreneurs — promotion 12", Album: 'Sessions de formation', Lieu: 'Lyon', Credit: 'Équipe BBI', Days: 44 },
   { Title: "Atelier d'idéation : refonte du catalogue", Album: 'Vie BBI', Lieu: 'Abidjan', Credit: 'Direction pédagogique', Days: 58 },
   { Title: 'Qualiopi : audit blanc réussi', Album: 'Certifications', Lieu: 'Paris', Credit: 'Qualité BBI', Days: 72 },
-  { Title: 'Coulisses du module « Traiter les objections »', Album: 'Coulisses', Lieu: 'Studio', Credit: 'Communication BBI', Days: 88 }
+  { Title: 'Coulisses du module « Traiter les objections »', Album: 'Coulisses', Lieu: 'Studio', Credit: 'Communication BBI', Days: 88 },
+  { Title: 'Table ronde « Recruter et fidéliser ses talents »', Album: 'Vie BBI', Lieu: 'Paris', Credit: 'Communication BBI', Days: 96 },
+  { Title: 'Management d’équipe — cohorte 7, module 2', Album: 'Sessions de formation', Lieu: 'Paris', Credit: 'Équipe BBI', Days: 104 },
+  { Title: 'Formation des formateurs — immersion terrain', Album: 'Certifications', Lieu: 'Lyon', Credit: 'Direction pédagogique', Days: 118 },
+  { Title: 'Afterwork réseau BBI — antenne Abidjan', Album: 'Vie BBI', Lieu: 'Abidjan', Credit: 'Équipe BBI', Days: 132 }
 ];
 
 const demoItems = (): IGalleryItem[] =>
