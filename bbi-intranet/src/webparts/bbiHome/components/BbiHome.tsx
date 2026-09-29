@@ -141,6 +141,7 @@ const SECTION_IDS: string[] = [
 ];
 
 const BbiHome: React.FC<IBbiHomeProps> = (props) => {
+  console.info("[BBI-HOME] component entered");
   const [status, setStatus] = React.useState<HomeStatus>("loading");
   const [news, setNews] =
     React.useState<IHomeListResult<IHomeNews>>(emptyResult<IHomeNews>());
@@ -155,6 +156,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const scrolled = useScrolled(40);
   const activeSection = useActiveSection(SECTION_IDS);
   useChromeOffset(rootRef);
+  console.info("[BBI-HOME] initial hooks completed", status);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -273,7 +275,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     return (
       <div className={styles.loading} role="status">
         <span className={styles.loadingSpinner} aria-hidden="true" />
-        {props.strings.LoadingMessage}
+        {(props.strings && props.strings.LoadingMessage) ||
+          "Chargement de votre espace…"}
       </div>
     );
   }

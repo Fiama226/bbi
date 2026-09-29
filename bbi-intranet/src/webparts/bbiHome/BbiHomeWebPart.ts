@@ -67,6 +67,9 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
   private _themeVariant: IReadonlyTheme | undefined;
 
   protected onInit(): Promise<void> {
+    if (!this.properties) {
+      return Promise.resolve();
+    }
     if (!this.properties.siteUrl) {
       this.properties.siteUrl = this.context.pageContext.web.absoluteUrl;
     }
@@ -93,37 +96,43 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
   }
 
   public render(): void {
+    console.info('[BBI-HOME] webpart render entered');
+    console.info('[BBI-HOME] properties', typeof this.properties, Object.keys(this.properties || {}));
+    console.info('[BBI-HOME] context', !!this.context, !!this.context?.spHttpClient);
+    const properties = this.properties || ({} as IBbiHomeWebPartProps);
     const element: React.ReactElement<IBbiHomeProps> = React.createElement(BbiHome, {
-      siteUrl: this.properties.siteUrl,
-      newsListTitle: this.properties.newsListTitle,
-      sessionsListTitle: this.properties.sessionsListTitle,
-      trainersListTitle: this.properties.trainersListTitle,
-      formationsListTitle: this.properties.formationsListTitle,
-      documentsLibraryTitle: this.properties.documentsLibraryTitle,
-      maxItems: this.properties.maxItems || 5,
-      heroEyebrow: this.properties.heroEyebrow || '',
-      heroTitle: this.properties.heroTitle || '',
-      heroSubtitle: this.properties.heroSubtitle || '',
-      heroImageUrl: this.properties.heroImageUrl || '',
-      primaryCtaLabel: this.properties.primaryCtaLabel || '',
-      primaryCtaUrl: this.properties.primaryCtaUrl || '',
-      secondaryCtaLabel: this.properties.secondaryCtaLabel || '',
-      secondaryCtaUrl: this.properties.secondaryCtaUrl || '',
-      navLinks: this.properties.navLinks || '',
-      quickLinks: this.properties.quickLinks || '',
-      kpis: this.properties.kpis || '',
-      announcementText: this.properties.announcementText || '',
-      footerNote: this.properties.footerNote || '',
-      showDataNotices: this.properties.showDataNotices === true,
-      enableAnnouncement: this.properties.enableAnnouncement !== false,
-      layoutCompact: this.properties.layoutCompact === true,
+      siteUrl: properties.siteUrl || this.context.pageContext.web.absoluteUrl,
+      newsListTitle: properties.newsListTitle || 'Actualites',
+      sessionsListTitle: properties.sessionsListTitle || 'Sessions',
+      trainersListTitle: properties.trainersListTitle || 'Formateurs',
+      formationsListTitle: properties.formationsListTitle || 'Formations',
+      documentsLibraryTitle: properties.documentsLibraryTitle || 'Supports publiés',
+      maxItems: properties.maxItems || 5,
+      heroEyebrow: properties.heroEyebrow || '',
+      heroTitle: properties.heroTitle || '',
+      heroSubtitle: properties.heroSubtitle || '',
+      heroImageUrl: properties.heroImageUrl || '',
+      primaryCtaLabel: properties.primaryCtaLabel || '',
+      primaryCtaUrl: properties.primaryCtaUrl || '',
+      secondaryCtaLabel: properties.secondaryCtaLabel || '',
+      secondaryCtaUrl: properties.secondaryCtaUrl || '',
+      navLinks: properties.navLinks || '',
+      quickLinks: properties.quickLinks || '',
+      kpis: properties.kpis || '',
+      announcementText: properties.announcementText || '',
+      footerNote: properties.footerNote || '',
+      showDataNotices: properties.showDataNotices === true,
+      enableAnnouncement: properties.enableAnnouncement !== false,
+      layoutCompact: properties.layoutCompact === true,
       spHttpClient: this.context.spHttpClient,
       isDarkTheme: this._themeVariant ? !!this._themeVariant.isInverted : false,
       hasTeamsContext: !!this.context.sdks.microsoftTeams,
       themeVariant: this._themeVariant,
       strings
     });
+    console.info('[BBI-HOME] React element created');
     ReactDom.render(element, this.domElement);
+    console.info('[BBI-HOME] ReactDOM render returned');
   }
 
   protected onDispose(): void {

@@ -368,7 +368,15 @@ function generateConfig(env) {
                     test: /\.s[ac]ss$/i,
                     use: [
                         'style-loader',
-                        'css-loader',
+                        {
+                            loader: 'css-loader',
+                            options: {
+                                modules: {
+                                    auto: true,
+                                    localIdentName: '[local]_[hash:base64:5]'
+                                }
+                            }
+                        },
                         {
                             loader: 'sass-loader',
                             options: {
