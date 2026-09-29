@@ -7,39 +7,56 @@
   "manifestVersion": 2,
   "requiresCustomScript": false,
   "supportsFullBleed": true,
-  "supportedHosts": ["SharePointWebPart", "TeamsTab", "SharePointFullPage", "TeamsPersonalApp"],
+  "supportedHosts": [
+    "SharePointWebPart",
+    "TeamsTab",
+    "SharePointFullPage",
+    "TeamsPersonalApp"
+  ],
   "supportsThemeVariants": true,
-  "preconfiguredEntries": [{
-    "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
-    "group": { "default": "Advanced" },
-    "title": { "default": "BBI Accueil (plein écran)" },
-    "description": { "default": "Page d'accueil BBI immersive : héros plein écran, chiffres clés, actualités, sessions, catalogue et supports publiés." },
-    "officeFabricIconFontName": "Home",
-    "properties": {
-      "siteUrl": "",
-      "newsListTitle": "Actualites",
-      "sessionsListTitle": "Sessions",
-      "trainersListTitle": "Formateurs",
-      "formationsListTitle": "Formations",
-      "documentsLibraryTitle": "Supports publiés",
-      "galleryLibraryTitle": "Galerie médias",
-      "maxItems": 5,
-      "heroEyebrow": "",
-      "heroTitle": "",
-      "heroSubtitle": "",
-      "heroImageUrl": "",
-      "primaryCtaLabel": "",
-      "primaryCtaUrl": "",
-      "secondaryCtaLabel": "",
-      "secondaryCtaUrl": "",
-      "navLinks": "",
-      "quickLinks": "",
-      "kpis": "",
-      "announcementText": "",
-      "footerNote": "",
-      "showDataNotices": false,
-      "enableAnnouncement": true,
-      "layoutCompact": false
+  "preconfiguredEntries": [
+    {
+      "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
+      "group": {
+        "default": "Advanced"
+      },
+      "title": {
+        "default": "BBI Accueil (plein écran)"
+      },
+      "description": {
+        "default": "Page d'accueil BBI immersive : héros en diaporama (images + textes), chiffres clés, actualités paginées avec page dédiée, sessions, employé du mois, certifications, catalogue, supports, galerie, formateurs (photo et contact) et organigramme."
+      },
+      "officeFabricIconFontName": "Home",
+      "properties": {
+        "siteUrl": "",
+        "newsListTitle": "Actualites",
+        "sessionsListTitle": "Sessions",
+        "trainersListTitle": "Formateurs",
+        "formationsListTitle": "Formations",
+        "documentsLibraryTitle": "Supports publiés",
+        "galleryLibraryTitle": "Galerie médias",
+        "maxItems": 5,
+        "heroEyebrow": "",
+        "heroTitle": "",
+        "heroSubtitle": "",
+        "heroImageUrl": "",
+        "primaryCtaLabel": "",
+        "primaryCtaUrl": "",
+        "secondaryCtaLabel": "",
+        "secondaryCtaUrl": "",
+        "navLinks": "",
+        "quickLinks": "",
+        "kpis": "1 500+ | Professionnels accompagnés\n10+ | Formations au catalogue\n9 | Pays couverts par le réseau\n96 % | De satisfaction constatée",
+        "announcementText": "",
+        "footerNote": "",
+        "showDataNotices": false,
+        "enableAnnouncement": true,
+        "layoutCompact": false,
+        "employeeListTitle": "Employés du mois",
+        "certificationsListTitle": "Certifications",
+        "orgChartListTitle": "Organigramme",
+        "heroSlides": ""
+      }
     }
-  }]
+  ]
 }

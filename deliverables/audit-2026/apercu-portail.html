@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBI — Aperçu cliquable du portail 2026 (accueil, actualité, organigramme)</title>
+<link rel="stylesheet" href="apercu-portail.css">
+<style>
+  /* Couche d'aperçu uniquement : cadre, bandeau explicatif, visuels de repli. */
+  html, body { margin: 0; padding: 0; background: #eef1f7; }
+  .preview-bar {
+    position: sticky; top: 0; z-index: 500;
+    display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center;
+    padding: 10px 20px;
+    background: #091430; color: #dce4f5;
+    font: 13px/1.5 "Segoe UI", -apple-system, Roboto, Arial, sans-serif;
+  }
+  .preview-bar strong { color: #fff; }
+  .preview-bar span { color: #9fb4dd; }
+  .preview-bar code {
+    background: rgba(255,255,255,.12); border-radius: 5px; padding: 1px 6px; font-size: 12px;
+  }
+  .preview-frame { max-width: 100%; margin: 0 auto; background: #fff; box-shadow: 0 20px 60px rgba(9,20,48,.18); }
+  .preview-hint { padding: 14px 24px; background: #fff8e6; border-bottom: 1px solid #f0dca6; color: #7a5500; font: 13px/1.6 "Segoe UI", Roboto, Arial, sans-serif; }
+  .preview-hint b { color: #5d4200; }
+  .thumb-placeholder { background: linear-gradient(135deg, #0e265c, #2e4a86); }
+</style>
+</head>
+<body>
+<div class="preview-bar">
+  <strong>BBI · Aperçu cliquable du portail</strong>
+  <span>Accueil (diaporama, chiffres clés, actualités paginées, employé du mois, certifications, formateurs, organigramme)</span>
+  <span>Styles compilés depuis les composants SPFx livrés · <code>tools/build-preview-css.js</code></span>
+</div>
+<div class="preview-hint">
+  <b>Ce que vous pouvez tester ici :</b> le diaporama du héros (images + textes, flèches, pastilles, défilement automatique),
+  la bande de <b>chiffres clés désormais hors de la zone rognée</b> (elle était invisible),
+  une actualité cliquable avec <b>pagination</b> et page dédiée (actualité suivante / précédente / autres),
+  la fiche contact des formateurs (téléphone, e-mail, WhatsApp, Teams), l&apos;<b>employé du mois</b>, les <b>certifications</b>
+  et l&apos;<b>organigramme</b> interactif (zoom, pôles, fiche). Les données sont celles du contenu de repli livré avec la solution.
+</div>
+
+<div class="preview-frame">
+<div class="base-home" id="app" data-view="accueil">
+
+  <div class="base-announcement" role="region" aria-label="Information à la une">
+    <span class="base-announcementDot" aria-hidden="true"></span>
+    <span class="base-announcementText" id="announcement-text">Qualité — Qualiopi : notre audit blanc est une réussite</span>
+    <a class="base-announcementLink" href="#actualites" data-nav="actualites">Voir les actualités →</a>
+  </div>
+
+  <header class="base-topbar base-topbarSolid" id="topbar">
+    <div class="base-topbarInner">
+      <a class="base-brand" href="#accueil" data-nav="accueil">
+        <span class="base-logoImage" role="img" aria-label="BBI"></span>
+        <span class="base-brandText">
+          <strong>BBI Intranet</strong>
+          <small>Propulseur de croissance · Créateur d&apos;impacts</small>
+        </span>
+      </a>
+      <button type="button" class="base-menuButton" aria-label="Navigation">☰</button>
+      <nav class="base-navigation" aria-label="Navigation principale" id="nav">
+        <a class="base-navLink" href="#accueil" data-nav="accueil">Accueil</a>
+        <a class="base-navLink" href="#formations" data-nav="formations">Formations</a>
+        <a class="base-navLink" href="#sessions" data-nav="sessions">Sessions</a>
+        <a class="base-navLink" href="#actualites" data-nav="actualites">Actualités</a>
+        <a class="base-navLink" href="#ressources" data-nav="ressources">Ressources</a>
+        <a class="base-navLink" href="#communaute" data-nav="communaute">Communauté</a>
+        <a class="base-navLink" href="#organigramme" data-nav="organigramme">Organigramme</a>
+      </nav>
+      <form class="base-searchForm" role="search" onsubmit="return false;">
+        <label class="base-visuallyHidden" for="q">Rechercher dans BBI Intranet</label>
+        <input id="q" type="search" placeholder="Rechercher dans BBI">
+        <button type="submit" aria-label="Rechercher">⌕</button>
+      </form>
+    </div>
+  </header>
+
+  <main class="base-content">
+
+    <!-- ============ ACCUEIL : héros en diaporama + chiffres clés ============ -->
+    <section class="hero-heroWrap" id="accueil" data-viewblock="accueil" aria-roledescription="carrousel" aria-label="À la une">
+      <div class="hero-stage" data-bbi-hero-stage="true">
+        <div class="hero-media hero-mediaActive" data-slide="0" aria-hidden="true">
+          <div class="hero-mediaImage hero-visualDemo0"></div>
+        </div>
+        <div class="hero-media" data-slide="1" aria-hidden="true">
+          <div class="hero-mediaImage hero-visualDemo1"></div>
+        </div>
+        <div class="hero-media" data-slide="2" aria-hidden="true">
+          <div class="hero-mediaImage hero-visualDemo2"></div>
+        </div>
+        <div class="hero-media" data-slide="3" aria-hidden="true">
+          <div class="hero-mediaImage hero-visualDemo3"></div>
+        </div>
+        <div class="hero-veil" aria-hidden="true"></div>
+
+        <div class="hero-inner">
+          <p class="hero-greeting"><span class="hero-greetingWave" aria-hidden="true">👋</span>Bonjour Camille</p>
+          <div class="hero-text hero-textAnimated" id="hero-text">
+            <p class="hero-eyebrow" id="hero-eyebrow">Business Builders International</p>
+            <h1 class="hero-title" id="hero-title">L&apos;expertise qui fait grandir les dirigeants.</h1>
+            <p class="hero-subtitle" id="hero-subtitle">Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables.</p>
+            <div class="hero-actions">
+              <a class="hero-primary" id="hero-cta" href="#formations" data-nav="formations">Explorer les formations <span aria-hidden="true">→</span></a>
+              <a class="hero-secondary" href="#ressources" data-nav="ressources">Nos ressources</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-controls">
+          <button type="button" class="hero-arrow" data-slide-prev aria-label="Diapositive précédente">‹</button>
+          <ul class="hero-dots" id="hero-dots" aria-label="Choix de la diapositive"></ul>
+          <span class="hero-progress" id="hero-progress" aria-hidden="true"></span>
+          <button type="button" class="hero-arrow" data-slide-next aria-label="Diapositive suivante">›</button>
+          <button type="button" class="hero-explore" data-nav="formations">Explorer <span aria-hidden="true">↓</span></button>
+        </div>
+      </div>
+
+      <!-- C'EST CE BLOC QUI ÉTAIT INVISIBLE : il vit maintenant HORS de la zone
+           rognée (.hero-stage en overflow:hidden) et remonte de 46 px. -->
+      <ul class="hero-kpiBand" data-bbi-kpi-band="true" aria-label="Chiffres clés BBI">
+        <li class="hero-kpi"><strong>1 500+</strong><span>Professionnels accompagnés</span></li>
+        <li class="hero-kpi"><strong>10+</strong><span>Formations au catalogue</span></li>
+        <li class="hero-kpi"><strong>9</strong><span>Pays couverts par le réseau</span></li>
+        <li class="hero-kpi"><strong>96 %</strong><span>De satisfaction constatée</span></li>
+      </ul>
+    </section>
+
+    <!-- ============ ACCÈS DIRECTS ============ -->
+    <section class="base-section" data-viewblock="accueil" aria-labelledby="quick-title">
+      <div class="base-sectionHeading">
+        <div>
+          <p class="base-eyebrow">Accès directs</p>
+          <h2 id="quick-title">Vos espaces</h2>
+        </div>
+      </div>
+      <div class="base-quickGrid">
+        <a class="base-quickLink" href="#formations" data-nav="formations"><span class="base-quickIcon" aria-hidden="true">▦</span><strong>Catalogue des formations</strong><small>Parcours, modalités et durées</small></a>
+        <a class="base-quickLink" href="#sessions" data-nav="sessions"><span class="base-quickIcon" aria-hidden="true">▣</span><strong>Prochaines sessions</strong><small>Planning et inscriptions</small></a>
+        <a class="base-quickLink" href="#ressources" data-nav="ressources"><span class="base-quickIcon" aria-hidden="true">▤</span><strong>Supports &amp; médias</strong><small>Documents, photos et vidéos</small></a>
+        <a class="base-quickLink" href="#organigramme" data-nav="organigramme"><span class="base-quickIcon" aria-hidden="true">◈</span><strong>Organigramme</strong><small>Équipes, pôles et contacts</small></a>
+        <a class="base-quickLink" href="#communaute" data-nav="communaute"><span class="base-quickIcon" aria-hidden="true">◎</span><strong>Communauté BBI</strong><small>Formateurs et experts</small></a>
+        <a class="base-quickLink" href="#actualites" data-nav="actualites"><span class="base-quickIcon" aria-hidden="true">✦</span><strong>Actualités BBI</strong><small>Les nouvelles du réseau</small></a>
+      </div>
+    </section>
+
+    <!-- ============ ACTUALITÉS + SESSIONS ============ -->
+    <section class="base-newsSessions" id="actualites" data-viewblock="accueil actualites" aria-label="Actualités et prochaines sessions">
+      <div class="base-newsColumn">
+        <div class="base-sectionHeading">
+          <div>
+            <p class="base-eyebrow">À la une</p>
+            <h2>Actualités BBI</h2>
+          </div>
+          <a class="base-textLink" href="#actualites" data-nav="actualites">Toutes les actualités <span aria-hidden="true">→</span></a>
+        </div>
+        <div id="news-board"></div>
+      </div>
+
+      <div class="base-sessionsColumn" id="sessions">
+        <div class="base-sectionHeading">
+          <div>
+            <p class="base-eyebrow">À venir</p>
+            <h2>Prochaines sessions</h2>
+          </div>
+          <a class="base-textLink" href="#sessions" data-nav="sessions">Tout voir <span aria-hidden="true">→</span></a>
+        </div>
+        <ul class="base-sessionList" id="session-list"></ul>
+        <div class="base-agendaCard">
+          <p class="base-eyebrow">Agenda</p>
+          <h3>8 sessions planifiées cette saison</h3>
+          <p>Inscrivez-vous en un clic, ajoutez la session à votre agenda Outlook et retrouvez les supports dès la fin de la formation.</p>
+          <a class="base-textLink" href="#sessions" data-nav="sessions">Ouvrir le planning complet <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EMPLOYÉ DU MOIS + CERTIFICATIONS ============ -->
+    <section class="base-teamSection" id="vie-equipe" data-viewblock="accueil" aria-label="Vie de l'équipe">
+      <div class="team-wrap">
+        <article class="team-employeeCard" aria-labelledby="employee-title">
+          <p class="team-eyebrow">Employé du mois</p>
+          <h2 id="employee-title" class="team-title">Septembre 2026</h2>
+          <div class="team-employeeBody">
+            <span class="team-photo team-visual3" role="img" aria-label="Léa Marchand"><span class="team-photoInitials">LM</span></span>
+            <div class="team-employeeText">
+              <strong class="team-name">Léa Marchand</strong>
+              <span class="team-role">Cheffe de projet e-learning · Opérations &amp; digital</span>
+              <p class="team-message">Léa a piloté la refonte complète des modules e-learning et la mise en ligne des capsules du studio en un trimestre. Un travail d&apos;orfèvre sur la qualité pédagogique et l&apos;accessibilité, salué par les formateurs comme par les apprenants.</p>
+            </div>
+            <ul class="team-facts">
+              <li>5 modules repensés</li>
+              <li>100 % des vidéos sous-titrées</li>
+              <li>4,9/5 auprès des apprenants</li>
+            </ul>
+          </div>
+          <div class="team-cardFooter">
+            <a class="team-link" href="#communaute" data-nav="communaute">Voir l&apos;équipe <span aria-hidden="true">→</span></a>
+            <a class="team-link" href="#organigramme" data-nav="organigramme">Organigramme <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+
+        <article class="team-certCard" aria-labelledby="cert-title">
+          <p class="team-eyebrow">Qualité &amp; conformité</p>
+          <h2 id="cert-title" class="team-title">Certifications &amp; agréments</h2>
+          <ul class="team-certList">
+            <li class="team-certItem">
+              <span class="team-badge team-badge0" aria-hidden="true">QA</span>
+              <span class="team-certText">
+                <strong>Qualiopi — Actions de formation</strong>
+                <span>Cofrac / Marque Qualité</span>
+                <small>Certification qualité des actions de formation, obligatoire pour les financeurs publics.</small>
+              </span>
+              <span class="team-certMeta"><em>Certifié</em><small>Valide jusqu&apos;au avril 2027</small></span>
+            </li>
+            <li class="team-certItem">
+              <span class="team-badge team-badge1" aria-hidden="true">DA</span>
+              <span class="team-certText">
+                <strong>Datadock</strong>
+                <span>Uniformation</span>
+                <small>Référencement des organismes de formation auprès des OPCO.</small>
+              </span>
+              <span class="team-certMeta"><em>Référencé</em><small>Valide jusqu&apos;au janvier 2027</small></span>
+            </li>
+            <li class="team-certItem">
+              <span class="team-badge team-badge2" aria-hidden="true">CB</span>
+              <span class="team-certText">
+                <strong>Certification BBI Formateur référent</strong>
+                <span>Business Builders International</span>
+                <small>Référentiel interne : ingénierie, animation, évaluation et posture.</small>
+              </span>
+              <span class="team-certMeta"><em>42 formateurs certifiés</em></span>
+            </li>
+            <li class="team-certItem">
+              <span class="team-badge team-badge3" aria-hidden="true">PT</span>
+              <span class="team-certText">
+                <strong>Préparation TOSA / ICDL</strong>
+                <span>Centre agréé</span>
+                <small>Compétences numériques certifiées, éligibles au CPF.</small>
+              </span>
+              <span class="team-certMeta"><em>Centre agréé</em><small>Valide jusqu&apos;au juillet 2027</small></span>
+            </li>
+          </ul>
+          <div class="team-cardFooter">
+            <a class="team-link" href="#actualites" data-nav="actualites">Actualités qualité <span aria-hidden="true">→</span></a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============ FORMATIONS ============ -->
+    <section class="base-section" id="formations" data-viewblock="accueil formations" aria-label="Catalogue des formations">
+      <div class="base-sectionHeading">
+        <div>
+          <p class="base-eyebrow">Se former</p>
+          <h2>Catalogue des formations</h2>
+        </div>
+      </div>
+      <div class="base-quickGrid">
+        <a class="base-quickLink" href="#formations" data-nav="formations"><span class="base-quickIcon" aria-hidden="true">▦</span><strong>Management d&apos;équipe</strong><small>BBI-MGT-101 · 14 h · Présentiel</small></a>
+        <a class="base-quickLink" href="#formations" data-nav="formations"><span class="base-quickIcon" aria-hidden="true">▦</span><strong>Négociation commerciale</strong><small>BBI-COM-204 · 7 h · Hybride</small></a>
+        <a class="base-quickLink" href="#formations" data-nav="formations"><span class="base-quickIcon" aria-hidden="true">▦</span><strong>Prospection digitale</strong><small>BBI-DIG-140 · 3,5 h · Distanciel</small></a>
+        <a class="base-quickLink" href="#formations" data-nav="formations"><span class="base-quickIcon" aria-hidden="true">▦</span><strong>Fondamentaux Qualiopi</strong><small>BBI-QUA-301 · 7 h · Distanciel</small></a>
+      </div>
+    </section>
+
+    <!-- ============ RESSOURCES, GALERIE & FORMATEURS ============ -->
+    <section class="base-resourcesPeople" id="ressources" data-viewblock="accueil ressources communaute" aria-label="Supports, galerie et formateurs">
+      <div class="base-resources">
+        <div class="base-documents">
+          <div class="base-sectionHeading">
+            <div>
+              <p class="base-eyebrow">Ressources</p>
+              <h2>Derniers supports publiés</h2>
+            </div>
+          </div>
+          <ul class="base-sessionList">
+            <li class="base-session"><div class="base-sessionInfo"><h3>Support de formation — Management d&apos;équipe</h3><p>📊 PPTX · 4,2 Mo · mis à jour il y a 3 jours</p></div><span class="base-sessionStatus">Télécharger</span></li>
+            <li class="base-session"><div class="base-sessionInfo"><h3>Grille d&apos;évaluation à froid</h3><p>📄 PDF · 320 Ko · mis à jour il y a 8 jours</p></div><span class="base-sessionStatus">Télécharger</span></li>
+            <li class="base-session"><div class="base-sessionInfo"><h3>Kit d&apos;animation — Atelier objections</h3><p>📘 DOCX · 1,1 Mo · mis à jour il y a 12 jours</p></div><span class="base-sessionStatus">Télécharger</span></li>
+          </ul>
+        </div>
+        <div class="base-gallery" id="galerie">
+          <div class="base-sectionHeading">
+            <div>
+              <p class="base-eyebrow">À voir</p>
+              <h2>Galerie de la communauté</h2>
+            </div>
+          </div>
+          <div class="base-quickGrid">
+            <a class="base-quickLink" href="#galerie"><span class="hero-mediaImage hero-visualDemo1" style="height:120px;border-radius:10px" role="img" aria-label="Séminaire annuel"></span><strong>Séminaire annuel — Dakar</strong><small>Vie BBI · 14 photos</small></a>
+            <a class="base-quickLink" href="#galerie"><span class="hero-mediaImage hero-visualDemo0" style="height:120px;border-radius:10px" role="img" aria-label="Atelier prise de parole"></span><strong>Atelier prise de parole</strong><small>Sessions de formation · 9 photos</small></a>
+            <a class="base-quickLink" href="#galerie"><span class="hero-mediaImage hero-visualDemo3" style="height:120px;border-radius:10px" role="img" aria-label="Coulisses du studio"></span><strong>Coulisses du studio</strong><small>Coulisses · 6 photos</small></a>
+            <a class="base-quickLink" href="#galerie"><span class="hero-mediaImage hero-visualDemo2" style="height:120px;border-radius:10px" role="img" aria-label="Remise des attestations"></span><strong>Remise des attestations</strong><small>Certifications · 11 photos</small></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="base-people" id="communaute">
+        <div class="base-sectionHeading">
+          <div>
+            <p class="base-eyebrow">Votre réseau</p>
+            <h2>Formateurs référents</h2>
+          </div>
+          <a class="base-textLink" href="#communaute" data-nav="communaute">Annuaire complet <span aria-hidden="true">→</span></a>
+        </div>
+        <div class="tr-directory">
+          <ul class="tr-grid" id="trainer-grid"></ul>
+        </div>
+        <div class="base-community">
+          <div>
+            <p class="base-eyebrow">Communauté</p>
+            <h3>Réseau des formateurs</h3>
+            <p>Échanges de pratiques, entraide pédagogique et veille : rejoignez la communauté BBI sur Teams et Viva Engage.</p>
+          </div>
+          <div class="base-communityActions">
+            <a class="base-textLink" href="#organigramme" data-nav="organigramme">Voir l&apos;organigramme <span aria-hidden="true">→</span></a>
+            <a class="base-textLink" href="#communaute" data-nav="communaute">Découvrir la communauté <span aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ PAGE DÉDIÉE À UNE ACTUALITÉ ============ -->
+    <section class="base-section" id="actualite" data-viewblock="actualite" aria-label="Actualité">
+      <div id="news-detail"></div>
+    </section>
+
+    <!-- ============ ORGANIGRAMME ============ -->
+    <section class="base-section" id="organigramme" data-viewblock="organigramme" aria-label="Organigramme de l'entreprise">
+      <div class="base-sectionHeading">
+        <div>
+          <p class="base-eyebrow">Notre organisation</p>
+          <h2>Organigramme BBI</h2>
+          <p class="base-sectionLead">Direction, pôles et antennes : cliquez sur un poste pour afficher la fiche et les coordonnées du collaborateur.</p>
+        </div>
+        <a class="base-textLink" href="#communaute" data-nav="communaute">Annuaire des formateurs <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="org-chart" id="org-chart"></div>
+    </section>
+
+    <!-- ============ GRILLE THÉMATIQUE ============ -->
+    <section class="base-topicLinks" data-viewblock="accueil" aria-label="Vie d'entreprise et ressources pédagogiques">
+      <a class="base-topicLink" href="#ressources" data-nav="ressources"><span aria-hidden="true">⌘</span><strong>Méthodes &amp; outils d&apos;animation</strong><small>Kits, modèles et trames de séquence</small></a>
+      <a class="base-topicLink" href="#vie-equipe" data-anchor="vie-equipe"><span aria-hidden="true">✳</span><strong>Qualité &amp; certification</strong><small>Qualiopi, évaluations, preuves de conformité</small></a>
+      <a class="base-topicLink" href="#actualites" data-nav="actualites"><span aria-hidden="true">◈</span><strong>Vie d&apos;entreprise</strong><small>Événements, séminaires et temps forts</small></a>
+      <a class="base-topicLink" href="#organigramme" data-nav="organigramme"><span aria-hidden="true">⌗</span><strong>Organisation &amp; contacts</strong><small>Pôles, antennes et responsables</small></a>
+    </section>
+  </main>
+
+  <footer class="base-footer">
+    <div class="base-footerInner">
+      <span class="base-footerBrand"><span class="base-footerLogo" role="img" aria-label="BBI"></span><span>Business Builders International — Intranet collaboratif</span></span>
+      <nav class="base-footerNav" aria-label="Navigation du portail">
+        <a href="#accueil" data-nav="accueil">Accueil</a>
+        <a href="#formations" data-nav="formations">Formations</a>
+        <a href="#sessions" data-nav="sessions">Sessions</a>
+        <a href="#actualites" data-nav="actualites">Actualités</a>
+        <a href="#ressources" data-nav="ressources">Ressources</a>
+        <a href="#organigramme" data-nav="organigramme">Organigramme</a>
+      </nav>
+      <small class="base-footerCopy">© 2026 Business Builders International · Tous droits réservés</small>
+    </div>
+  </footer>
+
+  <button type="button" class="base-backToTop base-backToTopVisible" id="back-to-top" aria-label="Revenir en haut de la page">↑</button>
+</div>
+</div>
+
+<script>
+/* =====================================================================
+   Aperçu cliquable — reprend la logique des composants React livrés :
+   diaporama du héros, actualités paginées + page dédiée, annuaire des
+   formateurs avec fiche contact, organigramme interactif.
+   Données = contenu de repli livré avec la solution SPFx.
+   ===================================================================== */
+
+var NEWS = [
+  { id: 1, title: '12 nouveaux formateurs certifiés', category: 'Certification', published: '2026-09-25T09:00:00Z', author: 'Direction pédagogique', demo: 0,
+    summary: "La session de certification de septembre s'est achevée avec 100 % de réussite. Retour sur trois jours d'apprentissage collectif.",
+    body: "<p>Trois jours, douze formateurs, un seul objectif : garantir la même qualité d'animation sur l'ensemble du réseau BBI.</p><h2>Un parcours exigeant</h2><p>La certification BBI repose sur trois piliers : la maîtrise du contenu pédagogique, la posture d'animation et l'évaluation continue des acquis. Chaque candidat a animé une séquence filmée en conditions réelles.</p><p>Cette promotion affiche 100 % de réussite au premier passage, avec une note de <strong>4,8 sur 5</strong> pour l'accompagnement des tuteurs.</p>" },
+  { id: 2, title: 'Le catalogue des formations évolue', category: 'Formations', published: '2026-09-18T09:00:00Z', author: 'Équipe BBI', demo: 1,
+    summary: 'Deux nouveaux parcours de management, un module e-learning de prospection digitale et une formation Qualiopi renforcée.',
+    body: "<p>Le catalogue s'enrichit de six parcours, dont deux entièrement nouveaux, pensés à partir des besoins remontés par les clients.</p><p>Les parcours « Management de proximité » et « Conduite du changement » sont proposés en présentiel et en hybride.</p>" },
+  { id: 3, title: 'Qualiopi : notre audit blanc est une réussite', category: 'Qualité', published: '2026-09-12T09:00:00Z', author: 'Qualité BBI', demo: 2,
+    summary: 'Quatorze indicateurs sur quatorze validés. La direction qualité fait le point sur les actions correctives engagées.',
+    body: "<p>L'audit blanc a mobilisé l'ensemble des équipes pendant deux semaines : revue des preuves, entretiens et observation de sessions.</p><p>Les quatorze indicateurs du référentiel national qualité sont validés.</p>" },
+  { id: 4, title: 'Trois nouvelles antennes BBI en Afrique de l’Ouest', category: 'Réseau', published: '2026-08-28T09:00:00Z', author: 'Direction générale', demo: 3,
+    summary: 'Abidjan, Dakar et Bamako rejoignent le réseau. Les premières cohortes locales démarrent au premier trimestre.',
+    body: "<p>Abidjan, Dakar et Bamako rejoignent officiellement le réseau BBI, portant à neuf le nombre de pays couverts.</p><p>Chaque antenne s'appuie sur un formateur référent local, certifié selon le même référentiel.</p>" },
+  { id: 5, title: 'Retour sur les ateliers de rentrée', category: 'Vie BBI', published: '2026-08-15T09:00:00Z', author: 'Communication BBI', demo: 1,
+    summary: 'Les équipes se sont retrouvées autour de nouvelles méthodes pédagogiques et de la refonte des grilles d’évaluation.',
+    body: "<p>Deux jours de travail collectif pour réinterroger nos pratiques : rythmes, évaluation par les pairs et place du digital.</p>" },
+  { id: 6, title: 'Lancement du module e-learning « Prospection digitale »', category: 'Formations', published: '2026-07-30T09:00:00Z', author: 'Digital BBI', demo: 2,
+    summary: 'Cinq micro-séquences, des cas réels et une mise en situation filmée, disponibles pour tous les adhérents.',
+    body: "<p>Cinq micro-séquences de huit minutes, conçues pour être suivies entre deux rendez-vous clients.</p>" },
+  { id: 7, title: 'Séminaire annuel des formateurs : cap sur 2026', category: 'Vie BBI', published: '2026-07-18T09:00:00Z', author: 'Direction pédagogique', demo: 3,
+    summary: 'Deux jours à Dakar pour partager les pratiques et préparer la montée en charge du réseau.',
+    body: "<p>Le séminaire annuel réunira l'ensemble des formateurs autour d'un fil rouge : « transmettre utile ».</p>" },
+  { id: 8, title: 'Nouveau partenariat avec la CCI pour l’alternance', category: 'Partenariats', published: '2026-07-04T09:00:00Z', author: 'Direction générale', demo: 0,
+    summary: 'BBI accompagne les entreprises dans l’intégration de leurs apprentis : parcours tuteur et outils d’évaluation inclus.',
+    body: "<p>Le partenariat couvre trois régions et prévoit la formation de 200 tuteurs d'apprentis sur l'année.</p>" },
+  { id: 9, title: 'Les évaluations à froid progressent de 9 points', category: 'Qualité', published: '2026-06-22T09:00:00Z', author: 'Qualité BBI', demo: 1,
+    summary: 'Mesuré à 90 jours, l’impact des formations progresse nettement sur les indicateurs de mise en pratique.',
+    body: "<p>L'évaluation à 90 jours mesure ce qui reste réellement en place : gestes professionnels, rituels d'équipe, livrables.</p>" },
+  { id: 10, title: 'Programme « Femmes dirigeantes » : appel à candidatures', category: 'Programmes', published: '2026-06-10T09:00:00Z', author: 'Équipe BBI', demo: 2,
+    summary: 'Dix places pour un parcours de six mois mêlant coaching individuel, pairs et mise en relation avec des mentors.',
+    body: "<p>Le programme combine six mois d'accompagnement : coaching individuel, ateliers entre pairs et mentorat.</p>" },
+  { id: 11, title: 'Le studio BBI ouvre ses portes aux antennes', category: 'Digital', published: '2026-05-28T09:00:00Z', author: 'Digital BBI', demo: 3,
+    summary: 'Les antennes peuvent désormais produire leurs propres capsules vidéo avec les équipes du studio.',
+    body: "<p>Tournage, montage, sous-titrage : le studio accompagne les antennes de la conception à la publication.</p>" },
+  { id: 12, title: 'Restauration de la plateforme d’inscription en ligne', category: 'Vie BBI', published: '2026-05-16T09:00:00Z', author: 'Communication BBI', demo: 0,
+    summary: 'Une nouvelle interface d’inscription, plus rapide, disponible depuis les prochaines sessions du portail.',
+    body: "<p>La nouvelle interface tient en un écran : choix de la session, informations du participant et confirmation immédiate.</p>" }
+];
+
+var TRAINERS = [
+  { name: 'Amélie Martin', role: 'Responsable pédagogique', filiere: 'Management & Qualité', location: 'Paris — Siège', phone: '+33 6 12 45 78 90', email: 'amelie.martin@businessbuilders.fr', whatsapp: '+33612457890', demo: 0, bio: "Pilote l'ingénierie pédagogique du réseau et accompagne la montée en compétences des formateurs BBI.", specialites: 'Management de proximité · Ingénierie pédagogique', certifications: 'Qualiopi · Coach professionnel (RNCP)' },
+  { name: 'Stéphane Laurent', role: 'Coach certifié', filiere: 'Coaching & leadership', location: 'Lyon', phone: '+33 6 23 56 89 01', email: 'stephane.laurent@businessbuilders.fr', whatsapp: '+33623568901', demo: 1, bio: 'Coach certifié et ancien directeur commercial : posture, prise de parole et relation client.', specialites: 'Coaching de dirigeants · Prise de parole', certifications: 'Coach certifié ICF · Process Communication' },
+  { name: 'Khadija Diallo', role: 'Formatrice', filiere: 'Commerce & négociation', location: 'Dakar — Antenne', phone: '+221 77 456 78 90', email: 'khadija.diallo@businessbuilders.fr', whatsapp: '+221774567890', demo: 2, bio: 'Spécialiste de la négociation complexe, elle anime les parcours commerciaux sur le terrain.', specialites: 'Négociation · Prospection terrain', certifications: 'Méthode BBI Vente · TOSA' },
+  { name: 'Thomas Bernard', role: 'Formateur', filiere: 'Digital & prospection', location: 'Paris — Siège', phone: '+33 6 34 67 90 12', email: 'thomas.bernard@businessbuilders.fr', whatsapp: '+33634679012', demo: 3, bio: 'Ancien responsable growth : il outille les équipes commerciales et anime le module « Prospection digitale ».', specialites: 'Prospection digitale · Outils CRM', certifications: 'Google Ads · HubSpot Academy' },
+  { name: 'Marie-Claire Ngoma', role: 'Consultante qualité', filiere: 'Qualité & certification', location: 'Abidjan — Antenne', phone: '+225 07 12 34 56 78', email: 'marie-claire.ngoma@businessbuilders.fr', whatsapp: '+2250712345678', demo: 0, bio: 'Accompagne les organismes de formation dans leur mise en conformité Qualiopi.', specialites: 'Qualiopi · Audit interne', certifications: 'Auditeur qualité certifié' },
+  { name: 'Youssef El Amrani', role: 'Formateur', filiere: 'Leadership & changement', location: 'Distanciel', phone: '+33 6 45 78 01 23', email: 'youssef.elamrani@businessbuilders.fr', whatsapp: '+33645780123', demo: 1, bio: "Intervient sur les transformations d'organisation et la conduite du changement.", specialites: 'Conduite du changement · Leadership', certifications: 'Méthode BBI Leadership' },
+  { name: 'Claire Fontaine', role: 'Coach certifiée', filiere: 'Coaching d’entrepreneurs', location: 'Paris — Siège', phone: '+33 6 56 89 12 34', email: 'claire.fontaine@businessbuilders.fr', whatsapp: '+33656891234', demo: 2, bio: 'Accompagne les créateurs et repreneurs : structuration du projet et posture de dirigeant.', specialites: 'Coaching entrepreneurial · Codéveloppement', certifications: 'Coach certifiée · Green Belt Lean' },
+  { name: 'Jean-Marc Okafor', role: 'Directeur pédagogique', filiere: 'Management', location: 'Paris — Siège', phone: '+33 6 67 90 23 45', email: 'jean-marc.okafor@businessbuilders.fr', whatsapp: '+33667902345', demo: 3, bio: "Fixe les orientations pédagogiques du réseau et garantit l'homogénéité des parcours.", specialites: 'Stratégie pédagogique · Management', certifications: 'Qualiopi · MBA' },
+  { name: 'Awa Traoré', role: 'Formatrice', filiere: 'Relation client', location: 'Bamako — Antenne', phone: '+223 76 12 34 56', email: 'awa.traore@businessbuilders.fr', whatsapp: '+22376123456', demo: 0, bio: 'Forme les équipes aux standards de service et à la gestion des réclamations clients.', specialites: 'Relation client · Qualité de service', certifications: 'Méthode BBI Service' },
+  { name: 'Samuel Kouassi', role: 'Formateur', filiere: 'Vente & management', location: 'Abidjan — Antenne', phone: '+225 05 98 76 54 32', email: 'samuel.kouassi@businessbuilders.fr', whatsapp: '+2250598765432', demo: 1, bio: "Accompagne les équipes de vente et les managers de proximité en Afrique de l'Ouest.", specialites: 'Management de proximité · Vente', certifications: 'Méthode BBI Vente' }
+];
+
+var SESSIONS = [
+  { title: "Management d'équipe — Cohorte 7", date: '2026-10-06T09:00:00Z', modality: 'Présentiel', location: 'Paris', status: 'Inscriptions ouvertes', trainer: 'Amélie Martin' },
+  { title: "Coaching d'entrepreneurs — Module 1", date: '2026-10-13T09:00:00Z', modality: 'Distanciel', location: 'Teams', status: 'Webinaire', trainer: 'Claire Fontaine' },
+  { title: 'Atelier « Traiter les objections »', date: '2026-10-20T09:00:00Z', modality: 'Présentiel', location: 'Lyon', status: '3 places', trainer: 'Khadija Diallo' },
+  { title: 'Prospection digitale — promo 12', date: '2026-10-29T09:00:00Z', modality: 'Distanciel', location: 'Teams', status: 'Inscriptions ouvertes', trainer: 'Thomas Bernard' },
+  { title: 'Fondamentaux Qualiopi — revue annuelle', date: '2026-11-03T09:00:00Z', modality: 'Distanciel', location: 'Teams', status: 'Webinaire', trainer: 'Marie-Claire Ngoma' },
+  { title: 'Négociation commerciale avancée', date: '2026-11-16T09:00:00Z', modality: 'Présentiel', location: 'Dakar', status: 'Inscriptions ouvertes', trainer: 'Khadija Diallo' },
+  { title: 'Leadership & gestion du changement', date: '2026-11-30T09:00:00Z', modality: 'Hybride', location: 'Paris / Teams', status: 'Liste d’attente', trainer: 'Youssef El Amrani' },
+  { title: 'Atelier « Prise de parole en public »', date: '2026-12-14T09:00:00Z', modality: 'Présentiel', location: 'Abidjan', status: '5 places', trainer: 'Stéphane Laurent' }
+];
+
+var ORG = [
+  { id: 1, name: 'Jean-Marc Okafor', role: 'Directeur général', pole: 'Direction générale', parent: null, location: 'Paris — Siège', email: 'jean-marc.okafor@businessbuilders.fr', phone: '+33 1 84 20 10 20', demo: 0 },
+  { id: 2, name: 'Amélie Martin', role: 'Directrice pédagogique', pole: 'Pédagogie & ingénierie', parent: 'Jean-Marc Okafor', location: 'Paris — Siège', email: 'amelie.martin@businessbuilders.fr', phone: '+33 1 84 20 11 21', demo: 1 },
+  { id: 3, name: 'Khadija Diallo', role: 'Directrice commerciale & réseau', pole: 'Développement', parent: 'Jean-Marc Okafor', location: 'Dakar — Antenne', email: 'khadija.diallo@businessbuilders.fr', phone: '+221 77 456 78 90', demo: 2 },
+  { id: 4, name: 'Marie-Claire Ngoma', role: 'Directrice qualité & conformité', pole: 'Qualité', parent: 'Jean-Marc Okafor', location: 'Abidjan — Antenne', email: 'marie-claire.ngoma@businessbuilders.fr', phone: '+225 07 12 34 56 78', demo: 3 },
+  { id: 5, name: 'Thomas Bernard', role: 'Directeur opérations & digital', pole: 'Opérations', parent: 'Jean-Marc Okafor', location: 'Paris — Siège', email: 'thomas.bernard@businessbuilders.fr', phone: '+33 1 84 20 14 24', demo: 0 },
+  { id: 6, name: 'Stéphane Laurent', role: 'Responsable coaching & leadership', pole: 'Pédagogie & ingénierie', parent: 'Amélie Martin', location: 'Lyon', email: 'stephane.laurent@businessbuilders.fr', phone: '+33 6 23 56 89 01', demo: 1 },
+  { id: 7, name: 'Claire Fontaine', role: 'Responsable certification', pole: 'Pédagogie & ingénierie', parent: 'Amélie Martin', location: 'Paris — Siège', email: 'claire.fontaine@businessbuilders.fr', phone: '+33 6 56 89 12 34', demo: 2 },
+  { id: 8, name: 'Youssef El Amrani', role: 'Responsable parcours management', pole: 'Pédagogie & ingénierie', parent: 'Amélie Martin', location: 'Distanciel', email: 'youssef.elamrani@businessbuilders.fr', phone: '+33 6 45 78 01 23', demo: 3 },
+  { id: 9, name: 'Awa Traoré', role: 'Responsable antenne Bamako', pole: 'Développement', parent: 'Khadija Diallo', location: 'Bamako — Antenne', email: 'awa.traore@businessbuilders.fr', phone: '+223 76 12 34 56', demo: 0 },
+  { id: 10, name: 'Samuel Kouassi', role: 'Responsable antenne Abidjan', pole: 'Développement', parent: 'Khadija Diallo', location: 'Abidjan — Antenne', email: 'samuel.kouassi@businessbuilders.fr', phone: '+225 05 98 76 54 32', demo: 1 },
+  { id: 11, name: 'Fatou Ndiaye', role: 'Auditrice qualité', pole: 'Qualité', parent: 'Marie-Claire Ngoma', location: 'Dakar — Antenne', email: 'fatou.ndiaye@businessbuilders.fr', phone: '+221 77 123 45 67', demo: 2 },
+  { id: 12, name: 'Léa Marchand', role: 'Cheffe de projet e-learning', pole: 'Opérations', parent: 'Thomas Bernard', location: 'Paris — Siège', email: 'lea.marchand@businessbuilders.fr', phone: '+33 1 84 20 19 29', demo: 3 }
+];
+
+/* --------------------------- helpers -------------------------------- */
+function esc(value) {
+  return String(value === undefined || value === null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function initials(name) {
+  return String(name || '').split(/\s+/).filter(Boolean).slice(0, 2).map(function (p) { return p.charAt(0); }).join('').toUpperCase();
+}
+function fdate(value) {
+  return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
+}
+function fdateLong(value) {
+  return new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(value));
+}
+function fday(value) {
+  return new Intl.DateTimeFormat('fr-FR', { day: '2-digit' }).format(new Date(value));
+}
+function fmonth(value) {
+  return new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(new Date(value)).replace('.', '');
+}
+function minutes(article) {
+  var words = (article.body + ' ' + article.summary).replace(/<[^>]+>/g, ' ').split(/\s+/).filter(function (w) { return w.length > 1; }).length;
+  return Math.max(1, Math.round(words / 200));
+}
+function visualClass(prefix, index) { return prefix + 'visual' + ((index || 0) % 4); }
+
+/* ------------------------- héros (diaporama) ------------------------ */
+var SLIDES = [
+  { eyebrow: 'Business Builders International', title: "L'expertise qui fait grandir les dirigeants.", subtitle: 'Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables.', cta: 'Explorer les formations', url: '#formations' },
+  { eyebrow: 'Notre méthode', title: 'Des parcours conçus pour le terrain.', subtitle: 'Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours.', cta: 'Voir les prochaines sessions', url: '#sessions' },
+  { eyebrow: 'Réseau international', title: '9 pays, une même exigence de qualité.', subtitle: 'Un référentiel pédagogique unique et des antennes locales dans chaque région.', cta: "Découvrir l'organisation", url: '#organigramme' },
+  { eyebrow: 'Qualité certifiée', title: 'Qualiopi, un gage de confiance.', subtitle: 'Des process audités et une amélioration continue au service de vos financeurs.', cta: 'Voir les certifications', url: '#vie-equipe' }
+];
+var heroIndex = 0, heroTimer = null, heroPaused = false;
+var heroMedia = Array.prototype.slice.call(document.querySelectorAll('[data-slide]'));
+var heroDots = document.getElementById('hero-dots');
+
+SLIDES.forEach(function (slide, index) {
+  var li = document.createElement('li');
+  var button = document.createElement('button');
+  button.type = 'button';
+  button.className = index === 0 ? 'hero-dot hero-dotActive' : 'hero-dot';
+  button.setAttribute('aria-label', 'Diapositive ' + (index + 1) + ' sur ' + SLIDES.length + ' : ' + slide.title);
+  button.addEventListener('click', function () { showSlide(index); restartHero(); });
+  li.appendChild(button);
+  heroDots.appendChild(li);
+});
+
+function showSlide(index) {
+  heroIndex = (index + SLIDES.length) % SLIDES.length;
+  var slide = SLIDES[heroIndex];
+  heroMedia.forEach(function (media, i) {
+    media.className = i === heroIndex ? 'hero-media hero-mediaActive' : 'hero-media';
+  });
+  Array.prototype.slice.call(heroDots.children).forEach(function (li, i) {
+    li.firstChild.className = i === heroIndex ? 'hero-dot hero-dotActive' : 'hero-dot';
+  });
+  document.getElementById('hero-eyebrow').textContent = slide.eyebrow;
+  document.getElementById('hero-title').textContent = slide.title;
+  document.getElementById('hero-subtitle').textContent = slide.subtitle;
+  var cta = document.getElementById('hero-cta');
+  cta.innerHTML = esc(slide.cta) + ' <span aria-hidden="true">→</span>';
+  cta.setAttribute('href', slide.url);
+  cta.setAttribute('data-nav', slide.url.replace('#', ''));
+  var text = document.getElementById('hero-text');
+  text.classList.remove('hero-textAnimated');
+  void text.offsetWidth; /* relance l'animation */
+  text.classList.add('hero-textAnimated');
+  var progress = document.getElementById('hero-progress');
+  progress.style.animation = 'none';
+  void progress.offsetWidth;
+  progress.style.animation = 'bbiHeroProgress 8000ms linear forwards';
+}
+function restartHero() {
+  if (heroTimer) { clearInterval(heroTimer); }
+  heroTimer = setInterval(function () { if (!heroPaused) { showSlide(heroIndex + 1); } }, 8000);
+}
+document.querySelector('[data-slide-prev]').addEventListener('click', function () { showSlide(heroIndex - 1); restartHero(); });
+document.querySelector('[data-slide-next]').addEventListener('click', function () { showSlide(heroIndex + 1); restartHero(); });
+document.querySelector('.hero-heroWrap').addEventListener('mouseenter', function () { heroPaused = true; });
+document.querySelector('.hero-heroWrap').addEventListener('mouseleave', function () { heroPaused = false; });
+showSlide(0);
+restartHero();
+
+/* --------------------- actualités + pagination ---------------------- */
+var NEWS_PAGE_SIZE = 4, newsPage = 0;
+
+function newsCard(article) {
+  return '<li class="news-card">' +
+    '<button type="button" class="news-cardButton" data-article="' + article.id + '">' +
+      '<span class="news-cardImage ' + visualClass('news-', article.demo) + '" role="img" aria-label=""></span>' +
+      '<span class="news-cardBody">' +
+        '<span class="news-category">' + esc(article.category) + '</span>' +
+        '<strong class="news-cardTitle">' + esc(article.title) + '</strong>' +
+        '<span class="news-cardSummary">' + esc(article.summary) + '</span>' +
+        '<span class="news-cardMeta">' + fdate(article.published) + ' · ' + esc(article.author) + ' · ' + minutes(article) + ' min</span>' +
+        '<span class="news-cardMore">Lire l&apos;actualité <span aria-hidden="true">→</span></span>' +
+      '</span>' +
+    '</button></li>';
+}
+
+function renderNewsBoard() {
+  var totalPages = Math.ceil(NEWS.length / NEWS_PAGE_SIZE);
+  var slice = NEWS.slice(newsPage * NEWS_PAGE_SIZE, newsPage * NEWS_PAGE_SIZE + NEWS_PAGE_SIZE);
+  var featured = slice[0];
+  var rest = slice.slice(1);
+  var html = '<div class="news-board">' +
+    '<article class="news-featured"><button type="button" class="news-featuredButton" data-article="' + featured.id + '">' +
+      '<span class="news-featuredImage ' + visualClass('news-', featured.demo) + '" role="img" aria-label=""></span>' +
+      '<span class="news-featuredBody">' +
+        '<span class="news-category">' + esc(featured.category) + '</span>' +
+        '<strong class="news-featuredTitle">' + esc(featured.title) + '</strong>' +
+        '<span class="news-featuredSummary">' + esc(featured.summary) + '</span>' +
+        '<span class="news-cardMeta">' + fdate(featured.published) + ' · ' + esc(featured.author) + ' · ' + minutes(featured) + ' min de lecture</span>' +
+        '<span class="news-featuredMore">Lire l&apos;actualité <span aria-hidden="true">→</span></span>' +
+      '</span></button></article>';
+  if (rest.length) {
+    html += '<ul class="news-grid">' + rest.map(newsCard).join('') + '</ul>';
+  }
+  html += '<nav class="news-pagination" data-bbi-news-pagination="true" aria-label="Pagination des actualités">';
+  html += '<button type="button" class="news-pageButton" data-page="0" ' + (newsPage === 0 ? 'disabled' : '') + ' aria-label="Première page">«</button>';
+  html += '<button type="button" class="news-pageButton" data-page="' + (newsPage - 1) + '" ' + (newsPage === 0 ? 'disabled' : '') + ' aria-label="Page précédente">‹</button>';
+  for (var i = 0; i < totalPages; i += 1) {
+    html += '<button type="button" class="news-pageButton' + (i === newsPage ? ' news-pageButtonActive' : '') + '" data-page="' + i + '"' + (i === newsPage ? ' aria-current="page"' : '') + '>' + (i + 1) + '</button>';
+  }
+  html += '<button type="button" class="news-pageButton" data-page="' + (newsPage + 1) + '" ' + (newsPage >= totalPages - 1 ? 'disabled' : '') + ' aria-label="Page suivante">›</button>';
+  html += '<span class="news-pageInfo">Page ' + (newsPage + 1) + ' sur ' + totalPages + '</span></nav>';
+  html += '<a class="news-viewAll" href="#actualites" data-nav="actualites">Toutes les actualités <span aria-hidden="true">→</span></a></div>';
+  document.getElementById('news-board').innerHTML = html;
+}
+
+var currentArticleId = 0;
+
+function renderNewsDetail(id) {
+  var index = -1;
+  NEWS.forEach(function (item, i) { if (item.id === id) { index = i; } });
+  if (index === -1) { index = 0; }
+  var article = NEWS[index];
+  currentArticleId = article.id;
+  var previous = index > 0 ? NEWS[index - 1] : null;
+  var next = index < NEWS.length - 1 ? NEWS[index + 1] : null;
+  var others = NEWS.filter(function (item) { return item.id !== article.id; }).slice(0, 4);
+  var out = '<div class="nd-shell"><nav class="nd-breadcrumb" aria-label="Fil d\'ariane">' +
+    '<a href="#accueil" data-nav="accueil">Accueil</a><span aria-hidden="true">›</span>' +
+    '<a href="#actualites" data-nav="actualites">Actualités</a><span aria-hidden="true">›</span><span>' + esc(article.category) + '</span></nav>' +
+    '<div class="nd-layout"><article class="nd-article"><header class="nd-head">' +
+      '<span class="nd-category">' + esc(article.category) + '</span>' +
+      '<h1 class="nd-title">' + esc(article.title) + '</h1>' +
+      '<p class="nd-standfirst">' + esc(article.summary) + '</p>' +
+      '<div class="nd-byline"><span class="nd-author"><span class="nd-authorAvatar" aria-hidden="true">' + initials(article.author) + '</span>' + esc(article.author) + '</span>' +
+      '<span aria-hidden="true">·</span><time>' + fdateLong(article.published) + '</time><span aria-hidden="true">·</span><span>' + minutes(article) + ' min de lecture</span></div>' +
+    '</header>' +
+    '<figure class="nd-figure ' + visualClass('nd-', article.demo) + '" role="img" aria-label="' + esc(article.title) + '"></figure>' +
+    '<div class="nd-body"><div class="nd-rich">' + article.body + '</div>' +
+      '<div class="nd-footerActions"><button type="button" class="nd-backButton" data-nav="actualites"><span aria-hidden="true">←</span> Toutes les actualités</button>' +
+      '<div class="nd-share"><span class="nd-shareLabel">Partager</span>' +
+        '<button type="button" class="nd-shareButton">✉ Outlook</button>' +
+        '<button type="button" class="nd-shareButton">⬦ Teams</button>' +
+        '<button type="button" class="nd-shareButton">⌘ Copier le lien</button></div></div></div></article>' +
+    '<aside class="nd-sidebar" aria-label="Navigation dans les actualités"><div class="nd-contextGroup">';
+  if (next) {
+    out += '<button type="button" class="nd-context nd-contextNext" data-article="' + next.id + '"><span class="nd-contextLabel">Actualité suivante <span aria-hidden="true">→</span></span><strong>' + esc(next.title) + '</strong><small>' + esc(next.category) + '</small></button>';
+  }
+  if (previous) {
+    out += '<button type="button" class="nd-context" data-article="' + previous.id + '"><span class="nd-contextLabel"><span aria-hidden="true">←</span> Actualité précédente</span><strong>' + esc(previous.title) + '</strong><small>' + esc(previous.category) + '</small></button>';
+  }
+  out += '</div><div class="nd-others"><h2>Autres actualités</h2><ul class="nd-othersList">';
+  others.forEach(function (item) {
+    out += '<li><button type="button" class="nd-otherItem" data-article="' + item.id + '">' +
+      '<span class="nd-otherImage ' + visualClass('nd-', item.demo) + '" aria-hidden="true"></span>' +
+      '<span class="nd-otherText"><strong>' + esc(item.title) + '</strong><small>' + esc(item.category) + '</small></span></button></li>';
+  });
+  out += '</ul><a class="nd-allNews" href="#actualites" data-nav="actualites">Toutes les actualités <span aria-hidden="true">→</span></a></div></aside></div></div>';
+  document.getElementById('news-detail').innerHTML = out;
+}
+
+/* ------------------- sessions + annuaire formateurs ----------------- */
+function renderSessions() {
+  document.getElementById('session-list').innerHTML = SESSIONS.map(function (session) {
+    return '<li class="base-session"><div class="base-sessionDate"><strong>' + fday(session.date) + '</strong><span>' + fmonth(session.date) + '</span></div>' +
+      '<div class="base-sessionInfo"><h3>' + esc(session.title) + '</h3><p>⌂ ' + esc(session.modality) + ' · ' + esc(session.location) + '</p>' +
+      '<small>Animé par ' + esc(session.trainer) + '</small></div>' +
+      '<span class="base-sessionStatus">' + esc(session.status) + '</span></li>';
+  }).join('');
+}
+
+function renderTrainers() {
+  document.getElementById('trainer-grid').innerHTML = TRAINERS.slice(0, 8).map(function (trainer, index) {
+    return '<li class="tr-card"><button type="button" class="tr-cardButton" data-trainer="' + index + '" aria-label="Afficher la fiche de ' + esc(trainer.name) + '">' +
+      '<span class="tr-photo ' + visualClass('tr-', trainer.demo) + '" role="img" aria-label="' + esc(trainer.name) + '"><span class="tr-photoInitials">' + initials(trainer.name) + '</span></span>' +
+      '<span class="tr-identity"><strong>' + esc(trainer.name) + '</strong><small>' + esc(trainer.role) + '</small><em>' + esc(trainer.filiere) + '</em></span>' +
+      '<span class="tr-hint">Fiche &amp; contact <span aria-hidden="true">→</span></span></button></li>';
+  }).join('');
+}
+
+function openTrainer(index) {
+  var trainer = TRAINERS[index];
+  var upcoming = SESSIONS.filter(function (session) { return session.trainer === trainer.name; });
+  var overlay = document.createElement('div');
+  overlay.className = 'tr-overlay';
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
+  overlay.innerHTML = '<div class="tr-modal">' +
+    '<button type="button" class="tr-close" aria-label="Fermer la fiche">✕</button>' +
+    '<div class="tr-modalHead"><span class="tr-modalPhoto ' + visualClass('tr-', trainer.demo) + '" role="img" aria-label="' + esc(trainer.name) + '">' + initials(trainer.name) + '</span>' +
+      '<div class="tr-modalIdentity"><h2 class="tr-modalName">' + esc(trainer.name) + '</h2><p class="tr-modalRole">' + esc(trainer.role) + '</p>' +
+      '<ul class="tr-tags"><li class="tr-tagPrimary">' + esc(trainer.filiere) + '</li><li>' + esc(trainer.location) + '</li></ul></div></div>' +
+    '<div class="tr-actions">' +
+      '<a class="tr-action tr-actionWhatsApp" href="https://wa.me/' + trainer.whatsapp.replace(/[^\d]/g, '') + '" target="_blank" rel="noopener">WhatsApp</a>' +
+      '<a class="tr-action" href="mailto:' + trainer.email + '">Envoyer un e-mail</a>' +
+      '<a class="tr-action" href="tel:' + trainer.phone.replace(/[^\d+]/g, '') + '">Appeler</a>' +
+      '<a class="tr-action" href="https://teams.microsoft.com/l/chat/0/0?users=' + encodeURIComponent(trainer.email) + '" target="_blank" rel="noopener">Discuter sur Teams</a></div>' +
+    '<dl class="tr-details">' +
+      '<div><dt>Téléphone</dt><dd>' + esc(trainer.phone) + '</dd></div>' +
+      '<div><dt>E-mail</dt><dd>' + esc(trainer.email) + '</dd></div>' +
+      '<div><dt>WhatsApp</dt><dd>' + esc(trainer.whatsapp) + '</dd></div>' +
+      '<div><dt>Localisation</dt><dd>' + esc(trainer.location) + '</dd></div></dl>' +
+    '<p class="tr-bio">' + esc(trainer.bio) + '</p>' +
+    '<section class="tr-modalSection"><h3>Spécialités</h3><ul class="tr-chips">' + trainer.specialites.split('·').map(function (chip) { return '<li>' + esc(chip.trim()) + '</li>'; }).join('') + '</ul></section>' +
+    '<section class="tr-modalSection"><h3>Certifications</h3><ul class="tr-chips">' + trainer.certifications.split('·').map(function (chip) { return '<li class="tr-chipCert">' + esc(chip.trim()) + '</li>'; }).join('') + '</ul></section>' +
+    (upcoming.length ? '<section class="tr-modalSection"><h3>Sessions animées</h3><ul class="tr-sessionList">' + upcoming.map(function (session) {
+      return '<li><strong>' + esc(session.title) + '</strong><small>' + fdate(session.date) + ' · ' + esc(session.modality) + ' · ' + esc(session.location) + '</small></li>';
+    }).join('') + '</ul></section>' : '') +
+    '</div>';
+  document.body.appendChild(overlay);
+  document.body.style.overflow = 'hidden';
+  overlay.querySelector('.tr-close').focus();
+  function close() {
+    document.body.removeChild(overlay);
+    document.body.style.overflow = '';
+  }
+  overlay.querySelector('.tr-close').addEventListener('click', close);
+  overlay.addEventListener('click', function (event) { if (event.target === overlay) { close(); } });
+  document.addEventListener('keydown', function onKey(event) {
+    if (event.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); }
+  });
+}
+
+/* --------------------------- organigramme --------------------------- */
+var orgPole = '', orgZoom = 1, orgListView = false, orgSelected = 1;
+
+function orgTree() {
+  /* Copies neuves à chaque rendu : les données sources ne sont jamais
+     modifiées (sinon les enfants s'accumuleraient à chaque re-rendu). */
+  var copies = ORG.map(function (node) {
+    return {
+      id: node.id, name: node.name, role: node.role, pole: node.pole,
+      parent: node.parent, location: node.location, email: node.email,
+      phone: node.phone, demo: node.demo, children: []
+    };
+  });
+  var byName = {};
+  copies.forEach(function (node) { byName[node.name] = node; });
+  var roots = [];
+  copies.forEach(function (node) {
+    var parent = node.parent ? byName[node.parent] : null;
+    if (parent) {
+      parent.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  });
+  return roots;
+}
+
+function orgNodeHtml(node, depth) {
+  var isSelected = node.id === orgSelected;
+  var dimmed = orgPole && node.pole !== orgPole;
+  var classes = 'org-nodeCard' + (depth === 0 ? ' org-nodeRoot' : '') + (isSelected ? ' org-nodeSelected' : '') + (dimmed ? ' org-nodeDimmed' : '');
+  var html = '<li class="org-nodeWrap"><button type="button" class="' + classes + '" data-org="' + node.id + '" aria-pressed="' + isSelected + '">' +
+    '<span class="org-avatar ' + visualClass('org-', node.demo) + '" role="img" aria-label="' + esc(node.name) + '">' + initials(node.name) + '</span>' +
+    '<span class="org-nodeIdentity"><strong>' + esc(node.name) + '</strong><small>' + esc(node.role) + '</small></span>' +
+    (node.children && node.children.length ? '<span class="org-nodeCount">' + node.children.length + '</span>' : '') +
+    '</button>';
+  if (node.children && node.children.length) {
+    html += '<ul class="org-childList">' + node.children.map(function (child) { return orgNodeHtml(child, depth + 1); }).join('') + '</ul>';
+  }
+  return html + '</li>';
+}
+
+function renderOrgChart() {
+  var roots = orgTree();
+  var poles = [];
+  ORG.forEach(function (node) { if (poles.indexOf(node.pole) === -1) { poles.push(node.pole); } });
+  poles.sort();
+  var selected = ORG.filter(function (node) { return node.id === orgSelected; })[0] || ORG[0];
+  var flat = [];
+  (function walk(list, depth) { list.forEach(function (node) { flat.push({ node: node, depth: depth }); walk(node.children || [], depth + 1); }); })(roots, 0);
+
+  var html = '<div class="org-toolbar"><div class="org-filters" role="group" aria-label="Mettre en avant un pôle">' +
+    '<button type="button" class="org-chip' + (orgPole ? '' : ' org-chipActive') + '" data-pole="">Tous les pôles</button>' +
+    poles.map(function (pole) { return '<button type="button" class="org-chip' + (orgPole === pole ? ' org-chipActive' : '') + '" data-pole="' + esc(pole) + '">' + esc(pole) + '</button>'; }).join('') +
+    '</div><div class="org-tools"><div class="org-zoom" role="group" aria-label="Zoom">' +
+      '<button type="button" class="org-toolButton" data-zoom="-1" aria-label="Réduire">−</button>' +
+      '<span class="org-zoomValue">' + Math.round(orgZoom * 100) + ' %</span>' +
+      '<button type="button" class="org-toolButton" data-zoom="1" aria-label="Agrandir">+</button></div>' +
+      '<button type="button" class="org-toolButton" data-listview="1" aria-pressed="' + orgListView + '">' + (orgListView ? 'Vue arbre' : 'Vue liste') + '</button>' +
+    '</div></div>';
+
+  if (orgListView) {
+    html += '<ul class="org-listView">' + flat.map(function (entry) {
+      var node = entry.node;
+      return '<li class="' + (orgPole && node.pole !== orgPole ? 'org-listItemDimmed' : '') + '" style="padding-left:' + (entry.depth * 22 + 14) + 'px">' +
+        '<button type="button" class="org-listButton" data-org="' + node.id + '">' +
+        '<span class="org-listAvatar ' + visualClass('org-', node.demo) + '">' + initials(node.name) + '</span>' +
+        '<span><strong>' + esc(node.name) + '</strong><small>' + esc([node.role, node.pole, node.location].join(' · ')) + '</small></span>' +
+        '<span aria-hidden="true">→</span></button></li>';
+    }).join('') + '</ul>';
+  } else {
+    html += '<div class="org-canvas"><div class="org-treeZoom" style="zoom:' + orgZoom + '"><ul class="org-tree">' +
+      roots.map(function (node) { return orgNodeHtml(node, 0); }).join('') + '</ul></div></div>';
+  }
+
+  html += '<aside class="org-detail" aria-label="Fiche de ' + esc(selected.name) + '">' +
+    '<span class="org-detailAvatar ' + visualClass('org-', selected.demo) + '" role="img" aria-label="' + esc(selected.name) + '">' + initials(selected.name) + '</span>' +
+    '<div class="org-detailText"><strong>' + esc(selected.name) + '</strong><span>' + esc(selected.role) + '</span><em>' + esc(selected.pole) + '</em></div>' +
+    '<dl class="org-detailList">' +
+      '<div><dt>E-mail</dt><dd><a href="mailto:' + selected.email + '">' + esc(selected.email) + '</a></dd></div>' +
+      '<div><dt>Téléphone</dt><dd><a href="tel:' + selected.phone.replace(/[^\d+]/g, '') + '">' + esc(selected.phone) + '</a></dd></div>' +
+      '<div><dt>Localisation</dt><dd>' + esc(selected.location) + '</dd></div></dl>' +
+    '<div class="org-detailActions">' +
+      '<a class="org-detailAction" href="https://teams.microsoft.com/l/chat/0/0?users=' + encodeURIComponent(selected.email) + '" target="_blank" rel="noopener">Discuter sur Teams</a>' +
+      '<a class="org-detailAction" href="tel:' + selected.phone.replace(/[^\d+]/g, '') + '">Appeler</a></div></aside>';
+
+  document.getElementById('org-chart').innerHTML = html;
+}
+
+/* ------------------------ navigation et vues ------------------------ */
+var VIEW_ALIASES = {
+  accueil: 'accueil', home: 'accueil', acces: 'accueil', 'vie-equipe': 'accueil',
+  formations: 'formations', catalogue: 'formations',
+  sessions: 'sessions', agenda: 'sessions',
+  actualites: 'actualites', news: 'actualites', 'vie-bbi': 'actualites',
+  actualite: 'actualite', article: 'actualite', newsitem: 'actualite',
+  ressources: 'ressources', documents: 'ressources', galerie: 'ressources',
+  communaute: 'communaute', formateurs: 'communaute', support: 'communaute',
+  organigramme: 'organigramme', organisation: 'organigramme', recherche: 'recherche'
+};
+
+/* Ancres de section : uniquement `acces` et `vie-equipe` (voir portalRoutes.ts). */
+var HOME_ANCHORS = { 'vie-equipe': 'vie-equipe', acces: 'acces' };
+
+function hashTerm() {
+  var raw = (window.location.hash || '').replace(/^#/, '');
+  return raw.split(/[?/&]/)[0].toLowerCase();
+}
+
+function setView(view, options) {
+  document.getElementById('app').setAttribute('data-view', view);
+  if (!options || !options.silent) {
+    var hash = view;
+    if (view === 'actualite' && currentArticleId) { hash = 'actualite?id=' + currentArticleId; }
+    if (window.location.hash !== '#' + hash) { window.history.pushState(null, '', '#' + hash); }
+  }
+  Array.prototype.slice.call(document.querySelectorAll('[data-viewblock]')).forEach(function (block) {
+    var tokens = block.getAttribute('data-viewblock').split(/\s+/);
+    block.classList.toggle('preview-hidden', tokens.indexOf(view) === -1);
+  });
+  Array.prototype.slice.call(document.querySelectorAll('#nav .base-navLink')).forEach(function (link) {
+    link.classList.toggle('base-navActive', link.getAttribute('data-nav') === view);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.addEventListener('click', function (event) {
+  var target = event.target.closest ? event.target.closest('[data-nav],[data-anchor],[data-article],[data-trainer],[data-org],[data-page],[data-pole],[data-zoom],[data-listview]') : null;
+  if (!target) { return; }
+  if (target.hasAttribute('data-anchor')) {
+    event.preventDefault();
+    setView('accueil');
+    var section = document.getElementById(target.getAttribute('data-anchor'));
+    if (section) { window.setTimeout(function () { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 40); }
+    return;
+  }
+  if (target.hasAttribute('data-nav')) {
+    event.preventDefault();
+    setView(target.getAttribute('data-nav'));
+    return;
+  }
+  if (target.hasAttribute('data-article')) {
+    renderNewsDetail(parseInt(target.getAttribute('data-article'), 10));
+    setView('actualite');
+    return;
+  }
+  if (target.hasAttribute('data-trainer')) {
+    openTrainer(parseInt(target.getAttribute('data-trainer'), 10));
+    return;
+  }
+  if (target.hasAttribute('data-org')) {
+    orgSelected = parseInt(target.getAttribute('data-org'), 10);
+    renderOrgChart();
+    return;
+  }
+  if (target.hasAttribute('data-page')) {
+    var page = parseInt(target.getAttribute('data-page'), 10);
+    var totalPages = Math.ceil(NEWS.length / NEWS_PAGE_SIZE);
+    if (page >= 0 && page < totalPages) { newsPage = page; renderNewsBoard(); }
+    return;
+  }
+  if (target.hasAttribute('data-pole')) {
+    var pole = target.getAttribute('data-pole');
+    orgPole = orgPole === pole ? '' : pole;
+    renderOrgChart();
+    return;
+  }
+  if (target.hasAttribute('data-zoom')) {
+    orgZoom = Math.min(1.4, Math.max(0.6, Math.round((orgZoom + parseInt(target.getAttribute('data-zoom'), 10) * 0.1) * 10) / 10));
+    renderOrgChart();
+    return;
+  }
+  if (target.hasAttribute('data-listview')) {
+    orgListView = !orgListView;
+    renderOrgChart();
+  }
+});
+
+document.getElementById('back-to-top').addEventListener('click', function () {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+renderNewsBoard();
+renderSessions();
+renderTrainers();
+renderOrgChart();
+renderNewsDetail(3);
+
+(function openFromUrl() {
+  var term = hashTerm();
+  var anchor = HOME_ANCHORS[term];
+  if (anchor) {
+    setView('accueil');
+    window.setTimeout(function () {
+      var section = document.getElementById(anchor);
+      if (section) { section.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    }, 40);
+    return;
+  }
+  if (term === 'actualite') {
+    var params = (window.location.hash || '').replace(/^#/, '').split(/[?/&]/).slice(1);
+    var id = 1;
+    params.forEach(function (pair) {
+      var parts = pair.split('=');
+      if (parts[0] === 'id') { id = parseInt(parts[1], 10) || 1; }
+    });
+    var route = (window.location.hash || '').replace(/^#/, '').split('/');
+    if (route[1]) { id = parseInt(route[1], 10) || id; }
+    renderNewsDetail(id);
+    setView('actualite', { silent: true });
+    return;
+  }
+  setView(VIEW_ALIASES[term] || 'accueil', { silent: true });
+})();
+
+window.addEventListener('hashchange', function () {
+  var term = hashTerm();
+  if (HOME_ANCHORS[term]) { setView('accueil', { silent: true }); return; }
+  if (term === 'actualite') { renderNewsDetail(currentArticleId || 1); setView('actualite', { silent: true }); return; }
+  setView(VIEW_ALIASES[term] || 'accueil', { silent: true });
+});
+</script>
+<style>
+  /* Masquage des vues (l'équivalent simplifié des règles CSS Modules « data-view »). */
+  .preview-hidden { display: none !important; }
+  #app[data-view="actualites"] .base-newsSessions,
+  #app[data-view="sessions"] .base-newsSessions { grid-template-columns: minmax(0, 1fr); }
+  #app[data-view="actualites"] .base-newsSessions .base-sessionsColumn,
+  #app[data-view="sessions"] .base-newsSessions .base-newsColumn { display: none !important; }
+  #app[data-view="actualites"] .base-newsSessions .base-newsColumn,
+  #app[data-view="sessions"] .base-newsSessions .base-sessionsColumn { display: block !important; max-width: 920px; width: 100%; margin: 0 auto; }
+  #app[data-view="ressources"] .base-resourcesPeople .base-people,
+  #app[data-view="communaute"] .base-resourcesPeople .base-resources { display: none !important; }
+  #app[data-view="ressources"] .base-resourcesPeople,
+  #app[data-view="communaute"] .base-resourcesPeople { flex-direction: column; }
+  #nav .base-navLink { cursor: pointer; }
+  #news-board .news-board, #news-detail .nd-shell, #org-chart .org-chart { max-width: none; }
+</style>
+</body>
+</html>

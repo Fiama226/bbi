@@ -178,6 +178,14 @@ const hostDiv = window.document.createElement('div');
 window.document.body.appendChild(hostDiv);
 
 const wp = new WpClass();
+// Comme le framework SPFx : les propriétés du manifeste sont injectées dans la
+// web part avant onInit(), puis onInit() applique les valeurs par défaut.
+wp.properties = JSON.parse(
+  JSON.stringify(
+    require(path.join(root, 'src/webparts/bbiHome/BbiHomeWebPart.manifest.json'))
+      .preconfiguredEntries[0].properties
+  )
+);
 wp.context = {
   pageContext: {
     web: { absoluteUrl: 'https://businessbuilderinter.sharepoint.com/sites/intranet' },
@@ -208,7 +216,17 @@ wp.context = {
 };
 
 try {
-  wp.render();
+  // Cycle de vie réel : onInit() (valeurs par défaut, migration) puis render().
+  Promise.resolve(typeof wp.onInit === 'function' ? wp.onInit() : undefined)
+    .catch(() => undefined)
+    .then(() => {
+      try {
+        wp.render();
+      } catch (e) {
+        console.log('✗ RENDU EN ERREUR :', e);
+        process.exit(1);
+      }
+    });
 } catch (e) {
   console.log('✗ RENDU EN ERREUR :', e);
   process.exit(1);
@@ -242,6 +260,25 @@ setTimeout(() => {
     domUsesCss &&
     missing.length === 0;
 
+  // Non-régression : la bande de chiffres clés ne doit jamais être rendue
+  // dans la zone rognée du diaporama (c'était la cause de son invisibilité).
+  const kpiBand = hostDiv.querySelector('[data-bbi-kpi-band]');
+  const kpiInsideStage = hostDiv.querySelector('[data-bbi-hero-stage] [data-bbi-kpi-band]');
+  const kpiCount = hostDiv.querySelectorAll('[data-bbi-kpi-band] > li').length;
+  const slideCount = hostDiv.querySelectorAll('[data-bbi-hero-slide]').length;
+  const pagination = hostDiv.querySelector('[data-bbi-news-pagination]');
+  console.log(
+    `Bande de chiffres clés : ${kpiBand ? `${kpiCount} chiffre(s)` : 'ABSENTE'} — hors zone rognée : ${
+      kpiBand && !kpiInsideStage ? 'OUI' : 'NON'
+    }`
+  );
+  console.log(`Diapositives du héros : ${slideCount}`);
+  console.log(`Pagination des actualités : ${pagination ? 'PRÉSENTE' : 'ABSENTE'}`);
+
+  const kpiOk = !!kpiBand && !kpiInsideStage && kpiCount >= 3;
+  const slidesOk = slideCount >= 2;
+  const paginationOk = !!pagination;
+
   const routeRoot = hostDiv.querySelector('#bbi-home-root');
   const trainingLink = hostDiv.querySelector('header nav a[href="#formations"]');
   if (trainingLink) {
@@ -255,9 +292,21 @@ setTimeout(() => {
   const homeRouteOk = routeRoot && routeRoot.getAttribute('data-view') === 'accueil';
   console.log(`Navigation SPA (Accueil → Formations → Accueil) : ${trainingRouteOk && homeRouteOk ? 'OK' : 'ÉCHEC'}`);
 
-  const allOk = styleOk && trainingRouteOk && homeRouteOk;
+  const orgLink = hostDiv.querySelector('header nav a[href="#organigramme"]');
+  if (orgLink) {
+    orgLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  }
+  const orgRouteOk = !!orgLink && routeRoot && routeRoot.getAttribute('data-view') === 'organigramme';
+  console.log(`Navigation SPA vers #organigramme : ${orgRouteOk ? 'OK' : 'ÉCHEC'}`);
+
+  const allOk =
+    styleOk && trainingRouteOk && homeRouteOk && orgRouteOk && kpiOk && slidesOk && paginationOk;
   console.log(
-    `\n${allOk ? '✓ CSS ET NAVIGATION PRESENTS/COHERENTS' : '✗ VÉRIFICATION EN ÉCHEC'} (mode ${mode})`
+    `\n${
+      allOk
+        ? '✓ CSS, HÉROS (DIAPORAMA + CHIFFRES CLÉS HORS ZONE ROGNÉE), PAGINATION ET NAVIGATION OK'
+        : '✗ VÉRIFICATION EN ÉCHEC'
+    } (mode ${mode})`
   );
   process.exit(allOk ? 0 : 1);
 }, 300);

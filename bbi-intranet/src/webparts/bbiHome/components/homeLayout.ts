@@ -1,3 +1,12 @@
+/** Séparateur tolérant : « | », « ; » ou tabulation. */
+const splitParts = (line: string): string[] => line.split(/\s*[|;]\s*|\t+/).map((part) => part.trim());
+
+const nonEmptyLines = (text: string): string[] =>
+  (text || '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => !!line && line.indexOf('#') !== 0);
+
 import * as React from 'react';
 
 export interface INavLink {
@@ -18,14 +27,121 @@ export interface IKpi {
   label: string;
 }
 
-/** Séparateur tolérant : « | », « ; » ou tabulation. */
-const splitParts = (line: string): string[] => line.split(/\s*[|;]\s*|\t+/).map((part) => part.trim());
+/**
+ * Diapositive du héros : un visuel de fond et/ou du texte.
+ *
+ * Format d'une ligne (séparateur « | ») :
+ *   image | sur-titre | titre | accroche | libellé du bouton | lien du bouton
+ *
+ * · seule l'image est reconnue automatiquement (URL, chemin ou nom de fichier) ;
+ * · si la ligne ne commence pas par une image, elle est entièrement textuelle :
+ *   « titre | accroche | libellé du bouton | lien du bouton » ;
+ * · une diapositive sans visuel s'affiche sur le fond bleu nuit BBI.
+ */
+export interface IHeroSlide {
+  imageUrl: string;
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  ctaLabel: string;
+  ctaUrl: string;
+}
 
-const nonEmptyLines = (text: string): string[] =>
-  (text || '')
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => !!line && line.indexOf('#') !== 0);
+const IMAGE_PATTERN = /\.(jpe?g|png|gif|webp|bmp|avif|svg)(\?.*)?$/i;
+
+/** Une valeur ressemble-t-elle à un visuel (URL, chemin, nom de fichier) ? */
+export const looksLikeImage = (value: string): boolean => {
+  const candidate = (value || '').trim();
+  if (!candidate) {
+    return false;
+  }
+  if (IMAGE_PATTERN.test(candidate)) {
+    return true;
+  }
+  if (/^(https?:)?\/\//i.test(candidate) || candidate.charAt(0) === '/') {
+    return true;
+  }
+  return candidate.indexOf('/') !== -1 || /^(image|visuel|photo|assets?)\b/i.test(candidate);
+};
+
+/** Héros : une ligne par diapositive (voir IHeroSlide pour le format exact). */
+export const parseHeroSlides = (text: string, defaults: IHeroSlide[]): IHeroSlide[] => {
+  const lines = nonEmptyLines(text);
+  if (lines.length === 0) {
+    return defaults;
+  }
+  const slides: IHeroSlide[] = [];
+  lines.forEach((line) => {
+    const parts = splitParts(line);
+    if (parts.length === 0) {
+      return;
+    }
+    const hasImage = looksLikeImage(parts[0]);
+    const textOnly = !hasImage && parts[0] === '';
+    const slide: IHeroSlide = {
+      imageUrl: hasImage ? parts[0] : '',
+      eyebrow: '',
+      title: '',
+      subtitle: '',
+      ctaLabel: '',
+      ctaUrl: ''
+    };
+    if (hasImage || textOnly) {
+      // « image | sur-titre | titre | accroche | bouton | lien » — les champs
+      // vides restent facultatifs.
+      const values = parts.slice(1);
+      slide.eyebrow = values[0] || '';
+      slide.title = values[1] || '';
+      slide.subtitle = values[2] || '';
+      slide.ctaLabel = values[3] || '';
+      slide.ctaUrl = values[4] || '';
+    } else {
+      // Raccourci « titre | accroche | bouton | lien » (diapositive textuelle).
+      slide.title = parts[0] || '';
+      slide.subtitle = parts[1] || '';
+      slide.ctaLabel = parts[2] || '';
+      slide.ctaUrl = parts[3] || '';
+    }
+    if (slide.title || slide.imageUrl) {
+      slides.push(slide);
+    }
+  });
+  return slides.length > 0 ? slides : defaults;
+};
+
+/** Route interne du portail : #vue ou #vue?param=valeur (aussi #vue/12). */
+export interface IPortalRoute {
+  view: string;
+  params: { [key: string]: string };
+}
+
+export const parsePortalRoute = (rawHash: string): IPortalRoute => {
+  const raw = (rawHash || '').replace(/^#/, '').trim();
+  if (!raw) {
+    return { view: '', params: {} };
+  }
+  const separator = raw.indexOf('?');
+  const path = separator === -1 ? raw : raw.slice(0, separator);
+  const params: { [key: string]: string } = {};
+  if (separator !== -1) {
+    raw
+      .slice(separator + 1)
+      .split('&')
+      .forEach((pair) => {
+        const chunks = pair.split('=');
+        const key = decodeURIComponent(chunks[0] || '').toLowerCase();
+        if (key) {
+          params[key] = decodeURIComponent(chunks.slice(1).join('=') || '');
+        }
+      });
+  }
+  const segments = path.split('/').filter((segment) => !!segment);
+  const view = (segments[0] || '').toLowerCase();
+  if (segments.length > 1 && !params.id) {
+    params.id = segments.slice(1).join('/');
+  }
+  return { view, params };
+};
 
 /**
  * Navigation : une ligne par lien — « Libellé | URL » ou « Libellé | #ancre ».

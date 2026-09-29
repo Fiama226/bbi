@@ -4,7 +4,7 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 | Web part | ID | Rôle |
 |---|---|---|
-| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil, Formations, Sessions, Actualités, Ressources (documents + galerie) et Communauté. La navigation change de vue sans recharger ni quitter cette page. Masque le chrome SharePoint en lecture, conserve les commandes en édition, et fonctionne dans le package publié comme dans le workbench hébergé. |
+| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil (héros en diaporama images + textes, chiffres clés, employé du mois, certifications), Formations, Sessions, Actualités (flux paginé + **page dédiée par actualité**), Ressources (documents + galerie), Communauté (annuaire des formateurs avec **photo et fiche contact WhatsApp/Teams**) et **Organigramme interactif**. La navigation change de vue sans recharger ni quitter cette page. Masque le chrome SharePoint en lecture, conserve les commandes en édition, et fonctionne dans le package publié comme dans le workbench hébergé. |
 | **BBI Catalogue des formations** | `d37a426e-48db-484f-bf10-c38675bb7b43` | Cartes filtrables (filière) + recherche, alimentées par la liste `Formations`. Affiche des données d'exemple si la liste n'existe pas encore. |
 | **BBI Galerie médias** | `f0f19a37-2c11-4812-9006-8aa71a9254f1` | Galerie photos/vidéos alimentée par la bibliothèque d'images « Galerie médias » : albums filtrables, mosaïque, visionneuse plein écran accessible (clavier, focus, `aria-modal`), vidéos mp4, vignettes générées par SharePoint. |
 | **BBI Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
@@ -15,7 +15,7 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 > Pour le déploiement standard : téléversez le package, puis ajoutez **uniquement `BBI Accueil — portail unifié`** à `accueil.aspx`. N'ajoutez pas les briques Catalogue, Galerie ou Documents séparément.
 
-Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.5.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
+Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.6.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
 
 ### Contenus de repli (production ready)
 
@@ -23,7 +23,9 @@ Toutes les sources sont tolérantes : liste absente (404), liste non créée, **
 
 | Composant | Source | Si absente / vide |
 |---|---|---|
-| BBI Accueil | `Actualites`, `Sessions`, `Formateurs` | Actualités, sessions à venir et formateurs d'exemple (dates calculées relativement, jamais périmées) |
+| BBI Accueil | `Actualites`, `Sessions`, `Formateurs` | Actualités (12), sessions à venir (8) et formateurs d'exemple (10, coordonnées complètes) |
+| BBI Accueil — vie de l'équipe | `Employés du mois`, `Certifications` | 1 portrait (Léa Marchand) + 4 certifications (Qualiopi, Datadock, BBI, TOSA/ICDL) |
+| BBI Accueil — organigramme | `Organigramme` | Arbre de 12 postes (direction, 4 pôles, antennes) avec coordonnées |
 | BBI Catalogue | `Formations` | 5 formations BBI représentatives |
 | BBI Fiche formation | `Formations`, `Sessions`, `Supports publiés`, `Formateurs` | Fiche complète (objectifs, programme, prérequis, sessions, supports, référent) — y compris pour un code inconnu |
 | BBI Sessions | `Sessions`, `Formations` | Planning de 6 sessions réparties sur les mois à venir |
@@ -33,7 +35,7 @@ Toutes les sources sont tolérantes : liste absente (404), liste non créée, **
 
 Les bandeaux « données de démonstration » sont masqués par défaut : option `showDataNotices` dans le volet de propriétés (manifeste : `false`).
 
-**Vérification :** `node tools/verify-fallback.js` — 42 contrôles exécutés sur les couches de données réelles (aucun accès réseau requis).
+**Vérifications :** `node tools/verify-fallback.js` — **100 contrôles** exécutés sur les couches de données réelles (aucun accès réseau requis) · `node tools/css-harness.js dist` — styles et classes réellement injectés, chiffres clés hors zone rognée, pagination, navigation · `node tools/preview-smoke.js` — **34 contrôles** de parcours sur l'aperçu cliquable (`deliverables/audit-2026/apercu-portail.html`).
 
 > **Provisionnement** : `../deploy/provision-bbi-intranet.ps1` crée les listes, bibliothèques (dont « Galerie médias »), **une page d'accueil et une web part**. Les anciennes pages éventuellement déjà présentes ne sont pas supprimées ; le nouveau menu ne les utilise plus. Guide : `../deploy/README.md`.
 

@@ -8,6 +8,7 @@ Livrables produits à partir du logo, des captures d'inspiration et des besoins 
 - **Package** : `deliverables/spfx/bbi-intranet.sppkg` — à téléverser dans l'App Catalog SharePoint Online
 - **Sources** : `bbi-intranet/` (SPFx 1.22.2, TypeScript 5.8, React 17)
   - **`BBI Accueil — portail unifié`** — ajoutez uniquement cette web part à la page d'accueil : les vues Accueil, Formations, Sessions, Actualités, Ressources (supports + galerie) et Communauté sont intégrées dans une seule application sans quitter la page. Recherche locale et URLs partageables par vue.
+- **Vérifications avant livraison** : `npx heft build` · `node tools/verify-fallback.js` (100 contrôles) · `node tools/css-harness.js dist` · `node tools/preview-smoke.js` (34 contrôles) · `npm run build` (package `sharepoint/solution/bbi-intranet.sppkg`).
 - **Dev sous Docker** : `cd bbi-intranet && cp .env.example .env && docker compose up --build -d` — instructions complètes dans `bbi-intranet/README.md` (le workbench utilisé est celui du tenant SPO, le workbench local n'existe plus depuis SPFx 1.20+/Heft).
 
 
@@ -22,15 +23,29 @@ Livrables produits à partir du logo, des captures d'inspiration et des besoins 
 | `deliverables/audit-2026/apercu-repli.html` | **Aperçu du comportement à vide** : galerie, catalogue et documents rendus avec des sources absentes ou vides, à partir des styles compilés et des visuels réellement embarqués. |
 | `deploy/provision-bbi-intranet.ps1` | **Script PnP PowerShell idempotent** : listes, colonnes, bibliothèques et une seule page d'accueil avec une web part BBI Accueil, custom action « plein écran », thème et données d'exemple. Modes `-DryRun` et `-VerifyOnly`. |
 | `deploy/README.md` | Guide de mise en place pas à pas + réglages de conformité (étiquettes, IRM, ouverture navigateur) + dépannage. |
-| `deliverables/spfx/bbi-intranet.sppkg` | **Package v1.5.0.0** : portail BBI Accueil unifié (ajoutez une seule web part à la page), extension plein écran et briques intégrées. |
+| `deliverables/spfx/bbi-intranet.sppkg` | **Package v1.6.0.0** : portail BBI Accueil unifié (ajoutez une seule web part à la page), diaporama du héros, actualités paginées avec page dédiée, employé du mois, certifications, organigramme, extension plein écran et briques intégrées. |
 | `teams/New-BbiTeamsPackage.ps1` | **Générateur de packages Teams / Viva Connections** (manifestes + icônes + .zip) pour l'expérience *zéro chrome SharePoint*. Guide : `teams/README.md`. |
 | `bbi-environnement.json` | **Tenant et site du client** — source unique de vérité : `businessbuilderinter.sharepoint.com`, `/sites/intranet`, groupe concepteurs, URL du workbench hébergé. Les scripts PowerShell et les réglages de développement s'y réfèrent. |
+
+| `deliverables/audit-2026/audit-minutieux.html` | **Audit minutieux de l'itération 2** : 8 demandes livrées et vérifiées, 18 écarts résiduels (accessibilité, performance, gouvernance, RGPD, Qualiopi), benchmark des bonnes pratiques 2026, **22 propositions priorisées**, feuille de route 90 jours, **cahier de recette en 22 contrôles**, risques et décisions à arbitrer. |
+| `deliverables/audit-2026/apercu-portail.html` | **Aperçu cliquable du portail** : diaporama du héros, chiffres clés, actualités paginées + page dédiée, fiche formateur (WhatsApp, Teams), employé du mois, certifications, organigramme interactif. Styles compilés depuis les composants livrés (`bbi-intranet/tools/build-preview-css.js`) et vérifiés par `tools/preview-smoke.js`. |
+
+### Ce que fait la version 1.6.0.0
+
+- **Héros en diaporama (images *et* textes).** Défilement automatique de 8 s, flèches, pastilles, barre de progression, pause au survol et à l'onglet inactif, arrêt si l'utilisateur a demandé « animations réduites ». Une diapositive peut n'avoir **que du texte** : `image | sur-titre | titre | accroche | bouton | lien` (le premier champ vide = diapositive sans visuel).
+- **Chiffres clés enfin visibles.** La bande des 4 KPI est sortie de la zone rognée du diaporama (`overflow:hidden`) : elle reste dans le flux, remonte de 46 px sur le bas du héros et s'affiche à toutes les largeurs.
+- **Actualités paginées + page dédiée.** Clic sur une actualité → page complète (`#actualite?id=12`, partageable) avec fil d'Ariane, chapô, auteur, date, temps de lecture, HTML assaini, partage Outlook / Teams / copie du lien, **actualité suivante, précédente et autres actualités**. Pagination « précédent / numéros / suivant » alimentée page par page côté serveur : le volume ne dégrade pas l'affichage.
+- **Employé du mois & certifications.** Nouvelle section « Vie de l'équipe » alimentée par deux nouvelles listes (portrait, fonction, message, faits marquants, organisme, périmètre, échéance, statut).
+- **Annuaire des formateurs avec photo et fiche contact.** Au clic : téléphone, e-mail, **WhatsApp** (`wa.me` normalisé), Teams, localisation, biographie, spécialités, certifications et sessions animées. Fiche accessible au clavier (Échap, focus piégé puis restitué).
+- **Organigramme interactif.** Nouvelle vue `#organigramme` dans la barre de navigation, le pied de page et les accès directs : arbre connecté, zoom 60–140 %, mise en avant par pôle, bascule liste, fiche contact au clic. Colonne « Ordre » créée sous son nom interne sûr (`Ordre`, jamais `Order`).
+- **Densité revue.** Espaces de section réduits (96 → 50 px, 46 px pour actualités/sessions), galerie replacée à droite des supports sans colonne vide, blocs « Accès directs » et « Communauté » compactés.
+- **Vérifications automatisées.** `node tools/verify-fallback.js` → **100 vérifications** (source absente, vide, alimentée), `node tools/css-harness.js dist` (styles réellement injectés, KPI hors zone rognée, pagination, navigation) et `node tools/preview-smoke.js` → **34 vérifications** de parcours sur l'aperçu cliquable.
 
 ### Ce que fait la version 1.4.0.0
 
 - **Aucune page vide, quelles que soient les données.** Chaque composant interroge sa source SharePoint ; si la liste, la bibliothèque ou la galerie est **absente, non créée ou encore vide**, il affiche un contenu de repli réaliste (visuels et textes BBI embarqués dans le package) au lieu d'un écran vide ou d'un message d'erreur. Aucune configuration n'est nécessaire pour que les pages soient présentables dès l'installation ; vos contenus remplacent automatiquement les exemples dès la première publication.
 - **Bandeaux d'information masqués par défaut.** L'option de propriété `Afficher les indicateurs de données de démonstration` (`showDataNotices`, désactivée par défaut) permet d'afficher un bandeau expliquant qu'un contenu de repli est utilisé — utile pendant la mise en place, invisible en production.
-- **Harnais de vérification livré** — `bbi-intranet/tools/verify-fallback.js` transpile les couches de données réelles et les exécute contre un client SharePoint simulé : **42 vérifications** couvrant source absente (404), source vide et source alimentée. Commande : `node tools/verify-fallback.js`.
+- **Harnais de vérification livré** — `bbi-intranet/tools/verify-fallback.js` transpile les couches de données réelles et les exécute contre un client SharePoint simulé : **42 vérifications** couvrant source absente (404), source vide et source alimentée (portées à **100** depuis la version 1.6.0.0). Commande : `node tools/verify-fallback.js`.
 
 ### Ce que fait la version 1.3.0.0
 
@@ -65,7 +80,7 @@ cd deploy
 | `deliverables/index.html` | **Dossier de conception complet** (13 sections + 2 annexes) : architecture hub, page d'accueil, UX, UI/thème, gestion des formations, protection des documents (lecture seule / anti-téléchargement / anti-impression), SPFx, configurations, gouvernance, ALM, feuille de route, licences. |
 | `deliverables/maquette-accueil.html` | Maquette HTML d'origine; sa version fonctionnelle est la web part **BBI Accueil** dans `bbi-intranet/`. |
 | `deliverables/bbi-theme.json` | Thème SharePoint personnalisé BBI (bleu nuit #0E265C) à publier via `Add-PnPTenantTheme`. |
-| `deliverables/spfx/bbi-intranet.sppkg` | **Package installable** (web parts ci-dessus, assets embarqués). |
+| `deliverables/spfx/bbi-intranet.sppkg` | **Package installable v1.6.0.0** (web parts ci-dessus, assets embarqués). |
 | `bbi-intranet/` | Projet SPFx source (Dockerfile + docker-compose inclus). |
 | `deliverables/assets/img/` | Logo BBI (converti en PNG) + visuels d'illustration générés pour la maquette. |
 

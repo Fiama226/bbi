@@ -10,6 +10,9 @@ export interface IBbiHomeProps {
   formationsListTitle: string;
   documentsLibraryTitle: string;
   galleryLibraryTitle: string;
+  employeeListTitle: string;
+  certificationsListTitle: string;
+  orgChartListTitle: string;
   maxItems: number;
 
   /* --- Héros --- */
@@ -17,6 +20,8 @@ export interface IBbiHomeProps {
   heroTitle: string;
   heroSubtitle: string;
   heroImageUrl: string;
+  /** Diaporama du héros : une ligne par diapositive (voir HomeHero). */
+  heroSlides: string;
   primaryCtaLabel: string;
   primaryCtaUrl: string;
   secondaryCtaLabel: string;
