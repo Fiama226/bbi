@@ -359,9 +359,18 @@ function generateConfig(env) {
                     }
                 },
                 // Asset files (images, fonts, media)
+                // En production, les émettre dans release/assets/ (et non release/manifests/) :
+                // c'est depuis release/assets/ que « heft package-solution » récolte les
+                // ClientSideAssets du .sppkg. Sans cela, les visuels embarqués (logo, héros,
+                // galerie…) seraient absents du package.
                 {
                     test: /\.(png|mp4|mp3|svg|jpg|aac|woff2|woff)$/i,
-                    type: 'asset/resource'
+                    type: 'asset/resource',
+                    generator: {
+                        filename: env.production
+                            ? '../assets/[name]_[contenthash][ext][query]'
+                            : '[name]_[contenthash][ext][query]'
+                    }
                 },
                 // Styles (CSS/SCSS)
                 {
@@ -373,6 +382,13 @@ function generateConfig(env) {
                             options: {
                                 modules: {
                                     auto: true,
+                                    // css-loader >= 6 exports les classes des CSS modules en
+                                    // "named exports" par défaut (namedExport), mais style-loader
+                                    // 1.1.3 ne lit que `content.locals` sur l'export par défaut.
+                                    // Sans namedExport:false, `styles` vaut {} et aucune classe
+                                    // n'est appliquée au rendu React (CSS « invisible »).
+                                    namedExport: false,
+                                    exportLocalsConvention: 'as-is',
                                     localIdentName: '[local]_[hash:base64:5]'
                                 }
                             }
