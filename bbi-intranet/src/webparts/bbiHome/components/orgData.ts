@@ -1,4 +1,6 @@
 import { SPHttpClient } from '@microsoft/sp-http';
+import { safeImageUrl } from '../../../shared/safeUrl';
+import { listApiUrl } from '../../../shared/sharePointRest';
 
 /** Un poste de l'organigramme (une personne = un nœud). */
 export interface IOrgNode {
@@ -27,7 +29,6 @@ export interface IOrgChartResult {
   isDemo: boolean;
 }
 
-const stripSlashes = (value: string): string => (value || '').replace(/\/+$/, '');
 
 const textOf = (value: unknown): string | undefined => {
   if (value === undefined || value === null) {
@@ -156,9 +157,12 @@ export const loadOrgChart = async (
   listTitle: string
 ): Promise<IOrgChartResult> => {
   try {
-    const fieldsEndpoint =
-      `${stripSlashes(siteUrl)}/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/fields` +
-      `?$select=InternalName&$top=500`;
+    const fieldsEndpoint = listApiUrl(
+      siteUrl,
+      listTitle,
+      'fields',
+      '?$select=InternalName&$top=500'
+    );
     const fieldsResponse = await spHttpClient.get(fieldsEndpoint, SPHttpClient.configurations.v1);
     if (!fieldsResponse.ok) {
       throw new Error(`HTTP ${fieldsResponse.status}`);
@@ -175,9 +179,12 @@ export const loadOrgChart = async (
     const select = ['Id', 'Title']
       .concat(Object.keys(mapping).map((key) => mapping[key]))
       .filter((value, index, all) => all.indexOf(value) === index);
-    const endpoint =
-      `${stripSlashes(siteUrl)}/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/items` +
-      `?$select=${select.join(',')}&$top=300`;
+    const endpoint = listApiUrl(
+      siteUrl,
+      listTitle,
+      'items',
+      `?$select=${select.join(',')}&$top=300`
+    );
     const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
@@ -191,7 +198,7 @@ export const loadOrgChart = async (
         Pole: mapping.Pole ? textOf(raw[mapping.Pole]) : undefined,
         ParentId: mapping.ParentId ? numberOrUndefined(raw[mapping.ParentId]) : undefined,
         ParentTitle: mapping.Parent ? textOf(raw[mapping.Parent]) : undefined,
-        PhotoUrl: mapping.PhotoUrl ? textOf(raw[mapping.PhotoUrl]) : undefined,
+        PhotoUrl: mapping.PhotoUrl ? safeImageUrl(textOf(raw[mapping.PhotoUrl])) : undefined,
         Email: mapping.Email ? textOf(raw[mapping.Email]) : undefined,
         Phone: mapping.Phone ? textOf(raw[mapping.Phone]) : undefined,
         Location: mapping.Location ? textOf(raw[mapping.Location]) : undefined,

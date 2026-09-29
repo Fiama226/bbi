@@ -14,6 +14,12 @@
 const fs = require('fs');
 const path = require('path');
 const ts = require('typescript');
+const { JSDOM } = require('jsdom');
+const sanitizerDom = new JSDOM('<!doctype html><html><body></body></html>', {
+  url: 'https://tenant.sharepoint.com/sites/intranet'
+});
+global.window = sanitizerDom.window;
+const DOMPurify = require('dompurify')(sanitizerDom.window);
 
 let passed = 0;
 let failed = 0;
@@ -58,6 +64,9 @@ function loadTsModule(relativePath) {
     }
     if (request === '@microsoft/sp-component-base') {
       return {};
+    }
+    if (request === 'dompurify') {
+      return DOMPurify;
     }
     if (request.charAt(0) === '.') {
       const candidate = path.resolve(path.dirname(file), request);
@@ -223,8 +232,8 @@ async function testHome() {
   check('actualités — liste alimentée → données réelles', liveNews.isDemo === false && liveNews.items[0].Title === 'Vraie actualité');
   check(
     'actualités — liens Hyperlink SharePoint normalisés',
-    liveNews.items[0].ImageUrl === '/sites/intranet/SiteAssets/news.jpg' &&
-      liveNews.items[0].LinkUrl === '/sites/intranet/SitePages/article.aspx?itemid=1'
+    liveNews.items[0].ImageUrl === 'https://tenant.sharepoint.com/sites/intranet/SiteAssets/news.jpg' &&
+      liveNews.items[0].LinkUrl === 'https://tenant.sharepoint.com/sites/intranet/SitePages/article.aspx?itemid=1'
   );
   check(
     'actualités — URL de visuel résolue sans erreur',
@@ -333,6 +342,21 @@ async function testArticle() {
   check('article trouvé → données réelles', live.isDemo === false && live.article.Title === 'Certification réussie');
   check('scripts retirés du HTML éditorial', sanitizeHtml('<p>a</p><script>alert(1)</script>').indexOf('<script') === -1);
   check('gestionnaires d\'événements retirés', sanitizeHtml('<b onclick="x()">a</b>').indexOf('onclick') === -1);
+  check('attributs d’événement non quotés retirés', sanitizeHtml('<img src=x onerror=alert(1)>').indexOf('onerror') === -1);
+  check('SVG actif retiré', sanitizeHtml('<svg onload=alert(1)><circle /></svg>').indexOf('<svg') === -1);
+  check('URL javascript retirée des liens', sanitizeHtml('<a href="javascript:alert(1)">lien</a>').indexOf('javascript:') === -1);
+  check('mise en forme éditoriale conservée', sanitizeHtml('<p><strong>BBI</strong></p>').indexOf('<strong>BBI</strong>') !== -1);
+  const { safeHref, safeImageUrl } = loadTsModule('src/shared/safeUrl.ts');
+  check('URL javascript refusée', safeHref('javascript:alert(1)') === undefined);
+  check('URL HTTPS autorisée', safeHref('https://example.com/formation') === 'https://example.com/formation');
+  check('URI data refusée pour les images', safeImageUrl('data:image/svg+xml,<svg/>') === undefined);
+  check('URL relative SharePoint normalisée', !!safeImageUrl('/sites/intranet/photo.jpg'));
+  const { encodeODataLiteral, listApiUrl } = loadTsModule('src/shared/sharePointRest.ts');
+  const specialListUrl = listApiUrl(SITE, "L'équipe & qualité", 'items');
+  check('nom de liste avec apostrophe échappé', specialListUrl.indexOf("getbytitle('L''%C3%A9quipe") !== -1);
+  check('nom de liste avec esperluette encodé', specialListUrl.indexOf('%26') !== -1);
+  check('valeur OData avec caractères spéciaux encodée', encodeODataLiteral("A&B' C").indexOf('%26') !== -1);
+  check('apostrophe dans valeur OData doublée', encodeODataLiteral("A&B'").indexOf("B''") !== -1);
   check('temps de lecture calculé', readingTimeOf('', 'mot '.repeat(400)) === 2);
   check('actualité courante exclue des suggestions', live.related.every((r) => r.Id !== 5));
 }
@@ -489,6 +513,10 @@ async function testNewsArchive() {
     fakeClient([
       { match: /fields/, json: { value: [{ InternalName: 'Published' }, { InternalName: 'Body' }] } },
       {
+        match: /items\(4\)/,
+        json: { Id: 4, Title: 'Précédente', Published: '2026-09-10T09:00:00Z', Body: '<p>Corps</p>' }
+      },
+      {
         match: /items/,
         json: {
           value: [
@@ -510,6 +538,46 @@ async function testNewsArchive() {
     'navigation éditoriale recalculée autour de l’article',
     liveBundle.next.Title === 'Encore avant' && liveBundle.previous.Title === 'Dernière'
   );
+
+  const paged = await loadNewsPage(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Published' }] } },
+      {
+        match: /skiptoken/,
+        json: { value: [{ Id: 6, Title: 'Page deux A' }, { Id: 7, Title: 'Page deux B' }] }
+      },
+      {
+        match: /items/,
+        json: {
+          value: [1, 2, 3, 4, 5].map((Id) => ({ Id, Title: `Page un ${Id}` })),
+          'odata.nextLink': `${SITE}/_api/web/lists/getbytitle('News')/items?$skiptoken=Paged%3DTRUE%26p_ID%3D5`
+        }
+      }
+    ]),
+    SITE,
+    'News archive',
+    1,
+    5
+  );
+  check('pagination SharePoint — suit le nextLink pour la page demandée',
+    paged.items.length === 2 && paged.items[0].Id === 6 && paged.hasMore === false && !paged.isDemo);
+
+  const oldArticle = await loadNewsItem(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Published' }] } },
+      {
+        match: /items\(999\)/,
+        json: { Id: 999, Title: 'Archive ancienne', Published: '2020-01-01T09:00:00Z' }
+      },
+      { match: /items/, json: { value: [{ Id: 5, Title: 'Actualité récente' }] } }
+    ]),
+    SITE,
+    'Old news list',
+    999,
+    4
+  );
+  check('page dédiée — une actualité ancienne est chargée directement par ID',
+    oldArticle.article && oldArticle.article.Id === 999 && oldArticle.article.Title === 'Archive ancienne');
 }
 
 /* ------------------------------------------------------------------ */
@@ -534,6 +602,46 @@ async function testTeamHighlights() {
     'employé du mois — mise en avant rédigée',
     (employee.items[0].Message || '').length > 80 && !!employee.items[0].Role && !!employee.items[0].Highlights
   );
+
+  const currentWinner = await loadEmployeeOfMonth(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'IsCurrent' }, { InternalName: 'Month' }] } },
+      { match: /items/, json: { value: [
+        { Id: 11, Title: 'Gagnante du mois', IsCurrent: true, Month: 'juin 2026' },
+        { Id: 10, Title: 'Ancienne mise à l\'honneur', IsCurrent: false, Month: 'mai 2026' }
+      ] } }
+    ]),
+    SITE,
+    'Employes'
+  );
+  check('employé du mois — le drapeau IsCurrent prévaut sur Created',
+    currentWinner.isDemo === false && currentWinner.items.length === 1 && currentWinner.items[0].Title === 'Gagnante du mois');
+
+  const currentMonthLabel = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(new Date());
+  const legacyWinner = await loadEmployeeOfMonth(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Month' }] } },
+      { match: /items/, json: { value: [
+        { Id: 12, Title: 'Archive', Month: 'mai 2020' },
+        { Id: 13, Title: 'Mois courant', Month: currentMonthLabel }
+      ] } }
+    ]),
+    SITE,
+    'Employes'
+  );
+  check('employé du mois — compatibilité avec le champ Mois historique',
+    legacyWinner.isDemo === false && legacyWinner.items[0].Title === 'Mois courant');
+
+  const noCurrentWinner = await loadEmployeeOfMonth(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'IsCurrent' }] } },
+      { match: /items/, json: { value: [{ Id: 14, Title: 'Archive', IsCurrent: false }] } }
+    ]),
+    SITE,
+    'Employes'
+  );
+  check('employé du mois — pas de gagnant courant = état vide, pas de faux gagnant',
+    noCurrentWinner.isDemo === false && noCurrentWinner.items.length === 0);
 
   const certifications = await loadHomeCertifications(missing, SITE, 'Certifications', 6);
   check('certifications — repli disponible', certifications.items.length >= 3 && certifications.isDemo === true);
@@ -591,7 +699,7 @@ async function testTeamHighlights() {
   check('formateurs — données réelles lues', live.isDemo === false && live.items[0].Title === 'Amélie Martin');
   check(
     'formateurs — photo, téléphone, e-mail et WhatsApp repris',
-    live.items[0].PhotoUrl === '/sites/intranet/SiteAssets/amelie.jpg' &&
+    live.items[0].PhotoUrl === 'https://tenant.sharepoint.com/sites/intranet/SiteAssets/amelie.jpg' &&
       live.items[0].Phone === '+33 6 12 45 78 90' &&
       live.items[0].Email === 'amelie.martin@businessbuilders.fr' &&
       live.items[0].WhatsApp === '+33612457890'
@@ -610,6 +718,45 @@ async function testTeamHighlights() {
 /* ------------------------------------------------------------------ */
 /* 9. Organigramme                                                     */
 /* ------------------------------------------------------------------ */
+async function testPortalSearch() {
+  console.log('\nRecherche globale du portail');
+  const { searchPortal } = loadTsModule('src/webparts/bbiHome/components/homeSearch.ts');
+  let requestedUrl = '';
+  const rows = [
+    {
+      Cells: { results: [
+        { Key: 'Title', Value: 'Guide de formation' },
+        { Key: 'Description', Value: '<b>Parcours</b> de formation' },
+        { Key: 'ContentType', Value: 'Document' },
+        { Key: 'Path', Value: `${SITE}/Documents/guide.pdf` }
+      ] }
+    },
+    {
+      Cells: { results: [
+        { Key: 'Title', Value: 'Lien dangereux' },
+        { Key: 'Path', Value: 'javascript:alert(1)' }
+      ] }
+    }
+  ];
+  const results = await searchPortal({
+    get: async (url) => {
+      requestedUrl = url;
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ PrimaryQueryResult: { RelevantResults: { Table: { Rows: { results: rows } } } } })
+      };
+    }
+  }, SITE, 'formation OR *', 20);
+  const parsedUrl = new URL(requestedUrl);
+  check('recherche globale — requête SharePoint bornée au site courant',
+    parsedUrl.pathname.endsWith('/_api/search/query') && parsedUrl.searchParams.get('querytext').includes(`Path:"${SITE}"`));
+  check('recherche globale — termes utilisateur échappés et taille bornée',
+    !parsedUrl.searchParams.get('querytext').includes('*') && parsedUrl.searchParams.get('rowlimit') === '20');
+  check('recherche globale — résultats filtrés par URL sûre et présentés en texte',
+    results.length === 1 && results[0].title === 'Guide de formation' && results[0].href.endsWith('/Documents/guide.pdf') && results[0].description === 'Parcours de formation', JSON.stringify(results));
+}
+
 async function testOrgChart() {
   console.log('\nOrganigramme de l’entreprise');
   const { loadOrgChart, buildOrgTree, orgPoles } = loadTsModule(
@@ -667,6 +814,7 @@ async function testOrgChart() {
   await testNewsArchive();
   await testTeamHighlights();
   await testOrgChart();
+  await testPortalSearch();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);
 })();

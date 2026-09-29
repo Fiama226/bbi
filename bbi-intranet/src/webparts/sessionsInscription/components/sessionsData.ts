@@ -1,5 +1,7 @@
 import { SPHttpClient } from '@microsoft/sp-http';
 import { ISessionItem, ISessionsResult } from './ISessionsInscriptionProps';
+import { safeHref } from '../../../shared/safeUrl';
+import { listApiUrl } from '../../../shared/sharePointRest';
 
 const stripSlashes = (value: string): string => value.replace(/\/+$/, '');
 
@@ -73,17 +75,24 @@ export const loadSessions = async (
   const web = stripSlashes(siteUrl);
   try {
     const select = 'Id,Title,StartDate,Modality,Location,Status,RegistrationUrl';
-    const sessionEndpoint =
-      `${web}/_api/web/lists/getbytitle('${encodeURIComponent(sessionsListTitle)}')/items` +
-      `?$select=${select},EndDate&$orderby=StartDate&$top=${Math.max(maxItems * 4, 60)}`;
+    const sessionEndpoint = listApiUrl(
+      web,
+      sessionsListTitle,
+      'items',
+      `?$select=${select},EndDate&$orderby=StartDate&$top=${Math.max(maxItems * 4, 60)}`
+    );
     let response = await spHttpClient.get(sessionEndpoint, SPHttpClient.configurations.v1);
     let usedEndDate = true;
     if (!response.ok) {
       // La colonne EndDate n'existe peut-être pas : on réessaie sans.
       usedEndDate = false;
       response = await spHttpClient.get(
-        `${web}/_api/web/lists/getbytitle('${encodeURIComponent(sessionsListTitle)}')/items` +
-          `?$select=${select}&$orderby=StartDate&$top=${Math.max(maxItems * 4, 60)}`,
+        listApiUrl(
+          web,
+          sessionsListTitle,
+          'items',
+          `?$select=${select}&$orderby=StartDate&$top=${Math.max(maxItems * 4, 60)}`
+        ),
         SPHttpClient.configurations.v1
       );
     }
@@ -101,8 +110,7 @@ export const loadSessions = async (
     const filiereByCode: { [code: string]: string } = {};
     try {
       const formationResponse = await spHttpClient.get(
-        `${web}/_api/web/lists/getbytitle('${encodeURIComponent(formationsListTitle)}')/items` +
-          `?$select=CodeFormation,Filiere&$top=500`,
+        listApiUrl(web, formationsListTitle, 'items', '?$select=CodeFormation,Filiere&$top=500'),
         SPHttpClient.configurations.v1
       );
       if (formationResponse.ok) {
@@ -133,7 +141,7 @@ export const loadSessions = async (
           Location: raw.Location ? String(raw.Location) : undefined,
           Status: raw.Status ? String(raw.Status) : undefined,
           RegistrationUrl: raw.RegistrationUrl
-            ? String((raw.RegistrationUrl as { Url?: string }).Url || raw.RegistrationUrl)
+            ? safeHref(String((raw.RegistrationUrl as { Url?: string }).Url || raw.RegistrationUrl))
             : undefined,
           CodeFormation: code,
           Filiere: code ? filiereByCode[code] : undefined

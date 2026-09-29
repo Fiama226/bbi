@@ -177,7 +177,7 @@ function Ensure-BbiField {
         [string]$List,
         [string]$DisplayName,
         [string]$InternalName = $DisplayName,
-        [string]$Type = 'Text',              # Text | Note | Choice | DateTime | Number | Hyperlink
+        [string]$Type = 'Text',              # Text | Note | Choice | DateTime | Number | Hyperlink | Boolean
         [string[]]$Choices,
         [switch]$Required,
         [switch]$AddToDefaultView
@@ -455,10 +455,11 @@ Ensure-BbiList -Title 'Employés du mois' -Template GenericList | Out-Null
 Ensure-BbiField -List 'Employés du mois' -DisplayName 'Poste'        -InternalName 'Role'       -Type Text
 Ensure-BbiField -List 'Employés du mois' -DisplayName 'Pôle'         -InternalName 'Pole'       -Type Text
 Ensure-BbiField -List 'Employés du mois' -DisplayName 'Mois'         -InternalName 'Month'      -Type Text
+Ensure-BbiField -List 'Employés du mois' -DisplayName 'En cours'     -InternalName 'IsCurrent'  -Type Boolean
 Ensure-BbiField -List 'Employés du mois' -DisplayName 'Motivation'   -InternalName 'Message'    -Type Note
 Ensure-BbiField -List 'Employés du mois' -DisplayName 'Faits marquants' -InternalName 'Highlights' -Type Text
 Ensure-BbiField -List 'Employés du mois' -DisplayName 'Photo (URL)'  -InternalName 'PhotoUrl'   -Type Hyperlink
-Ensure-BbiView  -List 'Employés du mois' -Title 'Mises à l''honneur' -Fields @('Title','Role','Pole','Month') `
+Ensure-BbiView  -List 'Employés du mois' -Title 'Mises à l''honneur' -Fields @('Title','Role','Pole','Month','IsCurrent') `
     -Query '<OrderBy><FieldRef Name="Created" Ascending="FALSE"/></OrderBy>'
 
 # --- Certifications : IHomeCertification { Title, Issuer, Scope, ValidUntil, Status }
@@ -778,6 +779,7 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
                 Role       = 'Cheffe de projet e-learning'
                 Pole       = 'Opérations & digital'
                 Month      = (Get-Culture).DateTimeFormat.GetMonthName((Get-Date).Month) + ' ' + (Get-Date).Year
+                IsCurrent  = $true
                 Message    = "Léa a piloté la refonte complète des modules e-learning et la mise en ligne des capsules du studio en un trimestre. Un travail d'orfèvre sur la qualité pédagogique et l'accessibilité, salué par les formateurs comme par les apprenants."
                 Highlights = '5 modules repensés · 100 % des vidéos sous-titrées · 4,9/5 auprès des apprenants'
             } | Out-Null

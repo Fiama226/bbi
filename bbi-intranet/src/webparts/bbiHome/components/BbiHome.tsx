@@ -14,6 +14,7 @@ import {
   loadHomeTrainers,
 } from "./homeData";
 import { IHomeNewsBundle, IHomeNewsPage, NEWS_PAGE_SIZE, loadNewsItem, loadNewsPage } from "./newsArchive";
+import { IHomeSearchResult, searchPortal } from "./homeSearch";
 import {
   PortalView,
   anchorIdFromHash,
@@ -52,6 +53,15 @@ import { IBbiGalleryProps } from "../../bbiGallery/components/IBbiGalleryProps";
 import galleryStrings from "BbiGalleryWebPartStrings";
 
 type HomeStatus = "loading" | "ready";
+
+interface IPortalSearchResult {
+  title: string;
+  description: string;
+  category: string;
+  href?: string;
+  view?: PortalView;
+  newsId?: number;
+}
 
 const emptyResult = <T,>(): IHomeListResult<T> => ({
   items: [],
@@ -165,6 +175,70 @@ const greetingOf = (name?: string): string => {
   return `Bonjour ${formatted}`;
 };
 
+const QuickLinkIcon: React.FC<{ icon: string }> = ({ icon }) => {
+  const svgProps = {
+    viewBox: "0 0 24 24",
+    width: 22,
+    height: 22,
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: 1.7,
+    strokeLinecap: "round" as const,
+    strokeLinejoin: "round" as const,
+    "aria-hidden": true as const,
+  };
+
+  switch (icon) {
+    case "▦":
+      return (
+        <svg {...svgProps}>
+          <rect x="3" y="3" width="7" height="7" rx="1.5" />
+          <rect x="14" y="3" width="7" height="7" rx="1.5" />
+          <rect x="3" y="14" width="7" height="7" rx="1.5" />
+          <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+      );
+    case "▣":
+      return (
+        <svg {...svgProps}>
+          <rect x="3" y="5" width="18" height="16" rx="2" />
+          <path d="M7 3v4M17 3v4M3 10h18M8 14h3M8 17h7" />
+        </svg>
+      );
+    case "▤":
+      return (
+        <svg {...svgProps}>
+          <path d="M7 3h7l5 5v13H7zM14 3v5h5M10 13h6M10 17h6" />
+        </svg>
+      );
+    case "◈":
+      return (
+        <svg {...svgProps}>
+          <rect x="9" y="3" width="6" height="5" rx="1" />
+          <rect x="3" y="16" width="6" height="5" rx="1" />
+          <rect x="15" y="16" width="6" height="5" rx="1" />
+          <path d="M12 8v4M6 12h12M6 12v4M18 12v4" />
+        </svg>
+      );
+    case "◎":
+      return (
+        <svg {...svgProps}>
+          <circle cx="9" cy="8" r="3" />
+          <path d="M3 20v-1a6 6 0 0 1 12 0v1M16 5.5a3 3 0 0 1 0 5.8M18 14a4 4 0 0 1 3 4v2" />
+        </svg>
+      );
+    case "✦":
+      return (
+        <svg {...svgProps}>
+          <path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5" />
+          <path d="M7 2v4M17 2v4" />
+        </svg>
+      );
+    default:
+      return <span>{icon}</span>;
+  }
+};
+
 const DEFAULT_QUICK_LINKS: IQuickLink[] = [
   {
     icon: "▦",
@@ -204,6 +278,43 @@ const DEFAULT_QUICK_LINKS: IQuickLink[] = [
   },
 ];
 
+const LazyMount: React.FC<{
+  active: boolean;
+  minHeight: number;
+  children: React.ReactNode;
+}> = ({ active, minHeight, children }) => {
+  const hostRef = React.useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = React.useState<boolean>(active);
+
+  React.useEffect(() => {
+    if (active) {
+      setMounted(true);
+      return undefined;
+    }
+    if (mounted || !hostRef.current) {
+      return undefined;
+    }
+    if (typeof IntersectionObserver === 'undefined') {
+      setMounted(true);
+      return undefined;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        setMounted(true);
+        observer.disconnect();
+      }
+    }, { rootMargin: '480px 0px' });
+    observer.observe(hostRef.current);
+    return () => observer.disconnect();
+  }, [active, mounted]);
+
+  return (
+    <div ref={hostRef}>
+      {mounted ? children : <div aria-hidden="true" style={{ minHeight }} />}
+    </div>
+  );
+};
+
 const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const [status, setStatus] = React.useState<HomeStatus>("loading");
   const [newsPage, setNewsPage] = React.useState<IHomeNewsPage>(emptyNewsPage());
@@ -226,6 +337,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const [orgLoading, setOrgLoading] = React.useState<boolean>(false);
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>([]);
+  const [portalSearchLoading, setPortalSearchLoading] = React.useState(false);
+  const [portalSearchFailed, setPortalSearchFailed] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [activeView, setActiveView] = React.useState<PortalView>(() => viewFromHash(window.location.hash));
   const [newsId, setNewsId] = React.useState<number>(() => newsIdFromHash(window.location.hash));
@@ -239,6 +353,40 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       searchInputRef.current.focus({ preventScroll: true });
     }
   }, [activeView, searchQuery]);
+
+  React.useEffect(() => {
+    if (activeView !== "recherche" || !searchQuery) {
+      setPortalResults([]);
+      setPortalSearchLoading(false);
+      setPortalSearchFailed(false);
+      return undefined;
+    }
+    let cancelled = false;
+    setPortalResults([]);
+    setPortalSearchLoading(true);
+    setPortalSearchFailed(false);
+    const timer = window.setTimeout(() => {
+      // The timeout cannot await; the promise has success and error handlers below.
+      // eslint-disable-next-line no-void
+      void searchPortal(props.spHttpClient, props.siteUrl, searchQuery)
+        .then((results) => {
+          if (!cancelled) setPortalResults(results);
+        })
+        .catch(() => {
+          if (!cancelled) {
+            setPortalResults([]);
+            setPortalSearchFailed(true);
+          }
+        })
+        .then(() => {
+          if (!cancelled) setPortalSearchLoading(false);
+        });
+    }, 180);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [activeView, props.siteUrl, props.spHttpClient, searchQuery]);
 
   const scrolled = useScrolled(40);
   useChromeOffset(rootRef);
@@ -499,7 +647,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     .slice(0, activeView === "sessions" ? 40 : Math.max(props.maxItems, 4));
 
   const needle = searchQuery.toLocaleLowerCase("fr");
-  const searchResults = [
+  const localSearchResults: IPortalSearchResult[] = [
     ...newsPage.items.map((item) => ({
       title: item.Title,
       description: item.Summary || item.Category || "Actualité BBI",
@@ -522,6 +670,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       newsId: 0,
     })),
   ].filter((item) => `${item.title} ${item.description}`.toLocaleLowerCase("fr").includes(needle));
+  const localTitles = new Set(localSearchResults.map((item) => item.title.toLocaleLowerCase("fr")));
+  const searchResults: IPortalSearchResult[] = [
+    ...localSearchResults,
+    ...portalResults.filter((item) => !localTitles.has(item.title.toLocaleLowerCase("fr"))),
+  ];
 
   const catalogProps: ITrainingCatalogProps = {
     siteUrl: props.siteUrl,
@@ -720,29 +873,47 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           </div>
           {searchQuery ? (
             searchResults.length > 0 ? (
-              <ul className={styles.searchResultsList}>
-                {searchResults.map((result, index) => (
-                  <li key={`${result.category}-${result.title}-${index}`}>
-                    <a
-                      href={`#${result.view}`}
-                      onClick={(event) => {
-                        event.preventDefault();
-                        openView(result.view, { newsId: result.newsId });
-                      }}
-                    >
-                      <span className={styles.searchResultType}>{result.category}</span>
-                      <strong>{result.title}</strong>
-                      <small>{result.description}</small>
-                      <span aria-hidden="true">→</span>
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <>
+                {portalSearchFailed && (
+                  <p className={styles.emptyState} role="status">
+                    La recherche globale est indisponible ; seuls les résultats déjà chargés dans le portail sont affichés.
+                  </p>
+                )}
+                <ul className={styles.searchResultsList}>
+                  {searchResults.map((result, index) => (
+                    <li key={`${result.category}-${result.title}-${index}`}>
+                      <a
+                        href={result.view ? `#${result.view}` : (result.href || '#recherche')}
+                        target={result.view ? undefined : '_blank'}
+                        rel={result.view ? undefined : 'noopener noreferrer'}
+                        onClick={(event) => {
+                          if (result.view) {
+                            event.preventDefault();
+                            openView(result.view, { newsId: result.newsId });
+                          }
+                        }}
+                      >
+                        <span className={styles.searchResultType}>{result.category}</span>
+                        <strong>{result.title}</strong>
+                        <small>{result.description}</small>
+                        <span aria-hidden="true">→</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            ) : portalSearchLoading ? (
+              <p className={styles.emptyState} role="status">
+                Recherche dans les contenus du portail…
+              </p>
+            ) : portalSearchFailed ? (
+              <p className={styles.emptyState} role="status">
+                La recherche globale n’a pas pu aboutir. Réessayez plus tard ou parcourez les rubriques du portail.
+              </p>
             ) : (
               <p className={styles.emptyState}>
-                Aucun résultat pour « {searchQuery} » dans les actualités, les
-                sessions ou la communauté. Essayez « management », « coaching »
-                ou « Qualiopi », ou parcourez le catalogue ci-dessous.
+                Aucun résultat pour « {searchQuery} » dans les contenus accessibles du portail.
+                Essayez une autre formulation ou parcourez les rubriques ci-dessous.
               </p>
             )
           ) : (
@@ -829,10 +1000,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 }}
               >
                 <span className={styles.quickIcon} aria-hidden="true">
-                  {link.icon}
+                  <QuickLinkIcon icon={link.icon} />
                 </span>
                 <strong>{link.title}</strong>
                 <small>{link.subtitle}</small>
+                <span className={styles.quickArrow} aria-hidden="true">→</span>
               </a>
             ))}
           </div>
@@ -1038,7 +1210,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               Voir tout le catalogue <span aria-hidden="true">→</span>
             </a>
           </div>
-          <TrainingCatalog {...catalogProps} />
+          <LazyMount active={activeView === 'formations'} minHeight={210}>
+            <TrainingCatalog {...catalogProps} />
+          </LazyMount>
         </section>
 
         <section
@@ -1064,7 +1238,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                   Bibliothèque <span aria-hidden="true">→</span>
                 </a>
               </div>
-              <SecureDocuments {...documentsProps} />
+              <LazyMount active={activeView === 'ressources'} minHeight={210}>
+                <SecureDocuments {...documentsProps} />
+              </LazyMount>
             </div>
             <div className={styles.gallery} id="galerie">
               <div className={styles.sectionHeading}>
@@ -1073,7 +1249,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                   <h2>Galerie de la communauté</h2>
                 </div>
               </div>
-              <BbiGallery {...galleryProps} />
+              <LazyMount active={activeView === 'ressources'} minHeight={270}>
+                <BbiGallery {...galleryProps} />
+              </LazyMount>
             </div>
           </div>
 

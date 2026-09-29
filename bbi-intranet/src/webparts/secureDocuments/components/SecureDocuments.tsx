@@ -2,6 +2,8 @@ import * as React from 'react';
 import styles from './SecureDocuments.module.scss';
 import { ISecureDocumentsProps, ISecureDocument } from './ISecureDocumentsProps';
 import { SPHttpClient } from '@microsoft/sp-http';
+import { safeHref } from '../../../shared/safeUrl';
+import { listApiUrl } from '../../../shared/sharePointRest';
 
 type LoadStatus = 'loading' | 'ready';
 
@@ -63,16 +65,22 @@ export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
     let cancelled = false;
     const load = async (): Promise<void> => {
       setStatus('loading');
-      const endpoint: string =
-        `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(libraryTitle)}')/items` +
-        `?$select=Id,Title,FileRef,FileLeafRef,Modified&$orderby=Modified%20desc&$top=${maxItems}`;
+      const endpoint: string = listApiUrl(
+        siteUrl,
+        libraryTitle,
+        'items',
+        `?$select=Id,Title,FileRef,FileLeafRef,Modified&$orderby=Modified%20desc&$top=${maxItems}`
+      );
       try {
         const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
         if (cancelled) { return; }
         if (!response.ok) { throw new Error(`HTTP ${response.status}`); }
         const json = await response.json();
         if (cancelled) { return; }
-        const loaded = (json && json.value ? json.value : []) as ISecureDocument[];
+        const loaded = ((json && json.value ? json.value : []) as ISecureDocument[]).map((doc) => ({
+          ...doc,
+          FileRef: safeHref(doc.FileRef) || ''
+        }));
         if (loaded.length === 0) {
           // Bibliothèque créée mais encore vide : on sert les supports de démonstration.
           setDocs(DEMO_DOCS);
@@ -94,10 +102,13 @@ export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
   }, [siteUrl, libraryTitle, maxItems, spHttpClient]);
 
   const openDoc = (doc: ISecureDocument): void => {
-    if (!doc.FileRef || doc.FileRef === '#') {
+    const href = safeHref(doc.FileRef);
+    if (!href || href === '#') {
       return; // données de démonstration : pas d'ouverture
     }
-    window.open(`${doc.FileRef}?web=1`, '_blank', 'noopener,noreferrer');
+    const viewerUrl = new URL(href, window.location.href);
+    viewerUrl.searchParams.set('web', '1');
+    window.open(viewerUrl.href, '_blank', 'noopener,noreferrer');
   };
 
   if (status === 'loading') {

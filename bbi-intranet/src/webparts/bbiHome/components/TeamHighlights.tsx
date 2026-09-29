@@ -107,7 +107,7 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
               className={
                 employee.PhotoUrl
                   ? styles.photo
-                  : `${styles.photo} ${employeeVisualClass(employee.DemoIndex)}`
+                  : `${styles.photo} ${employeeIsDemo ? styles.demoPortrait : employeeVisualClass(employee.DemoIndex)}`
               }
               style={
                 employee.PhotoUrl
@@ -117,7 +117,7 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
               role="img"
               aria-label={employee.Title}
             >
-              {!employee.PhotoUrl && (
+              {!employee.PhotoUrl && !employeeIsDemo && (
                 <span className={styles.photoInitials}>{initialsOf(employee.Title)}</span>
               )}
             </span>

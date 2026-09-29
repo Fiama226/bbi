@@ -7,6 +7,7 @@ import {
 } from '@microsoft/sp-application-base';
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IReadonlyTheme } from '@microsoft/sp-component-base';
+import { listApiUrl } from '../../shared/sharePointRest';
 
 import strings from 'BbiFullScreenApplicationCustomizerStrings';
 
@@ -194,7 +195,7 @@ export default class BbiFullScreenApplicationCustomizer extends BaseApplicationC
     const listId: string = (pageContext.listId as string) || '';
     const endpoint: string = listId
       ? `${webUrl}/_api/web/lists(guid'${listId}')/items(${pageItemId})?$select=PageLayoutType`
-      : `${webUrl}/_api/web/lists/getbytitle('Pages%20du%20site')/items(${pageItemId})?$select=PageLayoutType`;
+      : listApiUrl(webUrl, 'Pages du site', `items(${pageItemId})`, '?$select=PageLayoutType');
 
     try {
       const response = await this.context.spHttpClient.get(endpoint, SPHttpClient.configurations.v1);

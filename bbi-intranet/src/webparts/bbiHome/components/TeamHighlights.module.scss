@@ -21,21 +21,19 @@
 }
 
 .employeeCard {
-  background: linear-gradient(135deg, #fff 0%, #f7f9fd 100%);
   position: relative;
   overflow: hidden;
+  background: linear-gradient(145deg, #fff 0%, #f7f9fc 100%);
 }
 
-.employeeCard::after {
-  content: "";
+.employeeCard::before {
   position: absolute;
-  right: -40px;
-  top: -40px;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(210, 20, 25, 0.08) 0%, rgba(210, 20, 25, 0) 70%);
-  pointer-events: none;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--bbi-red), rgba(210, 20, 25, 0.12));
+  content: "";
 }
 
 .eyebrow {
@@ -56,28 +54,33 @@
 
 .employeeBody {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 124px minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
-  margin-bottom: 12px;
+  margin: 5px 0 16px;
 }
 
 .photo {
   position: relative;
-  width: 96px;
-  height: 96px;
-  border-radius: 16px;
-  background-color: var(--bbi-navy);
-  background-position: center;
-  background-size: cover;
   display: flex;
+  width: 124px;
+  height: 142px;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(14, 38, 92, 0.08);
+  border-radius: 12px;
+  background-color: var(--bbi-navy);
+  background-position: center 34%;
+  background-size: cover;
   color: #fff;
   font-size: 26px;
   font-weight: 700;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(14, 38, 92, 0.18);
+  box-shadow: 0 8px 20px rgba(14, 38, 92, 0.12);
+}
+
+.demoPortrait {
+  background-image: url("../assets/employee-lea-marchand.jpg");
 }
 
 .visual0 {
@@ -106,42 +109,46 @@
 
 .name {
   display: block;
-  font-size: 17px;
   color: var(--bbi-ink);
+  font-size: 19px;
+  line-height: 1.25;
 }
 
 .role {
   display: block;
-  margin: 2px 0 8px;
-  font-size: 12.8px;
-  font-weight: 600;
+  margin: 5px 0 10px;
   color: var(--bbi-red);
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.5;
 }
 
 .message {
   margin: 0;
-  font-size: 13.4px;
-  line-height: 1.6;
   color: var(--bbi-muted);
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .facts {
   grid-column: 1 / -1;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  margin: 2px 0 0;
+  gap: 7px;
+  margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .facts li {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #eef2fb;
+  padding: 6px 10px;
+  border: 1px solid #e2e7f0;
+  border-radius: 7px;
+  background: #f3f5f9;
   color: var(--bbi-navy-2);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .certList {
@@ -289,14 +296,19 @@
 
 @media (max-width: 620px) {
   .employeeBody {
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 13px;
   }
 
   .photo {
-    width: 72px;
-    height: 72px;
+    width: 88px;
+    height: 108px;
+    border-radius: 10px;
     font-size: 20px;
   }
+
+  .name { font-size: 17px; }
+  .message { font-size: 12.5px; }
 
   .certItem {
     grid-template-columns: 36px minmax(0, 1fr);
