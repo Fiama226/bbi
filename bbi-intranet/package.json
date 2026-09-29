@@ -41,6 +41,7 @@
     "@rushstack/heft-sass-plugin": "0.15.24",
     "@rushstack/heft-typescript-plugin": "1.1.2",
     "@rushstack/heft-webpack5-plugin": "1.2.2",
+    "@types/dompurify": "^3.0.5",
     "@types/heft-jest": "1.0.2",
     "@types/react": "17.0.45",
     "@types/react-dom": "17.0.17",
