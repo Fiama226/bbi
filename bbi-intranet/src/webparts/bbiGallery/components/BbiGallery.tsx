@@ -38,6 +38,7 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
     albumFilter,
     spHttpClient,
     strings,
+    embedded,
   } = props;
 
   const [status, setStatus] = React.useState<LoadStatus>("loading");
@@ -274,7 +275,7 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
     >
       <div className={styles.header}>
         <div>
-          <h2 className={styles.title}>{strings.WebPartTitle}</h2>
+          {!embedded && <h2 className={styles.title}>{strings.WebPartTitle}</h2>}
           <p className={styles.subtitle}>
             {visibleItems.length} {strings.CounterLabel}
             {visibleItems.length > 1 ? "s" : ""}

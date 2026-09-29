@@ -10,6 +10,8 @@ export interface ISecureDocumentsProps {
   isDarkTheme: boolean;
   hasTeamsContext: boolean;
   themeVariant?: IReadonlyTheme;
+  /** true : intégré dans un portail (la page fournit déjà le titre). */
+  embedded?: boolean;
   strings: ISecureDocumentsWebPartStrings;
 }
 

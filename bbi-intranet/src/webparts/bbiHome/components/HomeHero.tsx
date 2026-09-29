@@ -13,6 +13,8 @@ export interface IHomeHeroProps {
   secondaryUrl: string;
   kpis: IKpi[];
   compact: boolean;
+  /** Salutation « Bonjour Prénom » : vide = masquée. */
+  greeting: string;
   onExplore: () => void;
   onInternalNavigate: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
 }
@@ -29,6 +31,7 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
     secondaryUrl,
     kpis,
     compact,
+    greeting,
     onExplore,
     onInternalNavigate,
   } = props;
@@ -55,6 +58,14 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
       <div className={styles.heroVeil} aria-hidden="true" />
 
       <div className={styles.heroInner}>
+        {greeting && (
+          <p className={styles.heroGreeting}>
+            <span className={styles.heroGreetingWave} aria-hidden="true">
+              👋
+            </span>
+            {greeting}
+          </p>
+        )}
         <p className={styles.heroEyebrow}>{eyebrow}</p>
         <h1 id="bbi-home-title" className={styles.heroTitle}>
           {titleLines.map((line, index) => (

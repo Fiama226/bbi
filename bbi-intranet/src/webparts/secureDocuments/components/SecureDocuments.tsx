@@ -9,7 +9,11 @@ const DEMO_DOCS: ISecureDocument[] = [
   { Id: 1, Title: 'MGT-101 · Slides animateur — Management d’équipe', FileRef: '#', FileLeafRef: 'MGT-101 Slides animateur v2026.2.pptx', Modified: '2026-09-22T10:00:00Z' },
   { Id: 2, Title: 'COA-201 · Manuel participant — Coaching (module 1)', FileRef: '#', FileLeafRef: 'COA-201 Manuel participant v2026.1.docx', Modified: '2026-09-19T10:00:00Z' },
   { Id: 3, Title: 'COM-110 · Exercices & cas pratiques', FileRef: '#', FileLeafRef: 'COM-110 Exercices v2026.1.pdf', Modified: '2026-09-15T10:00:00Z' },
-  { Id: 4, Title: 'QUA-301 · Évaluation à chaud (QCM)', FileRef: '#', FileLeafRef: 'QUA-301 Evaluation v2025.4.docx', Modified: '2026-09-10T10:00:00Z' }
+  { Id: 4, Title: 'QUA-301 · Évaluation à chaud (QCM)', FileRef: '#', FileLeafRef: 'QUA-301 Evaluation v2025.4.docx', Modified: '2026-09-10T10:00:00Z' },
+  { Id: 5, Title: 'MGT-101 · Grille d’évaluation animateur', FileRef: '#', FileLeafRef: 'MGT-101 Grille evaluation v2026.1.xlsx', Modified: '2026-09-05T10:00:00Z' },
+  { Id: 6, Title: 'DIG-140 · Module 2 — prospection sur LinkedIn', FileRef: '#', FileLeafRef: 'DIG-140 Module 2 v2026.1.mp4', Modified: '2026-08-28T10:00:00Z' },
+  { Id: 7, Title: 'LDR-210 · Kit d’animation — leadership', FileRef: '#', FileLeafRef: 'LDR-210 Kit animation v2026.1.zip', Modified: '2026-08-15T10:00:00Z' },
+  { Id: 8, Title: 'COM-220 · Étude de cas — négociation complexe', FileRef: '#', FileLeafRef: 'COM-220 Etude de cas v2025.3.pdf', Modified: '2026-08-02T10:00:00Z' }
 ];
 
 const iconFor = (fileName: string): string => {
@@ -49,7 +53,7 @@ const formatDate = (iso?: string): string => {
 };
 
 export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
-  const { siteUrl, libraryTitle, maxItems, showDataNotices, spHttpClient, strings } = props;
+  const { siteUrl, libraryTitle, maxItems, showDataNotices, spHttpClient, strings, embedded } = props;
 
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [docs, setDocs] = React.useState<ISecureDocument[]>([]);
@@ -106,9 +110,11 @@ export const SecureDocuments: React.FC<ISecureDocumentsProps> = (props) => {
 
   return (
     <div className={styles.bbiSecure}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>🔒 {strings.WebPartTitle}</h2>
-      </div>
+      {!embedded && (
+        <div className={styles.header}>
+          <h2 className={styles.title}>🔒 {strings.WebPartTitle}</h2>
+        </div>
+      )}
 
       {showDataNotices && isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
 

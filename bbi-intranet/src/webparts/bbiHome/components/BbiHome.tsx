@@ -130,6 +130,26 @@ const DEFAULT_NAV: INavLink[] = [
   { label: "Communauté", url: "#communaute" },
 ];
 
+const SEARCH_SUGGESTIONS: string[] = [
+  "Qualiopi",
+  "Coaching",
+  "Management",
+  "Prospection",
+  "Négociation",
+  "Certification",
+];
+
+/** « Bonjour Prénom » à partir du nom affiché SharePoint (ou de l'adresse). */
+const greetingOf = (name?: string): string => {
+  const clean = (name || "").split("@")[0].trim();
+  const first = clean.split(/\s+/).filter(Boolean)[0] || "";
+  if (!first) {
+    return "";
+  }
+  const formatted = first.charAt(0).toLocaleUpperCase("fr") + first.slice(1);
+  return `Bonjour ${formatted}`;
+};
+
 const DEFAULT_QUICK_LINKS: IQuickLink[] = [
   {
     icon: "▦",
@@ -177,6 +197,15 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const [menuOpen, setMenuOpen] = React.useState(false);
   const [activeView, setActiveView] = React.useState<PortalView>(viewFromLocation);
   const rootRef = React.useRef<HTMLDivElement>(null);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Dans la vue recherche sans requête, on recentre l'utilisateur sur la
+  // saisie plutôt que de l'inviter devant « Résultats pour « » ».
+  React.useEffect(() => {
+    if (activeView === "recherche" && !searchQuery && searchInputRef.current) {
+      searchInputRef.current.focus({ preventScroll: true });
+    }
+  }, [activeView, searchQuery]);
 
   const scrolled = useScrolled(40);
   useChromeOffset(rootRef);
@@ -306,6 +335,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     showDataNotices: props.showDataNotices,
     isDarkTheme: false,
     hasTeamsContext: false,
+    embedded: true,
     strings: trainingStrings,
   };
   const documentsProps: ISecureDocumentsProps = {
@@ -316,6 +346,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     showDataNotices: props.showDataNotices,
     isDarkTheme: false,
     hasTeamsContext: false,
+    embedded: true,
     strings: documentStrings,
   };
   const galleryProps: IBbiGalleryProps = {
@@ -330,6 +361,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     spHttpClient: props.spHttpClient,
     isDarkTheme: false,
     hasTeamsContext: false,
+    embedded: true,
     strings: galleryStrings,
   };
   const avatarStyles: string[] = [
@@ -376,7 +408,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
 
       <header
         className={
-          scrolled ? `${styles.topbar} ${styles.topbarSolid}` : styles.topbar
+          scrolled || activeView !== "accueil"
+            ? `${styles.topbar} ${styles.topbarSolid}`
+            : styles.topbar
         }
       >
         <div className={styles.topbarInner}>
@@ -452,6 +486,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             </label>
             <input
               id="bbi-home-search"
+              ref={searchInputRef}
               type="search"
               value={search}
               onChange={(event) => {
@@ -467,28 +502,69 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       </header>
 
       <main className={styles.content}>
-        <section className={styles.section} id="recherche" aria-labelledby="search-results-title">
+        <section
+          className={styles.section}
+          id="recherche"
+          data-bbi-view="recherche"
+          aria-labelledby="search-results-title"
+        >
           <div className={styles.sectionHeading}>
             <div>
-              <p className={styles.eyebrow}>Recherche dans le portail</p>
-              <h2 id="search-results-title">Résultats pour « {searchQuery} »</h2>
+              <p className={styles.eyebrow}>
+                {searchQuery ? "Recherche dans le portail" : "Portail BBI"}
+              </p>
+              <h2 id="search-results-title">
+                {searchQuery
+                  ? `Résultats pour « ${searchQuery} »`
+                  : "Recherche dans le portail"}
+              </h2>
             </div>
           </div>
-          {searchResults.length > 0 ? (
-            <ul className={styles.searchResultsList}>
-              {searchResults.map((result, index) => (
-                <li key={`${result.category}-${result.title}-${index}`}>
-                  <a href={`#${result.view}`} onClick={(event) => { event.preventDefault(); openView(result.view); }}>
-                    <span className={styles.searchResultType}>{result.category}</span>
-                    <strong>{result.title}</strong>
-                    <small>{result.description}</small>
-                    <span aria-hidden="true">→</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+          {searchQuery ? (
+            searchResults.length > 0 ? (
+              <ul className={styles.searchResultsList}>
+                {searchResults.map((result, index) => (
+                  <li key={`${result.category}-${result.title}-${index}`}>
+                    <a href={`#${result.view}`} onClick={(event) => { event.preventDefault(); openView(result.view); }}>
+                      <span className={styles.searchResultType}>{result.category}</span>
+                      <strong>{result.title}</strong>
+                      <small>{result.description}</small>
+                      <span aria-hidden="true">→</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className={styles.emptyState}>
+                Aucun résultat pour « {searchQuery} » dans les actualités, les
+                sessions ou la communauté. Essayez « management », « coaching »
+                ou « Qualiopi », ou parcourez le catalogue ci-dessous.
+              </p>
+            )
           ) : (
-            <p className={styles.emptyState}>Aucun résultat dans les actualités, sessions ou la communauté. Essayez un autre terme ou parcourez le catalogue.</p>
+            <div>
+              <p className={styles.searchIntro}>
+                Recherchez une formation, une session, une actualité ou un
+                formateur dans le portail BBI. Utilisez la barre de recherche
+                ci-dessus, ou partez de l’un des thèmes fréquents.
+              </p>
+              <p className={styles.searchSuggestionsLabel}>Recherches fréquentes</p>
+              <div className={styles.searchSuggestions} aria-label="Recherches fréquentes">
+                {SEARCH_SUGGESTIONS.map((term) => (
+                  <button
+                    key={term}
+                    type="button"
+                    className={styles.searchSuggestionChip}
+                    onClick={() => {
+                      setSearch(term);
+                      setSearchQuery(term);
+                    }}
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
           <button type="button" className={styles.searchCatalogButton} onClick={() => { openView("formations"); }}>
             Parcourir le catalogue des formations <span aria-hidden="true">→</span>
@@ -512,6 +588,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           secondaryUrl={props.secondaryCtaUrl || "#sessions"}
           kpis={kpis}
           compact={props.layoutCompact === true}
+          greeting={greetingOf(props.userName)}
           onExplore={() => {
             const target = document.getElementById("acces");
             if (target) {
@@ -524,6 +601,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         <section
           className={styles.section}
           id="acces"
+          data-bbi-view="acces"
           aria-labelledby="bbi-quick-title"
         >
           <div className={styles.sectionHeading}>
@@ -581,6 +659,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         <section
           className={styles.newsSessions}
           id="actualites"
+          data-bbi-view="actualites"
           aria-label="Actualités et prochaines sessions"
         >
           <div className={styles.newsColumn}>
@@ -725,6 +804,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         <section
           className={styles.section}
           id="formations"
+          data-bbi-view="formations"
           aria-label="Catalogue des formations"
         >
           <div className={styles.sectionHeading}>
@@ -746,6 +826,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         <section
           className={styles.resourcesPeople}
           id="ressources"
+          data-bbi-view="ressources"
           aria-label="Supports publiés et formateurs référents"
         >
           <div className={styles.resources}>

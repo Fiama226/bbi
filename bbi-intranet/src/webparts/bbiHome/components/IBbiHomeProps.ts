@@ -34,6 +34,9 @@ export interface IBbiHomeProps {
   enableAnnouncement: boolean;
   layoutCompact: boolean;
 
+  /* --- Utilisateur connecté (salutation) --- */
+  userName?: string;
+
   /* --- Contexte SPFx --- */
   spHttpClient: SPHttpClient;
   isDarkTheme: boolean;

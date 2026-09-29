@@ -10,11 +10,16 @@ const DEMO_FORMATIONS: IFormation[] = [
   { Id: 2, Title: "Coaching d'entrepreneurs", CodeFormation: 'BBI-COA-201', Filiere: 'Coaching', Modalite: 'Hybride', DureeH: 28, Niveau: 'Expert', StatutCatalogue: 'Actif' },
   { Id: 3, Title: 'Vendre la valeur, pas le prix', CodeFormation: 'BBI-COM-110', Filiere: 'Commerce', Modalite: 'Présentiel', DureeH: 7, Niveau: 'Débutant', StatutCatalogue: 'Actif' },
   { Id: 4, Title: 'Prospection digitale', CodeFormation: 'BBI-DIG-140', Filiere: 'Digital', Modalite: 'Distanciel', DureeH: 3.5, Niveau: 'Débutant', StatutCatalogue: 'Actif' },
-  { Id: 5, Title: 'Fondamentaux Qualiopi', CodeFormation: 'BBI-QUA-301', Filiere: 'Qualité & Certification', Modalite: 'Distanciel', DureeH: 7, Niveau: 'Intermédiaire', StatutCatalogue: 'Actif' }
+  { Id: 5, Title: 'Fondamentaux Qualiopi', CodeFormation: 'BBI-QUA-301', Filiere: 'Qualité & Certification', Modalite: 'Distanciel', DureeH: 7, Niveau: 'Intermédiaire', StatutCatalogue: 'Actif' },
+  { Id: 6, Title: 'Leadership & gestion du changement', CodeFormation: 'BBI-LDR-210', Filiere: 'Management', Modalite: 'Hybride', DureeH: 21, Niveau: 'Confirmé', StatutCatalogue: 'Actif' },
+  { Id: 7, Title: 'Négociation commerciale avancée', CodeFormation: 'BBI-COM-220', Filiere: 'Commerce', Modalite: 'Présentiel', DureeH: 14, Niveau: 'Confirmé', StatutCatalogue: 'Actif' },
+  { Id: 8, Title: 'Prise de parole en public', CodeFormation: 'BBI-SPK-120', Filiere: 'Soft skills', Modalite: 'Présentiel', DureeH: 7, Niveau: 'Débutant', StatutCatalogue: 'Actif' },
+  { Id: 9, Title: 'Gestion de projet agile', CodeFormation: 'BBI-PRJ-150', Filiere: 'Digital', Modalite: 'Distanciel', DureeH: 10.5, Niveau: 'Intermédiaire', StatutCatalogue: 'Actif' },
+  { Id: 10, Title: 'Bases du coaching professionnel', CodeFormation: 'BBI-COA-101', Filiere: 'Coaching', Modalite: 'Présentiel', DureeH: 28, Niveau: 'Débutant', StatutCatalogue: 'Actif' }
 ];
 
 export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
-  const { siteUrl, listTitle, maxItems, showDataNotices, spHttpClient, strings } = props;
+  const { siteUrl, listTitle, maxItems, showDataNotices, spHttpClient, strings, embedded } = props;
 
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [items, setItems] = React.useState<IFormation[]>([]);
@@ -97,9 +102,11 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
 
   return (
     <div className={styles.bbiCatalog}>
-      <div className={styles.header}>
-        <h2 className={styles.title}>{strings.WebPartTitle}</h2>
-      </div>
+      {!embedded && (
+        <div className={styles.header}>
+          <h2 className={styles.title}>{strings.WebPartTitle}</h2>
+        </div>
+      )}
 
       {showDataNotices && isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
 
