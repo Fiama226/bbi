@@ -5,6 +5,7 @@ export interface ITrainingCatalogProps {
   siteUrl: string;
   listTitle: string;
   maxItems: number;
+  initialQuery?: string;
   spHttpClient: SPHttpClient;
   showDataNotices: boolean;
   isDarkTheme: boolean;

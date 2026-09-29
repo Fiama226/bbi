@@ -7,9 +7,7 @@ Livrables produits à partir du logo, des captures d'inspiration et des besoins 
 
 - **Package** : `deliverables/spfx/bbi-intranet.sppkg` — à téléverser dans l'App Catalog SharePoint Online
 - **Sources** : `bbi-intranet/` (SPFx 1.22.2, TypeScript 5.8, React 17)
-  - `BBI Accueil` — maquette d'accueil convertie en web part responsive ; actualités, sessions et formateurs viennent de listes SharePoint, avec exemples si les sources sont absentes ; réutilise le catalogue et les documents.
-  - `BBI Catalogue des formations` — cartes filtrables alimentées par la liste `Formations` (mode démo auto si la liste est absente)
-  - `BBI Documents sécurisés` — visionneuse lecture seule des supports publiés (`?web=1`, badge 🔒)
+  - **`BBI Accueil — portail unifié`** — ajoutez uniquement cette web part à la page d'accueil : les vues Accueil, Formations, Sessions, Actualités, Ressources (supports + galerie) et Communauté sont intégrées dans une seule application sans quitter la page. Recherche locale et URLs partageables par vue.
 - **Dev sous Docker** : `cd bbi-intranet && cp .env.example .env && docker compose up --build -d` — instructions complètes dans `bbi-intranet/README.md` (le workbench utilisé est celui du tenant SPO, le workbench local n'existe plus depuis SPFx 1.20+/Heft).
 
 
@@ -22,9 +20,9 @@ Livrables produits à partir du logo, des captures d'inspiration et des besoins 
 | `deliverables/audit-2026/apercu-accueil.html` | Aperçu visuel de la page d'accueil plein écran (styles compilés depuis le composant livré). |
 | `deliverables/audit-2026/apercu-modeles-pages.html` | Aperçu visuel des trois modèles de page : fiche formation, sessions & inscriptions, article. |
 | `deliverables/audit-2026/apercu-repli.html` | **Aperçu du comportement à vide** : galerie, catalogue et documents rendus avec des sources absentes ou vides, à partir des styles compilés et des visuels réellement embarqués. |
-| `deploy/provision-bbi-intranet.ps1` | **Script PnP PowerShell idempotent** : listes, colonnes, vues, bibliothèques, pages, web parts, custom action « plein écran », thème, navigation, données d'exemple. Modes `-DryRun` (simulation) et `-VerifyOnly` (audit). |
+| `deploy/provision-bbi-intranet.ps1` | **Script PnP PowerShell idempotent** : listes, colonnes, bibliothèques et une seule page d'accueil avec une web part BBI Accueil, custom action « plein écran », thème et données d'exemple. Modes `-DryRun` et `-VerifyOnly`. |
 | `deploy/README.md` | Guide de mise en place pas à pas + réglages de conformité (étiquettes, IRM, ouverture navigateur) + dépannage. |
-| `deliverables/spfx/bbi-intranet.sppkg` | **Package v1.4.0.0** : 7 web parts + 1 extension, visuels de repli embarqués. |
+| `deliverables/spfx/bbi-intranet.sppkg` | **Package v1.5.0.0** : portail BBI Accueil unifié (ajoutez une seule web part à la page), extension plein écran et briques intégrées. |
 | `teams/New-BbiTeamsPackage.ps1` | **Générateur de packages Teams / Viva Connections** (manifestes + icônes + .zip) pour l'expérience *zéro chrome SharePoint*. Guide : `teams/README.md`. |
 | `bbi-environnement.json` | **Tenant et site du client** — source unique de vérité : `businessbuilderinter.sharepoint.com`, `/sites/intranet`, groupe concepteurs, URL du workbench hébergé. Les scripts PowerShell et les réglages de développement s'y réfèrent. |
 

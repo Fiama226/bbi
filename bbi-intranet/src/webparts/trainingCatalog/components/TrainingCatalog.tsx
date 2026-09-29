@@ -19,8 +19,14 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
   const [status, setStatus] = React.useState<LoadStatus>('loading');
   const [items, setItems] = React.useState<IFormation[]>([]);
   const [isDemo, setIsDemo] = React.useState(false);
-  const [query, setQuery] = React.useState('');
+  const [query, setQuery] = React.useState(props.initialQuery || '');
   const [filiere, setFiliere] = React.useState('');
+
+  React.useEffect(() => {
+    if (props.initialQuery !== undefined) {
+      setQuery(props.initialQuery);
+    }
+  }, [props.initialQuery]);
 
   React.useEffect(() => {
     let cancelled = false;

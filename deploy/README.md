@@ -1,12 +1,13 @@
-# BBI Intranet — Guide de mise en place (listes, documents, galerie, page plein écran)
+# BBI Intranet — Guide de mise en place (portail unifié)
 
 Ce dossier contient **le script d'installation complet** de l'intranet BBI : il crée les listes,
-les bibliothèques, les colonnes, les vues, les pages, la galerie médias, la page d'accueil plein
-écran et l'identité visuelle — **exactement dans le format attendu par le code SPFx**.
+les bibliothèques, les colonnes, les vues, une seule page d'accueil applicative, le thème et l'identité
+visuelle. Sur cette page, **une seule web part BBI Accueil** fournit plusieurs vues internes (formations,
+sessions, actualités, ressources, communauté) sans navigation vers des pages SharePoint séparées.
 
 > Expérience **sans aucun chrome SharePoint** (Teams / Viva Connections) : [`../teams/README.md`](../teams/README.md)
 > Fichier principal : [`provision-bbi-intranet.ps1`](./provision-bbi-intranet.ps1)
-> Package SPFx à installer avant : [`../deliverables/spfx/bbi-intranet.sppkg`](../deliverables/spfx/bbi-intranet.sppkg) (v1.2.0.0)
+> Package SPFx à installer avant : [`../deliverables/spfx/bbi-intranet.sppkg`](../deliverables/spfx/bbi-intranet.sppkg) (v1.5.0.0)
 
 ---
 
@@ -14,21 +15,13 @@ les bibliothèques, les colonnes, les vues, les pages, la galerie médias, la pa
 
 | Page | Type | Contenu |
 |---|---|---|
-| `accueil.aspx` | **Page applicative plein écran** | Web part `BBI Accueil` : héros 100 % écran, bandeau d'info, chiffres clés, accès directs, actualités, sessions, catalogue, galerie, supports, formateurs |
-| `catalogue.aspx` | Page article | `BBI Catalogue des formations` (recherche + filtres par filière) |
-| `galerie.aspx` | Page article | `BBI Galerie médias` (albums + visionneuse plein écran) |
-| `formation.aspx` | **Modèle de page** | `BBI Fiche formation` — une fiche par formation, pilotée par `?code=BBI-XXX` |
-| `sessions.aspx` | Page article | `BBI Sessions & inscriptions` (planning groupé par mois, filtres, agenda) |
-| `article.aspx` | **Modèle de page** | `BBI Article d'actualité` — piloté par `?itemid=12` |
-| `vie-bbi.aspx` | Page article | Variante compacte de l'accueil (vie d'entreprise) |
-| `support.aspx`, `mentions-legales.aspx` | Pages article | À compléter (FAQ, mentions) |
+| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil, Formations, Sessions, Actualités, Ressources (supports + galerie) et Communauté. Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
 
 Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Formations`, `Supports publiés`, `Galerie médias`.
 
-> **Les pages sont présentables dès la fin du déploiement, même sans aucune donnée.** Si une liste, une
-> bibliothèque ou la galerie est absente, non créée ou encore vide, la web part affiche un contenu de
-> repli réaliste et professionnel (textes et visuels BBI embarqués dans le package). Rien à configurer :
-> vos premiers éléments publiés remplacent automatiquement les exemples, bloc par bloc.
+> **Le portail est présentable dès la fin du déploiement, même sans aucune donnée.** Si une liste ou une
+> bibliothèque est absente, non créée ou vide, la vue concernée présente un contenu de repli professionnel.
+> Les pages distinctes du catalogue, des sessions, des actualités et de la galerie ne sont plus à créer.
 >
 > Pour visualiser ce mécanisme pendant la mise en place, activez l'option **« Afficher les indicateurs de
 > données de démonstration »** dans le volet Propriétés de chaque web part : un bandeau précise alors la
@@ -38,15 +31,13 @@ Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Formations`, `Supports 
 
 ## 0 bis. Que se passe-t-il si une source est vide ?
 
-| Web part | Source surveillée | Comportement si absente / vide | Ce qui remplace les exemples |
+| Vue du portail | Source surveillée | Comportement si absente / vide | Ce qui remplace les exemples |
 |---|---|---|---|
-| `BBI Accueil` | `Actualites`, `Sessions`, `Formateurs` | Blocs alimentés par des exemples datés relativement | Publier une actualité / une session / un formateur |
-| `BBI Catalogue` | `Formations` | 5 formations représentatives | Publier une formation (`Statut catalogue = Actif`) |
-| `BBI Fiche formation` | `Formations`, `Sessions`, `Supports publiés`, `Formateurs` | Fiche complète même pour un code inconnu | Renseigner `Code formation` sur la formation |
-| `BBI Sessions & inscriptions` | `Sessions`, `Formations` | Planning de 6 sessions sur les mois à venir | Publier des sessions avec `Date de début` |
-| `BBI Article d'actualité` | `Actualites` | Article rédigé + 3 actualités liées + visuel | Renseigner le `Corps de l'article` |
-| `BBI Galerie médias` | `Galerie médias` | 8 photos dans 4 albums | Téléverser une image dans la bibliothèque |
-| `BBI Documents sécurisés` | `Supports publiés` | 4 supports, ouverture neutralisée | Publier un document dans la bibliothèque |
+| Accueil / actualités | `Actualites` | À la une + flux d'actualités | Publier une actualité |
+| Sessions | `Sessions` | Planning de sessions à venir | Publier des sessions avec `Date de début` |
+| Formations | `Formations` | Catalogue filtrable | Publier une formation (`Statut catalogue = Actif`) |
+| Ressources | `Supports publiés`, `Galerie médias` | Supports et galerie de démonstration | Publier des documents, photos ou vidéos |
+| Communauté | `Formateurs` | Annuaire d'exemple | Publier un formateur |
 
 Le remplacement se fait **source par source** : vous pouvez publier les actualités avant les sessions,
 l'accueil reste cohérent à chaque étape.
@@ -146,20 +137,28 @@ dans les interfaces d'administration (et doivent être tracés pour Qualiopi).
 | 6 | **Fonts de marque (optionnel)** | Brand center → *Brand fonts* | Téléverser la police institutionnelle (woff2) + jeu de polices BBI |
 | 7 | **Footer du site** | ⚙️ → *Modifier l'apparence* → Pied de page | Mentions légales · RGPD · Accessibilité · Contact |
 
-> ⚠️ **Ce qui n'est pas techniquement possible** : masquer la barre de suite Microsoft 365 (waffle,
-> recherche, avatar). Microsoft l'interdit explicitement et le CSS « pirate » casse à chaque mise à
-> jour. La page applicative supprime **l'en-tête de site, la navigation et le titre de page** ;
-> pour un écran 100 % sans chrome, publiez la même page dans **Teams / Viva Connections**.
+La web part **BBI Accueil** applique elle-même un mode immersif lorsqu'elle est chargée : elle masque la barre Microsoft 365, l'en-tête et la navigation SharePoint, la navigation latérale, le titre et (en lecture seule) la barre de commandes. Le comportement est embarqué dans le bundle de la web part : il fonctionne sur la page publiée depuis le `.sppkg` et dans le workbench hébergé avec les manifests de debug. En mode édition, les commandes sont conservées pour pouvoir modifier la page.
+
+> Les sélecteurs s'appuient sur les identifiants/accessibility hooks actuels de SharePoint. Microsoft peut les faire évoluer ; vérifier le rendu après les mises à jour SharePoint. La page `SingleWebPartAppPage` et l'extension BBI Plein écran restent recommandées pour obtenir le canevas bord à bord le plus fiable.
 
 ---
 
-## 5. Comprendre la page d'accueil « plein écran »
+## 5. Le portail tient sur une page
 
-La page `accueil.aspx` est une **SingleWebPartAppPage**. Concrètement :
+`accueil.aspx` est une **SingleWebPartAppPage** qui reçoit une seule web part : `BBI Accueil`. Son menu
+change de vue dans la même application — les destinations se reflètent dans le fragment de l'URL
+(`#formations`, `#sessions`, `#actualites`, `#ressources`, `#communaute`) pour permettre les favoris
+et les liens directs, sans créer de pages SharePoint additionnelles.
 
-- elle n'affiche **ni en-tête de site, ni navigation, ni titre de page** — le rendu ressemble à un vrai site web ;
-- la web part `BBI Accueil` y occupe **toute la largeur** (`supportsFullBleed: true`) et son héros fait **100 % de la hauteur visible** (`100svh` moins la hauteur réelle du chrome, mesurée automatiquement) ;
-- l'extension **BBI Plein écran** (ClientSideExtension) supprime les marges résiduelles du canevas SharePoint : c'est elle qui rend le bord-à-bord parfait, y compris en mode *workbench*.
+- **Accueil** : raccourcis, actualités récentes, prochaines sessions et aperçu de l'équipe.
+- **Formations** : catalogue complet avec recherche et filtres.
+- **Sessions** : planning à venir.
+- **Actualités** : flux d'actualités.
+- **Ressources** : supports publiés et galerie médias.
+- **Communauté** : annuaire des formateurs référents et liens d'entraide.
+
+Ajoutez uniquement **BBI Accueil** à `accueil.aspx`. Les autres composants du package servent de briques
+internes à cette web part ; il n'est pas nécessaire d'ajouter séparément catalogue, documents ou galerie.
 
 ### Vérifier / modifier l'extension
 
@@ -195,34 +194,22 @@ Set-PnPClientSidePage -Identity accueil.aspx -LayoutType Article
 
 ---
 
-## 5 bis. Utiliser les modèles de page (équipes éditoriales)
+## 5 bis. Navigation entre les vues
 
-Deux modèles sont créés par le script et apparaissent dans **Nouveau → Page** :
+Le menu et les tuiles restent dans le portail :
 
-### Fiche formation (`formation.aspx`)
-1. Ouvrir le catalogue, cliquer une formation → l'URL se termine par `?code=BBI-MGT-101`.
-2. La page `formation.aspx` lit ce code et affiche la fiche complète (objectifs, programme, sessions, supports, formateurs).
-3. Pour créer une nouvelle fiche : *Nouveau → Page → BBI Fiche formation*, puis publier et partager le lien
-   en ajoutant `?code=<CODE>` — ou, plus simple, **lier le catalogue** directement :
-   `…/SitePages/formation.aspx?code=BBI-MGT-101`.
-4. Les champs `Objectifs`, `Programme`, `Prérequis` sont **multi-lignes** : une ligne = une puce / une étape.
+| Vue | Fragment |
+|---|---|
+| Accueil | `#accueil` |
+| Formations | `#formations` |
+| Sessions | `#sessions` |
+| Actualités | `#actualites` |
+| Ressources et galerie | `#ressources` |
+| Communauté / formateurs | `#communaute` |
 
-> Conseil : conservez **une seule page** `formation.aspx` et pilotez-la par le code (pas une page par formation).
-> Vous évitez ainsi les pages orphelines et gardez un design unique. Si vous préférez une page par formation,
-> le modèle permet aussi de partir d'une copie.
-
-### Article d'actualité (`article.aspx`)
-1. Noter l'identifiant de l'actualité (colonne **ID** de la liste `Actualites`).
-2. Lien à partager : `…/SitePages/article.aspx?itemid=12` — visuel, chapô, auteur, temps de lecture,
-   boutons de partage (e-mail, Teams, copie du lien) et actualités liées sont générés automatiquement.
-3. Renseigner la colonne `Corps de l'article` (multi-lignes enrichi) pour le texte long.
-
-### Sessions & inscriptions (`sessions.aspx`)
-Page prête à l'emploi : recherche, filtres filière/modalité, regroupement par mois, `Ajouter à mon agenda`,
-lien vers la fiche formation (le code est extrait automatiquement du titre de la session, ex. « … — BBI-MGT-101 »).
-
-> 💡 **Astuce de nommage** : placez toujours le code formation dans le titre de la session
-> (`Management d'équipe — Cohorte 7 — BBI-MGT-101`) : le planning en déduit la filière et le lien vers la fiche.
+Les fragments peuvent être utilisés dans les favoris ou les liens internes. Les actions qui doivent
+réellement sortir du portail (par exemple ouvrir un document ou rejoindre un formulaire d'inscription)
+restent des liens vers leur destination sécurisée SharePoint.
 
 ---
 

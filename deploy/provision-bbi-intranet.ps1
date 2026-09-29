@@ -1,19 +1,18 @@
 <#
 .SYNOPSIS
-    BBI Intranet — provisionnement complet du site SharePoint Online (listes, bibliothèques,
-    pages, web parts SPFx, thème, navigation, page d'accueil plein écran).
+    BBI Intranet — provisionnement du site SharePoint Online (listes, bibliothèques,
+    page d'accueil unique avec le portail BBI Accueil, thème et navigation).
 
 .DESCRIPTION
     Ce script rend le site BBI fonctionnel avec la solution SPFx « bbi-intranet » :
       1. listes et bibliothèques métier avec les colonnes EXACTES attendues par le code SPFx ;
       2. vues utiles (catalogue actif, prochaines sessions, récemment publiés, albums) ;
       3. bibliothèque d'images « Galerie médias » + colonnes Album / Lieu / Crédit / Date ;
-      4. pages SharePoint (Accueil plein écran, Catalogue, Galerie, Vie BBI, Support, Mentions) ;
-      5. ajout des web parts BBI et de leurs propriétés sur ces pages ;
-      6. page d'accueil applicative (SingleWebPartAppPage) sans en-tête ni navigation ;
-      7. extension « BBI Plein écran » (bord à bord) via une Custom Action ;
-      8. thème « BBI Bleu nuit », logo, en-tête, navigation et pied de page ;
-      9. jeu de données d'exemple (optionnel) pour valider immédiatement.
+      4. une page d'accueil applicative (SingleWebPartAppPage) avec une seule web part BBI Accueil ;
+      5. vues internes Catalogue, Sessions, Actualités, Ressources et Communauté ;
+      6. extension « BBI Plein écran » (bord à bord) via une Custom Action ;
+      7. thème « BBI Bleu nuit », logo, en-tête, navigation et pied de page ;
+      8. jeu de données d'exemple (optionnel) pour valider immédiatement.
 
     Le script est IDEMPOTENT : relancez-le autant de fois que nécessaire, il ne recrée
     pas ce qui existe déjà. Utilisez -DryRun pour simuler sans rien modifier.
@@ -44,7 +43,7 @@
 
 .NOTES
     Auteur : agence SPFx — Business Builders International
-    Version : 1.4.0 — accompagne la solution bbi-intranet 1.4.0.0
+    Version : 1.5.0 — accompagne la solution bbi-intranet 1.5.0.0
 #>
 
 [CmdletBinding()]
@@ -542,15 +541,15 @@ $homeProps = @{
     enableAnnouncement    = $true
     layoutCompact         = $false
     heroEyebrow           = 'Business Builders International'
-    heroTitle             = "Faites grandir vos talents,`npropulsez vos projets."
-    heroSubtitle          = "Le catalogue des formations BBI, vos prochaines sessions et tous vos supports pédagogiques, au même endroit."
-    primaryCtaLabel       = 'Explorer le catalogue'
+    heroTitle             = "L'expertise qui fait grandir les dirigeants."
+    heroSubtitle          = "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables."
+    primaryCtaLabel       = 'Explorer les formations'
     primaryCtaUrl         = '#formations'
-    secondaryCtaLabel     = 'Voir la galerie'
-    secondaryCtaUrl       = '#galerie'
-    navLinks              = "# Accueil | #accueil`n# Accès directs | #acces`n# Actualités | #actualites`n# Catalogue | #formations`n# Galerie | #galerie`n# Ressources | #ressources`n# Espace formateurs* | /sites/espace-formateurs"
-    quickLinks            = "▦ | Catalogue des formations | Parcours, modalités et durées | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #actualites`n▤ | Supports publiés | Consultation en lecture seule | #ressources`n◈ | Galerie médias | Photos et vidéos BBI | #galerie`n◎ | Formateurs référents | Votre réseau d'experts | #formateurs`n✆ | Support & FAQ | Une question, une demande | #support"
-    kpis                  = "1 500 | Professionnels formés`n120 | Sessions par an`n40 | Formateurs certifiés`n96% | Taux de recommandation"
+    secondaryCtaLabel     = 'Voir les prochaines sessions'
+    secondaryCtaUrl       = '#sessions'
+    navLinks              = "# Accueil | #accueil`n# Formations | #formations`n# Sessions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
+    quickLinks            = "▦ | Catalogue des formations | Parcours, modalités et durées | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
+    kpis                  = ""
     enableGallery         = $true
 } | ConvertTo-Json -Compress
 
@@ -558,40 +557,9 @@ $homeProps = @{
 Ensure-BbiPage -Name 'accueil' -Title 'Accueil' -LayoutType 'SingleWebPartAppPage' | Out-Null
 Ensure-BbiWebPart -Page 'accueil.aspx' -ComponentId $WP_HOME -PropertiesJson $homeProps -Name 'BBI Accueil (plein écran)'
 
-# --- Catalogue
-Ensure-BbiPage -Name 'catalogue' -Title 'Catalogue des formations' | Out-Null
-Ensure-BbiWebPart -Page 'catalogue.aspx' -ComponentId $WP_CATALOG -Name 'BBI Catalogue des formations' `
-    -PropertiesJson (@{ siteUrl = $script:DataSiteUrl; listTitle = 'Formations'; maxItems = 60 } | ConvertTo-Json -Compress)
-
-# --- Galerie
-Ensure-BbiPage -Name 'galerie' -Title 'Galerie médias' | Out-Null
-Ensure-BbiWebPart -Page 'galerie.aspx' -ComponentId $WP_GALLERY -Name 'BBI Galerie médias' `
-    -PropertiesJson (@{ siteUrl = $script:DataSiteUrl; libraryTitle = 'Galerie médias'; maxItems = 48; columns = 4; showCaptions = $true; allowDownload = $true } | ConvertTo-Json -Compress)
-
-# --- Vie BBI (actualités + sessions + communauté)
-Ensure-BbiPage -Name 'vie-bbi' -Title "Vie d'entreprise" | Out-Null
-Ensure-BbiWebPart -Page 'vie-bbi.aspx' -ComponentId $WP_HOME -Name 'BBI Accueil (variante compacte)' `
-    -PropertiesJson (@{ siteUrl = $script:DataSiteUrl; layoutCompact = $true; enableGallery = $false } | ConvertTo-Json -Compress)
-
-# --- Fiche formation : MODÈLE DE PAGE (une fiche par formation, via ?code=BBI-XXX)
-Ensure-BbiPage -Name 'formation' -Title 'Fiche formation' -PromoteAs 'Template' | Out-Null
-Ensure-BbiWebPart -Page 'formation.aspx' -ComponentId $WP_FICHE -Name 'BBI Fiche formation' `
-    -PropertiesJson (@{ siteUrl = $script:DataSiteUrl; formationsListTitle = 'Formations'; sessionsListTitle = 'Sessions'; documentsLibraryTitle = 'Supports publiés'; trainersListTitle = 'Formateurs'; showSessions = $true; showDocuments = $true; showTrainer = $true } | ConvertTo-Json -Compress)
-
-# --- Sessions & inscriptions
-Ensure-BbiPage -Name 'sessions' -Title 'Sessions & inscriptions' | Out-Null
-Ensure-BbiWebPart -Page 'sessions.aspx' -ComponentId $WP_SESSIONS -Name 'BBI Sessions & inscriptions' `
-    -PropertiesJson (@{ siteUrl = $script:DataSiteUrl; sessionsListTitle = 'Sessions'; formationsListTitle = 'Formations'; maxItems = 30; showPast = $false } | ConvertTo-Json -Compress)
-
-# --- Article d'actualité : MODÈLE DE PAGE (une page par actualité, via ?itemid=12)
-Ensure-BbiPage -Name 'article' -Title "Article d'actualité" -PromoteAs 'Template' | Out-Null
-Ensure-BbiWebPart -Page 'article.aspx' -ComponentId $WP_ARTICLE -Name "BBI Article d'actualité" `
-    -PropertiesJson (@{ siteUrl = $script:DataSiteUrl; newsListTitle = 'Actualites'; maxRelated = 3 } | ConvertTo-Json -Compress)
-
-# --- Support & FAQ + Mentions légales + Plan du site
-Ensure-BbiPage -Name 'support' -Title 'Support & FAQ' | Out-Null
-Ensure-BbiPage -Name 'mentions-legales' -Title 'Mentions légales' | Out-Null
-Ensure-BbiPage -Name 'plan-du-site' -Title 'Plan du site' | Out-Null
+# --- Le portail utilise une seule page SharePoint : les destinations du menu
+#     (formations, sessions, actualités, ressources, communauté) sont des vues
+#     internes pilotées par la web part BBI Accueil, sans pages .aspx séparées.
 
 # --- Page d'accueil du site = accueil.aspx
 if (-not $DryRun -and -not $VerifyOnly) {
@@ -667,12 +635,17 @@ if ($DryRun -or $VerifyOnly) {
 # 7. NAVIGATION DU SITE
 # ==================================================================
 Write-Title "7/9 · Navigation"
-Ensure-BbiNavNode -Title 'Accueil'      -Url "$SiteUrl/SitePages/accueil.aspx"
-Ensure-BbiNavNode -Title 'Catalogue'    -Url "$SiteUrl/SitePages/catalogue.aspx"
-Ensure-BbiNavNode -Title 'Sessions'     -Url "$SiteUrl/SitePages/sessions.aspx"
-Ensure-BbiNavNode -Title 'Galerie'      -Url "$SiteUrl/SitePages/galerie.aspx"
-Ensure-BbiNavNode -Title "Vie d'entreprise" -Url "$SiteUrl/SitePages/vie-bbi.aspx"
-Ensure-BbiNavNode -Title 'Support'      -Url "$SiteUrl/SitePages/support.aspx"
+# Retire les anciens raccourcis du menu qui menaient vers des pages .aspx séparées.
+if (-not $DryRun -and -not $VerifyOnly) {
+    $legacyNavTitles = @('Catalogue', 'Sessions', 'Galerie', "Vie d'entreprise", 'Support')
+    $topNodes = Get-PnPNavigationNode -Location 'TopNavigationBar' -ErrorAction SilentlyContinue
+    foreach ($node in ($topNodes | Where-Object { $legacyNavTitles -contains $_.Title })) {
+        Invoke-Bbi "Retrait de l'ancien lien de navigation « $($node.Title) »" {
+            Remove-PnPNavigationNode -Identity $node.Id -Force -ErrorAction Stop
+        } | Out-Null
+    }
+}
+Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
 
 # ==================================================================
 # 8. DONNÉES D'EXEMPLE

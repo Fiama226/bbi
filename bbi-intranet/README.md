@@ -1,19 +1,21 @@
 # BBI Intranet — Solution SPFx (SharePoint Online)
 
-Solution **SPFx 1.22.2** contenant les trois web parts métier de l'intranet Business Builders International :
+Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le package embarque aussi des briques autonomes historiques, mais **le portail demandé ne nécessite qu'une seule web part sur une seule page** : `BBI Accueil — portail unifié`.
 
 | Web part | ID | Rôle |
 |---|---|---|
-| **BBI Accueil (plein écran)** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | Page d'accueil type « site web » : héros 100 % de la hauteur visible (mesure du chrome SharePoint, y compris en workbench), bandeau d'information, chiffres clés, accès directs, actualités, sessions, catalogue intégré, galerie, supports publiés, formateurs, pied de page. `supportsFullBleed: true` + `SharePointFullPage`. |
+| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil, Formations, Sessions, Actualités, Ressources (documents + galerie) et Communauté. La navigation change de vue sans recharger ni quitter cette page. Masque le chrome SharePoint en lecture, conserve les commandes en édition, et fonctionne dans le package publié comme dans le workbench hébergé. |
 | **BBI Catalogue des formations** | `d37a426e-48db-484f-bf10-c38675bb7b43` | Cartes filtrables (filière) + recherche, alimentées par la liste `Formations`. Affiche des données d'exemple si la liste n'existe pas encore. |
 | **BBI Galerie médias** | `f0f19a37-2c11-4812-9006-8aa71a9254f1` | Galerie photos/vidéos alimentée par la bibliothèque d'images « Galerie médias » : albums filtrables, mosaïque, visionneuse plein écran accessible (clavier, focus, `aria-modal`), vidéos mp4, vignettes générées par SharePoint. |
 | **BBI Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
 | **BBI Fiche formation** *(modèle)* | `a9c99e25-db18-4419-894b-08bc9c5b9081` | Modèle de page : la page lit `?code=BBI-MGT-101` et affiche présentation, objectifs, programme, prérequis, public visé, prochaines sessions (Événements de la liste Sessions, filtrées par code), supports publiés et formateurs référents. |
 | **BBI Sessions & inscriptions** | `96216ee2-85b1-473b-aaec-e5b646a151ee` | Planning groupé par mois : recherche, filtres filière/modalité, statut d'inscription, lien « Ajouter à mon agenda » (Outlook) et lien vers la fiche formation (code extrait du titre). |
 | **BBI Article d'actualité** *(modèle)* | `f769f3df-2c27-4a30-bce2-d4ae5793557b` | Modèle de page : lit `?itemid=12`, affiche visuel, chapô, auteur, temps de lecture, partage (e-mail/Teams/copie du lien) et actualités liées. Le HTML éditorial est nettoyé (scripts et événements retirés). |
-| **BBI Documents sécurisés** | `c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41` | Visionneuse des supports publiés : badge 🔒 *Lecture seule*, ouverture **navigateur uniquement** (`?web=1`). La protection réelle (anti-téléchargement / anti-impression) est appliquée par la plateforme : permissions *Lecture*, étiquette de sensibilité ou IRM, accès conditionnel — voir `../deliverables/index.html` §7. |
+| **BBI Documents sécurisés** | `c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41` | Brique autonome conservée dans le package ; ses contenus sont intégrés dans la vue Ressources du portail. |
 
-Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.4.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
+> Pour le déploiement standard : téléversez le package, puis ajoutez **uniquement `BBI Accueil — portail unifié`** à `accueil.aspx`. N'ajoutez pas les briques Catalogue, Galerie ou Documents séparément.
+
+Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.5.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
 
 ### Contenus de repli (production ready)
 
@@ -33,7 +35,7 @@ Les bandeaux « données de démonstration » sont masqués par défaut : option
 
 **Vérification :** `node tools/verify-fallback.js` — 42 contrôles exécutés sur les couches de données réelles (aucun accès réseau requis).
 
-> **Provisionnement** : `../deploy/provision-bbi-intranet.ps1` crée les listes, bibliothèques (dont « Galerie médias »), pages, web parts et la custom action « plein écran ». Guide : `../deploy/README.md`. Audit et recommandations : `../deliverables/audit-2026/index.html`.
+> **Provisionnement** : `../deploy/provision-bbi-intranet.ps1` crée les listes, bibliothèques (dont « Galerie médias »), **une page d'accueil et une web part**. Les anciennes pages éventuellement déjà présentes ne sont pas supprimées ; le nouveau menu ne les utilise plus. Guide : `../deploy/README.md`.
 
 ---
 

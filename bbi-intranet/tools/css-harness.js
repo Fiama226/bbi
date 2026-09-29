@@ -29,7 +29,8 @@ const folder =
 
 const bundleFile = fs
   .readdirSync(folder)
-  .find((f) => f.startsWith(bundleName) && f.endsWith('.js'));
+  .filter((f) => f.startsWith(bundleName) && f.endsWith('.js'))
+  .sort((a, b) => fs.statSync(path.join(folder, b)).mtimeMs - fs.statSync(path.join(folder, a)).mtimeMs)[0];
 if (!bundleFile) {
   console.error(`✗ bundle introuvable dans ${folder}`);
   process.exit(1);
@@ -240,8 +241,23 @@ setTimeout(() => {
     allCss.includes('bbi-bleed') &&
     domUsesCss &&
     missing.length === 0;
+
+  const routeRoot = hostDiv.querySelector('#bbi-home-root');
+  const trainingLink = hostDiv.querySelector('header nav a[href="#formations"]');
+  if (trainingLink) {
+    trainingLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  }
+  const trainingRouteOk = routeRoot && routeRoot.getAttribute('data-view') === 'formations';
+  const homeLink = hostDiv.querySelector('header nav a[href="#accueil"]');
+  if (homeLink) {
+    homeLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  }
+  const homeRouteOk = routeRoot && routeRoot.getAttribute('data-view') === 'accueil';
+  console.log(`Navigation SPA (Accueil → Formations → Accueil) : ${trainingRouteOk && homeRouteOk ? 'OK' : 'ÉCHEC'}`);
+
+  const allOk = styleOk && trainingRouteOk && homeRouteOk;
   console.log(
-    `\n${styleOk ? '✓ CSS PRESENT ET COHERENT' : '✗ CSS ABSENT OU INCOHERENT'} (mode ${mode})`
+    `\n${allOk ? '✓ CSS ET NAVIGATION PRESENTS/COHERENTS' : '✗ VÉRIFICATION EN ÉCHEC'} (mode ${mode})`
   );
-  process.exit(styleOk ? 0 : 1);
+  process.exit(allOk ? 0 : 1);
 }, 300);
