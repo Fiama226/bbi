@@ -59,7 +59,7 @@ export default class ArticleActualiteWebPart extends BaseClientSideWebPart<IArti
       shareUrl: this.properties.shareUrl || '',
       spHttpClient: this.context.spHttpClient,
       isDarkTheme: this._themeVariant ? !!this._themeVariant.isInverted : false,
-      hasTeamsContext: !!this.context.sdks.microsoftTeams,
+      hasTeamsContext: !!(this.context.sdks && this.context.sdks.microsoftTeams),
       themeVariant: this._themeVariant,
       strings
     });

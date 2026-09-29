@@ -42,7 +42,7 @@ export default class TrainingCatalogWebPart extends BaseClientSideWebPart<ITrain
         showDataNotices: this.properties.showDataNotices === true,
         spHttpClient: this.context.spHttpClient,
         isDarkTheme: this._isDarkTheme,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
+        hasTeamsContext: !!(this.context.sdks && this.context.sdks.microsoftTeams),
         strings: strings
       }
     );

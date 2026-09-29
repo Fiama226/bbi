@@ -55,6 +55,53 @@ const { ManifestPlugin, CumulativeManifestProcessor, DependencyDiscoveryMode } =
 const { JsonFile } = require('@rushstack/node-core-library');
 const { Terminal, ConsoleTerminalProvider } = require('@rushstack/terminal');
 const { LocalizationPlugin } = require('@rushstack/webpack5-localization-plugin');
+const nodePath = require('path');
+// Mirrors @microsoft/spfx-heft-plugins/lib-commonjs/plugins/webpackConfigurationPlugin/webpackPlugins/CopyReleaseAssetsPlugin
+// (kept inline because that file is not exported by the package's "exports" map).
+class CopyReleaseAssetsPlugin {
+    constructor(options) {
+        this._options = options;
+    }
+    apply(compiler) {
+        compiler.hooks.thisCompilation.tap('copy-release-assets', (compilation) => {
+            const thisWebpack = compiler.webpack;
+            compilation.hooks.processAssets.tapPromise({
+                stage: thisWebpack.Compilation.PROCESS_ASSETS_STAGE_REPORT + 1,
+                name: 'copy-release-assets'
+            }, async () => {
+                const { releasePath, isDebug, assetsFolderName = 'assets', manifestsFolderName = 'manifests' } = this._options;
+                const assetsReleasePath = `${releasePath}/${assetsFolderName}`;
+                const manifestsReleasePath = `${releasePath}/${manifestsFolderName}`;
+                const relativeAssetsReleasePath = nodePath.relative(compiler.options.output.path, assetsReleasePath);
+                const relativeManifestsReleasePath = nodePath.relative(compiler.options.output.path, manifestsReleasePath);
+                const ignoredFileExtensions = ['.stats.json', '.stats.html'];
+                if (!this._options.releaseMapFiles) {
+                    ignoredFileExtensions.push('.map');
+                }
+                for (const [assetName, assetSource] of Object.entries(compilation.assets)) {
+                    let shouldCopyAssetToRelease = true;
+                    for (const ignoredExtension of ignoredFileExtensions) {
+                        if (assetName.endsWith(ignoredExtension)) {
+                            shouldCopyAssetToRelease = false;
+                            break;
+                        }
+                    }
+                    if (shouldCopyAssetToRelease) {
+                        const releaseManifestVariant = assetSource.releaseManifest;
+                        if (releaseManifestVariant) {
+                            // This is a manifest: emit the release-URL variant into release/manifests
+                            compilation.emitAsset(`${relativeManifestsReleasePath}/${assetName}`, new thisWebpack.sources.RawSource(releaseManifestVariant));
+                        }
+                        else {
+                            // This isn't a manifest
+                            compilation.emitAsset(`${relativeAssetsReleasePath}/${assetName}`, assetSource);
+                        }
+                    }
+                }
+            });
+        });
+    }
+}
 // Configuration constants
 const DEFAULT_LOCALE = 'en-us';
 const TEMP_FOLDER_NAME = 'temp';
@@ -165,6 +212,19 @@ const localization = {
  */ function getBundleConfig() {
     const entry = {};
     const bundleEntries = [];
+    // If a manifest version is "*", replace it with the package version (mirrors the non-ejected
+    // WebpackConfigurationGenerator). A literal "*" in a shipped manifest breaks Version.parse()
+    // during SPFx loader manifest-store lookups.
+    const packageVersion = (() => {
+        try {
+            const packageJson = JsonFile.load(`${__dirname}/package.json`);
+            const indexOfDelimiter = packageJson.version.indexOf('-');
+            return indexOfDelimiter > 0 ? packageJson.version.substr(0, indexOfDelimiter) : packageJson.version;
+        }
+        catch (e) {
+            return undefined;
+        }
+    })();
     for (const bundle of bundles){
         entry[bundle.bundleName] = bundle.components[0].entrypoint;
         const bundleEntry = {
@@ -173,6 +233,9 @@ const localization = {
         };
         for (const component of bundle.components){
             const manifestData = JsonFile.load(component.manifest);
+            if (manifestData.version === '*' && packageVersion) {
+                manifestData.version = packageVersion;
+            }
             bundleEntry.components[manifestData.id] = {
                 manifestData,
                 manifestPath: `${__dirname}/${component.manifest}`,
@@ -309,17 +372,22 @@ function getSPFxWebpackConfig({ production }) {
 }
 function generateConfig(env) {
     const { entry, alias, externals, plugins } = getSPFxWebpackConfig(env);
-    // Use different output folders for production vs development to maintain compatibility with non-ejected mode
-    // Production: Manifests in release/manifests (webpack output.path), JS bundles in ../assets via filename path
-    // Development: Both manifests and JS in dist
-    const outputFolder = env.production ? RELEASE_MANIFESTS_FOLDER : DIST_FOLDER_NAME;
-    const jsFilenamePrefix = env.production ? '../assets/' : '';
+    // Emit everything flat into dist/ (manifests, JS bundles, images). The ManifestPlugin records
+    // scriptResources paths from the emitted file names, so the file names must be flat to match the
+    // ClientSideAssets/ layout that package-solution produces.
+    //
+    // CopyReleaseAssetsPlugin then splits the compilation assets into release/manifests (manifest
+    // JSON, with release URLs) and release/assets (all other files) - the exact layout
+    // `heft package-solution --production` reads. The previous configuration used a '../assets/'
+    // filename prefix in production, which produced manifest paths that resolve OUTSIDE
+    // ClientSideAssets (HTTP 404 at runtime -> the SPFx loader rejects with a plain error object
+    // and the web part shows "ERREUR : [object Object]").
     const config = {
         mode: env.production ? 'production' : 'development',
         entry,
         output: {
-            filename: `${jsFilenamePrefix}[name]_[locale]_[contenthash].js`,
-            path: `${__dirname}/${outputFolder}`,
+            filename: '[name]_[locale]_[contenthash].js',
+            path: `${__dirname}/${DIST_FOLDER_NAME}`,
             // SPFx requires AMD module format for SharePoint's module loader
             libraryTarget: 'amd'
         },
@@ -397,7 +465,17 @@ function generateConfig(env) {
         performance: {
             hints: false
         },
-        plugins
+        plugins: [
+            ...plugins,
+            // Always produce the release/ folder (release/manifests + release/assets) in the exact
+            // layout `heft package-solution` expects. Mirrors the non-ejected rig.
+            new CopyReleaseAssetsPlugin({
+                releasePath: `${__dirname}/release`,
+                isDebug: !env.production,
+                assetsFolderName: 'assets',
+                manifestsFolderName: 'manifests'
+            })
+        ]
     };
     return config;
 }

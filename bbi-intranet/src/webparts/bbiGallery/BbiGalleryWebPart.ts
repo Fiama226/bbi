@@ -60,7 +60,7 @@ export default class BbiGalleryWebPart extends BaseClientSideWebPart<IBbiGallery
       albumFilter: this.properties.albumFilter || '',
       spHttpClient: this.context.spHttpClient,
       isDarkTheme: this._isDarkTheme,
-      hasTeamsContext: !!this.context.sdks.microsoftTeams,
+      hasTeamsContext: !!(this.context.sdks && this.context.sdks.microsoftTeams),
       themeVariant: this._themeVariant,
       strings
     });

@@ -41,7 +41,7 @@ export default class SecureDocumentsWebPart extends BaseClientSideWebPart<ISecur
         showDataNotices: this.properties.showDataNotices === true,
         spHttpClient: this.context.spHttpClient,
         isDarkTheme: this._isDarkTheme,
-        hasTeamsContext: !!this.context.sdks.microsoftTeams,
+        hasTeamsContext: !!(this.context.sdks && this.context.sdks.microsoftTeams),
         strings: strings
       }
     );

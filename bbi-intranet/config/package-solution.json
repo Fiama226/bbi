@@ -3,7 +3,7 @@
   "solution": {
     "name": "bbi-intranet-client-side-solution",
     "id": "2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3",
-    "version": "1.4.0.0",
+    "version": "1.4.1.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -30,7 +30,7 @@
         "title": "bbi-intranet Feature",
         "description": "Déploie les composants web BBI (Accueil plein écran, Catalogue des formations, Documents sécurisés, Galerie médias) et l'extension de mise en page plein écran.",
         "id": "ebc798de-cab3-4872-9f1d-5f95d19f2052",
-        "version": "1.4.0.0"
+        "version": "1.4.1.0"
       }
     ]
   },

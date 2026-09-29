@@ -24,15 +24,20 @@ Livrables produits à partir du logo, des captures d'inspiration et des besoins 
 | `deliverables/audit-2026/apercu-repli.html` | **Aperçu du comportement à vide** : galerie, catalogue et documents rendus avec des sources absentes ou vides, à partir des styles compilés et des visuels réellement embarqués. |
 | `deploy/provision-bbi-intranet.ps1` | **Script PnP PowerShell idempotent** : listes, colonnes, vues, bibliothèques, pages, web parts, custom action « plein écran », thème, navigation, données d'exemple. Modes `-DryRun` (simulation) et `-VerifyOnly` (audit). |
 | `deploy/README.md` | Guide de mise en place pas à pas + réglages de conformité (étiquettes, IRM, ouverture navigateur) + dépannage. |
-| `deliverables/spfx/bbi-intranet.sppkg` | **Package v1.4.0.0** : 7 web parts + 1 extension, visuels de repli embarqués. |
+| `deliverables/spfx/bbi-intranet.sppkg` | **Package v1.4.1.0** : 7 web parts + 1 extension, visuels de repli embarqués. |
 | `teams/New-BbiTeamsPackage.ps1` | **Générateur de packages Teams / Viva Connections** (manifestes + icônes + .zip) pour l'expérience *zéro chrome SharePoint*. Guide : `teams/README.md`. |
 | `bbi-environnement.json` | **Tenant et site du client** — source unique de vérité : `businessbuilderinter.sharepoint.com`, `/sites/intranet`, groupe concepteurs, URL du workbench hébergé. Les scripts PowerShell et les réglages de développement s'y réfèrent. |
+
+### Ce que fait la version 1.4.1.0
+
+- **Correctif d'empaquetage (« ERREUR : [object Object] » à l'ajout d'un web part).** La configuration webpack éjectée produisait, en mode production, des chemins `../assets/…` dans les manifestes alors que `package-solution` place les fichiers à plat dans `ClientSideAssets/` : chaque bundle était introuvable (HTTP 404) et le chargeur SPFx affichait « ERREUR : [object Object] » (l'erreur brute du chargeur de modules, sans message). La sortie est maintenant à plat (comme le rig officiel), le plugin `CopyReleaseAssetsPlugin` est rétabli pour produire `release/manifests` + `release/assets`, et les versions `*` des manifestes sont remplacées par la version du package. Tous les chemins du `.sppkg` sont vérifiés résolus dans `ClientSideAssets/` avant livraison.
+- **Robustesse Teams.** `this.context.sdks` est désormais lu de façon défensive dans les 7 web parts (évite un plantage si `sdks` est absent de l'hôte).
 
 ### Ce que fait la version 1.4.0.0
 
 - **Aucune page vide, quelles que soient les données.** Chaque composant interroge sa source SharePoint ; si la liste, la bibliothèque ou la galerie est **absente, non créée ou encore vide**, il affiche un contenu de repli réaliste (visuels et textes BBI embarqués dans le package) au lieu d'un écran vide ou d'un message d'erreur. Aucune configuration n'est nécessaire pour que les pages soient présentables dès l'installation ; vos contenus remplacent automatiquement les exemples dès la première publication.
 - **Bandeaux d'information masqués par défaut.** L'option de propriété `Afficher les indicateurs de données de démonstration` (`showDataNotices`, désactivée par défaut) permet d'afficher un bandeau expliquant qu'un contenu de repli est utilisé — utile pendant la mise en place, invisible en production.
-- **Harnais de vérification livré** — `bbi-intranet/tools/verify-fallback.js` transpile les couches de données réelles et les exécute contre un client SharePoint simulé : **42 vérifications** couvrant source absente (404), source vide et source alimentée. Commande : `node tools/verify-fallback.js`.
+- **Harnais de vérification livré** — `bbi-intranet/tools/verify-fallback.js` transpile les couches de données réelles et les exécute contre un client SharePoint simulé : **44 vérifications** couvrant source absente (404), source vide et source alimentée. Commande : `node tools/verify-fallback.js`.
 
 ### Ce que fait la version 1.3.0.0
 
