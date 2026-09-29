@@ -427,18 +427,61 @@ Ensure-BbiField -List 'Sessions' -DisplayName 'Modalité'      -InternalName 'Mo
 Ensure-BbiField -List 'Sessions' -DisplayName 'Lieu'          -InternalName 'Location' -Type Text
 Ensure-BbiField -List 'Sessions' -DisplayName 'Statut'        -InternalName 'Status'   -Type Text
 Ensure-BbiField -List 'Sessions' -DisplayName 'Inscription (URL)' -InternalName 'RegistrationUrl' -Type Hyperlink
+Ensure-BbiField -List 'Sessions' -DisplayName 'Formateur'      -InternalName 'Trainer'   -Type Text
 Ensure-BbiView  -List 'Sessions' -Title 'Prochaines sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
     -Query '<Where><Geq><FieldRef Name="StartDate"/><Value Type="DateTime"><Today/></Value></Geq></Where><OrderBy><FieldRef Name="StartDate"/></OrderBy>'
 Ensure-BbiView  -List 'Sessions' -Title 'Toutes les sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
     -Query '<OrderBy><FieldRef Name="StartDate" Ascending="FALSE"/></OrderBy>'
 
-# --- Formateurs : IHomeTrainer { Title, Role, Filiere, Initials }
+# --- Formateurs : IHomeTrainer { Title, Role, Filiere, Initials, PhotoUrl, Phone, Email, WhatsApp, Location, Bio… }
 Ensure-BbiList -Title 'Formateurs' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Rôle'     -InternalName 'Role'     -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Filière'  -InternalName 'Filiere'  -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Initiales' -InternalName 'Initials' -Type Text
-Ensure-BbiView  -List 'Formateurs' -Title 'Annuaire formateurs' -Fields @('Title','Role','Filiere','Initials') `
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Rôle'        -InternalName 'Role'        -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Filière'     -InternalName 'Filiere'     -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Initiales'   -InternalName 'Initials'    -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Photo (URL)' -InternalName 'PhotoUrl'    -Type Hyperlink
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Téléphone'   -InternalName 'Phone'       -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'E-mail'      -InternalName 'Email'       -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'WhatsApp'    -InternalName 'WhatsApp'    -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Localisation' -InternalName 'Location'   -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Biographie'  -InternalName 'Bio'         -Type Note
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Spécialités' -InternalName 'Specialites' -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Certifications' -InternalName 'Certifications' -Type Text
+Ensure-BbiField -List 'Formateurs' -DisplayName 'Profil LinkedIn' -InternalName 'LinkedIn' -Type Hyperlink
+Ensure-BbiView  -List 'Formateurs' -Title 'Annuaire formateurs' -Fields @('Title','Role','Filiere','Phone','Email','Location') `
     -Query '<OrderBy><FieldRef Name="Title"/></OrderBy>'
+
+# --- Employés du mois : IHomeEmployee { Title, Role, Pole, Month, Message, Highlights, PhotoUrl }
+Ensure-BbiList -Title 'Employés du mois' -Template GenericList | Out-Null
+Ensure-BbiField -List 'Employés du mois' -DisplayName 'Poste'        -InternalName 'Role'       -Type Text
+Ensure-BbiField -List 'Employés du mois' -DisplayName 'Pôle'         -InternalName 'Pole'       -Type Text
+Ensure-BbiField -List 'Employés du mois' -DisplayName 'Mois'         -InternalName 'Month'      -Type Text
+Ensure-BbiField -List 'Employés du mois' -DisplayName 'Motivation'   -InternalName 'Message'    -Type Note
+Ensure-BbiField -List 'Employés du mois' -DisplayName 'Faits marquants' -InternalName 'Highlights' -Type Text
+Ensure-BbiField -List 'Employés du mois' -DisplayName 'Photo (URL)'  -InternalName 'PhotoUrl'   -Type Hyperlink
+Ensure-BbiView  -List 'Employés du mois' -Title 'Mises à l''honneur' -Fields @('Title','Role','Pole','Month') `
+    -Query '<OrderBy><FieldRef Name="Created" Ascending="FALSE"/></OrderBy>'
+
+# --- Certifications : IHomeCertification { Title, Issuer, Scope, ValidUntil, Status }
+Ensure-BbiList -Title 'Certifications' -Template GenericList | Out-Null
+Ensure-BbiField -List 'Certifications' -DisplayName 'Organisme'   -InternalName 'Issuer'     -Type Text
+Ensure-BbiField -List 'Certifications' -DisplayName 'Périmètre'   -InternalName 'Scope'      -Type Note
+Ensure-BbiField -List 'Certifications' -DisplayName 'Valable jusqu''au' -InternalName 'ValidUntil' -Type DateTime
+Ensure-BbiField -List 'Certifications' -DisplayName 'Statut'      -InternalName 'Status'     -Type Text
+Ensure-BbiView  -List 'Certifications' -Title 'Certifications & agréments' -Fields @('Title','Issuer','ValidUntil','Status') `
+    -Query '<OrderBy><FieldRef Name="Created"/></OrderBy>'
+
+# --- Organigramme : IOrgNode { Title, Role, Pole, Parent, PhotoUrl, Email, Phone, Location, Order }
+Ensure-BbiList -Title 'Organigramme' -Template GenericList | Out-Null
+Ensure-BbiField -List 'Organigramme' -DisplayName 'Poste'        -InternalName 'Role'     -Type Text
+Ensure-BbiField -List 'Organigramme' -DisplayName 'Pôle'         -InternalName 'Pole'     -Type Text
+Ensure-BbiField -List 'Organigramme' -DisplayName 'Responsable'  -InternalName 'Parent'   -Type Text
+Ensure-BbiField -List 'Organigramme' -DisplayName 'Photo (URL)'  -InternalName 'PhotoUrl' -Type Hyperlink
+Ensure-BbiField -List 'Organigramme' -DisplayName 'E-mail'       -InternalName 'Email'    -Type Text
+Ensure-BbiField -List 'Organigramme' -DisplayName 'Téléphone'    -InternalName 'Phone'    -Type Text
+Ensure-BbiField -List 'Organigramme' -DisplayName 'Localisation' -InternalName 'Location' -Type Text
+Ensure-BbiField -List 'Organigramme' -DisplayName 'Ordre'        -InternalName 'Ordre'    -Type Number
+Ensure-BbiView  -List 'Organigramme' -Title 'Organigramme complet' -Fields @('Title','Role','Pole','Parent','Location') `
+    -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
 
 # --- Formations : IFormation { Title, CodeFormation, Filiere, Modalite, DureeH, Niveau, StatutCatalogue }
 Ensure-BbiList -Title 'Formations' -Template GenericList | Out-Null
@@ -536,6 +579,9 @@ $homeProps = @{
     formationsListTitle   = 'Formations'
     documentsLibraryTitle = 'Supports publiés'
     galleryLibraryTitle   = 'Galerie médias'
+    employeeListTitle     = 'Employés du mois'
+    certificationsListTitle = 'Certifications'
+    orgChartListTitle     = 'Organigramme'
     maxItems              = 6
     enableGallery         = $true
     enableAnnouncement    = $true
@@ -543,13 +589,14 @@ $homeProps = @{
     heroEyebrow           = 'Business Builders International'
     heroTitle             = "L'expertise qui fait grandir les dirigeants."
     heroSubtitle          = "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables."
+    heroSlides            = " | Business Builders International | L'expertise qui fait grandir les dirigeants. | Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables. | Explorer les formations | #formations`n | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions`n | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir l'organisation | #organigramme`n | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe"
     primaryCtaLabel       = 'Explorer les formations'
     primaryCtaUrl         = '#formations'
     secondaryCtaLabel     = 'Voir les prochaines sessions'
     secondaryCtaUrl       = '#sessions'
-    navLinks              = "# Accueil | #accueil`n# Formations | #formations`n# Sessions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
-    quickLinks            = "▦ | Catalogue des formations | Parcours, modalités et durées | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
-    kpis                  = ""
+    navLinks              = "# Accueil | #accueil`n# Formations | #formations`n# Sessions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute`n# Organigramme | #organigramme"
+    quickLinks            = "▦ | Catalogue des formations | Parcours, modalités et durées | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Organigramme | Équipes, pôles et contacts | #organigramme`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
+    kpis                  = "1 500+ | Professionnels accompagnés`n10+ | Formations au catalogue`n9 | Pays couverts par le réseau`n96 % | De satisfaction constatée"
     enableGallery         = $true
 } | ConvertTo-Json -Compress
 
@@ -646,6 +693,8 @@ if (-not $DryRun -and -not $VerifyOnly) {
     }
 }
 Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
+# Le portail est mono-page : les vues (dont l'organigramme) sont des ancres internes.
+Ensure-BbiNavNode -Title 'Organigramme' -Url "$SiteUrl/SitePages/accueil.aspx#organigramme"
 
 # ==================================================================
 # 8. DONNÉES D'EXEMPLE
@@ -704,12 +753,65 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
         } | Out-Null
     }
 
-    # Formateurs
+    # Formateurs (avec coordonnées : la fiche s'ouvre au clic dans le portail)
     if ((Get-PnPListItem -List 'Formateurs' -PageSize 1).Count -eq 0) {
         Invoke-Bbi "Insertion des formateurs d'exemple" {
-            Add-PnPListItem -List 'Formateurs' -Values @{ Title = 'Amélie Martin';   Role = 'Responsable pédagogique'; Filiere = 'Management & Qualité';   Initials = 'AM' } | Out-Null
-            Add-PnPListItem -List 'Formateurs' -Values @{ Title = 'Stéphane Laurent'; Role = 'Coach certifié';          Filiere = 'Coaching & leadership'; Initials = 'SL' } | Out-Null
-            Add-PnPListItem -List 'Formateurs' -Values @{ Title = 'Khadija Diallo';   Role = 'Formatrice';              Filiere = 'Commerce & négociation'; Initials = 'KD' } | Out-Null
+            $formateurs = @(
+                @{ Title = 'Amélie Martin';   Role = 'Responsable pédagogique'; Filiere = 'Management & Qualité';   Initials = 'AM'; Phone = '+33 6 12 45 78 90'; Email = 'amelie.martin@businessbuilders.fr'; WhatsApp = '+33612457890'; Location = 'Paris — Siège'; Bio = "Pilote l'ingénierie pédagogique du réseau et accompagne la montée en compétences des formateurs BBI."; Specialites = 'Management de proximité · Ingénierie pédagogique'; Certifications = 'Qualiopi · Coach professionnel (RNCP)' },
+                @{ Title = 'Stéphane Laurent'; Role = 'Coach certifié';          Filiere = 'Coaching & leadership'; Initials = 'SL'; Phone = '+33 6 23 56 89 01'; Email = 'stephane.laurent@businessbuilders.fr'; WhatsApp = '+33623568901'; Location = 'Lyon'; Bio = "Coach certifié et ancien directeur commercial : posture, prise de parole et relation client."; Specialites = 'Coaching de dirigeants · Prise de parole'; Certifications = 'Coach certifié ICF · Process Communication' },
+                @{ Title = 'Khadija Diallo';   Role = 'Formatrice';              Filiere = 'Commerce & négociation'; Initials = 'KD'; Phone = '+221 77 456 78 90'; Email = 'khadija.diallo@businessbuilders.fr'; WhatsApp = '+221774567890'; Location = 'Dakar — Antenne'; Bio = "Spécialiste de la négociation complexe, elle anime les parcours commerciaux sur le terrain."; Specialites = 'Négociation · Prospection terrain'; Certifications = 'Méthode BBI Vente · TOSA' },
+                @{ Title = 'Thomas Bernard';   Role = 'Formateur';               Filiere = 'Digital & prospection'; Initials = 'TB'; Phone = '+33 6 34 67 90 12'; Email = 'thomas.bernard@businessbuilders.fr'; WhatsApp = '+33634679012'; Location = 'Paris — Siège'; Bio = "Ancien responsable growth : il outille les équipes commerciales et anime le module « Prospection digitale »."; Specialites = 'Prospection digitale · Outils CRM'; Certifications = 'Google Ads · HubSpot Academy' },
+                @{ Title = 'Marie-Claire Ngoma'; Role = 'Consultante qualité';   Filiere = 'Qualité & certification'; Initials = 'MN'; Phone = '+225 07 12 34 56 78'; Email = 'marie-claire.ngoma@businessbuilders.fr'; WhatsApp = '+2250712345678'; Location = 'Abidjan — Antenne'; Bio = "Accompagne les organismes de formation dans leur mise en conformité Qualiopi."; Specialites = 'Qualiopi · Audit interne'; Certifications = 'Auditeur qualité certifié' },
+                @{ Title = 'Youssef El Amrani'; Role = 'Formateur';              Filiere = 'Leadership & changement'; Initials = 'YA'; Phone = '+33 6 45 78 01 23'; Email = 'youssef.elamrani@businessbuilders.fr'; WhatsApp = '+33645780123'; Location = 'Distanciel'; Bio = "Intervient sur les transformations d'organisation et la conduite du changement."; Specialites = 'Conduite du changement · Leadership'; Certifications = 'Méthode BBI Leadership' },
+                @{ Title = 'Claire Fontaine';  Role = 'Coach certifiée';          Filiere = 'Coaching d''entrepreneurs'; Initials = 'CF'; Phone = '+33 6 56 89 12 34'; Email = 'claire.fontaine@businessbuilders.fr'; WhatsApp = '+33656891234'; Location = 'Paris — Siège'; Bio = "Accompagne les créateurs et repreneurs : structuration du projet et posture de dirigeant."; Specialites = 'Coaching entrepreneurial · Codéveloppement'; Certifications = 'Coach certifiée · Green Belt Lean' },
+                @{ Title = 'Jean-Marc Okafor'; Role = 'Directeur pédagogique';   Filiere = 'Management'; Initials = 'JO'; Phone = '+33 6 67 90 23 45'; Email = 'jean-marc.okafor@businessbuilders.fr'; WhatsApp = '+33667902345'; Location = 'Paris — Siège'; Bio = "Fixe les orientations pédagogiques du réseau et garantit l'homogénéité des parcours."; Specialites = 'Stratégie pédagogique · Management'; Certifications = 'Qualiopi · MBA' }
+            )
+            foreach ($formateur in $formateurs) { Add-PnPListItem -List 'Formateurs' -Values $formateur | Out-Null }
+        } | Out-Null
+    }
+
+    # Employé du mois
+    if ((Get-PnPListItem -List 'Employés du mois' -PageSize 1).Count -eq 0) {
+        Invoke-Bbi "Insertion de l'employé du mois" {
+            Add-PnPListItem -List 'Employés du mois' -Values @{
+                Title      = 'Léa Marchand'
+                Role       = 'Cheffe de projet e-learning'
+                Pole       = 'Opérations & digital'
+                Month      = (Get-Culture).DateTimeFormat.GetMonthName((Get-Date).Month) + ' ' + (Get-Date).Year
+                Message    = "Léa a piloté la refonte complète des modules e-learning et la mise en ligne des capsules du studio en un trimestre. Un travail d'orfèvre sur la qualité pédagogique et l'accessibilité, salué par les formateurs comme par les apprenants."
+                Highlights = '5 modules repensés · 100 % des vidéos sous-titrées · 4,9/5 auprès des apprenants'
+            } | Out-Null
+        } | Out-Null
+    }
+
+    # Certifications & agréments
+    if ((Get-PnPListItem -List 'Certifications' -PageSize 1).Count -eq 0) {
+        Invoke-Bbi "Insertion des certifications" {
+            Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Qualiopi — Actions de formation'; Issuer = 'Cofrac / Marque Qualité'; Scope = 'Certification qualité des actions de formation, obligatoire pour les financeurs publics.'; ValidUntil = $today.AddDays(210); Status = 'Certifié' } | Out-Null
+            Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Datadock'; Issuer = 'Uniformation'; Scope = 'Référencement des organismes de formation auprès des OPCO.'; ValidUntil = $today.AddDays(120); Status = 'Référencé' } | Out-Null
+            Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Certification BBI Formateur référent'; Issuer = 'Business Builders International'; Scope = 'Référentiel interne : ingénierie, animation, évaluation et posture.'; Status = '42 formateurs certifiés' } | Out-Null
+            Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Préparation TOSA / ICDL'; Issuer = 'Centre agréé'; Scope = 'Compétences numériques certifiées, éligibles au CPF.'; ValidUntil = $today.AddDays(300); Status = 'Centre agréé' } | Out-Null
+        } | Out-Null
+    }
+
+    # Organigramme
+    if ((Get-PnPListItem -List 'Organigramme' -PageSize 1).Count -eq 0) {
+        Invoke-Bbi "Insertion de l'organigramme" {
+            $organigramme = @(
+                @{ Title = 'Jean-Marc Okafor';   Role = 'Directeur général';                  Pole = 'Direction générale';       Ordre = 1; Email = 'jean-marc.okafor@businessbuilders.fr';   Phone = '+33 1 84 20 10 20'; Location = 'Paris — Siège' },
+                @{ Title = 'Amélie Martin';      Role = 'Directrice pédagogique';             Pole = 'Pédagogie & ingénierie';   Ordre = 2; Parent = 'Jean-Marc Okafor'; Email = 'amelie.martin@businessbuilders.fr';  Phone = '+33 1 84 20 11 21'; Location = 'Paris — Siège' },
+                @{ Title = 'Khadija Diallo';     Role = 'Directrice commerciale & réseau';    Pole = 'Développement';            Ordre = 3; Parent = 'Jean-Marc Okafor'; Email = 'khadija.diallo@businessbuilders.fr'; Phone = '+221 77 456 78 90'; Location = 'Dakar — Antenne' },
+                @{ Title = 'Marie-Claire Ngoma'; Role = 'Directrice qualité & conformité';    Pole = 'Qualité';                  Ordre = 4; Parent = 'Jean-Marc Okafor'; Email = 'marie-claire.ngoma@businessbuilders.fr'; Phone = '+225 07 12 34 56 78'; Location = 'Abidjan — Antenne' },
+                @{ Title = 'Thomas Bernard';     Role = 'Directeur opérations & digital';     Pole = 'Opérations';               Ordre = 5; Parent = 'Jean-Marc Okafor'; Email = 'thomas.bernard@businessbuilders.fr'; Phone = '+33 1 84 20 14 24'; Location = 'Paris — Siège' },
+                @{ Title = 'Stéphane Laurent';   Role = 'Responsable coaching & leadership';  Pole = 'Pédagogie & ingénierie';   Ordre = 6; Parent = 'Amélie Martin'; Email = 'stephane.laurent@businessbuilders.fr'; Phone = '+33 6 23 56 89 01'; Location = 'Lyon' },
+                @{ Title = 'Claire Fontaine';    Role = 'Responsable certification';          Pole = 'Pédagogie & ingénierie';   Ordre = 7; Parent = 'Amélie Martin'; Email = 'claire.fontaine@businessbuilders.fr'; Phone = '+33 6 56 89 12 34'; Location = 'Paris — Siège' },
+                @{ Title = 'Youssef El Amrani';  Role = 'Responsable parcours management';    Pole = 'Pédagogie & ingénierie';   Ordre = 8; Parent = 'Amélie Martin'; Email = 'youssef.elamrani@businessbuilders.fr'; Phone = '+33 6 45 78 01 23'; Location = 'Distanciel' },
+                @{ Title = 'Awa Traoré';         Role = 'Responsable antenne Bamako';         Pole = 'Développement';            Ordre = 9; Parent = 'Khadija Diallo'; Email = 'awa.traore@businessbuilders.fr'; Phone = '+223 76 12 34 56'; Location = 'Bamako — Antenne' },
+                @{ Title = 'Samuel Kouassi';     Role = 'Responsable antenne Abidjan';        Pole = 'Développement';            Ordre = 10; Parent = 'Khadija Diallo'; Email = 'samuel.kouassi@businessbuilders.fr'; Phone = '+225 05 98 76 54 32'; Location = 'Abidjan — Antenne' },
+                @{ Title = 'Fatou Ndiaye';       Role = 'Auditrice qualité';                  Pole = 'Qualité';                  Ordre = 11; Parent = 'Marie-Claire Ngoma'; Email = 'fatou.ndiaye@businessbuilders.fr'; Phone = '+221 77 123 45 67'; Location = 'Dakar — Antenne' },
+                @{ Title = 'Léa Marchand';       Role = 'Cheffe de projet e-learning';        Pole = 'Opérations';               Ordre = 12; Parent = 'Thomas Bernard'; Email = 'lea.marchand@businessbuilders.fr'; Phone = '+33 1 84 20 19 29'; Location = 'Paris — Siège' }
+            )
+            foreach ($poste in $organigramme) { Add-PnPListItem -List 'Organigramme' -Values $poste | Out-Null }
         } | Out-Null
     }
 }
@@ -725,7 +827,19 @@ $optionalChecks = @(
     @{ List = 'Formations';  Field = 'Prerequis';          UsedBy = 'Fiche formation — Prérequis' },
     @{ List = 'Formations';  Field = 'FormateursReferents'; UsedBy = 'Fiche formation — Formateurs référents' },
     @{ List = 'Actualites';  Field = 'Body';               UsedBy = "Article d'actualité — Corps de l'article" },
-    @{ List = 'Sessions';    Field = 'EndDate';            UsedBy = 'Sessions — date de fin (agenda)' }
+    @{ List = 'Sessions';    Field = 'EndDate';            UsedBy = 'Sessions — date de fin (agenda)' },
+    @{ List = 'Sessions';    Field = 'Trainer';            UsedBy = 'Sessions — « animé par » dans la fiche formateur' },
+    @{ List = 'Formateurs';  Field = 'PhotoUrl';           UsedBy = 'Annuaire — photo du formateur' },
+    @{ List = 'Formateurs';  Field = 'Phone';              UsedBy = 'Fiche formateur — téléphone' },
+    @{ List = 'Formateurs';  Field = 'Email';              UsedBy = 'Fiche formateur — e-mail et Teams' },
+    @{ List = 'Formateurs';  Field = 'WhatsApp';           UsedBy = 'Fiche formateur — WhatsApp' },
+    @{ List = 'Formateurs';  Field = 'Location';           UsedBy = 'Fiche formateur — localisation' },
+    @{ List = 'Formateurs';  Field = 'Bio';                UsedBy = 'Fiche formateur — biographie' },
+    @{ List = 'Formateurs';  Field = 'Specialites';        UsedBy = 'Fiche formateur — spécialités' },
+    @{ List = 'Formateurs';  Field = 'Certifications';     UsedBy = 'Fiche formateur — certifications' },
+    @{ List = 'Organigramme'; Field = 'Parent';            UsedBy = 'Organigramme — rattachement hiérarchique' },
+    @{ List = 'Organigramme'; Field = 'Ordre';             UsedBy = 'Organigramme — ordre d''affichage des postes' },
+    @{ List = 'Organigramme'; Field = 'Role';              UsedBy = 'Organigramme — intitulé de poste' }
 )
 foreach ($check in $optionalChecks) {
     if (Test-BbiField -List $check.List -InternalName $check.Field) {

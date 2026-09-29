@@ -24,11 +24,15 @@ export interface IBbiHomeWebPartProps {
   formationsListTitle: string;
   documentsLibraryTitle: string;
   galleryLibraryTitle: string;
+  employeeListTitle: string;
+  certificationsListTitle: string;
+  orgChartListTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
   heroSubtitle: string;
   heroImageUrl: string;
+  heroSlides: string;
   primaryCtaLabel: string;
   primaryCtaUrl: string;
   secondaryCtaLabel: string;
@@ -49,13 +53,31 @@ const DEFAULT_NAV_LINKS: string = [
   '# Sessions | #sessions',
   '# Actualités | #actualites',
   '# Ressources | #ressources',
-  '# Communauté | #communaute'
+  '# Communauté | #communaute',
+  '# Organigramme | #organigramme'
+].join('\n');
+
+/**
+ * Diaporama du héros. Une ligne = une diapositive :
+ *   image | sur-titre | titre | accroche | libellé du bouton | lien du bouton
+ * Une ligne qui commence par « | » (donc sans image) reste entièrement
+ * textuelle : le texte s'affiche alors sur le fond bleu nuit BBI.
+ * Le raccourci « titre | accroche | bouton | lien » est également accepté.
+ */
+const DEFAULT_HERO_SLIDES: string = [
+  '# Une ligne par diapositive du héros (les lignes # sont des commentaires)',
+  '# image | sur-titre | titre | accroche | bouton | lien',
+  ' | Business Builders International | L\'expertise qui fait grandir les dirigeants. | Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables. | Explorer les formations | #formations',
+  ' | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions',
+  ' | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir l\'organisation | #organigramme',
+  ' | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe'
 ].join('\n');
 
 const DEFAULT_QUICK_LINKS: string = [
   '▦ | Catalogue des formations | Parcours, modalités et durées | #formations',
   '▣ | Prochaines sessions | Planning et inscriptions | #sessions',
   '▤ | Supports & médias | Documents, photos et vidéos | #ressources',
+  '◈ | Organigramme | Équipes, pôles et contacts | #organigramme',
   '◎ | Communauté BBI | Formateurs et experts | #communaute',
   '✦ | Actualités BBI | Les nouvelles du réseau | #actualites'
 ].join('\n');
@@ -147,6 +169,18 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     if (!this.properties.galleryLibraryTitle) {
       this.properties.galleryLibraryTitle = 'Galerie médias';
     }
+    if (!this.properties.employeeListTitle) {
+      this.properties.employeeListTitle = 'Employés du mois';
+    }
+    if (!this.properties.certificationsListTitle) {
+      this.properties.certificationsListTitle = 'Certifications';
+    }
+    if (!this.properties.orgChartListTitle) {
+      this.properties.orgChartListTitle = 'Organigramme';
+    }
+    if (!this.properties.heroSlides) {
+      this.properties.heroSlides = DEFAULT_HERO_SLIDES;
+    }
     return Promise.resolve();
   }
 
@@ -175,11 +209,15 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       formationsListTitle: properties.formationsListTitle || 'Formations',
       documentsLibraryTitle: properties.documentsLibraryTitle || 'Supports publiés',
       galleryLibraryTitle: properties.galleryLibraryTitle || 'Galerie médias',
+      employeeListTitle: properties.employeeListTitle || 'Employés du mois',
+      certificationsListTitle: properties.certificationsListTitle || 'Certifications',
+      orgChartListTitle: properties.orgChartListTitle || 'Organigramme',
       maxItems: properties.maxItems || 5,
       heroEyebrow: properties.heroEyebrow || '',
       heroTitle: properties.heroTitle || '',
       heroSubtitle: properties.heroSubtitle || '',
       heroImageUrl: properties.heroImageUrl || '',
+      heroSlides: properties.heroSlides || '',
       primaryCtaLabel: properties.primaryCtaLabel || '',
       primaryCtaUrl: properties.primaryCtaUrl || '',
       secondaryCtaLabel: properties.secondaryCtaLabel || '',
@@ -257,6 +295,9 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('formationsListTitle', { label: strings.FormationsListFieldLabel }),
               PropertyPaneTextField('documentsLibraryTitle', { label: strings.DocumentsLibraryFieldLabel }),
               PropertyPaneTextField('galleryLibraryTitle', { label: strings.GalleryLibraryFieldLabel }),
+              PropertyPaneTextField('employeeListTitle', { label: strings.EmployeeListFieldLabel }),
+              PropertyPaneTextField('certificationsListTitle', { label: strings.CertificationsListFieldLabel }),
+              PropertyPaneTextField('orgChartListTitle', { label: strings.OrgChartListFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,
@@ -290,6 +331,12 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('heroImageUrl', {
                 label: strings.HeroImageFieldLabel,
                 description: strings.HeroImageFieldDescription
+              }),
+              PropertyPaneTextField('heroSlides', {
+                label: strings.HeroSlidesFieldLabel,
+                multiline: true,
+                rows: 6,
+                description: strings.HeroSlidesFieldDescription
               })
             ]
           },

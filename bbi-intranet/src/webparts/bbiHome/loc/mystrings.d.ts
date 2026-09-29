@@ -9,6 +9,9 @@ declare interface IBbiHomeWebPartStrings {
   FormationsListFieldLabel: string;
   DocumentsLibraryFieldLabel: string;
   GalleryLibraryFieldLabel: string;
+  EmployeeListFieldLabel: string;
+  CertificationsListFieldLabel: string;
+  OrgChartListFieldLabel: string;
   MaxItemsFieldLabel: string;
 
   HeroPageDescription: string;
@@ -19,6 +22,8 @@ declare interface IBbiHomeWebPartStrings {
   HeroSubtitleFieldLabel: string;
   HeroImageFieldLabel: string;
   HeroImageFieldDescription: string;
+  HeroSlidesFieldLabel: string;
+  HeroSlidesFieldDescription: string;
   CtaGroupName: string;
   PrimaryCtaLabelFieldLabel: string;
   SecondaryCtaLabelFieldLabel: string;

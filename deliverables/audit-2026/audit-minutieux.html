@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BBI — Audit minutieux du portail 2026 (itération 2)</title>
+<style>
+  :root{
+    --navy:#0E265C; --navy2:#1F3A70; --navy3:#2E4A86; --soft:#F4F6FA;
+    --red:#D21419; --redsoft:#FDEEEE; --ink:#21252B; --muted:#5A6270;
+    --line:#E1E4EA; --ok:#0E7A3D; --oksoft:#E4F4EA; --warn:#8A5A00; --warnsoft:#FFF8E6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif;background:#F0F2F5;color:var(--ink);font-size:15px;line-height:1.58}
+  a{color:var(--navy2)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 22px 90px}
+  header.doc{background:linear-gradient(115deg,#081534 0%,var(--navy) 48%,var(--navy3) 100%);color:#fff;padding:52px 0 44px;margin-bottom:34px;position:relative;overflow:hidden}
+  header.doc::after{content:"";position:absolute;right:-90px;top:-60px;width:340px;height:340px;border-radius:50%;background:rgba(210,20,25,.22)}
+  header.doc .wrap{padding-bottom:0;position:relative;z-index:1}
+  .kicker{display:inline-block;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:6px 13px;border-radius:999px;margin-bottom:16px}
+  header.doc h1{font-size:38px;line-height:1.1;letter-spacing:-.02em;max-width:24ch}
+  header.doc p.lead{margin-top:14px;font-size:15.5px;color:#CBD8EF;max-width:76ch}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px 26px;margin-top:26px;font-size:12.5px;color:#AFC0E0}
+  .meta-row b{color:#fff}
+  section{background:#fff;border:1px solid var(--line);border-radius:14px;padding:30px 32px;margin-bottom:22px;box-shadow:0 1px 3px rgba(14,38,92,.06)}
+  h2{font-size:23px;color:var(--navy);letter-spacing:-.015em;display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
+  h2 .num{background:var(--navy);color:#fff;font-size:13px;border-radius:8px;padding:4px 10px;flex:0 0 auto}
+  h3{font-size:16.5px;color:var(--ink);margin:26px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--soft)}
+  h4{font-size:14.5px;color:var(--navy);margin:16px 0 6px}
+  p{margin:9px 0}
+  .sub{color:var(--muted);font-size:13.5px}
+  ul,ol{margin:10px 0 10px 22px}
+  li{margin:5px 0}
+  code{background:var(--soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12.8px;font-family:"Cascadia Code",Consolas,monospace}
+  pre{background:#0E1424;color:#DCE4F5;border-radius:10px;padding:16px 18px;overflow:auto;font-size:12.6px;line-height:1.5;margin:12px 0}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.6px}
+  th,td{text-align:left;padding:9px 11px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--soft);font-size:12.4px;text-transform:uppercase;letter-spacing:.04em;color:var(--navy);font-weight:700}
+  tbody tr:hover{background:#FAFBFD}
+  td.n{font-weight:700;color:var(--red);white-space:nowrap;width:52px}
+  td.c{text-align:center;white-space:nowrap}
+  .tag{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:2px 7px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+  .tag.spfx{background:var(--redsoft);color:var(--red)}
+  .tag.natif{background:#E8F0FE;color:var(--navy2)}
+  .tag.p0{background:var(--oksoft);color:var(--ok)}
+  .tag.p1{background:var(--warnsoft);color:var(--warn)}
+  .tag.p2{background:#EEF0F4;color:var(--muted)}
+  .tag.livre{background:var(--navy);color:#fff}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}header.doc h1{font-size:30px}}
+  .card{border:1px solid var(--line);border-radius:12px;padding:18px}
+  .card h4{margin-top:0}
+  .card small{color:var(--muted);font-size:12.8px;display:block;line-height:1.5}
+  .callout{border-left:4px solid var(--navy2);background:var(--soft);border-radius:0 10px 10px 0;padding:14px 18px;margin:16px 0;font-size:13.8px}
+  .callout.ok{border-color:var(--ok);background:var(--oksoft)}
+  .callout.warn{border-color:#D9A400;background:var(--warnsoft)}
+  .callout.stop{border-color:var(--red);background:var(--redsoft)}
+  /* Notation d'audit */
+  .score{display:inline-block;font-size:11px;font-weight:700;border-radius:6px;padding:3px 8px;letter-spacing:.03em;white-space:nowrap}
+  .s-ok{background:var(--oksoft);color:var(--ok)}
+  .s-warn{background:var(--warnsoft);color:var(--warn)}
+  .s-risk{background:var(--redsoft);color:var(--red)}
+  .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 4px}
+  @media(max-width:860px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+  .kpi{border:1px solid var(--line);border-left:4px solid var(--red);border-radius:0 10px 10px 0;padding:14px 16px;background:#fff}
+  .kpi b{display:block;font-size:26px;line-height:1;color:var(--navy)}
+  .kpi span{font-size:12.4px;color:var(--muted)}
+  /* Matrice impact × effort */
+  .matrix{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+  .mx{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#FBFCFE}
+  .mx h4{margin:0 0 8px}
+  .mx ul{margin:0 0 0 20px;font-size:13.2px}
+  .mx.quick{background:var(--oksoft);border-color:#BFE3CC}
+  .mx.projet{background:#E8F0FE;border-color:#C6D8F7}
+  .mx.gain{background:var(--warnsoft);border-color:#F0DFA8}
+  .mx.report{background:#EEF0F4}
+  .chk{list-style:none;margin-left:0}
+  .chk li{padding-left:26px;position:relative}
+  .chk li::before{content:"☐";position:absolute;left:0;color:var(--navy2);font-size:15px}
+  .chk.ok li::before{content:"☑";color:var(--ok)}
+  footer.doc{text-align:center;color:var(--muted);font-size:12.5px;padding:26px 0 0}
+  @media print{body{background:#fff}section{box-shadow:none;break-inside:avoid}header.doc{background:#0E265C !important;-webkit-print-color-adjust:exact}}
+</style>
+</head>
+<body>
+
+<header class="doc">
+  <div class="wrap">
+    <span class="kicker">Itération 2 · audit minutieux, bonnes pratiques et propositions</span>
+    <h1>Portail BBI : ce qui est corrigé, ce qui reste à faire, et ce qui se fait de mieux.</h1>
+    <p class="lead">Audit complet de l'application livrée (sources, données, accessibilité, performance, gouvernance) :
+    corrections apportées aux 8 demandes, les 18 écarts résiduels assumés, 22 propositions priorisées et un plan 90 jours prêt à arbitrer.</p>
+    <div class="meta-row">
+      <span>Date : <b>29 septembre 2026</b></span>
+      <span>Périmètre : <b>8 web parts + 1 extension SPFx</b></span>
+      <span>Package audité : <b>v1.6.0.0</b></span>
+      <span>Vérifications automatisées : <b>100 + 34</b></span>
+      <span>Complément : <a href="index.html" style="color:#fff">dossier de conception</a> · <a href="apercu-portail.html" style="color:#fff">aperçu cliquable</a></span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<!-- ============================================================ 0 -->
+<section>
+  <h2><span class="num">0</span>Synthèse exécutive — ce qu'il faut retenir</h2>
+  <div class="kpi-row">
+    <div class="kpi"><b>8 / 8</b><span>demandes client livrées et vérifiées</span></div>
+    <div class="kpi"><b>100</b><span>vérifications de repli (données absentes / vides / alimentées)</span></div>
+    <div class="kpi"><b>34</b><span>vérifications de l'aperçu cliquable (parcours utilisateur)</span></div>
+    <div class="kpi"><b>0</b><span>erreur de build, de lint ou de type</span></div>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:30%">Demande</th><th>Ce qui a été livré</th><th style="width:26%">Preuve</th></tr></thead>
+    <tbody>
+      <tr><td><b>1.</b> Héros en diaporama, textes compris</td><td>Images et textes qui défilent (8 s), flèches, pastilles, barre de progression, pause au survol/onglet inactif, arrêt si « animations réduites ». Une diapositive peut être <b>texte seul</b> : la ligne <code> | sur-titre | titre | accroche | bouton | lien</code> suffit.</td><td><code>HomeHero.tsx</code> + <code>testHeroAndRoutes</code></td></tr>
+      <tr><td><b>2.</b> Chiffres clés invisibles</td><td>La bande des 4 chiffres clés est sortie de la zone rognée du diaporama (<code>overflow:hidden</code>) : elle reste dans le flux et remonte de 46 px sur le bas du héros, à toutes les largeurs.</td><td>Vérification « bande HORS zone rognée » (harnais CSS + aperçu)</td></tr>
+      <tr><td><b>3.</b> Employé du mois + certifications</td><td>Nouvelle section « Vie de l'équipe » : portrait, fonction, message, faits marquants + liste des certifications (organisme, périmètre, validité, statut). Deux listes SharePoint provisionnées.</td><td><code>TeamHighlights.tsx</code> + <code>testTeamHighlights</code></td></tr>
+      <tr><td><b>4.</b> Trop d'espaces</td><td>Paddings de section ramenés de 96 px à 50 px (46 px pour le bloc actualités/sessions), galerie replacée en grille à droite des supports, blocs « Communauté » et « Accès directs » compactés, fin des zones vides sous « Prochaines sessions ».</td><td><code>BbiHome.module.scss</code> + captures de l'aperçu</td></tr>
+      <tr><td><b>5.</b> Photos et fiches des formateurs</td><td>Annuaire avec photo (ou monogramme si absente) ; au clic, fiche détaillée : téléphone, e-mail, <b>WhatsApp</b>, Teams, adresse, bio, spécialités, certifications, sessions animées. Fermeture par Échap, focus piégé puis restitué.</td><td><code>TrainerDirectory.tsx</code> + <code>testTeamHighlights</code></td></tr>
+      <tr><td><b>6.</b> Page dédiée par actualité</td><td>URL partageable <code>#actualite?id=12</code> (et <code>#actualite/12</code>) : fil d'Ariane, chapô, auteur, date, temps de lecture, visuel, HTML assaini, partage Outlook/Teams/copie de lien, <b>actualité suivante</b>, précédente et autres actualités.</td><td><code>NewsDetail.tsx</code> + <code>testNewsArchive</code></td></tr>
+      <tr><td><b>7.</b> Pagination des actualités</td><td>Pagination complète (précédent / numéros / suivant / « Page n sur m ») sur l'accueil et dans la vue dédiée, avec chargement serveur page par page (<code>$top</code> + <code>hasMore</code>) : le volume ne dégrade pas le temps d'affichage.</td><td><code>newsArchive.ts</code> + <code>testNewsArchive</code></td></tr>
+      <tr><td><b>8.</b> Page organigramme</td><td>Vue <code>#organigramme</code> ajoutée à la navigation, à la barre du pied de page et aux accès directs : arbre connecté, zoom 60–140 %, mise en avant par pôle, bascule liste, fiche contact au clic (e-mail, téléphone, Teams, site).</td><td><code>OrgChart.tsx</code> + <code>testOrgChart</code></td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout ok">
+    <b>Le socle reste inchangé et c'est volontaire :</b> aucune page vide quelle que soit la donnée. Chaque source est
+    interrogée avec des alias de colonnes (renommer une colonne ne casse rien) ; si la liste est absente, vide ou en erreur,
+    un contenu de repli BBI s'affiche. Le bandeau « données de démonstration » reste masqué par défaut
+    (<code>showDataNotices</code>).
+  </div>
+
+  <div class="callout warn">
+    <b>Trois points d'attention pour la mise en service :</b>
+    <ol style="margin-bottom:0">
+      <li>Le script <code>deploy/provision-bbi-intranet.ps1</code> a été enrichi mais <b>n'a pas pu être validé par un parseur PowerShell</b> dans cet environnement (téléchargement de PowerShell bloqué). Première exécution à faire en <code>-DryRun</code>.</li>
+      <li>Le déploiement réel sur le tenant n'a pas été exécuté : le cahier de recette (§7) liste les 22 contrôles à passer.</li>
+      <li>L'audit d'accessibilité n'a pas été fait avec lecteurs d'écran : les points RGAA structurels sont traités, la validation formelle reste à faire (§2.3).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ 1 -->
+<section>
+  <h2><span class="num">1</span>Méthode d'audit et notation</h2>
+  <div class="grid3">
+    <div class="card">
+      <h4>Référentiels utilisés</h4>
+      <small>
+        <b>RGAA 4.1 / WCAG 2.2 AA</b> (accessibilité) ·
+        <b>SPFx &amp; PnP</b> (développement SharePoint) ·
+        <b>ISO 25010</b> (qualité logicielle) ·
+        <b>indicateurs Qualiopi 21 à 32</b> (preuves, veille, amélioration continue) ·
+        <b>Microsoft 365</b> (gouvernance, cycle de vie, étiquettes de confidentialité).
+      </small>
+    </div>
+    <div class="card">
+      <h4>Preuves produites</h4>
+      <small>
+        <code>npx heft build</code> (type + lint + bundle) ·
+        <code>node tools/verify-fallback.js</code> — <b>100 vérifications</b> ·
+        <code>node tools/css-harness.js dist</code> — styles et classes réellement injectés ·
+        <code>node tools/preview-smoke.js</code> — <b>34 vérifications</b> de parcours ·
+        lecture du bundle et du manifeste de package (<b>64 entrées</b>, v1.6.0.0).
+      </small>
+    </div>
+    <div class="card">
+      <h4>Échelle de notation</h4>
+      <small>
+        <span class="score s-ok">CONFORME</span> rien à faire ·
+        <span class="score s-warn">À AMÉLIORER</span> écart connu, action planifiée ·
+        <span class="score s-risk">RISQUE</span> à traiter avant mise en service ou en priorité 1.
+      </small>
+    </div>
+  </div>
+  <p class="sub">L'audit porte sur ce qui a été construit — pas sur une intention. Chaque constat cite le fichier concerné.
+  Les 8 demandes client ont été traitées en une itération ; les 18 écarts résiduels du §2 sont volontairement listés,
+  chacun avec sa parade, pour que personne ne les découvre après la mise en production.</p>
+</section>
+
+<!-- ============================================================ 2 -->
+<section>
+  <h2><span class="num">2</span>Audit par domaine — écarts résiduels et points conformes</h2>
+
+  <h3>2.1 Contenu &amp; éditorial <span class="score s-warn">À AMÉLIORER</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Constat</th><th>Détail et correction proposée</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td><b>C1</b> — Pas de cycle de vie du contenu</td><td>Une actualité publiée reste en ligne indéfiniment. Ajouter les colonnes <code>DateExpiration</code> et <code>Proprietaire</code>, un filtre « en ligne », et un flux Power Automate qui prévient l'auteur 15 jours avant l'échéance.</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td><b>C2</b> — Dates de session non datées par saison</td><td>Les sessions de démonstration se recalent sur <code>aujourd'hui + n jours</code> — parfait pour une démo, à surveiller : en production, seule la liste SharePoint fait foi (aucune donnée de repli n'est visible si la liste est alimentée).</td><td class="c"><span class="tag p2">P3</span></td></tr>
+      <tr><td><b>C3</b> — Pas de gabarit éditorial</td><td>Une actualité sans visuel reçoit un dégradé BBI avec les initiales. Prévoir un modèle de page « Publier une actualité » (titre ≤ 70 caractères, chapô 160 caractères, 1 visuel 16/9, mots-clés Qualiopi) dans le site.</td><td class="c"><span class="tag p1">P2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.2 UX / ergonomie <span class="score s-ok">CONFORME</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Constat</th><th>Détail</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td><b>C4</b> — Navigation par hash assumée</td><td>Le portail est une application à vues (<code>#actualites</code>, <code>#organigramme</code>…) : les URL sont partageables, le bouton « précédent » du navigateur fonctionne, et les anciennes pages <code>.aspx</code> sont redirigées vers la bonne vue au lieu de casser un lien existant.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td><b>C5</b> — Ancres de section corrigées</td><td><code>#vie-equipe</code> (bouton du héros et tuile « Qualité &amp; certification ») ne renvoyait plus en haut de page : le routage vit désormais dans un module pur <code>portalRoutes.ts</code>, testé, qui distingue <b>vues</b> et <b>ancres de section</b>.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td><b>C6</b> — Densité revue</td><td>Espacements, hauteurs de cartes et colonnes harmonisés ; sur mobile, les colonnes passent l'une sous l'autre et le diaporama reste lisible (flèches conservées, indicateur masqué).</td><td class="c"><span class="tag p0">OK</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.3 Accessibilité (RGAA 4.1 / WCAG 2.2 AA) <span class="score s-warn">À AMÉLIORER</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Point</th><th>État</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Structure et titres</td><td><span class="score s-ok">CONFORME</span> un seul <code>h1</code> par vue, hiérarchie <code>h2/h3</code>, régions <code>aria-label</code>, listes réelles pour les KPI, les sessions et les certifications.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Clavier &amp; focus</td><td><span class="score s-ok">CONFORME</span> diaporama aux flèches, pastilles focusables, fiches formateur/actualité en <code>role="dialog"</code> avec piège de focus, fermeture Échap et restitution du focus.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Mouvement</td><td><span class="score s-ok">CONFORME</span> <code>prefers-reduced-motion</code> coupe le diaporama automatique, l'effet Ken Burns, la barre de progression et les transitions.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Contrastes</td><td><span class="score s-warn">À AMÉLIORER</span> les couples texte/fond de la palette sont conformes sur les blocs principaux ; <b>un contrôle outillé</b> (contraste AA sur les 4 dégradés de repli, les badges et l'état « sélectionné ») reste à faire, ainsi qu'un test NVDA/JAWS/VoiceOver.</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Lien d'évitement</td><td><span class="score s-warn">À AMÉLIORER</span> pas de « Aller au contenu » en tête de page ; à ajouter (3 lignes) et à tester — c'est le premier critère RGAA vérifié par un auditeur.</td><td class="c"><span class="tag p1">P2</span></td></tr>
+      <tr><td>Alternatives textuelles</td><td><span class="score s-ok">CONFORME</span> tout visuel décoratif est <code>aria-hidden</code>, tout visuel porteur d'information a un libellé (photo du collaborateur, visuel d'actualité).</td><td class="c"><span class="tag p0">OK</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.4 Performance <span class="score s-warn">À AMÉLIORER</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Point</th><th>État</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Requêtes SharePoint</td><td><span class="score s-ok">CONFORME</span> <code>$select</code> limité aux colonnes utiles, <code>$top</code> borné, découverte des colonnes une seule fois, chargement de l'organigramme à la demande (à l'ouverture de la vue).</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Cache navigateur</td><td><span class="score s-warn">À AMÉLIORER</span> chaque montage de page relit les listes. Proposition : cache <code>sessionStorage</code> avec horodatage (TTL 10 min) + bouton « Actualiser » discret.</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Images</td><td><span class="score s-warn">À AMÉLIORER</span> les visuels de repli sont embarqués en JPEG. Piste : conversion WebP/AVIF + <code>&lt;img srcset&gt;</code> et chargement différé pour les visuels de galerie.</td><td class="c"><span class="tag p1">P2</span></td></tr>
+      <tr><td>Taille du bundle</td><td><span class="score s-warn">À AMÉLIORER</span> un seul bundle par web part. Piste : <code>import()</code> dynamique pour la galerie et l'organigramme (chargés uniquement quand la vue s'ouvre).</td><td class="c"><span class="tag p1">P2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.5 Technique SharePoint / SPFx <span class="score s-ok">CONFORME</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Point</th><th>État</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Listes &gt; 5 000 éléments</td><td><span class="score s-warn">À AMÉLIORER</span> la pagination serveur utilise <code>$top</code> + tranche <code>page × taille</code> : au-delà de 5 000 éléments, SharePoint refusera la tranche. Prévoir des <b>vues indexées</b> sur les colonnes de tri (<code>Created</code> pour les actualités, <code>StartDate</code> pour les sessions, <code>Ordre</code> pour l'organigramme) : le script de provisionnement ne les crée pas encore, c'est un ajout à faire.</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Découverte de colonnes</td><td><span class="score s-ok">CONFORME</span> chaque chargeur interroge <code>/fields</code> puis applique une table d'alias : une colonne renommée côté SharePoint reste résolue (<code>Photo</code>/<code>Portrait</code>/<code>Avatar</code>…).</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Colonne « Ordre » de l'organigramme</td><td><span class="score s-ok">CORRIGÉ</span> le nom interne <code>Order</code> est réservé par SharePoint ; la colonne est créée sous <code>Ordre</code> et le code accepte <code>Ordre</code>, <code>Order</code> ou <code>Tri</code>.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Arbre d'organigramme</td><td><span class="score s-ok">CONFORME</span> <code>buildOrgTree</code> travaille sur des copies (aucune mutation des données), casse les boucles de rattachement et ne perd jamais un collaborateur.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.6 Sécurité &amp; conformité <span class="score s-ok">CONFORME</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Point</th><th>État</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Contenu HTML des actualités</td><td><span class="score s-ok">CONFORME</span> <code>sanitizeHtml</code> retire scripts, iframes, gestionnaires <code>on*</code> et liens <code>javascript:</code> avant affichage.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Documents sensibles</td><td><span class="score s-ok">CONFORME</span> la web part Documents sécurisés s'appuie sur les autorisations SharePoint + étiquettes de confidentialité / IRM pour l'anti-téléchargement et l'anti-impression.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Données personnelles</td><td><span class="score s-warn">À AMÉLIORER</span> téléphones et WhatsApp des formateurs sont visibles de tous les lecteurs du site. Arbitrer : (a) colonne « Afficher mes coordonnées » par formateur, (b) restriction de visibilité à l'« Espace Formateurs », (c) mention d'information RGPD sur la page Communauté.</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Liens externes</td><td><span class="score s-ok">CONFORME</span> <code>target="_blank"</code> systématiquement accompagné de <code>rel="noopener noreferrer"</code>.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Santé du tenant</td><td><span class="score s-warn">À AMÉLIORER</span> pas de supervision : ajouter le web part « État du service » / un flux Power Automate d'alerte en cas d'échec d'un flux de publication.</td><td class="c"><span class="tag p1">P2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.7 Qualité &amp; tests <span class="score s-warn">À AMÉLIORER</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Point</th><th>État</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Harnais de repli</td><td><span class="score s-ok">CONFORME</span> 100 vérifications exécutées hors navigateur contre un client SharePoint simulé.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Harnais de styles</td><td><span class="score s-ok">CONFORME</span> le bundle réel est chargé dans jsdom : les classes CSS Modules sont bien hachées et injectées, la bande de KPI, la pagination et la navigation répondent présent.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+      <tr><td>Tests de bout en bout</td><td><span class="score s-warn">À AMÉLIORER</span> aucun test Playwright/Cypress. Proposition : 6 scénarios (accueil → actualité → suivant, accueil → formateur → WhatsApp, organigramme → zoom → fiche, pagination, recherche, retour arrière navigateur).</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Intégration continue</td><td><span class="score s-warn">À AMÉLIORER</span> build et vérifications sont locaux. Proposition : GitHub Actions <code>heft build --production</code> + les 3 harnais + archive <code>.sppkg</code> à chaque étiquette.</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Tests de charge / volumétrie</td><td><span class="score s-warn">À AMÉLIORER</span> prévoir un jeu de 200 actualités, 60 formateurs et 300 postes d'organigramme pour valider pagination et temps de réponse.</td><td class="c"><span class="tag p1">P2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.8 Exploitation, adoption &amp; formation <span class="score s-warn">À AMÉLIORER</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Point</th><th>État</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Mesure d'usage</td><td><span class="score s-warn">À AMÉLIORER</span> aucune télémétrie. Proposition : Application Insights (clé de télémétrie SPFx) + tableau de bord : vues, clics annonces, fiches consultées, recherches sans résultat.</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Documentation utilisateur</td><td><span class="score s-warn">À AMÉLIORER</span> <code>deploy/README.md</code> couvre l'installation technique. Manque : un « guide de l'éditeur » d'une page (publier une actualité, inscrire un formateur, mettre à jour l'organigramme) + 2 tutoriels vidéo de 3 minutes.</td><td class="c"><span class="tag p1">P2</span></td></tr>
+      <tr><td>Support</td><td><span class="score s-warn">À AMÉLIORER</span> prévoir un canal Teams « Support intranet » et un modèle de ticket (vue concernée, navigateur, capture).</td><td class="c"><span class="tag p1">P2</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>2.9 Qualiopi <span class="score s-warn">À AMÉLIORER</span></h3>
+  <table>
+    <thead><tr><th style="width:34%">Point</th><th>État</th><th style="width:14%">Priorité</th></tr></thead>
+    <tbody>
+      <tr><td>Preuves et versions des supports</td><td><span class="score s-warn">À AMÉLIORER</span> la bibliothèque « Supports publiés » gère le versionnage SharePoint mais l'intranet n'affiche ni numéro de version, ni date de dernière révision, ni propriétaire. À ajouter (indicateur Qualiopi 22).</td><td class="c"><span class="tag p0">P1</span></td></tr>
+      <tr><td>Veille réglementaire</td><td><span class="score s-ok">CONFORME</span> le catalogue est structuré (filière, modalité, durée, niveau, statut) et filtrable : support crédible pour un audit.</td><td class="c"><span class="tag p0">OK</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 3 -->
+<section>
+  <h2><span class="num">3</span>Ce qui a changé dans le code (traçabilité)</h2>
+  <table>
+    <thead><tr><th style="width:32%">Fichier</th><th>Modification</th><th style="width:12%">Nature</th></tr></thead>
+    <tbody>
+      <tr><td><code>HomeHero.tsx</code> + module SCSS</td><td>Diaporama images + textes, commandes accessibles, bande de chiffres clés hors zone rognée, diapositives texte seul.</td><td><span class="tag spfx">NOUVEAU</span></td></tr>
+      <tr><td><code>NewsBoard.tsx</code>, <code>NewsDetail.tsx</code>, <code>newsArchive.ts</code></td><td>Fil d'actualités, pagination serveur, page dédiée avec actualité suivante/précédente/autres, partage et temps de lecture.</td><td><span class="tag spfx">NOUVEAU</span></td></tr>
+      <tr><td><code>TeamHighlights.tsx</code>, <code>TrainerDirectory.tsx</code>, <code>OrgChart.tsx</code>, <code>orgData.ts</code></td><td>Employé du mois + certifications, annuaire des formateurs avec fiche contact, organigramme interactif.</td><td><span class="tag spfx">NOUVEAU</span></td></tr>
+      <tr><td><code>homeLayout.ts</code>, <code>homeData.ts</code>, <code>portalRoutes.ts</code></td><td>Analyse des diapositives/KPI/nav, chargeurs de listes (employé, certifications, formateurs enrichis), routage pur et testable.</td><td><span class="tag spfx">REFAIT</span></td></tr>
+      <tr><td><code>BbiHome.tsx</code>, <code>BbiHome.module.scss</code></td><td>Portail unifié à 9 vues, densité revue, règles de bascule de vue, blocs conditionnels, retour en haut.</td><td><span class="tag spfx">REFAIT</span></td></tr>
+      <tr><td><code>BbiHomeWebPart.ts</code>, <code>IBbiHomeProps.ts</code>, <code>manifest.json</code>, <code>loc/*</code></td><td>9 nouvelles propriétés (diapositives, listes Employés/Certifications/Organigramme) + libellés fr/en + valeurs par défaut.</td><td><span class="tag spfx">ÉTENDU</span></td></tr>
+      <tr><td><code>assets/</code> (4 visuels de héros)</td><td>Visuels BBI embarqués : le diaporama est présentable même sans image configurée.</td><td><span class="tag natif">ASSETS</span></td></tr>
+      <tr><td><code>tools/verify-fallback.js</code>, <code>tools/css-harness.js</code>, <code>tools/build-preview-css.js</code>, <code>tools/preview-smoke.js</code></td><td>Vérifications automatisées : 100 + 34 contrôles, génération de l'aperçu à partir des styles réels.</td><td><span class="tag natif">OUTILS</span></td></tr>
+      <tr><td><code>deploy/provision-bbi-intranet.ps1</code></td><td>3 nouvelles listes (Employés du mois, Certifications, Organigramme), 12 colonnes de contact et de profil sur Formateurs, jeu de données de démonstration, 18 contrôles de cohérence, lien de navigation « Organigramme ».</td><td><span class="tag natif">DÉPLOIEMENT</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 4 -->
+<section>
+  <h2><span class="num">4</span>Ce qui se fait de mieux en 2026 (et ce qu'on en applique)</h2>
+  <table>
+    <thead><tr><th style="width:26%">Pratique de référence</th><th>Pourquoi c'est le standard</th><th style="width:30%">Application chez BBI</th></tr></thead>
+    <tbody>
+      <tr><td><b>Expérience « sans chrome »</b><br><small>SPFx application page + extension + Teams/Viva</small></td><td>Un intranet moderne ne ressemble plus à une page SharePoint : il ressemble à un produit. Le bandeau Microsoft disparaît sur les pages applicatives.</td><td><span class="score s-ok">FAIT</span> extension « BBI Plein écran » sur les pages applicatives ; packages Teams/Viva déjà générés par <code>teams/New-BbiTeamsPackage.ps1</code>.</td></tr>
+      <tr><td><b>Dégradation gracieuse</b><br><small>« no empty state »</small></td><td>Les intranets échouent presque toujours par vide, pas par bug. Un repli crédible préserve la confiance des utilisateurs.</td><td><span class="score s-ok">FAIT</span> 100 vérifications couvrent source absente, vide et alimentée.</td></tr>
+      <tr><td><b>Routage d'application</b><br><small>URL partageables</small></td><td>Un lien doit ouvrir la bonne ressource et survivre au copier-coller dans Teams.</td><td><span class="score s-ok">FAIT</span> <code>#actualite?id=12</code>, <code>#organigramme</code>, redirections des anciennes URL.</td></tr>
+      <tr><td><b>Accessibilité RGAA 4.1</b><br><small>obligation renforcée pour les organismes financés</small></td><td>C'est un critère d'achat public et un indicateur Qualiopi de fait (égalité d'accès). Les intranets échouent surtout sur : contrastes, focus, lecteurs d'écran, vidéos sans sous-titres.</td><td><span class="score s-warn">PARTIEL</span> structure, clavier, mouvement et alternatives sont traités ; audit outillé et lecteurs d'écran à planifier (§2.3).</td></tr>
+      <tr><td><b>Design system &amp; jetons</b></td><td>Une palette centralisée (variables CSS) évite la dérive visuelle et accélère les futures pages.</td><td><span class="score s-ok">FAIT</span> palette unique <code>#0E265C / #D21419 / #21252B / #E1E4EA / #F4F6FA</code>, classes CSS Modules préfixées par composant.</td></tr>
+      <tr><td><b>Données avant décoration</b><br><small>colonnes indexées, <code>$select</code>, cache</small></td><td>Un intranet lent n'est pas utilisé. Les seuils SharePoint (5 000 éléments, 1 400 ms de réponse) se franchissent vite.</td><td><span class="score s-warn">PARTIEL</span> requêtes ciblées et chargement à la demande ; cache local et pagination indexée à ajouter (§2.4, §2.5).</td></tr>
+      <tr><td><b>Gouvernance des contenus</b><br><small>propriétaire, échéance, approbation</small></td><td>Un intranet sans propriétaire devient un cimetière en 18 mois.</td><td><span class="score s-warn">À FAIRE</span> colonnes d'échéance + flux de rappel Power Automate (§2.1).</td></tr>
+      <tr><td><b>Mesure d'adoption</b><br><small>DEX / analytics produit</small></td><td>« Ce qui n'est pas mesuré n'est pas piloté » : les meilleurs intranets suivent 5 à 7 indicateurs, pas 30.</td><td><span class="score s-warn">À FAIRE</span> Application Insights + tableau de bord (§2.8, §9).</td></tr>
+      <tr><td><b>Automatisation Microsoft 365</b><br><small>Power Automate, Graph, Teams</small></td><td>Publier une actualité, prévenir un formateur, générer une attestation : tout cela ne doit plus être manuel.</td><td><span class="score s-warn">À FAIRE</span> propositions A3 à A6 (§5).</td></tr>
+      <tr><td><b>Tests &amp; CI/CD</b></td><td>Un package livré à la main finit par régresser. Les meilleures équipes SPFx testent et publient automatiquement.</td><td><span class="score s-warn">PARTIEL</span> harnais locaux solides ; Playwright + GitHub Actions à ajouter (§2.7).</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 5 -->
+<section>
+  <h2><span class="num">5</span>Brainstorm — 22 propositions priorisées</h2>
+  <div class="matrix">
+    <div class="mx quick">
+      <h4>Gains rapides — fort impact, faible effort</h4>
+      <ul>
+        <li><b>P01</b> Lien d'évitement « Aller au contenu » (accessibilité).</li>
+        <li><b>P02</b> Bouton « Copier le lien » sur chaque actualité (déjà utile côté partage) et sur chaque fiche collaborateur.</li>
+        <li><b>P03</b> Colonne « Afficher mes coordonnées » sur la liste Formateurs (RGPD).</li>
+        <li><b>P04</b> Numéro de version + date de révision visibles sur les supports publiés (Qualiopi).</li>
+        <li><b>P05</b> Encart « Dernière mise à jour » du portail dans le pied de page.</li>
+        <li><b>P06</b> Recherche : afficher un message utile + les suggestions quand aucun résultat.</li>
+      </ul>
+    </div>
+    <div class="mx projet">
+      <h4>Projets structurants — fort impact, effort moyen</h4>
+      <ul>
+        <li><b>P07</b> Télémétrie d'usage (Application Insights) + tableau de bord 5 indicateurs.</li>
+        <li><b>P08</b> Cycle de vie éditorial : propriétaire, échéance, rappel automatique.</li>
+        <li><b>P09</b> Inscription en ligne aux sessions : formulaire, confirmation, ajout agenda, liste d'attente.</li>
+        <li><b>P10</b> Notifications Teams : nouvelle actualité, session à venir, nouvel employé du mois.</li>
+        <li><b>P11</b> Intégration Microsoft Graph : photo de profil réelle, présence Teams, anniversaires.</li>
+        <li><b>P12</b> Carte adaptative Viva Connections (tableau de bord quotidien).</li>
+        <li><b>P13</b> Verticale de recherche Microsoft Search « Formations BBI ».</li>
+        <li><b>P14</b> Attestations automatiques (modèle Word + Power Automate + envoi e-mail).</li>
+      </ul>
+    </div>
+    <div class="mx gain">
+      <h4>Optimisations — impact modéré, effort faible à moyen</h4>
+      <ul>
+        <li><b>P15</b> Cache <code>sessionStorage</code> avec TTL sur les listes peu volatiles.</li>
+        <li><b>P16</b> Images WebP/AVIF + <code>srcset</code> + <code>loading="lazy"</code>.</li>
+        <li><b>P17</b> Découpage du bundle (<code>import()</code> pour galerie et organigramme).</li>
+        <li><b>P18</b> Mode sombre forcé + mode contraste élevé testés.</li>
+        <li><b>P19</b> Version anglaise complète (ressources fr/en déjà en place).</li>
+        <li><b>P20</b> Favoris « Mes raccourcis » par utilisateur (personnalisation légère).</li>
+      </ul>
+    </div>
+    <div class="mx report">
+      <h4>À reporter ou conditionner — effort élevé</h4>
+      <ul>
+        <li><b>P21</b> LMS / SCORM-xAPI : intégration lourde, à conditionner à un besoin d'évaluation certifiante en ligne.</li>
+        <li><b>P22</b> Application mobile dédiée : le canal Teams/Viva couvre 90 % du besoin sans développement supplémentaire.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="callout">
+    <b>Trois idées qui changeraient le quotidien, si vous ne devez en retenir que trois :</b>
+    <ol style="margin-bottom:0">
+      <li><b>P09 — Inscription en ligne aux sessions</b> avec confirmation et ajout à l'agenda : supprime les allers-retours par e-mail entre le secrétariat et les participants.</li>
+      <li><b>P11 — Microsoft Graph</b> : photos de profil réelles et présence Teams dans l'annuaire — l'intranet paraît « vivant » sans aucune saisie manuelle.</li>
+      <li><b>P08 — Cycle de vie éditorial</b> : chaque contenu a un propriétaire et une échéance, l'intranet ne se vide jamais et reste auditable (Qualiopi).</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ 6 -->
+<section>
+  <h2><span class="num">6</span>Feuille de route 90 jours</h2>
+  <table>
+    <thead><tr><th style="width:14%">Période</th><th style="width:34%">Objectif</th><th>Livrables</th><th style="width:16%">Qui</th></tr></thead>
+    <tbody>
+      <tr><td><b>J+0 → J+30</b><br><small>Stabiliser</small></td><td>Mise en production propre et mesurée.</td><td>Exécution <code>-DryRun</code> puis installation du script, recette §7, Application Insights (P07), lien d'évitement (P01), politique de coordonnées formateurs (P03), 2 tutoriels éditeurs.</td><td>IT BBI + Agence</td></tr>
+      <tr><td><b>J+30 → J+60</b><br><small>Enrichir</small></td><td>Automatiser et alléger.</td><td>Cycle de vie éditorial (P08), inscription en ligne (P09), notifications Teams (P10), cache et images (P15, P16), tests Playwright + GitHub Actions (§2.7).</td><td>Agence + Direction qualité</td></tr>
+      <tr><td><b>J+60 → J+90</b><br><small>Rayonner</small></td><td>Aller chercher les utilisateurs là où ils sont.</td><td>Microsoft Graph (P11), carte Viva Connections (P12), verticale de recherche (P13), attestations automatiques (P14), bilan d'usage et arbitrage phase 3.</td><td>Agence + Communication</td></tr>
+    </tbody>
+  </table>
+  <h3>Critères de succès de la vague 1</h3>
+  <ul>
+    <li>Les 22 contrôles du cahier de recette passent sur le tenant de production.</li>
+    <li>Aucun écran vide constaté sur les 9 vues, avec les données réelles.</li>
+    <li>Un éditeur non technique publie une actualité avec visuel en moins de 5 minutes, sans assistance.</li>
+    <li>La page d'accueil s'affiche en moins de 2,5 s sur un poste standard, réseau d'entreprise.</li>
+  </ul>
+</section>
+
+<!-- ============================================================ 7 -->
+<section>
+  <h2><span class="num">7</span>Cahier de recette — 22 contrôles avant mise en service</h2>
+  <p class="sub">À exécuter sur le site de production après installation du package et du provisionnement. Chaque contrôle indique le résultat attendu.</p>
+  <table>
+    <thead><tr><th class="c" style="width:44px">#</th><th style="width:34%">Contrôle</th><th>Résultat attendu</th></tr></thead>
+    <tbody>
+      <tr><td class="c">1</td><td>Ajout de la web part BBI Accueil sur la page d'accueil</td><td>Le portail s'affiche bord à bord, sans barre de défilement horizontale.</td></tr>
+      <tr><td class="c">2</td><td>Diaporama au chargement</td><td>4 diapositives défilent toutes les 8 s ; le texte change avec l'image ; pause au survol.</td></tr>
+      <tr><td class="c">3</td><td>Chiffres clés</td><td>Les 4 chiffres sont visibles sous le héros, entièrement, à 1366 px comme à 1920 px de large.</td></tr>
+      <tr><td class="c">4</td><td>Bouton « Voir les certifications » d'une diapositive</td><td>La page reste sur l'accueil et défile jusqu'à la section « Vie de l'équipe » (pas de retour en haut).</td></tr>
+      <tr><td class="c">5</td><td>Section « Employé du mois »</td><td>Portrait, nom, fonction, message et faits marquants issus de la liste Employés du mois.</td></tr>
+      <tr><td class="c">6</td><td>Section « Certifications »</td><td>Les 4 certifications du jeu de données avec organisme, périmètre, échéance et statut.</td></tr>
+      <tr><td class="c">7</td><td>Liste « Prochaines sessions »</td><td>3 à 5 sessions, groupées, sans espace vide sous le bloc.</td></tr>
+      <tr><td class="c">8</td><td>Galerie + supports</td><td>Les deux blocs sont côte à côte sur grand écran, empilés sur mobile, sans colonne vide à droite.</td></tr>
+      <tr><td class="c">9</td><td>Clic sur une actualité</td><td>Ouverture d'une page dédiée, URL <code>#actualite?id=…</code>, fil d'Ariane, corps mis en forme.</td></tr>
+      <tr><td class="c">10</td><td>Bouton « Actualité suivante »</td><td>L'article suivant s'affiche, l'URL change, le bouton « précédent » ramène au premier.</td></tr>
+      <tr><td class="c">11</td><td>Pagination des actualités</td><td>Le numéro de page, « Précédent » et « Suivant » fonctionnent ; la page 1 est active au chargement.</td></tr>
+      <tr><td class="c">12</td><td>Partage d'une actualité</td><td>Outlook et Teams ouvrent un message prérempli ; « Copier le lien » copie l'URL complète.</td></tr>
+      <tr><td class="c">13</td><td>Clic sur un formateur</td><td>Fiche détaillée : photo, fonction, bio, spécialités, certifications, coordonnées.</td></tr>
+      <tr><td class="c">14</td><td>Bouton WhatsApp d'un formateur</td><td>Ouvre <code>wa.me</code> avec le numéro sans espaces ni « + » résiduel.</td></tr>
+      <tr><td class="c">15</td><td>Fermeture d'une fiche (Échap, clic hors fiche, croix)</td><td>La fiche se ferme et le focus revient sur le bouton d'origine.</td></tr>
+      <tr><td class="c">16</td><td>Page « Organigramme »</td><td>Arbre lisible, zoom 60→140 %, mise en avant par pôle, bascule liste, fiche au clic.</td></tr>
+      <tr><td class="c">17</td><td>Navigation générale</td><td>Les 7 entrées de la barre affichent la bonne vue ; le bouton « précédent » du navigateur fonctionne.</td></tr>
+      <tr><td class="c">18</td><td>Ancien lien <code>…/catalogue.aspx</code></td><td>Le clic ouvre la vue Formations au lieu de quitter le portail.</td></tr>
+      <tr><td class="c">19</td><td>Liste vide (test de repli)</td><td>Supprimer tous les éléments d'Actualités : le contenu de repli s'affiche, aucune erreur, aucune page blanche.</td></tr>
+      <tr><td class="c">20</td><td>Renommage de colonne</td><td>Renommer <code>Photo</code> en <code>Portrait</code> : la photo du formateur s'affiche toujours.</td></tr>
+      <tr><td class="c">21</td><td>Accessibilité clavier</td><td>Parcours complet au clavier (Tab, flèches, Échap) sans piège, focus toujours visible.</td></tr>
+      <tr><td class="c">22</td><td>Mobile / Teams</td><td>Sur téléphone et dans Teams : une seule colonne, aucun texte tronqué, diaporama utilisable.</td></tr>
+    </tbody>
+  </table>
+  <div class="callout">
+    <b>Commandes de vérification automatique</b> (depuis <code>bbi-intranet/</code>) :
+    <pre>npx heft build                       <span class="c"># types + lint + bundle</span>
+node tools/verify-fallback.js        <span class="c"># 100 vérifications de repli (données absentes / vides / réelles)</span>
+node tools/css-harness.js dist       <span class="c"># styles injectés, héros, chiffres clés, pagination, navigation</span>
+node tools/preview-smoke.js          <span class="c"># 34 vérifications de l'aperçu cliquable</span>
+npm run build                        <span class="c"># build de production + package .sppkg (v1.6.0.0)</span>
+
+<span class="c"># PowerShell — contrôle de syntaxe du provisionnement (avant toute exécution)</span>
+$errors = $null
+[System.Management.Automation.Language.Parser]::ParseFile(
+    (Resolve-Path .\deploy\provision-bbi-intranet.ps1), [ref]$null, [ref]$errors) | Out-Null
+if ($errors) { $errors } else { 'Syntaxe OK' }</pre>
+  </div>
+</section>
+
+<!-- ============================================================ 8 -->
+<section>
+  <h2><span class="num">8</span>Risques &amp; parades</h2>
+  <table>
+    <thead><tr><th style="width:32%">Risque</th><th style="width:12%">Criticité</th><th>Parade</th></tr></thead>
+    <tbody>
+      <tr><td>Script de provisionnement non validé par un parseur PowerShell</td><td class="c"><span class="score s-warn">MOYENNE</span></td><td>Exécuter <code>-DryRun</code>, puis <code>-VerifyOnly</code>. En cas d'échec, corriger à chaud : le script est idempotent.</td></tr>
+      <tr><td>Liste dépassant 5 000 éléments</td><td class="c"><span class="score s-warn">MOYENNE</span></td><td>Vues indexées sur les colonnes de tri + purge annuelle (archivage des actualités de plus de 3 ans).</td></tr>
+      <tr><td>Coordonnées personnelles exposées</td><td class="c"><span class="score s-risk">ÉLEVÉE</span></td><td>Colonne « Afficher mes coordonnées » (P03) + note d'information RGPD + restriction aux lecteurs du site.</td></tr>
+      <tr><td>Intranet abandonné faute de contenus</td><td class="c"><span class="score s-risk">ÉLEVÉE</span></td><td>Propriétaire et échéance par contenu (P08), revue mensuelle de 15 minutes, 2 éditeurs formés par pôle.</td></tr>
+      <tr><td>Régression après une mise à jour</td><td class="c"><span class="score s-warn">MOYENNE</span></td><td>Harnais avant publication + Playwright et GitHub Actions (P §2.7).</td></tr>
+      <tr><td>Images lourdes sur réseau lent</td><td class="c"><span class="score s-warn">MOYENNE</span></td><td>WebP/srcset/lazy (P16) et consigne « 1 visuel de 200 Ko maximum » côté éditeurs.</td></tr>
+      <tr><td>Dépendance à un seul contributeur technique</td><td class="c"><span class="score s-warn">MOYENNE</span></td><td>Documentation à jour (<code>deploy/README.md</code> + README), script rejouable, package versionné dans le dépôt.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 9 -->
+<section>
+  <h2><span class="num">9</span>Indicateurs de succès (5, pas 30)</h2>
+  <table>
+    <thead><tr><th style="width:34%">Indicateur</th><th style="width:18%">Cible à 6 mois</th><th>Source</th></tr></thead>
+    <tbody>
+      <tr><td>Utilisateurs actifs mensuels</td><td>&gt; 80 % des effectifs</td><td>Application Insights / rapports SharePoint</td></tr>
+      <tr><td>Taux de clic sur l'annonce du jour</td><td>&gt; 25 %</td><td>Événement de télémétrie (P07)</td></tr>
+      <tr><td>Fiches formateurs consultées / mois</td><td>&gt; 100</td><td>Télémétrie</td></tr>
+      <tr><td>Délai de publication d'une actualité</td><td>&lt; 15 minutes (auto-formation comprise)</td><td>Observation éditeur</td></tr>
+      <tr><td>Contenus expirés encore en ligne</td><td>0</td><td>Rapport de la liste Actualités (colonne d'échéance)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 10 -->
+<section>
+  <h2><span class="num">10</span>Décisions à prendre (arbitrages client)</h2>
+  <table>
+    <thead><tr><th style="width:26%">Décision</th><th style="width:30%">Options</th><th>Recommandation</th></tr></thead>
+    <tbody>
+      <tr><td>Coordonnées des formateurs</td><td>Visibles par tous · masquées par défaut · visibles sur l'Espace Formateurs</td><td><b>Colonne « Afficher mes coordonnées »</b> + valeurs par défaut prudentes : chaque formateur choisit.</td></tr>
+      <tr><td>Canal de diffusion</td><td>SharePoint seul · + Teams · + Viva Connections</td><td><b>SharePoint + Teams</b> dans un premier temps (packages déjà générés), Viva ensuite.</td></tr>
+      <tr><td>Anciennes pages <code>.aspx</code></td><td>Conserver · rediriger · supprimer</td><td><b>Conserver en redirection</b> vers les vues (déjà géré), suppression après 3 mois sans clic.</td></tr>
+      <tr><td>Contenus de repli</td><td>Toujours autorisés · uniquement hors production</td><td><b>Toujours autorisés</b>, bandeau <code>showDataNotices</code> activable pendant la mise en place, désactivé en production.</td></tr>
+      <tr><td>Télémétrie</td><td>Aucune · Application Insights · Clarity</td><td><b>Application Insights</b> (conforme RGPD, intégré SPFx), mention dans la charte informatique.</td></tr>
+      <tr><td>Langue</td><td>Français · bilingue fr/en</td><td><b>Français par défaut, bilingue si des formateurs non francophones rejoignent le réseau</b> (les ressources existent déjà).</td></tr>
+      <tr><td>Attestations</td><td>Manuelles · semi-automatiques · automatiques</td><td><b>Semi-automatiques</b> : modèle Word + validation humaine avant envoi (Qualiopi).</td></tr>
+      <tr><td>Budget phase 3</td><td>Interne · accompagnement · formation</td><td><b>1 journée d'accompagnement éditorial + 2 tutoriels vidéo</b> : le meilleur retour sur investissement du plan.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================================================ 11 -->
+<section>
+  <h2><span class="num">11</span>Annexes</h2>
+  <h3>A. Contenu du mois de cette itération</h3>
+  <ul>
+    <li><b>Nouveaux écrans</b> : page d'actualité, organigramme, employé du mois, certifications, fiche formateur enrichie.</li>
+    <li><b>Nouvelles listes SharePoint</b> : Employés du mois, Certifications, Organigramme (+ 12 colonnes de contact et de profil sur Formateurs).</li>
+    <li><b>Nouvelles propriétés de web part</b> : 4 (diapositives du héros, intitulés des listes Employés du mois, Certifications et Organigramme), exposées dans le volet de propriétés.</li>
+    <li><b>Nouveaux outils</b> : génération de l'aperçu depuis les styles réels, 34 vérifications de parcours.</li>
+  </ul>
+  <h3>B. Livrables de ce dossier</h3>
+  <table>
+    <thead><tr><th style="width:34%">Fichier</th><th>Contenu</th></tr></thead>
+    <tbody>
+      <tr><td><code>deliverables/audit-2026/index.html</code></td><td>Dossier de conception : comparatif, page d'accueil refondue, catalogue des pages, design system, gouvernance, feuille de route.</td></tr>
+      <tr><td><code>deliverables/audit-2026/audit-minutieux.html</code></td><td><b>Le présent document</b> : audit par domaine, bonnes pratiques, 22 propositions, recette, décisions.</td></tr>
+      <tr><td><code>deliverables/audit-2026/apercu-portail.html</code></td><td>Aperçu cliquable : diaporama, chiffres clés, actualités paginées et page dédiée, fiche formateur, organigramme — styles compilés depuis les composants livrés.</td></tr>
+      <tr><td><code>deliverables/audit-2026/apercu-accueil.html</code>, <code>apercu-modeles-pages.html</code>, <code>apercu-repli.html</code></td><td>Aperçus de l'accueil, des modèles de page et du comportement à vide.</td></tr>
+      <tr><td><code>deliverables/spfx/bbi-intranet.sppkg</code></td><td>Package installable <b>v1.6.0.0</b> (64 entrées, 2,7 Mo).</td></tr>
+      <tr><td><code>deploy/provision-bbi-intranet.ps1</code> + <code>deploy/README.md</code></td><td>Provisionnement idempotent (listes, colonnes, navigation, web part d'accueil, données d'exemple) et guide pas à pas.</td></tr>
+    </tbody>
+  </table>
+  <h3>C. Glossaire express</h3>
+  <ul>
+    <li><b>SPFx</b> : modèle de développement Microsoft pour SharePoint Online et Teams.</li>
+    <li><b>Web part</b> : composant déposé sur une page ; <b>extension</b> : personnalise l'habillage de la page.</li>
+    <li><b>Repli</b> : contenu embarqué affiché quand la source SharePoint est absente ou vide.</li>
+    <li><b>RGAA 4.1</b> : référentiel général d'amélioration de l'accessibilité (base des obligations françaises) ; <b>WCAG 2.2 AA</b> : norme internationale équivalente.</li>
+    <li><b>Qualiopi</b> : certification qualité des organismes de formation ; les indicateurs 21 à 32 portent sur l'information et l'amélioration continue.</li>
+  </ul>
+</section>
+
+<footer class="doc">
+  BBI — Audit minutieux du portail 2026 · itération 2 · 29 septembre 2026 · package v1.6.0.0<br>
+  Toutes les vérifications citées dans ce document sont reproductibles : voir §7.
+</footer>
+
+</div>
+</body>
+</html>

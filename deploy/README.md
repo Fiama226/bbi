@@ -3,11 +3,12 @@
 Ce dossier contient **le script d'installation complet** de l'intranet BBI : il crée les listes,
 les bibliothèques, les colonnes, les vues, une seule page d'accueil applicative, le thème et l'identité
 visuelle. Sur cette page, **une seule web part BBI Accueil** fournit plusieurs vues internes (formations,
-sessions, actualités, ressources, communauté) sans navigation vers des pages SharePoint séparées.
+sessions, actualités — avec page dédiée par actualité — ressources, communauté et organigramme) sans navigation
+vers des pages SharePoint séparées.
 
 > Expérience **sans aucun chrome SharePoint** (Teams / Viva Connections) : [`../teams/README.md`](../teams/README.md)
 > Fichier principal : [`provision-bbi-intranet.ps1`](./provision-bbi-intranet.ps1)
-> Package SPFx à installer avant : [`../deliverables/spfx/bbi-intranet.sppkg`](../deliverables/spfx/bbi-intranet.sppkg) (v1.5.0.0)
+> Package SPFx à installer avant : [`../deliverables/spfx/bbi-intranet.sppkg`](../deliverables/spfx/bbi-intranet.sppkg) (v1.6.0.0)
 
 ---
 
@@ -15,9 +16,10 @@ sessions, actualités, ressources, communauté) sans navigation vers des pages S
 
 | Page | Type | Contenu |
 |---|---|---|
-| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil, Formations, Sessions, Actualités, Ressources (supports + galerie) et Communauté. Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
+| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil, Formations, Sessions, Actualités, Ressources (supports + galerie), Communauté et **Organigramme**. Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
 
-Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Formations`, `Supports publiés`, `Galerie médias`.
+Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Certifications`, `Organigramme`,
+`Formations`, `Supports publiés`, `Galerie médias`.
 
 > **Le portail est présentable dès la fin du déploiement, même sans aucune donnée.** Si une liste ou une
 > bibliothèque est absente, non créée ou vide, la vue concernée présente un contenu de repli professionnel.
@@ -33,11 +35,14 @@ Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Formations`, `Supports 
 
 | Vue du portail | Source surveillée | Comportement si absente / vide | Ce qui remplace les exemples |
 |---|---|---|---|
-| Accueil / actualités | `Actualites` | À la une + flux d'actualités | Publier une actualité |
+| Accueil / actualités | `Actualites` | À la une + flux d'actualités paginé + page dédiée par actualité | Publier une actualité |
+| Accueil — chiffres clés | *(propriétés de la web part)* | Les 4 chiffres par défaut, toujours visibles sous le héros | Modifier la propriété « Chiffres clés » |
+| Accueil — vie de l'équipe | `Employés du mois`, `Certifications` | Portraits et certifications d'exemple | Publier l'employé du mois, puis les certifications |
 | Sessions | `Sessions` | Planning de sessions à venir | Publier des sessions avec `Date de début` |
 | Formations | `Formations` | Catalogue filtrable | Publier une formation (`Statut catalogue = Actif`) |
 | Ressources | `Supports publiés`, `Galerie médias` | Supports et galerie de démonstration | Publier des documents, photos ou vidéos |
-| Communauté | `Formateurs` | Annuaire d'exemple | Publier un formateur |
+| Communauté | `Formateurs` | Annuaire d'exemple + fiches contact | Publier un formateur (photo, téléphone, e-mail, WhatsApp) |
+| Organigramme | `Organigramme` | Arbre de 12 postes d'exemple | Publier les postes avec leur `Responsable` |
 
 Le remplacement se fait **source par source** : vous pouvez publier les actualités avant les sessions,
 l'accueil reste cohérent à chaque étape.
@@ -46,8 +51,13 @@ l'accueil reste cohérent à chaque étape.
 
 ```powershell
 cd ../bbi-intranet
-node tools/verify-fallback.js     # 42 contrôles : source absente, source vide, source alimentée
+node tools/verify-fallback.js     # 100 contrôles : source absente, source vide, source alimentée
+node tools/css-harness.js dist    # styles réellement injectés, chiffres clés, pagination, navigation
+node tools/preview-smoke.js       # 34 contrôles de parcours sur l'aperçu cliquable
 ```
+
+Et pour parcourir le portail sans rien installer : ouvrez `deliverables/audit-2026/apercu-portail.html`
+(diaporama, actualités paginées et page dédiée, fiche formateur, organigramme).
 
 Pour voir le rendu sans rien installer, ouvrez `deliverables/audit-2026/apercu-repli.html` dans un
 navigateur : la galerie, le catalogue et les documents y sont présentés tels qu'ils apparaissent
@@ -81,6 +91,20 @@ Droits nécessaires : **administrateur SharePoint** (ou propriétaire du site + 
 ---
 
 ## 3. Étape 2 — Lancer le provisionnement
+
+> **Avant la première exécution — vérifier la syntaxe du script (10 secondes, aucun changement appliqué) :**
+>
+> ```powershell
+> $errors = $null
+> [System.Management.Automation.Language.Parser]::ParseFile(
+>     (Resolve-Path .\provision-bbi-intranet.ps1), [ref]$null, [ref]$errors) | Out-Null
+> if ($errors) { $errors } else { 'Syntaxe OK' }
+> # Optionnel (si PSScriptAnalyzer est installé) : Invoke-ScriptAnalyzer .\provision-bbi-intranet.ps1
+> ```
+>
+> Le script a été validé par un contrôle structurel (délimiteurs, chaînes, continuations) mais **pas par un parseur
+> PowerShell** dans l'environnement de développement hors ligne : cette vérification garantit une première exécution
+> sans surprise, et `-DryRun` ne modifie rien.
 
 Le script lit le tenant et le site dans **`bbi-environnement.json`** (racine du dépôt) :
 
@@ -229,7 +253,26 @@ et, pour la fiche formation : `Description` · `Objectifs pédagogiques` · `Pro
 👉 Seuls les éléments **Actif** apparaissent (les autres restent visibles en interne).
 
 ### Formateurs — liste `Formateurs`
-`Titre` (nom) · `Rôle` · `Filière` · `Initiales` (pastille colorée)
+`Titre` (nom) · `Rôle` · `Filière` · `Initiales` (pastille) · **`Photo (URL)`** (laissez vide pour afficher
+les initiales) · `Téléphone` · `E-mail` · **`WhatsApp`** · `Localisation` · `Biographie` · `Spécialités` ·
+`Certifications` · `Profil LinkedIn`
+👉 Un clic sur une carte ouvre la fiche complète du formateur : coordonnées cliquables (téléphone, e-mail,
+WhatsApp, Teams), spécialités, certifications et ses prochaines sessions. La colonne `WhatsApp` accepte
+toutes les écritures (`+33 6 …`, `0033…`, `0612…`) : le lien est normalisé automatiquement.
+
+### Employé du mois — liste `Employés du mois`
+`Titre` (nom) · `Poste` · `Pôle` · `Mois` · `Message` · `Faits marquants` · `Photo (URL)`
+👉 Le **dernier élément créé** est mis en avant dans la section « Vie de l'équipe ».
+
+### Certifications — liste `Certifications`
+`Titre` · `Organisme` · `Périmètre` · `Valide jusqu'au` · `Statut`
+👉 Elles s'affichent à côté de l'employé du mois (Qualiopi, Datadock, certifications internes…).
+
+### Organigramme — liste `Organigramme`
+`Titre` (nom) · `Poste` · `Pôle` · **`Responsable`** (nom du manager, rattachement hiérarchique) ·
+`Ordre` (numéro d'affichage) · `Localisation` · `E-mail` · `Téléphone`
+👉 Laissez `Responsable` vide pour le dirigeant : il devient la racine de l'arbre. Les boucles de
+rattachement sont détectées et ne font perdre aucun poste. Un clic sur un poste affiche la fiche contact.
 
 ### Documents — bibliothèque `Supports publiés`
 Déposer les fichiers **publiés** uniquement. Colonnes : `Code formation`, `Type de support`,
