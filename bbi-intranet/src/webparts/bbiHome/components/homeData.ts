@@ -1,4 +1,6 @@
 import { SPHttpClient } from '@microsoft/sp-http';
+import { safeHref, safeImageUrl } from '../../../shared/safeUrl';
+import { listApiUrl } from '../../../shared/sharePointRest';
 
 export interface IHomeNews {
   Id: number;
@@ -51,6 +53,7 @@ export interface IHomeEmployee {
   Role?: string;
   Pole?: string;
   Month?: string;
+  IsCurrent?: boolean;
   Message?: string;
   Highlights?: string;
   PhotoUrl?: string;
@@ -73,11 +76,15 @@ export interface IHomeListResult<T> {
   isDemo: boolean;
 }
 
+export interface IHomeNewsApiPage {
+  items: IHomeNews[];
+  nextUrl?: string;
+  isDemo: boolean;
+}
+
 /* ------------------------------------------------------------------ */
 /* Utilitaires                                                         */
 /* ------------------------------------------------------------------ */
-
-const stripSlashes = (value: string): string => (value || '').replace(/\/+$/, '');
 
 /** Lit un champ SharePoint potentiellement Hyperlink ({ Url, Description }) ou texte. */
 export const textOf = (value: unknown): string | undefined => {
@@ -160,10 +167,10 @@ export const externalUrl = (value?: string): string => {
   if (!clean) {
     return '';
   }
-  if (/^https?:\/\//i.test(clean)) {
-    return clean;
-  }
-  return `https://${clean.replace(/^\/+/, '')}`;
+  const candidate = /^https?:\/\//i.test(clean)
+    ? clean
+    : `https://${clean.replace(/^\/+/, '')}`;
+  return safeHref(candidate) || '';
 };
 
 const slug = (value: string): string =>
@@ -561,9 +568,12 @@ const readFields = async (
   siteUrl: string,
   listTitle: string
 ): Promise<string[]> => {
-  const endpoint =
-    `${stripSlashes(siteUrl)}/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/fields` +
-    `?$select=InternalName&$top=500`;
+  const endpoint = listApiUrl(
+    siteUrl,
+    listTitle,
+    'fields',
+    '?$select=InternalName&$top=500'
+  );
   const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
@@ -604,14 +614,42 @@ const queryItems = async (
   listTitle: string,
   query: string
 ): Promise<{ [key: string]: unknown }[]> => {
-  const endpoint =
-    `${stripSlashes(siteUrl)}/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/items?${query}`;
+  const endpoint = listApiUrl(siteUrl, listTitle, 'items', query);
   const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
   }
   const json = (await response.json()) as { value?: { [key: string]: unknown }[] };
   return json.value || [];
+};
+
+const queryItemsPage = async (
+  spHttpClient: SPHttpClient,
+  endpoint: string,
+  siteUrl: string
+): Promise<{ items: { [key: string]: unknown }[]; nextUrl?: string }> => {
+  const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}`);
+  }
+  const json = (await response.json()) as {
+    value?: { [key: string]: unknown }[];
+    'odata.nextLink'?: string;
+    'odata.nextlink'?: string;
+    '@odata.nextLink'?: string;
+    d?: { results?: { [key: string]: unknown }[]; __next?: string };
+  };
+  const rawItems = json.value || (json.d && json.d.results) || [];
+  const rawNext = json['odata.nextLink'] || json['odata.nextlink'] || json['@odata.nextLink'] ||
+    (json.d && json.d.__next) || '';
+  if (!rawNext) {
+    return { items: rawItems };
+  }
+  const nextUrl = safeHref(rawNext);
+  if (!nextUrl || new URL(nextUrl, siteUrl).origin !== new URL(siteUrl).origin) {
+    throw new Error('SharePoint returned an invalid pagination link');
+  }
+  return { items: rawItems, nextUrl };
 };
 
 const NEWS_FIELDS: { [key: string]: string[] } = {
@@ -653,6 +691,7 @@ const EMPLOYEE_FIELDS: { [key: string]: string[] } = {
   Role: ['Role', 'Rôle', 'Fonction', 'Poste'],
   Pole: ['Pole', 'Pôle', 'Direction', 'Departement'],
   Month: ['Month', 'Mois', 'Periode', 'Période'],
+  IsCurrent: ['IsCurrent', 'Current', 'Featured', 'MisEnAvant'],
   Message: ['Message', 'Citation', 'Motivation', 'Description'],
   Highlights: ['Highlights', 'Faits', 'Points', 'Realisations'],
   PhotoUrl: ['PhotoUrl', 'Photo', 'Portrait', 'Avatar', 'Image']
@@ -666,10 +705,7 @@ const CERTIFICATION_FIELDS: { [key: string]: string[] } = {
 };
 
 /** Visuel fourni par la liste : conservé tel quel (URL absolue ou relative au site). */
-const relativeImage = (value?: string): string | undefined => {
-  const clean = (value || '').trim();
-  return clean || undefined;
-};
+const relativeImage = (value?: string): string | undefined => safeImageUrl(value);
 
 /* ------------------------------------------------------------------ */
 /* Actualités                                                          */
@@ -682,10 +718,75 @@ const asNews = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IHomeN
   Category: mapping.Category ? textOf(raw[mapping.Category]) : undefined,
   Published: mapping.Published ? textOf(raw[mapping.Published]) : undefined,
   AuthorName: mapping.AuthorName ? textOf(raw[mapping.AuthorName]) : undefined,
-  ImageUrl: mapping.ImageUrl ? textOf(raw[mapping.ImageUrl]) : undefined,
-  LinkUrl: mapping.LinkUrl ? textOf(raw[mapping.LinkUrl]) : undefined,
+  ImageUrl: mapping.ImageUrl ? relativeImage(textOf(raw[mapping.ImageUrl])) : undefined,
+  LinkUrl: mapping.LinkUrl ? safeHref(textOf(raw[mapping.LinkUrl])) : undefined,
   Body: mapping.Body ? textOf(raw[mapping.Body]) : undefined
 });
+
+export const loadHomeNewsPage = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string,
+  pageSize: number,
+  continuationUrl?: string
+): Promise<IHomeNewsApiPage> => {
+  const safeSize = Math.max(1, Math.min(100, Math.floor(pageSize)));
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, NEWS_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title', 'Created'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const orderBy = mapping.Published ? `${mapping.Published} desc,Id desc` : 'Created desc,Id desc';
+    const endpoint = continuationUrl || listApiUrl(
+      siteUrl,
+      listTitle,
+      'items',
+      `?$select=${select.join(',')}&$orderby=${orderBy}&$top=${safeSize}`
+    );
+    const page = await queryItemsPage(spHttpClient, endpoint, siteUrl);
+    const news = page.items.map((raw) => asNews(raw, mapping));
+    if (news.length === 0 && !continuationUrl) {
+      return { items: DEMO_NEWS.slice(0, safeSize), isDemo: true };
+    }
+    return { items: news, nextUrl: page.nextUrl, isDemo: false };
+  } catch {
+    return {
+      items: continuationUrl ? [] : DEMO_NEWS.slice(0, safeSize),
+      isDemo: !continuationUrl
+    };
+  }
+};
+
+export const loadHomeNewsById = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string,
+  itemId: number
+): Promise<IHomeNews | undefined> => {
+  if (!Number.isInteger(itemId) || itemId < 1) {
+    return undefined;
+  }
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, NEWS_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title', 'Created'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const endpoint = listApiUrl(siteUrl, listTitle, `items(${itemId})`, `?$select=${select.join(',')}`);
+    const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
+    if (!response.ok) {
+      return undefined;
+    }
+    const json = (await response.json()) as { [key: string]: unknown };
+    const raw = (json as { value?: { [key: string]: unknown }[] }).value
+      ? ((json as { value?: { [key: string]: unknown }[] }).value || [])[0]
+      : json;
+    return raw && raw.Id ? asNews(raw, mapping) : undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 const asSession = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IHomeSession => ({
   Id: Number(raw.Id),
@@ -695,7 +796,7 @@ const asSession = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IHo
   Modality: mapping.Modality ? textOf(raw[mapping.Modality]) : undefined,
   Location: mapping.Location ? textOf(raw[mapping.Location]) : undefined,
   Status: mapping.Status ? textOf(raw[mapping.Status]) : undefined,
-  RegistrationUrl: mapping.RegistrationUrl ? textOf(raw[mapping.RegistrationUrl]) : undefined,
+  RegistrationUrl: mapping.RegistrationUrl ? safeHref(textOf(raw[mapping.RegistrationUrl])) : undefined,
   Trainer: mapping.Trainer ? textOf(raw[mapping.Trainer]) : undefined
 });
 
@@ -713,8 +814,11 @@ const asTrainer = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IHo
   Bio: mapping.Bio ? textOf(raw[mapping.Bio]) : undefined,
   Specialites: mapping.Specialites ? textOf(raw[mapping.Specialites]) : undefined,
   Certifications: mapping.Certifications ? textOf(raw[mapping.Certifications]) : undefined,
-  LinkedIn: mapping.LinkedIn ? textOf(raw[mapping.LinkedIn]) : undefined
+  LinkedIn: mapping.LinkedIn ? safeHref(textOf(raw[mapping.LinkedIn])) : undefined
 });
+
+const booleanOf = (value: unknown): boolean =>
+  value === true || value === 1 || value === '1' || String(value).toLowerCase() === 'true';
 
 const asEmployee = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IHomeEmployee => ({
   Id: Number(raw.Id),
@@ -722,6 +826,7 @@ const asEmployee = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IH
   Role: mapping.Role ? textOf(raw[mapping.Role]) : undefined,
   Pole: mapping.Pole ? textOf(raw[mapping.Pole]) : undefined,
   Month: mapping.Month ? textOf(raw[mapping.Month]) : undefined,
+  IsCurrent: mapping.IsCurrent ? booleanOf(raw[mapping.IsCurrent]) : undefined,
   Message: mapping.Message ? textOf(raw[mapping.Message]) : undefined,
   Highlights: mapping.Highlights ? textOf(raw[mapping.Highlights]) : undefined,
   PhotoUrl: mapping.PhotoUrl ? relativeImage(textOf(raw[mapping.PhotoUrl])) : undefined
@@ -830,6 +935,31 @@ export const loadHomeTrainers = async (
   }
 };
 
+const normalizePeriod = (value: string): string =>
+  value
+    .normalize('NFD')
+    .replace(/[\\u0300-\\u036f]/g, '')
+    .toLocaleLowerCase('fr')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+
+const isCurrentMonthLabel = (value?: string): boolean => {
+  const clean = (value || '').trim();
+  if (!clean) {
+    return false;
+  }
+  const now = new Date();
+  const french = new Intl.DateTimeFormat('fr-FR', { month: 'long', year: 'numeric' }).format(now);
+  const english = new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(now);
+  const monthNumber = now.getMonth() + 1;
+  const monthIso = `${now.getFullYear()}-${monthNumber < 10 ? `0${monthNumber}` : monthNumber}`;
+  const normalized = normalizePeriod(clean);
+  return normalized === normalizePeriod(french) ||
+    normalized === normalizePeriod(english) ||
+    normalized === normalizePeriod(monthIso) ||
+    normalized.indexOf(`${normalizePeriod(monthIso)} `) === 0;
+};
+
 export const loadEmployeeOfMonth = async (
   spHttpClient: SPHttpClient,
   siteUrl: string,
@@ -841,20 +971,28 @@ export const loadEmployeeOfMonth = async (
     const select = baseSelect(fields, ['Id', 'Title', 'Created'])
       .concat(Object.keys(mapping).map((key) => mapping[key]))
       .filter((value, index, all) => all.indexOf(value) === index);
+    const hasCurrentFlag = !!mapping.IsCurrent;
+    const currentFilter = hasCurrentFlag ? `&$filter=${mapping.IsCurrent} eq 1` : '';
     const items = await queryItems(
       spHttpClient,
       siteUrl,
       listTitle,
-      `$select=${select.join(',')}&$orderby=Created desc&$top=1`
+      `$select=${select.join(',')}${currentFilter}&$orderby=Created desc&$top=${hasCurrentFlag ? 1 : 60}`
     );
-    const employees = items.map((raw, index) => ({
-      ...asEmployee(raw, mapping),
-      DemoIndex: index % 4
-    }));
-    if (employees.length === 0 || !employees[0].Title) {
-      return { items: DEMO_EMPLOYEES, isDemo: true };
+    const employees = items
+      .map((raw, index) => ({
+        ...asEmployee(raw, mapping),
+        DemoIndex: index % 4
+      }))
+      .filter((item) => !!item.Title);
+    const employee = hasCurrentFlag
+      ? employees.find((item) => item.IsCurrent === true)
+      : employees.find((item) => isCurrentMonthLabel(item.Month));
+    if (!employee) {
+      // A real list with no current winner is an honest empty state, not demo data.
+      return { items: [], isDemo: false };
     }
-    return { items: employees, isDemo: false };
+    return { items: [employee], isDemo: false };
   } catch {
     return { items: DEMO_EMPLOYEES, isDemo: true };
   }

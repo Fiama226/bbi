@@ -8,6 +8,7 @@ const nonEmptyLines = (text: string): string[] =>
     .filter((line) => !!line && line.indexOf('#') !== 0);
 
 import * as React from 'react';
+import { safeHref } from '../../../shared/safeUrl';
 
 export interface INavLink {
   label: string;
@@ -156,12 +157,15 @@ export const parseNavLinks = (text: string, defaults: INavLink[]): INavLink[] =>
   lines.forEach((line) => {
     const parts = splitParts(line);
     if (parts.length >= 2) {
-      const emphasis = parts[0].indexOf('*') !== -1;
-      links.push({
-        label: parts[0].replace(/\*/g, '').trim(),
-        url: parts[1],
-        emphasis
-      });
+      const safeUrl = safeHref(parts[1]);
+      if (safeUrl) {
+        const emphasis = parts[0].indexOf('*') !== -1;
+        links.push({
+          label: parts[0].replace(/\*/g, '').trim(),
+          url: safeUrl,
+          emphasis
+        });
+      }
     } else if (parts.length === 1) {
       links.push({ label: parts[0], url: '#', emphasis: false });
     }
@@ -179,12 +183,15 @@ export const parseQuickLinks = (text: string, defaults: IQuickLink[]): IQuickLin
   lines.forEach((line) => {
     const parts = splitParts(line);
     if (parts.length >= 2) {
-      links.push({
-        icon: parts.length >= 4 ? parts[0] : '◆',
-        title: parts.length >= 4 ? parts[1] : parts[0],
-        subtitle: parts.length >= 4 ? parts[2] : parts[1],
-        url: parts.length >= 4 ? parts[3] : (parts[2] || '#')
-      });
+      const url = safeHref(parts.length >= 4 ? parts[3] : (parts[2] || '#'));
+      if (url) {
+        links.push({
+          icon: parts.length >= 4 ? parts[0] : '◆',
+          title: parts.length >= 4 ? parts[1] : parts[0],
+          subtitle: parts.length >= 4 ? parts[2] : parts[1],
+          url
+        });
+      }
     }
   });
   return links.length > 0 ? links : defaults;

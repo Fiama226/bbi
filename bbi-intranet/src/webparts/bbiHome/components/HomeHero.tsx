@@ -1,6 +1,7 @@
 import * as React from "react";
 import styles from "./HomeHero.module.scss";
 import { IHeroSlide, IKpi } from "./homeLayout";
+import { safeHref, safeImageUrl } from "../../../shared/safeUrl";
 
 export interface IHomeHeroProps {
   /** Diapositives configurées dans le volet de propriétés. */
@@ -27,6 +28,7 @@ export interface IHomeHeroProps {
 }
 
 const AUTOPLAY_MS = 8000;
+const twoDigits = (value: number): string => value < 10 ? `0${value}` : String(value);
 
 /** Visuels BBI embarqués : utilisés quand la diapositive n'a pas d'image. */
 interface IDemoVisuals {
@@ -155,7 +157,10 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
     }
   };
 
-  const textBlock = (): React.ReactNode => (
+  const textBlock = (): React.ReactNode => {
+    const ctaUrl = safeHref(active.ctaUrl || "#formations") || "#formations";
+    const secondaryHref = safeHref(secondaryUrl || "#ressources") || "#ressources";
+    return (
     <div
       className={
         animate ? `${styles.text} ${styles.textAnimated}` : styles.text
@@ -170,7 +175,12 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
           {titleLines.map((line, lineIndex) => (
             <React.Fragment key={`${line}-${lineIndex}`}>
               {line}
-              {lineIndex < titleLines.length - 1 && <br />}
+              {lineIndex < titleLines.length - 1 && (
+                <>
+                  <br className={styles.titleBreak} />
+                  <span className={styles.mobileTitleSpace}> </span>
+                </>
+              )}
             </React.Fragment>
           ))}
         </h1>
@@ -181,9 +191,9 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
         {active.ctaLabel && (
           <a
             className={styles.primary}
-            href={active.ctaUrl || "#formations"}
+            href={ctaUrl}
             onClick={(event) => {
-              onInternalNavigate(event, active.ctaUrl || "#formations");
+              onInternalNavigate(event, ctaUrl);
             }}
           >
             {active.ctaLabel}
@@ -193,9 +203,9 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
         {secondaryLabel && (
           <a
             className={styles.secondary}
-            href={secondaryUrl || "#ressources"}
+            href={secondaryHref}
             onClick={(event) => {
-              onInternalNavigate(event, secondaryUrl || "#ressources");
+              onInternalNavigate(event, secondaryHref);
             }}
           >
             {secondaryLabel}
@@ -203,7 +213,8 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
         )}
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <section
@@ -235,6 +246,7 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
       >
         {carousel.map((slide, slideIndex) => {
           const isActive = slideIndex === Math.min(index, count - 1);
+          const slideImageUrl = safeImageUrl(slide.imageUrl);
           return (
             <div
               key={`media-${slideIndex}`}
@@ -248,13 +260,13 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
             >
               <div
                 className={
-                  slide.imageUrl
+                  slideImageUrl
                     ? styles.mediaImage
                     : `${styles.mediaImage} ${demoVisualClass(slideIndex, styles)}`
                 }
                 style={
-                  slide.imageUrl
-                    ? { backgroundImage: `url("${slide.imageUrl}")` }
+                  slideImageUrl
+                    ? { backgroundImage: `url("${slideImageUrl}")` }
                     : undefined
                 }
               />
@@ -275,64 +287,64 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
           {textBlock()}
         </div>
 
-        {count > 1 && (
-          <div className={styles.controls}>
-            <button
-              type="button"
-              className={`${styles.arrow} ${styles.arrowPrev}`}
-              onClick={() => {
-                go(-1);
-              }}
-              aria-label="Diapositive précédente"
-            >
-              ‹
-            </button>
-            <ul className={styles.dots} aria-label="Choix de la diapositive">
-              {carousel.map((slide, dotIndex) => {
-                const isActive = dotIndex === Math.min(index, count - 1);
-                return (
-                  <li key={`dot-${dotIndex}`}>
-                    <button
-                      type="button"
-                      className={
-                        isActive
-                          ? `${styles.dot} ${styles.dotActive}`
-                          : styles.dot
-                      }
-                      aria-label={`Diapositive ${dotIndex + 1} sur ${count}${
-                        slide.title ? ` : ${slide.title}` : ""
-                      }`}
-                      aria-current={isActive ? "true" : undefined}
-                      onClick={() => {
-                        setIndex(dotIndex);
-                      }}
-                    >
-                      <span className={styles.visuallyHidden}>
-                        {dotIndex + 1}
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            {animate && !paused && (
-              <span
-                key={`progress-${Math.min(index, count - 1)}`}
-                className={styles.progress}
-                style={{ animationDuration: `${AUTOPLAY_MS}ms` }}
-                aria-hidden="true"
-              />
-            )}
-            <button
-              type="button"
-              className={`${styles.arrow} ${styles.arrowNext}`}
-              onClick={() => {
-                go(1);
-              }}
-              aria-label="Diapositive suivante"
-            >
-              ›
-            </button>
+        <div className={styles.controls}>
+          <div className={styles.controlsInner}>
+            {count > 1 ? (
+              <div className={styles.controlGroup}>
+                <p className={styles.slideCount} aria-hidden="true">
+                  {twoDigits(Math.min(index, count - 1) + 1)}
+                  <span>/</span>
+                  {twoDigits(count)}
+                </p>
+                <ul className={styles.dots} aria-label="Choix de la diapositive">
+                  {carousel.map((slide, dotIndex) => {
+                    const isActive = dotIndex === Math.min(index, count - 1);
+                    return (
+                      <li key={`dot-${dotIndex}`}>
+                        <button
+                          type="button"
+                          className={styles.dot}
+                          aria-label={`Diapositive ${dotIndex + 1} sur ${count}${
+                            slide.title ? ` : ${slide.title.replace(/\n/g, " ")}` : ""
+                          }`}
+                          aria-current={isActive ? "true" : undefined}
+                          onClick={() => setIndex(dotIndex)}
+                        >
+                          <span className={styles.dotTrack} aria-hidden="true">
+                            {isActive && animate && !paused && (
+                              <span
+                                key={`progress-${Math.min(index, count - 1)}`}
+                                className={styles.dotProgress}
+                                style={{ animationDuration: `${AUTOPLAY_MS}ms` }}
+                              />
+                            )}
+                          </span>
+                          <span className={styles.visuallyHidden}>{dotIndex + 1}</span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <div className={styles.arrows}>
+                  <button
+                    type="button"
+                    className={styles.arrow}
+                    onClick={() => go(-1)}
+                    aria-label="Diapositive précédente"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.arrow}
+                    onClick={() => go(1)}
+                    aria-label="Diapositive suivante"
+                  >
+                    ›
+                  </button>
+                </div>
+              </div>
+            ) : <span />}
             <button
               type="button"
               className={styles.explore}
@@ -342,7 +354,7 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
               Explorer <span aria-hidden="true">↓</span>
             </button>
           </div>
-        )}
+        </div>
 
         {/* Annonce aux lecteurs d'écran du changement de diapositive. */}
         <p className={styles.visuallyHidden} aria-live="polite">

@@ -1,4 +1,6 @@
 import { SPHttpClient } from '@microsoft/sp-http';
+import { safeHref } from '../../../shared/safeUrl';
+import { encodeODataLiteral, listApiUrl } from '../../../shared/sharePointRest';
 import {
   IFicheFormationData,
   IFormationDetail,
@@ -91,9 +93,12 @@ const readFields = async (
   siteUrl: string,
   listTitle: string
 ): Promise<string[]> => {
-  const endpoint =
-    `${stripSlashes(siteUrl)}/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/fields` +
-    `?$select=InternalName,TypeAsString&$top=500`;
+  const endpoint = listApiUrl(
+    siteUrl,
+    listTitle,
+    'fields',
+    '?$select=InternalName,TypeAsString&$top=500'
+  );
   const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
@@ -160,11 +165,14 @@ export const loadFicheFormation = async (
     });
 
     const filter = code
-      ? `&$filter=CodeFormation eq '${code.replace(/'/g, "''")}'`
+      ? `&$filter=CodeFormation eq '${encodeODataLiteral(code)}'`
       : '';
-    const formationEndpoint =
-      `${web}/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/items` +
-      `?$select=${select.join(',')}${filter}&$orderby=Title&$top=1`;
+    const formationEndpoint = listApiUrl(
+      web,
+      listTitle,
+      'items',
+      `?$select=${select.join(',')}${filter}&$orderby=Title&$top=1`
+    );
     const formationResponse = await spHttpClient.get(formationEndpoint, SPHttpClient.configurations.v1);
     if (!formationResponse.ok) {
       throw new Error(`HTTP ${formationResponse.status}`);
@@ -193,23 +201,32 @@ export const loadFicheFormation = async (
         ? textOf(raw[mapping.FormateursReferents])
         : undefined,
       ContactReferent: mapping.ContactReferent ? textOf(raw[mapping.ContactReferent]) : undefined,
-      LienInscription: mapping.LienInscription ? textOf(raw[mapping.LienInscription]) : undefined
+      LienInscription: mapping.LienInscription
+        ? safeHref(textOf(raw[mapping.LienInscription]))
+        : undefined
     };
     const formationCode = formation.CodeFormation || code;
 
     let sessions: IFormationSession[] = [];
     if (options.sessions && formationCode) {
       try {
-        const sessionEndpoint =
-          `${web}/_api/web/lists/getbytitle('${encodeURIComponent(sessionsListTitle)}')/items` +
+        const sessionEndpoint = listApiUrl(
+          web,
+          sessionsListTitle,
+          'items',
           `?$select=Id,Title,StartDate,Modality,Location,Status,RegistrationUrl` +
-          `&$filter=substringof('${formationCode.replace(/'/g, "''")}',Title)` +
-          `&$orderby=StartDate&$top=6`;
+            `&$filter=substringof('${encodeODataLiteral(formationCode)}',Title)` +
+            '&$orderby=StartDate&$top=6'
+        );
         const sessionResponse = await spHttpClient.get(sessionEndpoint, SPHttpClient.configurations.v1);
         if (sessionResponse.ok) {
           const json = (await sessionResponse.json()) as { value?: IFormationSession[] };
           const now = Date.now();
           sessions = (json.value || [])
+            .map((session) => ({
+              ...session,
+              RegistrationUrl: safeHref(session.RegistrationUrl)
+            }))
             .filter((session) => !session.StartDate || new Date(session.StartDate).getTime() >= now)
             .slice(0, 4);
         }
@@ -221,15 +238,21 @@ export const loadFicheFormation = async (
     let documents: IFormationDocument[] = [];
     if (options.documents && formationCode) {
       try {
-        const documentEndpoint =
-          `${web}/_api/web/lists/getbytitle('${encodeURIComponent(documentsLibraryTitle)}')/items` +
+        const documentEndpoint = listApiUrl(
+          web,
+          documentsLibraryTitle,
+          'items',
           `?$select=Id,Title,FileRef,FileLeafRef,TypeSupport,StatutSupport,Modified` +
-          `&$filter=CodeFormation eq '${formationCode.replace(/'/g, "''")}'` +
-          `&$orderby=TypeSupport&$top=10`;
+            `&$filter=CodeFormation eq '${encodeODataLiteral(formationCode)}'` +
+            '&$orderby=TypeSupport&$top=10'
+        );
         const documentResponse = await spHttpClient.get(documentEndpoint, SPHttpClient.configurations.v1);
         if (documentResponse.ok) {
           const json = (await documentResponse.json()) as { value?: IFormationDocument[] };
-          documents = json.value || [];
+          documents = (json.value || []).map((document) => ({
+            ...document,
+            FileRef: safeHref(document.FileRef) || ''
+          }));
         }
       } catch {
         documents = [];
@@ -244,9 +267,12 @@ export const loadFicheFormation = async (
         .filter((name) => !!name);
       if (names.length > 0) {
         try {
-          const trainerEndpoint =
-            `${web}/_api/web/lists/getbytitle('${encodeURIComponent(trainersListTitle)}')/items` +
-            `?$select=Id,Title,Role,Filiere,Initials&$orderby=Title&$top=200`;
+          const trainerEndpoint = listApiUrl(
+            web,
+            trainersListTitle,
+            'items',
+            '?$select=Id,Title,Role,Filiere,Initials&$orderby=Title&$top=200'
+          );
           const trainerResponse = await spHttpClient.get(trainerEndpoint, SPHttpClient.configurations.v1);
           if (trainerResponse.ok) {
             const json = (await trainerResponse.json()) as { value?: IFormationTrainer[] };

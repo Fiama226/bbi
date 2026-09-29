@@ -2,6 +2,7 @@ import * as React from 'react';
 import styles from './TrainingCatalog.module.scss';
 import { ITrainingCatalogProps, IFormation } from './ITrainingCatalogProps';
 import { SPHttpClient } from '@microsoft/sp-http';
+import { listApiUrl } from '../../../shared/sharePointRest';
 
 type LoadStatus = 'loading' | 'ready';
 
@@ -37,10 +38,12 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
     let cancelled = false;
     const load = async (): Promise<void> => {
       setStatus('loading');
-      const endpoint: string =
-        `${siteUrl}/_api/web/lists/getbytitle('${encodeURIComponent(listTitle)}')/items` +
-        `?$select=Id,Title,CodeFormation,Filiere,Modalite,DureeH,Niveau,StatutCatalogue` +
-        `&$orderby=Title&$top=300`;
+      const endpoint: string = listApiUrl(
+        siteUrl,
+        listTitle,
+        'items',
+        '?$select=Id,Title,CodeFormation,Filiere,Modalite,DureeH,Niveau,StatutCatalogue&$orderby=Title&$top=300'
+      );
       try {
         const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
         if (cancelled) { return; }

@@ -1,5 +1,8 @@
 import { SPHttpClient } from '@microsoft/sp-http';
+import DOMPurify from 'dompurify';
 import { IArticleRelated, IArticleResult, IArticleDetail } from './IArticleActualiteProps';
+import { safeHref, safeImageUrl } from '../../../shared/safeUrl';
+import { listApiUrl } from '../../../shared/sharePointRest';
 
 const stripSlashes = (value: string): string => value.replace(/\/+$/, '');
 
@@ -75,9 +78,12 @@ export const loadArticle = async (
 ): Promise<IArticleResult> => {
   const web = stripSlashes(siteUrl);
   try {
-    const fieldEndpoint =
-      `${web}/_api/web/lists/getbytitle('${encodeURIComponent(newsListTitle)}')/fields` +
-      `?$select=InternalName&$top=500`;
+    const fieldEndpoint = listApiUrl(
+      web,
+      newsListTitle,
+      'fields',
+      '?$select=InternalName&$top=500'
+    );
     const fieldResponse = await spHttpClient.get(fieldEndpoint, SPHttpClient.configurations.v1);
     if (!fieldResponse.ok) {
       throw new Error(`HTTP ${fieldResponse.status}`);
@@ -103,10 +109,13 @@ export const loadArticle = async (
     });
 
     const itemEndpoint = itemId
-      ? `${web}/_api/web/lists/getbytitle('${encodeURIComponent(newsListTitle)}')/items(${itemId})` +
-        `?$select=${select.join(',')}`
-      : `${web}/_api/web/lists/getbytitle('${encodeURIComponent(newsListTitle)}')/items` +
-        `?$select=${select.join(',')}&$orderby=Published desc&$top=1`;
+      ? listApiUrl(web, newsListTitle, `items(${itemId})`, `?$select=${select.join(',')}`)
+      : listApiUrl(
+          web,
+          newsListTitle,
+          'items',
+          `?$select=${select.join(',')}&$orderby=Published desc&$top=1`
+        );
 
     const itemResponse = await spHttpClient.get(itemEndpoint, SPHttpClient.configurations.v1);
     if (!itemResponse.ok) {
@@ -129,16 +138,19 @@ export const loadArticle = async (
       Category: textOf(raw.Category),
       AuthorName: textOf(raw.AuthorName),
       Published: textOf(raw.Published),
-      ImageUrl: mapping.ImageUrl ? textOf(raw[mapping.ImageUrl]) : undefined,
-      LinkUrl: mapping.LinkUrl ? textOf(raw[mapping.LinkUrl]) : undefined,
+      ImageUrl: mapping.ImageUrl ? safeImageUrl(textOf(raw[mapping.ImageUrl])) : undefined,
+      LinkUrl: mapping.LinkUrl ? safeHref(textOf(raw[mapping.LinkUrl])) : undefined,
       Body: mapping.Body ? textOf(raw[mapping.Body]) : undefined
     };
 
     let related: IArticleRelated[] = [];
     try {
-      const relatedEndpoint =
-        `${web}/_api/web/lists/getbytitle('${encodeURIComponent(newsListTitle)}')/items` +
-        `?$select=Id,Title,Category,Published&$orderby=Published desc&$top=${maxRelated + 1}`;
+      const relatedEndpoint = listApiUrl(
+        web,
+        newsListTitle,
+        'items',
+        `?$select=Id,Title,Category,Published&$orderby=Published desc&$top=${maxRelated + 1}`
+      );
       const relatedResponse = await spHttpClient.get(relatedEndpoint, SPHttpClient.configurations.v1);
       if (relatedResponse.ok) {
         const relatedJson = (await relatedResponse.json()) as { value?: IArticleRelated[] };
@@ -157,14 +169,21 @@ export const loadArticle = async (
 };
 
 /**
- * Nettoie le HTML de l'article : on conserve la mise en forme éditoriale
- * courante et on retire ce qui peut casser la page (scripts, styles, événements).
+ * Allowlist sanitizer for SharePoint-authored article HTML. Keep semantic
+ * editorial markup, but no scripts, styles, embeds, event handlers or unsafe URLs.
  */
 export const sanitizeHtml = (html: string): string =>
-  html
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
-    .replace(/ on[a-z]+="[^"]*"/gi, '')
-    .replace(/ on[a-z]+='[^']*'/gi, '')
-    .replace(/javascript:/gi, '');
+  DOMPurify.sanitize(html || '', {
+    ALLOWED_TAGS: [
+      'a', 'blockquote', 'br', 'caption', 'code', 'del', 'em', 'figcaption',
+      'figure', 'h2', 'h3', 'h4', 'hr', 'img', 'ins', 'li', 'mark', 'ol',
+      'p', 'pre', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'th',
+      'thead', 'tr', 'u', 'ul'
+    ],
+    ALLOWED_ATTR: ['alt', 'colspan', 'height', 'href', 'rowspan', 'src', 'title', 'width'],
+    ALLOW_DATA_ATTR: false,
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    ALLOWED_URI_REGEXP: /^(?:(?:https?:|mailto:|tel:)|(?:\/|#|\.\.?\/))/i,
+    FORBID_TAGS: ['embed', 'form', 'iframe', 'input', 'object', 'script', 'style', 'svg', 'math'],
+    FORBID_ATTR: ['style']
+  });

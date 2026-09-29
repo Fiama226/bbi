@@ -1,5 +1,7 @@
 import { SPHttpClient } from '@microsoft/sp-http';
 import { IGalleryItem, IGalleryResult, IGallerySchema } from './IBbiGalleryProps';
+import { safeHref, safeImageUrl } from '../../../shared/safeUrl';
+import { encodeODataLiteral, listApiUrl } from '../../../shared/sharePointRest';
 
 /** Colonnes optionnelles recherchées dans la bibliothèque, par ordre de préférence. */
 const OPTIONAL_FIELDS: { [key: string]: string[] } = {
@@ -14,8 +16,6 @@ const OPTIONAL_FIELDS: { [key: string]: string[] } = {
 
 const IMAGE_EXTENSIONS: string[] = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'heic'];
 const VIDEO_EXTENSIONS: string[] = ['mp4', 'mov', 'm4v', 'webm', 'avi', 'wmv'];
-
-const stripSlashes = (value: string): string => value.replace(/\/+$/, '');
 
 const extensionOf = (value?: string): string => {
   if (!value) {
@@ -129,9 +129,12 @@ const readFields = async (
   siteUrl: string,
   libraryTitle: string
 ): Promise<string[]> => {
-  const endpoint =
-    `${stripSlashes(siteUrl)}/_api/web/lists/getbytitle('${encodeURIComponent(libraryTitle)}')/fields` +
-    `?$select=InternalName,TypeAsString&$top=500`;
+  const endpoint = listApiUrl(
+    siteUrl,
+    libraryTitle,
+    'fields',
+    '?$select=InternalName,TypeAsString&$top=500'
+  );
   const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}`);
@@ -224,11 +227,14 @@ export const loadGallery = async (
     const orderBy = mapping.DatePhoto ? `${mapping.DatePhoto} desc` : 'Created desc';
     const filter =
       albumFilter && mapping.Album
-        ? `&$filter=${mapping.Album} eq '${albumFilter.replace(/'/g, "''")}'`
+        ? `&$filter=${mapping.Album} eq '${encodeODataLiteral(albumFilter)}'`
         : '';
-    const endpoint =
-      `${stripSlashes(siteUrl)}/_api/web/lists/getbytitle('${encodeURIComponent(libraryTitle)}')/items` +
-      `?$select=${selectFields.join(',')}${filter}&$orderby=${orderBy}&$top=${maxItems * 3}`;
+    const endpoint = listApiUrl(
+      siteUrl,
+      libraryTitle,
+      'items',
+      `?$select=${selectFields.join(',')}${filter}&$orderby=${orderBy}&$top=${maxItems * 3}`
+    );
 
     const response = await spHttpClient.get(endpoint, SPHttpClient.configurations.v1);
     if (!response.ok) {
@@ -240,15 +246,15 @@ export const loadGallery = async (
       Id: Number(entry.Id),
       Title: textOf(entry.Title),
       Description: mapping.Description ? textOf(entry[mapping.Description]) : undefined,
-      FileRef: textOf(entry.FileRef) || '',
+      FileRef: safeImageUrl(textOf(entry.FileRef)) || safeHref(textOf(entry.FileRef)) || '',
       FileLeafRef: textOf(entry.FileLeafRef),
       FileType: textOf(entry.File_x0020_Type),
       Album: mapping.Album ? textOf(entry[mapping.Album]) : undefined,
       Lieu: mapping.Lieu ? textOf(entry[mapping.Lieu]) : undefined,
       Credit: mapping.Credit ? textOf(entry[mapping.Credit]) : undefined,
       DatePhoto: mapping.DatePhoto ? textOf(entry[mapping.DatePhoto]) : textOf(entry.Created),
-      VideoUrl: mapping.VideoUrl ? textOf(entry[mapping.VideoUrl]) : undefined,
-      ThumbUrl: mapping.ThumbUrl ? textOf(entry[mapping.ThumbUrl]) : undefined
+      VideoUrl: mapping.VideoUrl ? safeHref(textOf(entry[mapping.VideoUrl])) : undefined,
+      ThumbUrl: mapping.ThumbUrl ? safeImageUrl(textOf(entry[mapping.ThumbUrl])) : undefined
     }));
 
     const visible = items
