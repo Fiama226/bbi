@@ -8,6 +8,7 @@ declare interface IBbiHomeWebPartStrings {
   TrainersListFieldLabel: string;
   FormationsListFieldLabel: string;
   DocumentsLibraryFieldLabel: string;
+  GalleryLibraryFieldLabel: string;
   MaxItemsFieldLabel: string;
 
   HeroPageDescription: string;

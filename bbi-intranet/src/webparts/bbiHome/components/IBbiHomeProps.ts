@@ -9,6 +9,7 @@ export interface IBbiHomeProps {
   trainersListTitle: string;
   formationsListTitle: string;
   documentsLibraryTitle: string;
+  galleryLibraryTitle: string;
   maxItems: number;
 
   /* --- Héros --- */

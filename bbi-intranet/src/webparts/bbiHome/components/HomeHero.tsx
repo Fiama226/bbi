@@ -14,6 +14,7 @@ export interface IHomeHeroProps {
   kpis: IKpi[];
   compact: boolean;
   onExplore: () => void;
+  onInternalNavigate: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
 }
 
 const HomeHero: React.FC<IHomeHeroProps> = (props) => {
@@ -29,6 +30,7 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
     kpis,
     compact,
     onExplore,
+    onInternalNavigate,
   } = props;
 
   const backgroundStyle: React.CSSProperties | undefined = imageUrl
@@ -69,6 +71,7 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
             <a
               className={styles.heroPrimary}
               href={primaryUrl || "#formations"}
+              onClick={(event) => { onInternalNavigate(event, primaryUrl || "#formations"); }}
             >
               {primaryLabel}
               <span aria-hidden="true"> →</span>
@@ -78,6 +81,7 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
             <a
               className={styles.heroSecondary}
               href={secondaryUrl || "#ressources"}
+              onClick={(event) => { onInternalNavigate(event, secondaryUrl || "#ressources"); }}
             >
               {secondaryLabel}
             </a>

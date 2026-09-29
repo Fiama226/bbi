@@ -17,7 +17,6 @@ import {
   parseKpis,
   parseNavLinks,
   parseQuickLinks,
-  useActiveSection,
   useChromeOffset,
   useScrolled,
 } from "./homeLayout";
@@ -28,8 +27,41 @@ import trainingStrings from "TrainingCatalogWebPartStrings";
 import SecureDocuments from "../../secureDocuments/components/SecureDocuments";
 import { ISecureDocumentsProps } from "../../secureDocuments/components/ISecureDocumentsProps";
 import documentStrings from "SecureDocumentsWebPartStrings";
+import BbiGallery from "../../bbiGallery/components/BbiGallery";
+import { IBbiGalleryProps } from "../../bbiGallery/components/IBbiGalleryProps";
+import galleryStrings from "BbiGalleryWebPartStrings";
 
 type HomeStatus = "loading" | "ready";
+type PortalView = "accueil" | "formations" | "sessions" | "actualites" | "ressources" | "communaute" | "recherche";
+
+const VIEW_FROM_HASH: { [key: string]: PortalView } = {
+  accueil: "accueil", home: "accueil", acces: "accueil",
+  formations: "formations", catalogue: "formations",
+  sessions: "sessions",
+  actualites: "actualites", news: "actualites", "vie-bbi": "actualites",
+  ressources: "ressources", documents: "ressources", galerie: "ressources",
+  communaute: "communaute", formateurs: "communaute", support: "communaute", "espace-formateurs": "communaute",
+  recherche: "recherche",
+};
+
+const viewFromHref = (href: string): PortalView | undefined => {
+  if (!href) { return undefined; }
+  if (href.charAt(0) === "#") {
+    return VIEW_FROM_HASH[href.slice(1).split(/[?&]/)[0].toLowerCase()];
+  }
+  // Anciennes propriétés SharePoint (déjà enregistrées sur des instances en place)
+  // continuent d'ouvrir la vue correspondante au lieu de quitter le portail.
+  const legacyUrl = href.toLowerCase();
+  if (legacyUrl.indexOf("catalogue.aspx") !== -1) { return "formations"; }
+  if (legacyUrl.indexOf("sessions.aspx") !== -1) { return "sessions"; }
+  if (legacyUrl.indexOf("vie-bbi.aspx") !== -1 || legacyUrl.indexOf("article.aspx") !== -1) { return "actualites"; }
+  if (legacyUrl.indexOf("galerie.aspx") !== -1 || legacyUrl.indexOf("supports publiés") !== -1) { return "ressources"; }
+  if (legacyUrl.indexOf("espace-formateurs") !== -1 || legacyUrl.indexOf("formation.aspx") !== -1) { return "communaute"; }
+  return undefined;
+};
+
+const viewFromLocation = (): PortalView =>
+  VIEW_FROM_HASH[window.location.hash.replace(/^#/, "").toLowerCase()] || "accueil";
 
 const emptyResult = <T,>(): IHomeListResult<T> => ({
   items: [],
@@ -91,11 +123,11 @@ const iconForModality = (modality?: string): string => {
 
 const DEFAULT_NAV: INavLink[] = [
   { label: "Accueil", url: "#accueil" },
-  { label: "Accès directs", url: "#acces" },
+  { label: "Formations", url: "#formations" },
+  { label: "Sessions", url: "#sessions" },
   { label: "Actualités", url: "#actualites" },
-  { label: "Catalogue", url: "#formations" },
   { label: "Ressources", url: "#ressources" },
-  { label: "Espace formateurs", url: "#formateurs" },
+  { label: "Communauté", url: "#communaute" },
 ];
 
 const DEFAULT_QUICK_LINKS: IQuickLink[] = [
@@ -109,35 +141,26 @@ const DEFAULT_QUICK_LINKS: IQuickLink[] = [
     icon: "▣",
     title: "Prochaines sessions",
     subtitle: "Planning et inscriptions",
-    url: "#actualites",
+    url: "#sessions",
   },
   {
     icon: "▤",
-    title: "Supports publiés",
-    subtitle: "Consultation en lecture seule",
+    title: "Supports & médias",
+    subtitle: "Documents, photos et vidéos",
     url: "#ressources",
   },
   {
     icon: "◎",
-    title: "Formateurs référents",
-    subtitle: "Votre réseau d’experts",
-    url: "#formateurs",
+    title: "Communauté BBI",
+    subtitle: "Formateurs et experts",
+    url: "#communaute",
   },
   {
-    icon: "✆",
-    title: "Support & FAQ",
-    subtitle: "Une question, une demande",
-    url: "#support",
+    icon: "✦",
+    title: "Actualités BBI",
+    subtitle: "Les nouvelles du réseau",
+    url: "#actualites",
   },
-];
-
-const SECTION_IDS: string[] = [
-  "accueil",
-  "acces",
-  "actualites",
-  "formations",
-  "ressources",
-  "vie-bbi",
 ];
 
 const BbiHome: React.FC<IBbiHomeProps> = (props) => {
@@ -150,13 +173,24 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const [trainers, setTrainers] =
     React.useState<IHomeListResult<IHomeTrainer>>(emptyResult<IHomeTrainer>());
   const [search, setSearch] = React.useState("");
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [activeView, setActiveView] = React.useState<PortalView>(viewFromLocation);
   const rootRef = React.useRef<HTMLDivElement>(null);
 
   const scrolled = useScrolled(40);
-  const activeSection = useActiveSection(SECTION_IDS);
   useChromeOffset(rootRef);
   console.info("[BBI-HOME] initial hooks completed", status);
+
+  React.useEffect(() => {
+    const syncViewFromUrl = (): void => setActiveView(viewFromLocation());
+    window.addEventListener("hashchange", syncViewFromUrl);
+    window.addEventListener("popstate", syncViewFromUrl);
+    return () => {
+      window.removeEventListener("hashchange", syncViewFromUrl);
+      window.removeEventListener("popstate", syncViewFromUrl);
+    };
+  }, []);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -166,19 +200,19 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         props.spHttpClient,
         props.siteUrl,
         props.newsListTitle,
-        props.maxItems,
+        Math.max(props.maxItems, 12),
       ),
       loadHomeSessions(
         props.spHttpClient,
         props.siteUrl,
         props.sessionsListTitle,
-        props.maxItems,
+        Math.max(props.maxItems, 12),
       ),
       loadHomeTrainers(
         props.spHttpClient,
         props.siteUrl,
         props.trainersListTitle,
-        props.maxItems,
+        Math.max(props.maxItems, 12),
       ),
     ])
       .then(([loadedNews, loadedSessions, loadedTrainers]) => {
@@ -220,11 +254,30 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   );
   const kpis: IKpi[] = React.useMemo(() => parseKpis(props.kpis), [props.kpis]);
 
+  const openView = (view: PortalView): void => {
+    const hash = view === "accueil" ? "accueil" : view;
+    if (window.location.hash !== `#${hash}`) {
+      window.history.pushState(null, "", `#${hash}`);
+    }
+    setActiveView(view);
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const followPortalLink = (event: React.MouseEvent<HTMLAnchorElement>, href: string): void => {
+    const view = viewFromHref(href);
+    if (view) {
+      event.preventDefault();
+      openView(view);
+    }
+  };
+
   const searchSite = (event: React.FormEvent<HTMLFormElement>): void => {
     event.preventDefault();
     const query = search.trim();
     if (query) {
-      window.location.href = `${props.siteUrl.replace(/\/+$/, "")}/_layouts/15/search.aspx?q=${encodeURIComponent(query)}`;
+      setSearchQuery(query);
+      openView("recherche");
     }
   };
 
@@ -235,12 +288,20 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         !session.StartDate ||
         new Date(session.StartDate).getTime() >= Date.now(),
     )
-    .slice(0, props.maxItems);
+    .slice(0, activeView === "sessions" ? 30 : props.maxItems);
+
+  const needle = searchQuery.toLocaleLowerCase("fr");
+  const searchResults = [
+    ...news.items.map((item) => ({ title: item.Title, description: item.Summary || item.Category || "Actualité BBI", category: "Actualité", view: "actualites" as PortalView })),
+    ...sessions.items.map((item) => ({ title: item.Title, description: [item.Modality, item.Location].filter(Boolean).join(" · ") || "Prochaine session", category: "Session", view: "sessions" as PortalView })),
+    ...trainers.items.map((item) => ({ title: item.Title, description: [item.Role, item.Filiere].filter(Boolean).join(" · ") || "Communauté BBI", category: "Communauté", view: "communaute" as PortalView })),
+  ].filter((item) => `${item.title} ${item.description}`.toLocaleLowerCase("fr").includes(needle));
 
   const catalogProps: ITrainingCatalogProps = {
     siteUrl: props.siteUrl,
     listTitle: props.formationsListTitle,
-    maxItems: props.maxItems,
+    maxItems: 300,
+    initialQuery: searchQuery,
     spHttpClient: props.spHttpClient,
     showDataNotices: props.showDataNotices,
     isDarkTheme: false,
@@ -250,12 +311,26 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const documentsProps: ISecureDocumentsProps = {
     siteUrl: props.siteUrl,
     libraryTitle: props.documentsLibraryTitle,
-    maxItems: props.maxItems,
+    maxItems: 30,
     spHttpClient: props.spHttpClient,
     showDataNotices: props.showDataNotices,
     isDarkTheme: false,
     hasTeamsContext: false,
     strings: documentStrings,
+  };
+  const galleryProps: IBbiGalleryProps = {
+    siteUrl: props.siteUrl,
+    libraryTitle: props.galleryLibraryTitle,
+    maxItems: 36,
+    columns: 4,
+    showCaptions: true,
+    allowDownload: true,
+    showDataNotices: props.showDataNotices,
+    albumFilter: "",
+    spHttpClient: props.spHttpClient,
+    isDarkTheme: false,
+    hasTeamsContext: false,
+    strings: galleryStrings,
   };
   const avatarStyles: string[] = [
     styles.avatar0,
@@ -282,7 +357,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   }
 
   return (
-    <div className={styles.home} ref={rootRef} id="bbi-home-root">
+    <div className={styles.home} ref={rootRef} id="bbi-home-root" data-view={activeView}>
       {showAnnouncement && (
         <div
           className={styles.announcement}
@@ -292,7 +367,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           <span className={styles.announcementDot} aria-hidden="true" />
           <span className={styles.announcementText}>{announcement}</span>
           {currentNews && currentNews.LinkUrl && (
-            <a className={styles.announcementLink} href={currentNews.LinkUrl}>
+            <a className={styles.announcementLink} href="#actualites" onClick={(event) => { followPortalLink(event, "#actualites"); }}>
               Lire <span aria-hidden="true">→</span>
             </a>
           )}
@@ -309,6 +384,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             className={styles.brand}
             href="#accueil"
             aria-label="BBI Intranet, accueil"
+            onClick={(event) => { followPortalLink(event, "#accueil"); }}
           >
             <span className={styles.logoImage} role="img" aria-label="BBI" />
             <span className={styles.brandText}>
@@ -340,10 +416,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             aria-label="Navigation principale"
           >
             {navLinks.map((link) => {
-              const isActive =
-                link.url.indexOf("#") === 0 &&
-                link.url.length > 1 &&
-                `#${activeSection}` === link.url;
+              const linkedView = viewFromHref(link.url);
+              const isActive = linkedView === activeView;
               const className = [
                 styles.navLink,
                 isActive ? styles.navActive : "",
@@ -357,7 +431,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                   href={link.url}
                   className={className}
                   aria-current={isActive ? "true" : undefined}
-                  onClick={() => {
+                  onClick={(event) => {
+                    followPortalLink(event, link.url);
                     setMenuOpen(false);
                   }}
                 >
@@ -382,7 +457,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
-              placeholder="Rechercher"
+              placeholder="Rechercher dans BBI"
             />
             <button type="submit" aria-label="Rechercher">
               ⌕
@@ -392,21 +467,49 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       </header>
 
       <main className={styles.content}>
+        <section className={styles.section} id="recherche" aria-labelledby="search-results-title">
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>Recherche dans le portail</p>
+              <h2 id="search-results-title">Résultats pour « {searchQuery} »</h2>
+            </div>
+          </div>
+          {searchResults.length > 0 ? (
+            <ul className={styles.searchResultsList}>
+              {searchResults.map((result, index) => (
+                <li key={`${result.category}-${result.title}-${index}`}>
+                  <a href={`#${result.view}`} onClick={(event) => { event.preventDefault(); openView(result.view); }}>
+                    <span className={styles.searchResultType}>{result.category}</span>
+                    <strong>{result.title}</strong>
+                    <small>{result.description}</small>
+                    <span aria-hidden="true">→</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className={styles.emptyState}>Aucun résultat dans les actualités, sessions ou la communauté. Essayez un autre terme ou parcourez le catalogue.</p>
+          )}
+          <button type="button" className={styles.searchCatalogButton} onClick={() => { openView("formations"); }}>
+            Parcourir le catalogue des formations <span aria-hidden="true">→</span>
+          </button>
+        </section>
+
         <HomeHero
           eyebrow={props.heroEyebrow || "Business Builders International"}
           title={
             props.heroTitle ||
-            "Faites grandir vos talents,\npropulsez vos projets."
+            "L'expertise qui fait grandir les dirigeants."
           }
           subtitle={
             props.heroSubtitle ||
-            "Le catalogue des formations BBI, vos prochaines sessions et tous vos supports pédagogiques, au même endroit."
+            "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables."
           }
           imageUrl={props.heroImageUrl || ""}
-          primaryLabel={props.primaryCtaLabel || "Explorer le catalogue"}
+          primaryLabel={props.primaryCtaLabel || "Explorer les formations"}
           primaryUrl={props.primaryCtaUrl || "#formations"}
-          secondaryLabel={props.secondaryCtaLabel || "Consulter les ressources"}
-          secondaryUrl={props.secondaryCtaUrl || "#ressources"}
+          secondaryLabel={props.secondaryCtaLabel || "Voir les prochaines sessions"}
+          secondaryUrl={props.secondaryCtaUrl || "#sessions"}
           kpis={kpis}
           compact={props.layoutCompact === true}
           onExplore={() => {
@@ -415,6 +518,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               target.scrollIntoView({ behavior: "smooth", block: "start" });
             }
           }}
+          onInternalNavigate={followPortalLink}
         />
 
         <section
@@ -434,6 +538,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 className={styles.quickLink}
                 href={link.url}
                 key={`${link.title}-${link.url}`}
+                onClick={(event) => { followPortalLink(event, link.url); }}
               >
                 <span className={styles.quickIcon} aria-hidden="true">
                   {link.icon}
@@ -442,6 +547,34 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 <small>{link.subtitle}</small>
               </a>
             ))}
+          </div>
+        </section>
+
+        <section className={styles.learningPath} aria-labelledby="bbi-path-title">
+          <div className={styles.learningPathIntro}>
+            <p className={styles.eyebrow}>La méthode BBI</p>
+            <h2 id="bbi-path-title">De l’apprentissage à l’impact.</h2>
+            <p>Une expérience qui relie les bons savoirs, la pratique sur le terrain et le partage entre pairs.</p>
+          </div>
+          <div className={styles.pathGrid}>
+            <article className={styles.pathCard}>
+              <span>01</span>
+              <h3>Choisir son parcours</h3>
+              <p>Repérez les compétences utiles à vos enjeux et trouvez la formation adaptée.</p>
+              <a href="#formations" onClick={(event) => { followPortalLink(event, "#formations"); }}>Explorer le catalogue →</a>
+            </article>
+            <article className={styles.pathCard}>
+              <span>02</span>
+              <h3>Apprendre en pratiquant</h3>
+              <p>Progressez avec des ateliers concrets, des formateurs experts et des mises en situation.</p>
+              <a href="#sessions" onClick={(event) => { followPortalLink(event, "#sessions"); }}>Voir les sessions →</a>
+            </article>
+            <article className={styles.pathCard}>
+              <span>03</span>
+              <h3>Ancrer et transmettre</h3>
+              <p>Retrouvez vos supports, échangez avec la communauté et faites vivre vos acquis.</p>
+              <a href="#ressources" onClick={(event) => { followPortalLink(event, "#ressources"); }}>Accéder aux ressources →</a>
+            </article>
           </div>
         </section>
 
@@ -458,7 +591,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               </div>
               <a
                 className={styles.textLink}
-                href={`${props.siteUrl}/SitePages/vie-bbi.aspx`}
+                href="#actualites"
+                onClick={(event) => { followPortalLink(event, "#actualites"); }}
               >
                 Toutes les actualités <span aria-hidden="true">→</span>
               </a>
@@ -512,9 +646,21 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             ) : (
               <p className={styles.emptyState}>Aucune actualité publiée.</p>
             )}
+            {news.items.length > 1 && (
+              <div className={styles.newsArchive} aria-label="Autres actualités">
+                {news.items.slice(1).map((item) => (
+                  <article className={styles.newsArchiveItem} key={item.Id}>
+                    <span className={styles.category}>{item.Category || "Vie BBI"}</span>
+                    <h3>{item.Title}</h3>
+                    <p>{item.Summary || "Une nouvelle de la communauté BBI."}</p>
+                    <small>{formatDate(item.Published)}{item.AuthorName ? ` · ${item.AuthorName}` : ""}</small>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className={styles.sessionsColumn}>
+          <div className={styles.sessionsColumn} id="sessions">
             <div className={styles.sectionHeading}>
               <div>
                 <p className={styles.eyebrow}>À venir</p>
@@ -522,7 +668,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               </div>
               <a
                 className={styles.textLink}
-                href={`${props.siteUrl}/Lists/${encodeURIComponent(props.sessionsListTitle)}/AllItems.aspx`}
+                href="#sessions"
+                onClick={(event) => { followPortalLink(event, "#sessions"); }}
               >
                 Tout voir <span aria-hidden="true">→</span>
               </a>
@@ -587,7 +734,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             </div>
             <a
               className={styles.textLink}
-              href={`${props.siteUrl}/SitePages/catalogue.aspx`}
+              href="#formations"
+              onClick={(event) => { followPortalLink(event, "#formations"); }}
             >
               Voir tout le catalogue <span aria-hidden="true">→</span>
             </a>
@@ -608,12 +756,22 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               </div>
               <a
                 className={styles.textLink}
-                href={`${props.siteUrl.replace(/\/+$/, "")}/${encodeURIComponent(props.documentsLibraryTitle)}/Forms/AllItems.aspx`}
+                href="#ressources"
+                onClick={(event) => { followPortalLink(event, "#ressources"); }}
               >
                 Bibliothèque <span aria-hidden="true">→</span>
               </a>
             </div>
             <SecureDocuments {...documentsProps} />
+            <div className={styles.embeddedGallery} id="galerie">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <p className={styles.eyebrow}>À voir</p>
+                  <h2>Galerie de la communauté</h2>
+                </div>
+              </div>
+              <BbiGallery {...galleryProps} />
+            </div>
           </div>
           <div className={styles.people} id="formateurs">
             <div className={styles.sectionHeading}>
@@ -623,7 +781,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               </div>
               <a
                 className={styles.textLink}
-                href={`${props.siteUrl}/Lists/${encodeURIComponent(props.trainersListTitle)}/AllItems.aspx`}
+                href="#communaute"
+                onClick={(event) => { followPortalLink(event, "#communaute"); }}
               >
                 Annuaire <span aria-hidden="true">→</span>
               </a>
@@ -667,8 +826,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 Échanges de pratiques, entraide pédagogique et veille :
                 rejoignez la communauté BBI sur Teams et Viva Engage.
               </p>
-              <a className={styles.textLink} href="#vie-bbi">
-                En savoir plus <span aria-hidden="true">→</span>
+              <a className={styles.textLink} href="#communaute" onClick={(event) => { followPortalLink(event, "#communaute"); }}>
+                Découvrir la communauté <span aria-hidden="true">→</span>
               </a>
             </div>
           </div>
@@ -679,17 +838,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           id="vie-bbi"
           aria-label="Vie d'entreprise et ressources pédagogiques"
         >
-          <a href="#ressources" className={styles.topicLink}>
+          <a href="#ressources" className={styles.topicLink} onClick={(event) => { followPortalLink(event, "#ressources"); }}>
             <span aria-hidden="true">⌘</span>
             <strong>Méthodes &amp; outils d&apos;animation</strong>
             <small>Kits, modèles et trames de séquence</small>
           </a>
-          <a href="#ressources" className={styles.topicLink}>
+          <a href="#ressources" className={styles.topicLink} onClick={(event) => { followPortalLink(event, "#ressources"); }}>
             <span aria-hidden="true">✳</span>
             <strong>Qualité &amp; certification</strong>
             <small>Qualiopi, évaluations, preuves de conformité</small>
           </a>
-          <a href="#actualites" className={styles.topicLink}>
+          <a href="#actualites" className={styles.topicLink} onClick={(event) => { followPortalLink(event, "#actualites"); }}>
             <span aria-hidden="true">◈</span>
             <strong>Vie d&apos;entreprise</strong>
             <small>Événements, séminaires et temps forts</small>
@@ -706,13 +865,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 "Business Builders International — Intranet collaboratif"}
             </span>
           </span>
-          <nav className={styles.footerNav} aria-label="Informations légales">
-            <a href="#accueil">Accueil</a>
-            <a href="#support">Support &amp; FAQ</a>
-            <a href="#ressources">Confidentialité &amp; supports</a>
-            <a href={`${props.siteUrl}/SitePages/mentions-legales.aspx`}>
-              Mentions légales
-            </a>
+          <nav className={styles.footerNav} aria-label="Navigation du portail">
+            <a href="#accueil" onClick={(event) => { followPortalLink(event, "#accueil"); }}>Accueil</a>
+            <a href="#formations" onClick={(event) => { followPortalLink(event, "#formations"); }}>Formations</a>
+            <a href="#ressources" onClick={(event) => { followPortalLink(event, "#ressources"); }}>Ressources</a>
+            <a href="#communaute" onClick={(event) => { followPortalLink(event, "#communaute"); }}>Communauté</a>
           </nav>
           <small className={styles.footerCopy}>
             © {new Date().getFullYear()} Business Builders International · Tous

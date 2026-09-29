@@ -1,4 +1,4 @@
-import { Version } from '@microsoft/sp-core-library';
+import { DisplayMode, Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
   IPropertyPanePage,
@@ -22,6 +22,7 @@ export interface IBbiHomeWebPartProps {
   trainersListTitle: string;
   formationsListTitle: string;
   documentsLibraryTitle: string;
+  galleryLibraryTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
@@ -43,19 +44,19 @@ export interface IBbiHomeWebPartProps {
 
 const DEFAULT_NAV_LINKS: string = [
   '# Accueil | #accueil',
-  '# Accès directs | #acces',
+  '# Formations | #formations',
+  '# Sessions | #sessions',
   '# Actualités | #actualites',
-  '# Catalogue | #formations',
   '# Ressources | #ressources',
-  '# Espace formateurs* | #formateurs'
+  '# Communauté | #communaute'
 ].join('\n');
 
 const DEFAULT_QUICK_LINKS: string = [
   '▦ | Catalogue des formations | Parcours, modalités et durées | #formations',
-  '▣ | Prochaines sessions | Planning et inscriptions | #actualites',
-  '▤ | Supports publiés | Consultation en lecture seule | #ressources',
-  '◎ | Formateurs référents | Votre réseau d’experts | #formateurs',
-  '✆ | Support & FAQ | Une question, une demande | #support'
+  '▣ | Prochaines sessions | Planning et inscriptions | #sessions',
+  '▤ | Supports & médias | Documents, photos et vidéos | #ressources',
+  '◎ | Communauté BBI | Formateurs et experts | #communaute',
+  '✦ | Actualités BBI | Les nouvelles du réseau | #actualites'
 ].join('\n');
 
 const DEFAULT_KPIS: string = [
@@ -63,8 +64,60 @@ const DEFAULT_KPIS: string = [
   '# ex. 1 500 | Professionnels formés depuis 2012'
 ].join('\n');
 
+const IMMERSIVE_HOME_STYLES: string = `
+  /* Chrome SharePoint / Microsoft 365 : rendu comme un site autonome. */
+  body.bbi-home-immersive #SuiteNavWrapper,
+  body.bbi-home-immersive #O365_NavHeader,
+  body.bbi-home-immersive #spSiteHeader,
+  body.bbi-home-immersive [data-automation-id="SiteHeader"],
+  body.bbi-home-immersive [data-automation-id="SuiteNav"],
+  body.bbi-home-immersive #sp-appBar,
+  body.bbi-home-immersive .sp-appBar,
+  body.bbi-home-immersive #spLeftNav,
+  body.bbi-home-immersive .spLeftNav,
+  body.bbi-home-immersive [data-automation-id="LeftNav"],
+  body.bbi-home-immersive [data-automation-id="pageHeader"],
+  body.bbi-home-immersive [data-automation-id="pageTitle"],
+  body.bbi-home-immersive #pageHeader,
+  body.bbi-home-immersive .pageTitle {
+    display: none !important;
+  }
+
+  /* Les commandes restent disponibles lors de l'édition / dans le workbench. */
+  body.bbi-home-immersive:not(.bbi-home-editing) #spCommandBar,
+  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="pageCommandBar"] {
+    display: none !important;
+  }
+
+  /* Canevas sans marges, sur la page publiée comme dans le workbench hébergé. */
+  body.bbi-home-immersive #workbenchPageContent,
+  body.bbi-home-immersive #spPageCanvasContent,
+  body.bbi-home-immersive #spPageCanvasContent > div,
+  body.bbi-home-immersive .Canvas,
+  body.bbi-home-immersive .CanvasZone,
+  body.bbi-home-immersive .CanvasSection,
+  body.bbi-home-immersive .ControlZone,
+  body.bbi-home-immersive [data-automation-id="CanvasZone"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  body.bbi-home-immersive #spPageCanvasContent,
+  body.bbi-home-immersive .CanvasComponent,
+  body.bbi-home-immersive .CanvasZoneSectionContainer {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+`;
+
 export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPartProps> {
   private _themeVariant: IReadonlyTheme | undefined;
+  private _immersiveStyle: HTMLStyleElement | undefined;
 
   protected onInit(): Promise<void> {
     if (!this.properties) {
@@ -82,6 +135,9 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     if (!this.properties.kpis) {
       this.properties.kpis = DEFAULT_KPIS;
     }
+    if (!this.properties.galleryLibraryTitle) {
+      this.properties.galleryLibraryTitle = 'Galerie médias';
+    }
     return Promise.resolve();
   }
 
@@ -96,6 +152,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
   }
 
   public render(): void {
+    this._enableImmersiveHome();
     console.info('[BBI-HOME] webpart render entered');
     console.info('[BBI-HOME] properties', typeof this.properties, Object.keys(this.properties || {}));
     console.info('[BBI-HOME] context', !!this.context, !!this.context?.spHttpClient);
@@ -107,6 +164,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       trainersListTitle: properties.trainersListTitle || 'Formateurs',
       formationsListTitle: properties.formationsListTitle || 'Formations',
       documentsLibraryTitle: properties.documentsLibraryTitle || 'Supports publiés',
+      galleryLibraryTitle: properties.galleryLibraryTitle || 'Galerie médias',
       maxItems: properties.maxItems || 5,
       heroEyebrow: properties.heroEyebrow || '',
       heroTitle: properties.heroTitle || '',
@@ -135,8 +193,32 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     console.info('[BBI-HOME] ReactDOM render returned');
   }
 
+  protected onDisplayModeChanged(_oldDisplayMode: DisplayMode): void {
+    this._syncImmersiveEditingClass();
+  }
+
+  private _enableImmersiveHome(): void {
+    document.body.classList.add('bbi-home-immersive');
+    if (!this._immersiveStyle) {
+      this._immersiveStyle = document.createElement('style');
+      this._immersiveStyle.setAttribute('data-bbi-home-immersive', 'true');
+      this._immersiveStyle.appendChild(document.createTextNode(IMMERSIVE_HOME_STYLES));
+      document.head.appendChild(this._immersiveStyle);
+    }
+    this._syncImmersiveEditingClass();
+  }
+
+  private _syncImmersiveEditingClass(): void {
+    document.body.classList.toggle('bbi-home-editing', this.displayMode === DisplayMode.Edit);
+  }
+
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
+    document.body.classList.remove('bbi-home-immersive', 'bbi-home-editing');
+    if (this._immersiveStyle && this._immersiveStyle.parentElement) {
+      this._immersiveStyle.parentElement.removeChild(this._immersiveStyle);
+    }
+    this._immersiveStyle = undefined;
   }
 
   protected get dataVersion(): Version {
@@ -160,6 +242,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('trainersListTitle', { label: strings.TrainersListFieldLabel }),
               PropertyPaneTextField('formationsListTitle', { label: strings.FormationsListFieldLabel }),
               PropertyPaneTextField('documentsLibraryTitle', { label: strings.DocumentsLibraryFieldLabel }),
+              PropertyPaneTextField('galleryLibraryTitle', { label: strings.GalleryLibraryFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,

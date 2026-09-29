@@ -1122,3 +1122,301 @@ a.sessionStatus:hover {
     transition: none;
   }
 }
+
+/* ============================================================
+   Portail unifié : des vues d'application dans une seule page SPFx
+   ============================================================ */
+
+.home[data-view="formations"] .content > :not(#formations),
+.home[data-view="sessions"] .content > :not(#actualites),
+.home[data-view="actualites"] .content > :not(#actualites),
+.home[data-view="ressources"] .content > :not(#ressources),
+.home[data-view="communaute"] .content > :not(#ressources),
+.home[data-view="recherche"] .content > :not(#recherche) {
+  display: none !important;
+}
+
+.home[data-view="accueil"] #recherche,
+.home[data-view="formations"] #recherche,
+.home[data-view="sessions"] #recherche,
+.home[data-view="actualites"] #recherche,
+.home[data-view="ressources"] #recherche,
+.home[data-view="communaute"] #recherche {
+  display: none !important;
+}
+
+.home[data-view="sessions"] #actualites,
+.home[data-view="actualites"] #actualites {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: calc(100vh - 90px);
+  align-content: start;
+}
+
+.home[data-view="sessions"] #actualites .newsColumn,
+.home[data-view="actualites"] #actualites .sessionsColumn {
+  display: none !important;
+}
+
+.home[data-view="sessions"] #actualites .sessionsColumn,
+.home[data-view="actualites"] #actualites .newsColumn {
+  display: block !important;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.home[data-view="formations"] #formations,
+.home[data-view="ressources"] #ressources,
+.home[data-view="communaute"] #ressources,
+.home[data-view="recherche"] #recherche {
+  min-height: calc(100vh - 90px);
+  align-content: start;
+}
+
+.home[data-view="ressources"] #ressources,
+.home[data-view="communaute"] #ressources {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.home[data-view="ressources"] #ressources .people,
+.home[data-view="communaute"] #ressources .resources {
+  display: none !important;
+}
+
+.home[data-view="ressources"] #ressources .resources,
+.home[data-view="communaute"] #ressources .people {
+  display: block !important;
+  max-width: 1000px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.newsArchive {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.newsArchiveItem {
+  padding: 18px 20px;
+  border: 1px solid var(--bbi-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.newsArchiveItem .category {
+  margin-bottom: 7px;
+}
+
+.newsArchiveItem h3 {
+  margin: 0 0 6px;
+  color: var(--bbi-navy);
+  font-size: 16px;
+}
+
+.newsArchiveItem p {
+  margin: 0 0 8px;
+  color: var(--bbi-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.newsArchiveItem small {
+  color: var(--bbi-muted);
+  font-size: 11.5px;
+}
+
+.searchResultsList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border: 1px solid var(--bbi-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.searchResultsList li + li {
+  border-top: 1px solid var(--bbi-line);
+}
+
+.searchResultsList a {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 24px;
+  gap: 4px 14px;
+  align-items: center;
+  padding: 16px 20px;
+  color: var(--bbi-ink);
+  text-decoration: none;
+  background: #fff;
+}
+
+.searchResultsList a:hover {
+  background: var(--bbi-soft);
+}
+
+.searchResultsList strong {
+  grid-column: 2;
+  color: var(--bbi-navy);
+  font-size: 14px;
+}
+
+.searchResultsList small {
+  grid-column: 2;
+  color: var(--bbi-muted);
+  font-size: 12px;
+}
+
+.searchResultType {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  color: var(--bbi-red);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.searchResultsList a > span:last-child {
+  grid-column: 3;
+  grid-row: 1 / span 2;
+  color: var(--bbi-navy);
+  font-size: 20px;
+}
+
+.searchCatalogButton {
+  margin-top: 20px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--bbi-navy);
+  color: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.searchCatalogButton:hover {
+  background: var(--bbi-red);
+}
+
+@media (max-width: 600px) {
+  .searchResultsList a {
+    grid-template-columns: 1fr 24px;
+  }
+
+  .searchResultType,
+  .searchResultsList strong,
+  .searchResultsList small {
+    grid-column: 1;
+  }
+
+  .searchResultType {
+    grid-row: auto;
+  }
+
+  .searchResultsList a > span:last-child {
+    grid-column: 2;
+  }
+}
+
+.embeddedGallery {
+  margin-top: 52px;
+  padding-top: 34px;
+  border-top: 1px solid var(--bbi-line);
+}
+
+.embeddedGallery .sectionHeading {
+  margin-bottom: 18px;
+}
+
+.learningPath {
+  max-width: var(--bbi-shell);
+  margin: 0 auto;
+  padding: 26px 32px 58px;
+}
+
+.learningPathIntro {
+  max-width: 700px;
+  margin: 0 0 22px;
+}
+
+.learningPathIntro h2 {
+  margin: 0 0 9px;
+  color: var(--bbi-navy);
+  font-size: clamp(24px, 3vw, 34px);
+  letter-spacing: -.03em;
+}
+
+.learningPathIntro > p:last-child {
+  max-width: 570px;
+  margin: 0;
+  color: var(--bbi-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.pathGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.pathCard {
+  position: relative;
+  min-height: 204px;
+  padding: 23px 22px 20px;
+  border: 1px solid var(--bbi-line);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #fff, #f8f9fc);
+  box-shadow: 0 5px 18px rgba(14, 38, 92, .045);
+}
+
+.pathCard > span {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  border-radius: 10px;
+  background: #fdeeef;
+  color: var(--bbi-red);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pathCard h3 {
+  margin: 0 0 7px;
+  color: var(--bbi-navy);
+  font-size: 17px;
+}
+
+.pathCard p {
+  min-height: 42px;
+  margin: 0 0 14px;
+  color: var(--bbi-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.pathCard a {
+  color: var(--bbi-navy-2);
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.pathCard a:hover {
+  color: var(--bbi-red);
+}
+
+@media (max-width: 760px) {
+  .pathGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pathCard {
+    min-height: 0;
+  }
+}
