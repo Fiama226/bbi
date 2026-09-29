@@ -143,7 +143,8 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
     [count],
   );
 
-  const active = carousel[Math.min(index, Math.max(0, count - 1))] || carousel[0];
+  const active =
+    carousel[Math.min(index, Math.max(0, count - 1))] || carousel[0];
   const titleLines = (active.title || "").split("\n");
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLElement>): void => {
@@ -156,10 +157,14 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
 
   const textBlock = (): React.ReactNode => (
     <div
-      className={animate ? `${styles.text} ${styles.textAnimated}` : styles.text}
+      className={
+        animate ? `${styles.text} ${styles.textAnimated}` : styles.text
+      }
       key={`slide-${Math.min(index, count - 1)}`}
     >
-      <p className={styles.eyebrow}>{active.eyebrow || "Business Builders International"}</p>
+      <p className={styles.eyebrow}>
+        {active.eyebrow || "Business Builders International"}
+      </p>
       {active.title && (
         <h1 id="bbi-home-title" className={styles.title}>
           {titleLines.map((line, lineIndex) => (
@@ -223,7 +228,9 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
       onKeyDown={onKeyDown}
     >
       <div
-        className={compact ? `${styles.stage} ${styles.stageCompact}` : styles.stage}
+        className={
+          compact ? `${styles.stage} ${styles.stageCompact}` : styles.stage
+        }
         data-bbi-hero-stage="true"
       >
         {carousel.map((slide, slideIndex) => {
@@ -231,7 +238,11 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
           return (
             <div
               key={`media-${slideIndex}`}
-              className={isActive ? `${styles.media} ${styles.mediaActive}` : styles.media}
+              className={
+                isActive
+                  ? `${styles.media} ${styles.mediaActive}`
+                  : styles.media
+              }
               data-bbi-hero-slide={slideIndex}
               aria-hidden="true"
             >
@@ -283,7 +294,11 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
                   <li key={`dot-${dotIndex}`}>
                     <button
                       type="button"
-                      className={isActive ? `${styles.dot} ${styles.dotActive}` : styles.dot}
+                      className={
+                        isActive
+                          ? `${styles.dot} ${styles.dotActive}`
+                          : styles.dot
+                      }
                       aria-label={`Diapositive ${dotIndex + 1} sur ${count}${
                         slide.title ? ` : ${slide.title}` : ""
                       }`}
@@ -292,7 +307,9 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
                         setIndex(dotIndex);
                       }}
                     >
-                      <span className={styles.visuallyHidden}>{dotIndex + 1}</span>
+                      <span className={styles.visuallyHidden}>
+                        {dotIndex + 1}
+                      </span>
                     </button>
                   </li>
                 );
@@ -336,7 +353,11 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
       </div>
 
       {kpis.length > 0 && (
-        <ul className={styles.kpiBand} data-bbi-kpi-band="true" aria-label="Chiffres clés BBI">
+        <ul
+          className={styles.kpiBand}
+          data-bbi-kpi-band="true"
+          aria-label="Chiffres clés BBI"
+        >
           {kpis.map((kpi) => (
             <li key={`${kpi.value}-${kpi.label}`} className={styles.kpi}>
               <strong>{kpi.value}</strong>
