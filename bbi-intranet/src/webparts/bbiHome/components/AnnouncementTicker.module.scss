@@ -1,0 +1,271 @@
+/* ============================================================
+   BBI — Bandeau d'annonces déroulant
+   Au-dessus de la barre de navigation : un ruban d'annonces qui
+   défile en boucle et mène, au clic, à la page de détail.
+   ============================================================ */
+
+.ticker {
+  position: relative;
+  /* Pas de z-index : le bandeau défile avec la page et doit passer DERRIÈRE
+     la barre de navigation collante (z-index 60) dès les premiers pixels de
+     défilement, jamais par-dessus elle. */
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 42px;
+  padding: 5px 26px;
+  background: var(--bbi-navy-2, #1f3a70);
+  color: #fff;
+  font-size: 13px;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Pastille « Annonces » ---------- */
+
+.badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 4px 11px 4px 9px;
+  border-radius: 999px;
+  background: var(--bbi-red);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: bbiTickerPulse 1.9s ease-in-out infinite;
+}
+
+/* ---------- Ruban défilant ---------- */
+
+.viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  /* Fondu sur les bords : le ruban « entre » et « sort » en douceur. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent);
+}
+
+/* Animations réduites ou annonce unique : la liste reste lisible et
+   consultable au défilement natif, sans mouvement automatique. */
+.viewportStill {
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+  scrollbar-width: thin;
+}
+
+.track {
+  display: flex;
+  /* width: max-content SANS min-width: les deux groupes font exactement la
+     moitié du ruban, donc -50% repose le début du second groupe sur le
+     début du premier. Avec un min-width: 100 %, un ruban plus court que la
+     fenêtre rebouclerait sur du vide. */
+  width: max-content;
+  animation: bbiTickerScroll var(--bbi-ticker-cycle, 30s) linear infinite;
+}
+
+.trackPaused {
+  animation-play-state: paused;
+}
+
+.group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  /* Marge portée par l'élément (et non par le conteneur) : les deux copies
+     du ruban mesurent exactement la même largeur, la boucle est donc
+     parfaitement continue. */
+  margin-right: 44px;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 5px 0;
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.link:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.itemTag {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.itemLabel {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 78ch;
+}
+
+.itemCta {
+  flex: 0 0 auto;
+  color: #f0c36c;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.item:hover .itemCta,
+.link:focus-visible .itemCta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ---------- Lien permanent ---------- */
+
+.seeAll {
+  flex: 0 0 auto;
+  padding: 3px 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.seeAll:hover {
+  border-bottom-color: #fff;
+}
+
+.seeAll:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- Mouvements ---------- */
+
+@keyframes bbiTickerScroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes bbiTickerPulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+
+/* Survol et focus figent le ruban : on ne veut pas faire disparaître
+   l'annonce que l'utilisateur est en train de lire ou de viser. */
+.ticker:hover .track,
+.ticker:focus-within .track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+
+  .badgeDot {
+    animation: none;
+  }
+}
+
+/* ---------- Écrans étroits ---------- */
+
+@media (max-width: 900px) {
+  .ticker {
+    gap: 11px;
+    padding: 5px 16px;
+  }
+
+  .badge {
+    font-size: 9.5px;
+    padding: 3px 9px 3px 8px;
+  }
+
+  .seeAll {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ticker {
+    /* Sur téléphone, la pastille et le lien permanent concurrencent le
+       ruban : on ne garde que le défilement des annonces. */
+    padding: 5px 0 5px 14px;
+  }
+
+  .seeAll {
+    display: none;
+  }
+
+  .itemCta {
+    display: none;
+  }
+
+  .item {
+    margin-right: 28px;
+  }
+
+  .viewport {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+  }
+}

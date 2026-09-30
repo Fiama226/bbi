@@ -29,6 +29,18 @@ export interface IKpi {
 }
 
 /**
+ * Annonce du bandeau déroulant qui surmonte la barre de navigation.
+ *
+ * `label` est le texte affiché, `href` la page de détail atteinte au clic
+ * (ancre du portail — `#actualite?id=12` — ou URL externe).
+ */
+export interface IAnnouncement {
+  key: string;
+  label: string;
+  href: string;
+}
+
+/**
  * Diapositive du héros : un visuel de fond et/ou du texte.
  *
  * Format d'une ligne (séparateur « | ») :
@@ -211,6 +223,31 @@ export const parseKpis = (text: string): IKpi[] => {
 };
 
 /**
+ * Annonces du bandeau déroulant : une ligne par annonce.
+ *
+ *   libellé | lien
+ *
+ * Le lien peut être une ancre du portail (`#actualite?id=12`, `#sessions`…)
+ * ou une URL externe. Sans lien, l'annonce mène à la liste des actualités :
+ * une annonce sans destination n'aurait aucun sens au clic.
+ */
+export const parseAnnouncements = (text: string): IAnnouncement[] => {
+  const lines = nonEmptyLines(text);
+  const announcements: IAnnouncement[] = [];
+  lines.forEach((line, index) => {
+    const parts = splitParts(line);
+    const label = (parts[0] || '').trim();
+    if (!label) {
+      return;
+    }
+    const raw = (parts[1] || '').trim();
+    const href = raw ? (safeHref(raw) || '#actualites') : '#actualites';
+    announcements.push({ key: `annonce-${index}`, label, href });
+  });
+  return announcements;
+};
+
+/**
  * Mesure la hauteur du « chrome » SharePoint situé au-dessus de la web part
  * (barre de suite Microsoft, en-tête de site…) afin de calculer une hauteur
  * de héros réellement plein écran, y compris dans le workbench.
@@ -254,8 +291,15 @@ export const useChromeOffset = (
       const rect = node.getBoundingClientRect();
 
       // 1) Hauteur du « chrome » SharePoint au-dessus de la web part.
+      //    Dans le workbench, l'extension plein écran et la web part
+      //    masquent toutes les barres natives : il ne reste donc rien à
+      //    déduire, et le portail doit occuper la fenêtre de bout en bout.
+      const immersiveWorkbench =
+        isWorkbench &&
+        (document.body.classList.contains('bbi-immersive') ||
+          document.body.classList.contains('bbi-home-immersive'));
       const top = Math.round(rect.top + window.scrollY);
-      chromeTop = Math.max(0, Math.min(140, top));
+      chromeTop = immersiveWorkbench ? 0 : Math.max(0, Math.min(140, top));
       node.style.setProperty('--bbi-chrome-offset', `${chromeTop}px`);
 
       // 2) Débordement latéral bord-à-bord : on mesure la marge naturelle

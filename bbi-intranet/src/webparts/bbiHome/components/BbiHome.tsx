@@ -28,6 +28,8 @@ import {
   IQuickLink,
   INavLink,
   IKpi,
+  IAnnouncement,
+  parseAnnouncements,
   parseHeroSlides,
   parseKpis,
   parseNavLinks,
@@ -37,6 +39,7 @@ import {
   useScrolled,
 } from "./homeLayout";
 import HomeHero from "./HomeHero";
+import AnnouncementTicker from "./AnnouncementTicker";
 import NewsBoard from "./NewsBoard";
 import NewsDetail from "./NewsDetail";
 import TrainerDirectory from "./TrainerDirectory";
@@ -53,6 +56,9 @@ import { IBbiGalleryProps } from "../../bbiGallery/components/IBbiGalleryProps";
 import galleryStrings from "BbiGalleryWebPartStrings";
 
 type HomeStatus = "loading" | "ready";
+
+/** Nombre d'annonces en réserve dans le bandeau déroulant. */
+const ANNOUNCEMENT_MAX = 8;
 
 interface IPortalSearchResult {
   title: string;
@@ -325,6 +331,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     isDemo: false,
   });
   const [newsBundleLoading, setNewsBundleLoading] = React.useState<boolean>(false);
+  const [announcementPage, setAnnouncementPage] =
+    React.useState<IHomeNewsPage>(emptyNewsPage());
   const [sessions, setSessions] =
     React.useState<IHomeListResult<IHomeSession>>(emptyResult<IHomeSession>());
   const [trainers, setTrainers] =
@@ -510,6 +518,33 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       cancelled = true;
     };
   }, [props.spHttpClient, props.siteUrl, props.newsListTitle, pageIndex, newsPageSize]);
+
+  // Annonces du bandeau déroulant : toujours les toutes premières actualités,
+  // quelle que soit la page d'actualités en cours de lecture, pour que le
+  // ruban ne change pas de contenu sous les yeux de l'utilisateur.
+  React.useEffect(() => {
+    let cancelled = false;
+    loadNewsPage(
+      props.spHttpClient,
+      props.siteUrl,
+      props.newsListTitle,
+      0,
+      ANNOUNCEMENT_MAX,
+    )
+      .then((page) => {
+        if (!cancelled) {
+          setAnnouncementPage(page);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAnnouncementPage(emptyNewsPage());
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [props.spHttpClient, props.siteUrl, props.newsListTitle]);
 
   // Actualité détaillée (#actualite?id=12) : chargée à la demande.
   React.useEffect(() => {
@@ -715,13 +750,22 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     strings: galleryStrings,
   };
 
-  const announcement =
-    (props.announcementText || "").trim() ||
-    (newsPage.items[0]
-      ? `${newsPage.items[0].Category || "À la une"} — ${newsPage.items[0].Title}`
-      : "");
-  const showAnnouncement = props.enableAnnouncement !== false && !!announcement;
-  const featuredNews = newsPage.items[0];
+  // Bandeau d'annonces : les annonces saisies dans les propriétés du
+  // portail priment ; à défaut, les dernières actualités font office
+  // d'annonces et mènent à leur page de détail.
+  const announcementItems: IAnnouncement[] = React.useMemo(() => {
+    const custom = parseAnnouncements(props.announcementText);
+    if (custom.length > 0) {
+      return custom;
+    }
+    return announcementPage.items.map((item) => ({
+      key: `actualite-${item.Id}`,
+      label: `${item.Category ? `${item.Category} — ` : ""}${item.Title}`,
+      href: `#actualite?id=${item.Id}`,
+    }));
+  }, [props.announcementText, announcementPage.items]);
+  const showAnnouncement =
+    props.enableAnnouncement !== false && announcementItems.length > 0;
 
   if (status === "loading") {
     return (
@@ -736,35 +780,19 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   return (
     <div className={styles.home} ref={rootRef} id="bbi-home-root" data-view={activeView}>
       {showAnnouncement && (
-        <div
-          className={styles.announcement}
-          role="region"
-          aria-label="Information à la une"
-        >
-          <span className={styles.announcementDot} aria-hidden="true" />
-          <span className={styles.announcementText}>{announcement}</span>
-          {featuredNews && (
-            <a
-              className={styles.announcementLink}
-              href="#actualites"
-              onClick={(event) => {
-                event.preventDefault();
-                openView("actualites");
-              }}
-            >
-              Voir les actualités <span aria-hidden="true">→</span>
-            </a>
-          )}
-        </div>
+        <AnnouncementTicker
+          items={announcementItems}
+          onOpen={followPortalLink}
+          onSeeAll={(event) => {
+            followPortalLink(event, "#actualites");
+          }}
+        />
       )}
 
-      <header
-        className={
-          scrolled || activeView !== "accueil"
-            ? `${styles.topbar} ${styles.topbarSolid}`
-            : styles.topbar
-        }
-      >
+      {/* Barre de navigation : toujours bleue, sur l'accueil comme sur les
+          autres vues. Le fond est appliqué par `.topbar` lui-même, l'état
+          translucide d'autrefois masquait la barre sur l'accueil. */}
+      <header className={`${styles.topbar} ${styles.topbarSolid}`}>
         <div className={styles.topbarInner}>
           <a
             className={styles.brand}

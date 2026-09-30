@@ -4,10 +4,10 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 | Web part | ID | Rôle |
 |---|---|---|
-| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil (héros en diaporama images + textes, chiffres clés, employé du mois, certifications), Formations, Sessions, Actualités (flux paginé + **page dédiée par actualité**), Ressources (documents + galerie), Communauté (annuaire des formateurs avec **photo et fiche contact WhatsApp/Teams**) et **Organigramme interactif**. La navigation change de vue sans recharger ni quitter cette page. Masque le chrome SharePoint en lecture, conserve les commandes en édition, et fonctionne dans le package publié comme dans le workbench hébergé. |
+| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil (héros en diaporama images + textes, chiffres clés sous le héros, employé du mois, certifications), Formations, Sessions, Actualités (flux paginé + **page dédiée par actualité**), Ressources (documents + galerie), Communauté (annuaire des formateurs avec **photo et fiche contact WhatsApp/Teams**) et **Organigramme interactif**. La navigation change de vue sans recharger ni quitter cette page. **Plein écran dans tous les sens** : chrome SharePoint, barre de commandes et cadre du workbench masqués, dans le package publié comme dans le workbench. **Alt + Maj + E** rétablit le chrome SharePoint quand vous devez gérer la page. |
 | **BBI Catalogue des formations** | `d37a426e-48db-484f-bf10-c38675bb7b43` | Cartes filtrables (filière) + recherche, alimentées par la liste `Formations`. Affiche des données d'exemple si la liste n'existe pas encore. |
 | **BBI Galerie médias** | `f0f19a37-2c11-4812-9006-8aa71a9254f1` | Galerie photos/vidéos alimentée par la bibliothèque d'images « Galerie médias » : albums filtrables, mosaïque, visionneuse plein écran accessible (clavier, focus, `aria-modal`), vidéos mp4, vignettes générées par SharePoint. |
-| **BBI Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
+| **BBI Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel, **et dans le workbench hébergé**, où il retire en plus la barre de commandes et le cadre d'édition. `hideCommandBar` vaut `true` par défaut. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
 | **BBI Fiche formation** *(modèle)* | `a9c99e25-db18-4419-894b-08bc9c5b9081` | Modèle de page : la page lit `?code=BBI-MGT-101` et affiche présentation, objectifs, programme, prérequis, public visé, prochaines sessions (Événements de la liste Sessions, filtrées par code), supports publiés et formateurs référents. |
 | **BBI Sessions & inscriptions** | `96216ee2-85b1-473b-aaec-e5b646a151ee` | Planning groupé par mois : recherche, filtres filière/modalité, statut d'inscription, lien « Ajouter à mon agenda » (Outlook) et lien vers la fiche formation (code extrait du titre). |
 | **BBI Article d'actualité** *(modèle)* | `f769f3df-2c27-4a30-bce2-d4ae5793557b` | Modèle de page : lit `?itemid=12`, affiche visuel, chapô, auteur, temps de lecture, partage (e-mail/Teams/copie du lien) et actualités liées. Le HTML éditorial est nettoyé (scripts et événements retirés). |
@@ -15,7 +15,7 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 > Pour le déploiement standard : téléversez le package, puis ajoutez **uniquement `BBI Accueil — portail unifié`** à `accueil.aspx`. N'ajoutez pas les briques Catalogue, Galerie ou Documents séparément.
 
-Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.6.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
+Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.7.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
 
 ### Contenus de repli (production ready)
 
@@ -35,7 +35,9 @@ Toutes les sources sont tolérantes : liste absente (404), liste non créée, **
 
 Les bandeaux « données de démonstration » sont masqués par défaut : option `showDataNotices` dans le volet de propriétés (manifeste : `false`).
 
-**Vérifications :** `node tools/verify-fallback.js` — **100 contrôles** exécutés sur les couches de données réelles (aucun accès réseau requis) · `node tools/css-harness.js dist` — styles et classes réellement injectés, chiffres clés hors zone rognée, pagination, navigation · `node tools/preview-smoke.js` — **34 contrôles** de parcours sur l'aperçu cliquable (`deliverables/audit-2026/apercu-portail.html`).
+**Vérifications :** `node tools/verify-fallback.js` — **128 contrôles** exécutés sur les couches de données réelles (aucun accès réseau requis) · `node tools/css-harness.js release` — styles et classes réellement injectés, barre de navigation opaque, chiffres clés sous le héros (jamais par-dessus), accueil sans organigramme, annonces déroulantes, pagination, navigation · `node tools/preview-smoke.js` — **34 contrôles** de parcours sur l'aperçu cliquable (`deliverables/audit-2026/apercu-portail.html`).
+
+> Le harnais CSS se lance sur `release` après un build de production (`npx heft build --production`) : en production, les bundles sont écrits dans `release/assets/`, pas dans `dist/`.
 
 > **Provisionnement** : `../deploy/provision-bbi-intranet.ps1` crée les listes, bibliothèques (dont « Galerie médias »), **une page d'accueil et une web part**. Les anciennes pages éventuellement déjà présentes ne sont pas supprimées ; le nouveau menu ne les utilise plus. Guide : `../deploy/README.md`.
 
@@ -200,6 +202,30 @@ Si une liste ou la bibliothèque n'existe pas, ou si son schéma n'est pas encor
 **Bibliothèque `Supports publiés`** — documents avec nom/titre ; tri par date de modification décroissante ; ouverture en `?web=1` (visionneuse navigateur).
 
 > Le catalogue, les documents, les actualités, les sessions et les formateurs basculent indépendamment en **données d'exemple** lorsque leur source est absente ou inaccessible.
+
+## 6 bis. Annonces déroulantes, plein écran et chiffres clés
+
+### Bandeau d'annonces déroulant
+
+La première section au-dessus de la barre de navigation n'affiche plus un texte fixe : c'est un **ruban d'annonces qui défile en boucle**. Chaque annonce est un lien qui ouvre sa **page de détail** partageable (`#actualite?id=12`).
+
+- **Source par défaut** : les dernières actualités (`Actualites`). Le ruban se remplit tout seul, sans configuration.
+- **Source personnalisée** : propriété `announcementText`, **une ligne par annonce** — `libellé | lien`. Le lien accepte une ancre du portail (`#actualite?id=12`, `#sessions`…) ou une URL externe ; une URL dangereuse (`javascript:`) est neutralisée vers `#actualites`, une annonce sans lien mène aux actualités.
+- **Confort de lecture** : le ruban se fige au survol et dès qu'une annonce reçoit le focus (clavier compris). Si l'utilisateur a demandé « animations réduies », il ne bouge plus et devient simplement défilable.
+- **Accessibilité** : la seconde copie du ruban (celle qui rentre par la droite) est `aria-hidden` et retirée du parcours de tabulation — chaque annonce n'est annoncée et atteinte qu'une fois.
+- Masquer tout le bandeau : propriété `enableAnnouncement` (par défaut `true`).
+
+### Plein écran réel (workbench et application installée)
+
+Le portail occupe toute la fenêtre, **y compris dans le workbench hébergé** : en-tête de site, barre de navigation gauche, barre de commandes, bandeau d'applications et cadre d'édition du workbench sont masqués, le canevas est élargi à 100 % sans marge ni bordure. L'extension **BBI Plein écran** applique le même traitement (elle masque aussi la barre de commandes dans le workbench, `hideCommandBar` vaut `true` par défaut).
+
+> **Alt + Maj + E** bascule le chrome SharePoint : pratique pour revenir à l'écran SharePoint classique et gérer la page (supprimer une web part, par exemple) sans toucher au code.
+
+### Chiffres clés sous le héros
+
+La bande des 4 chiffres clés est posée **sous** le diaporama, dans le flux normal. Elle remontait auparavant de 48 px par-dessus le héros et masquait les pastilles, les flèches, le lien « Explorer » et le bas des textes lorsque le héros était chargé (titre long, petit écran). Aucune marge négative : les chiffres ne peuvent plus recouvrir un bouton.
+
+> L'accueil s'arrête aux contenus de l'accueil : l'**organigramme** et la **page d'une actualité** ne s'y affichent plus, ils restent accessibles par leur propre vue (`#organigramme`, `#actualite?id=12`).
 
 ## 7. Sécurité
 

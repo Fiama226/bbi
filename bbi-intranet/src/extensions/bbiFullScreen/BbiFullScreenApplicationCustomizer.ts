@@ -76,6 +76,63 @@ const HIDE_COMMAND_BAR_STYLES: string = `
   }
 `;
 
+/**
+ * Workbench hébergé (_layouts/15/workbench.aspx).
+ *
+ * Le workbench conserve sa barre de commandes et son cadre d'édition même en
+ * lecture : sans ces règles, le portail reste encadré par SharePoint et
+ * n'occupe jamais la totalité de la fenêtre. On retire ces barres et on
+ * laisse le canevas manger toute la hauteur comme sur une page publiée.
+ */
+const WORKBENCH_STYLES: string = `
+  body.bbi-immersive.bbi-workbench #spCommandBar,
+  body.bbi-immersive.bbi-workbench [data-automation-id="pageCommandBar"],
+  body.bbi-immersive.bbi-workbench [data-automation-id="CommandBar"],
+  body.bbi-immersive.bbi-workbench #workbenchTopBar,
+  body.bbi-immersive.bbi-workbench #workbenchHeader,
+  body.bbi-immersive.bbi-workbench #workbenchToolbox,
+  body.bbi-immersive.bbi-workbench [data-automation-id="workbenchToolbox"],
+  body.bbi-immersive.bbi-workbench [data-automation-id="addWebPartButton"],
+  body.bbi-immersive.bbi-workbench .sp-workbench-chrome {
+    display: none !important;
+  }
+
+  body.bbi-immersive.bbi-workbench #workbenchPageContent,
+  body.bbi-immersive.bbi-workbench #spPageCanvasContent,
+  body.bbi-immersive.bbi-workbench #spPageCanvasContent > div,
+  body.bbi-immersive.bbi-workbench .Canvas,
+  body.bbi-immersive.bbi-workbench .CanvasComponent,
+  body.bbi-immersive.bbi-workbench .CanvasZone,
+  body.bbi-immersive.bbi-workbench .CanvasSection,
+  body.bbi-immersive.bbi-workbench .CanvasZoneSectionContainer,
+  body.bbi-immersive.bbi-workbench .ControlZone,
+  body.bbi-immersive.bbi-workbench [data-automation-id="CanvasZone"],
+  body.bbi-immersive.bbi-workbench .WebPart,
+  body.bbi-immersive.bbi-workbench [data-control-type="webPart"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  body.bbi-immersive.bbi-workbench #spPageCanvasContent,
+  body.bbi-immersive.bbi-workbench #workbenchPageContent,
+  body.bbi-immersive.bbi-workbench .Canvas {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Le héros mesure lui-même la hauteur du chrome : ici, elle vaut zéro. */
+  body.bbi-immersive.bbi-workbench {
+    --bbi-chrome-height: 0px;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+  }
+`;
+
 const HIDE_TITLE_STYLES: string = `
   body.bbi-immersive [data-automation-id="pageTitle"],
   body.bbi-immersive .pageTitle,
@@ -94,7 +151,7 @@ export interface IBbiFullScreenProperties {
   mode?: string;
   /** Supprime les marges du canevas SharePoint (bord à bord réel). */
   edgeToEdge?: boolean;
-  /** Masque la barre de commandes (Attention : pensez au bouton « Modifier » de la page). */
+  /** Masque la barre de commandes (masquée par défaut ; remettez-la à false pour rester en édition). */
   hideCommandBar?: boolean;
   /** Masque le titre de page et l'en-tête de page. */
   hidePageTitle?: boolean;
@@ -105,6 +162,20 @@ export interface IBbiFullScreenProperties {
   /** CSS complémentaire avancé (injecté tel quel). */
   customCss?: string;
 }
+
+/**
+ * Workbench hébergé ? L'URL est l'indice le plus fiable : l'élément
+ * `#workbenchPageContent` n'existe pas encore à l'initialisation.
+ */
+const isHostedWorkbench = (): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return (
+    /workbench\.aspx/i.test(window.location.href) ||
+    !!document.getElementById('workbenchPageContent')
+  );
+};
 
 export default class BbiFullScreenApplicationCustomizer extends BaseApplicationCustomizer<IBbiFullScreenProperties> {
   private _styleElement: HTMLStyleElement | undefined;
@@ -117,13 +188,18 @@ export default class BbiFullScreenApplicationCustomizer extends BaseApplicationC
     const properties: IBbiFullScreenProperties = {
       mode: this.properties.mode || 'appPage',
       edgeToEdge: this.properties.edgeToEdge !== false,
-      hideCommandBar: this.properties.hideCommandBar === true,
+      // Masquée par défaut : le portail doit remplir toute la page, y compris
+      // dans le workbench. Passez hideCommandBar à false pour continuer à
+      // travailler sur la page depuis la barre de commandes.
+      hideCommandBar: this.properties.hideCommandBar !== false,
       hidePageTitle: this.properties.hidePageTitle !== false,
       customCss: this.properties.customCss || ''
     };
 
-    // Application immédiate si le mode « always » est demandé.
-    if (properties.mode === 'always') {
+    // Application immédiate si le mode « always » est demandé, ou dans le
+    // workbench hébergé : celui-ci n'a pas de PageLayoutType, mais il doit
+    // lui aussi afficher le portail en plein écran.
+    if (properties.mode === 'always' || isHostedWorkbench()) {
       this._apply(properties);
     } else {
       // Sinon, on vérifie le type de mise en page de la page courante.
@@ -210,7 +286,9 @@ export default class BbiFullScreenApplicationCustomizer extends BaseApplicationC
   }
 
   private _apply(properties: IBbiFullScreenProperties): void {
+    const workbench = isHostedWorkbench();
     document.body.classList.add('bbi-immersive');
+    document.body.classList.toggle('bbi-workbench', workbench);
     document.documentElement.classList.add('bbi-immersive-html');
 
     const parts: string[] = [];
@@ -222,6 +300,11 @@ export default class BbiFullScreenApplicationCustomizer extends BaseApplicationC
     }
     if (properties.hideCommandBar) {
       parts.push(HIDE_COMMAND_BAR_STYLES);
+    }
+    if (workbench) {
+      // Le workbench garde ses barres natives même après HIDE_COMMAND_BAR :
+      // ce bloc supplémentaire les retire et élargit le canevas.
+      parts.push(WORKBENCH_STYLES);
     }
     if (properties.customCss) {
       parts.push(properties.customCss);
