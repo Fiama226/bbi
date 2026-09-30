@@ -77,6 +77,46 @@ check(
   'bande de chiffres clés HORS de la zone rognée',
   !!band && !!stage && !stage.contains(band) && stage.parentNode === band.parentNode
 );
+// Les chiffres ne doivent plus remonter sur le héros : la règle CSS ne doit
+// contenir aucune marge haute négative (c'est ce qui masquait boutons et textes).
+const kpiCss = Array.from(document.styleSheets)
+  .flatMap((sheet) => {
+    try {
+      return Array.from(sheet.cssRules).map((rule) => rule.cssText);
+    } catch (e) {
+      return [];
+    }
+  })
+  .filter((text) => /\.tick-kpiBand|\.hero-kpiBand/.test(text))
+  .join(' ');
+const kpiMargin = (kpiCss.match(/margin:\s*([^;}]+)/) || [])[1] || '';
+check(
+  'chiffres clés posés sous le héros (marge jamais négative)',
+  !/margin:\s*-\d/.test(kpiCss),
+  kpiMargin.trim()
+);
+
+// Bandeau d'annonces déroulant : plusieurs annonces, chacune un lien de détail.
+const ticker = document.querySelector('#ticker');
+const tickerLinks = ticker ? Array.from(ticker.querySelectorAll('a[href]')) : [];
+const tickerTargets = tickerLinks
+  .map((link) => link.getAttribute('href'))
+  .filter((href) => href.indexOf('#actualite?id=') === 0);
+check(
+  'bandeau d’annonces déroulant présent et animé',
+  !!ticker && !!document.querySelector('#ticker-track .tick-group') &&
+    ticker.querySelectorAll('.tick-group').length === 2
+);
+check(
+  'chaque annonce mène à sa page de détail',
+  tickerTargets.length > 0 && tickerTargets.length === tickerLinks.length - 1
+);
+click(document.querySelector('#ticker .tick-group .tick-link'));
+check(
+  'clic sur une annonce → page de détail de l’annonce',
+  view() === 'actualite' && document.querySelector('[data-viewblock="actualite"]:not(.preview-hidden)') !== null
+);
+click(document.querySelector('[data-nav="accueil"]'));
 
 const titleBefore = document.getElementById('hero-title').textContent;
 click(document.querySelector('[data-slide-next]'));

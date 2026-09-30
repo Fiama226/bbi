@@ -31,6 +31,7 @@ const MODULES = [
   { file: 'TeamHighlights.module.scss', prefix: 'team-', title: 'Employé du mois + certifications' },
   { file: 'TrainerDirectory.module.scss', prefix: 'tr-', title: 'Annuaire des formateurs + fiche' },
   { file: 'OrgChart.module.scss', prefix: 'org-', title: 'Organigramme interactif' },
+  { file: 'AnnouncementTicker.module.scss', prefix: 'tick-', title: 'Annonces déroulantes' },
 ];
 
 /** Visuels utilisés par l'aperçu (copiés depuis les ressources des web parts). */

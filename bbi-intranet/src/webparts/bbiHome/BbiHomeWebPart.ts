@@ -141,11 +141,85 @@ const IMMERSIVE_HOME_STYLES: string = `
     padding-top: 0 !important;
     padding-bottom: 0 !important;
   }
+
+  /* ------------------------------------------------------------------
+     Workbench hébergé (_layouts/15/workbench.aspx) : aucune barre native.
+     Le workbench garde sa barre de commandes et son cadre d'édition même en
+     lecture ; on les retire pour que le portail occupe réellement tout
+     l'écran, à l'identique de la page publiée.
+     Rappel : Alt + Maj + E rétablit le chrome SharePoint si l'on doit
+     revenir à la page « normale » de SharePoint (voir BbiHomeWebPart).
+     ------------------------------------------------------------------ */
+  body.bbi-home-immersive.bbi-home-workbench #spCommandBar,
+  body.bbi-home-immersive.bbi-home-workbench [data-automation-id="pageCommandBar"],
+  body.bbi-home-immersive.bbi-home-workbench [data-automation-id="CommandBar"],
+  body.bbi-home-immersive.bbi-home-workbench #workbenchTopBar,
+  body.bbi-home-immersive.bbi-home-workbench #workbenchHeader,
+  body.bbi-home-immersive.bbi-home-workbench #workbenchToolbox,
+  body.bbi-home-immersive.bbi-home-workbench [data-automation-id="workbenchToolbox"],
+  body.bbi-home-immersive.bbi-home-workbench [data-automation-id="addWebPartButton"],
+  body.bbi-home-immersive.bbi-home-workbench .sp-workbench-chrome {
+    display: none !important;
+  }
+
+  /* Le canevas et la web part occupent la totalité de la fenêtre. */
+  body.bbi-home-immersive.bbi-home-workbench #workbenchPageContent,
+  body.bbi-home-immersive.bbi-home-workbench #spPageCanvasContent,
+  body.bbi-home-immersive.bbi-home-workbench #spPageCanvasContent > div,
+  body.bbi-home-immersive.bbi-home-workbench .Canvas,
+  body.bbi-home-immersive.bbi-home-workbench .CanvasComponent,
+  body.bbi-home-immersive.bbi-home-workbench .CanvasZone,
+  body.bbi-home-immersive.bbi-home-workbench .CanvasSection,
+  body.bbi-home-immersive.bbi-home-workbench .CanvasZoneSectionContainer,
+  body.bbi-home-immersive.bbi-home-workbench .ControlZone,
+  body.bbi-home-immersive.bbi-home-workbench [data-automation-id="CanvasZone"],
+  body.bbi-home-immersive.bbi-home-workbench .WebPart,
+  body.bbi-home-immersive.bbi-home-workbench [data-control-type="webPart"] {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+  }
+
+  body.bbi-home-immersive.bbi-home-workbench #spPageCanvasContent,
+  body.bbi-home-immersive.bbi-home-workbench #workbenchPageContent,
+  body.bbi-home-immersive.bbi-home-workbench .Canvas {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Aucun espace résiduel autour du canevas : le portail touche les quatre
+     bords de la fenêtre, comme sur un site publié. */
+  body.bbi-home-immersive.bbi-home-workbench {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+  }
 `;
+
+/**
+ * Le portail est-il ouvert dans le workbench hébergé ?
+ *
+ * L'URL est le seul indice fiable au premier rendu : l'élément
+ * `#workbenchPageContent` n'existe pas encore quand la web part s'initialise.
+ */
+const isHostedWorkbench = (): boolean => {
+  if (typeof window === 'undefined') {
+    return false;
+  }
+  return (
+    /workbench\.aspx/i.test(window.location.href) ||
+    !!document.getElementById('workbenchPageContent')
+  );
+};
 
 export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPartProps> {
   private _themeVariant: IReadonlyTheme | undefined;
   private _immersiveStyle: HTMLStyleElement | undefined;
+  private _chromeShortcut: ((event: KeyboardEvent) => void) | undefined;
+  private _immersiveEnabled: boolean = true;
 
   protected onInit(): Promise<void> {
     if (!this.properties) {
@@ -196,9 +270,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
 
   public render(): void {
     this._enableImmersiveHome();
-    console.info('[BBI-HOME] webpart render entered');
-    console.info('[BBI-HOME] properties', typeof this.properties, Object.keys(this.properties || {}));
-    console.info('[BBI-HOME] context', !!this.context, !!this.context?.spHttpClient);
     const properties = this.properties || ({} as IBbiHomeWebPartProps);
     const connectedUser = this.context.pageContext.user;
     const element: React.ReactElement<IBbiHomeProps> = React.createElement(BbiHome, {
@@ -240,9 +311,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       themeVariant: this._themeVariant,
       strings
     });
-    console.info('[BBI-HOME] React element created');
     ReactDom.render(element, this.domElement);
-    console.info('[BBI-HOME] ReactDOM render returned');
   }
 
   protected onDisplayModeChanged(_oldDisplayMode: DisplayMode): void {
@@ -250,14 +319,62 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
   }
 
   private _enableImmersiveHome(): void {
-    document.body.classList.add('bbi-home-immersive');
     if (!this._immersiveStyle) {
       this._immersiveStyle = document.createElement('style');
       this._immersiveStyle.setAttribute('data-bbi-home-immersive', 'true');
       this._immersiveStyle.appendChild(document.createTextNode(IMMERSIVE_HOME_STYLES));
-      document.head.appendChild(this._immersiveStyle);
     }
-    this._syncImmersiveEditingClass();
+    this._applyImmersive(true);
+    this._registerChromeShortcut();
+  }
+
+  /**
+   * Active ou retire la feuille de style « plein écran ».
+   *
+   * L'état est mémorisé : un simple re-rendu de la web part ne doit pas
+   * réappliquer une mise en page que l'utilisateur vient d'annuler.
+   */
+  private _applyImmersive(active: boolean): void {
+    this._immersiveEnabled = active;
+    const node = this._immersiveStyle;
+    if (!node) {
+      return;
+    }
+    if (active && !node.parentElement) {
+      document.head.appendChild(node);
+    } else if (!active && node.parentElement) {
+      node.parentElement.removeChild(node);
+    }
+    document.body.classList.toggle('bbi-home-immersive', active);
+    // Workbench hébergé : on masque aussi la barre de commandes et le cadre
+    // d'édition, sinon le portail reste coincé dans une page SharePoint.
+    document.body.classList.toggle('bbi-home-workbench', active && isHostedWorkbench());
+  }
+
+  /**
+   * Alt + Maj + E : rétablit (ou masque) le chrome SharePoint.
+   *
+   * Le portail occupe toute la page, y compris dans le workbench ; cette
+   * combinaison de touches laisse la porte de sortie pour revenir à l'écran
+   * SharePoint classique et gérer la page (supprimer une web part, notamment)
+   * sans avoir à modifier le code.
+   */
+  private _registerChromeShortcut(): void {
+    if (this._chromeShortcut) {
+      return;
+    }
+    this._chromeShortcut = (event: KeyboardEvent): void => {
+      if (!event.altKey || !event.shiftKey || (event.key !== 'E' && event.key !== 'e')) {
+        return;
+      }
+      event.preventDefault();
+      this._applyImmersive(!this._immersiveEnabled);
+      this._syncImmersiveEditingClass();
+      window.setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));
+      }, 120);
+    };
+    document.addEventListener('keydown', this._chromeShortcut, true);
   }
 
   private _syncImmersiveEditingClass(): void {
@@ -266,7 +383,15 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
-    document.body.classList.remove('bbi-home-immersive', 'bbi-home-editing');
+    document.body.classList.remove(
+      'bbi-home-immersive',
+      'bbi-home-editing',
+      'bbi-home-workbench'
+    );
+    if (this._chromeShortcut) {
+      document.removeEventListener('keydown', this._chromeShortcut, true);
+      this._chromeShortcut = undefined;
+    }
     if (this._immersiveStyle && this._immersiveStyle.parentElement) {
       this._immersiveStyle.parentElement.removeChild(this._immersiveStyle);
     }

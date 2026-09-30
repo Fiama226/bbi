@@ -3,7 +3,7 @@
   "solution": {
     "name": "bbi-intranet-client-side-solution",
     "id": "2c6d2ca9-5eda-4ef6-9f47-a3997faa01b3",
-    "version": "1.6.0.0",
+    "version": "1.7.0.0",
     "includeClientSideAssets": true,
     "skipFeatureDeployment": true,
     "isDomainIsolated": false,
@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "Intranet BBI production : accueil en diaporama (images + textes), chiffres clés, actualités paginées avec page dédiée, sessions, employé du mois, certifications, catalogue, supports, galerie, annuaire des formateurs avec fiches contact et organigramme interactif."
+        "default": "Intranet BBI production : accueil plein écran (barre de navigation bleue, annonces déroulantes, héros en diaporama images + textes), chiffres clés sous le héros, actualités paginées avec page dédiée, sessions, employé du mois, certifications, catalogue, supports, galerie, annuaire des formateurs avec fiches contact et organigramme interactif."
       },
       "longDescription": {
-        "default": "Solution SPFx de l'intranet Business Builders International (7 web parts + 1 extension). Toutes les sources sont tolérantes : si une liste, une bibliothèque ou la galerie est absente, non créée ou encore vide, la page affiche un contenu de repli professionnel (visuels et données BBI embarqués) au lieu d'un état vide. 1) BBI Accueil plein écran — héros en diaporama (images et textes qui défilent, pause au survol, respect de « animations réduites »), bande de chiffres clés toujours visible, actualités à la une puis paginées avec page dédiée (actualité suivante, précédente et autres actualités), prochaines sessions, employé du mois, certifications et agréments, catalogue, supports publiés, galerie, annuaire des formateurs (photo, fiche contact : téléphone, e-mail, WhatsApp, Teams, localisation, bio, spécialités, sessions animées) et organigramme interactif (arbre, zoom, pôles, fiche contact). 2) BBI Catalogue des formations — cartes filtrables. 3) BBI Fiche formation — page pilotée par ?code=BBI-XXX. 4) BBI Sessions & inscriptions — planning groupé par mois, filtres, agenda. 5) BBI Article d'actualité — page pilotée par ?itemid=12. 6) BBI Galerie médias — albums et visionneuse plein écran. 7) BBI Documents sécurisés — visionneuse lecture seule. 8) Extension BBI Plein écran — mise en page bord à bord des pages applicatives."
+        "default": "Solution SPFx de l'intranet Business Builders International (7 web parts + 1 extension). Toutes les sources sont tolérantes : si une liste, une bibliothèque ou la galerie est absente, non créée ou encore vide, la page affiche un contenu de repli professionnel (visuels et données BBI embarqués) au lieu d'un état vide. 1) BBI Accueil plein écran — héros en diaporama (images et textes qui défilent, pause au survol, respect de « animations réduites »), bande de chiffres clés toujours visible, actualités à la une puis paginées avec page dédiée (actualité suivante, précédente et autres actualités), prochaines sessions, employé du mois, certifications et agréments, catalogue, supports publiés, galerie, annuaire des formateurs (photo, fiche contact : téléphone, e-mail, WhatsApp, Teams, localisation, bio, spécialités, sessions animées) et organigramme interactif (arbre, zoom, pôles, fiche contact). 2) BBI Catalogue des formations — cartes filtrables. 3) BBI Fiche formation — page pilotée par ?code=BBI-XXX. 4) BBI Sessions & inscriptions — planning groupé par mois, filtres, agenda. 5) BBI Article d'actualité — page pilotée par ?itemid=12. 6) BBI Galerie médias — albums et visionneuse plein écran. 7) BBI Documents sécurisés — visionneuse lecture seule. 8) Extension BBI Plein écran — mise en page bord à bord des pages applicatives et du workbench hébergé (barre de commandes et cadre d'édition masqués)."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -30,7 +30,7 @@
         "title": "bbi-intranet Feature",
         "description": "Déploie les composants web BBI (Accueil plein écran, Catalogue des formations, Documents sécurisés, Galerie médias) et l'extension de mise en page plein écran.",
         "id": "ebc798de-cab3-4872-9f1d-5f95d19f2052",
-        "version": "1.6.0.0"
+        "version": "1.7.0.0"
       }
     ]
   },

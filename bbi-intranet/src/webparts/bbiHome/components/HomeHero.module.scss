@@ -345,6 +345,11 @@
 .explore:hover { color: #fff; }
 .explore:hover span { transform: translateY(3px); }
 
+/* La bande des chiffres clés est posée SOUS le héros, dans le flux normal.
+   Elle remontait auparavant de 48 px par-dessus le diaporama et recouvrait
+   les pastilles, les flèches et le lien « Explorer » dès que le héros était
+   chargé (titre long, accroche longue, petits écrans). Aucune marge négative :
+   les chiffres ne peuvent plus masquer un bouton ni un texte. */
 .kpiBand {
   position: relative;
   z-index: 3;
@@ -353,7 +358,7 @@
   max-width: calc(var(--bbi-shell) - 64px);
   grid-template-columns: repeat(4, minmax(0, 1fr));
   overflow: hidden;
-  margin: -48px auto 0;
+  margin: clamp(28px, 4.4vh, 52px) auto 0;
   padding: 0;
   border: 1px solid rgba(17, 32, 67, .06);
   border-radius: 16px;
@@ -412,7 +417,7 @@
   .stage { min-height: max(620px, calc(100svh - var(--bbi-chrome-offset) - 64px)); }
   .inner { padding: 54px 24px 142px; }
   .controls { padding: 0 24px; }
-  .kpiBand { width: calc(100% - 48px); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: -34px; }
+  .kpiBand { width: calc(100% - 48px); grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 26px; }
   .kpi { padding: 20px 22px; }
   .kpi:nth-child(3) { border-left: 0; }
   .kpi:nth-child(n + 3) { border-top: 1px solid #e8ebf0; }
@@ -444,7 +449,7 @@
   .arrows { gap: 6px; }
   .arrow { width: 36px; height: 36px; }
   .explore { padding-left: 0; font-size: 10px; letter-spacing: .1em; }
-  .kpiBand { width: calc(100% - 32px); margin-top: -24px; border-radius: 12px; }
+  .kpiBand { width: calc(100% - 32px); margin-top: 20px; border-radius: 12px; }
   .kpi { gap: 3px; padding: 17px 15px 16px; }
   .kpi::before { left: 15px; width: 24px; }
   .kpi strong { font-size: 25px; }

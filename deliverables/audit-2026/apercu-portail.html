@@ -43,10 +43,29 @@
 <div class="preview-frame">
 <div class="base-home" id="app" data-view="accueil">
 
-  <div class="base-announcement" role="region" aria-label="Information à la une">
-    <span class="base-announcementDot" aria-hidden="true"></span>
-    <span class="base-announcementText" id="announcement-text">Qualité — Qualiopi : notre audit blanc est une réussite</span>
-    <a class="base-announcementLink" href="#actualites" data-nav="actualites">Voir les actualités →</a>
+  <div class="tick-ticker" role="region" aria-label="Annonces BBI" id="ticker">
+    <p class="tick-badge"><span class="tick-badgeDot" aria-hidden="true"></span>Annonces</p>
+    <div class="tick-viewport">
+      <div class="tick-track" id="ticker-track" style="--bbi-ticker-cycle: 42s;">
+        <ul class="tick-group" aria-label="Annonces BBI">
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=1" data-article="1"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Certification — 12 nouveaux formateurs certifiés</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=2" data-article="2"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Formations — Le catalogue des formations évolue</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=3" data-article="3"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Qualité — Qualiopi : notre audit blanc est une réussite</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=4" data-article="4"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Réseau — Trois nouvelles antennes BBI en Afrique de l’Ouest</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=6" data-article="6"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Formations — Lancement du module e-learning « Prospection digitale »</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=7" data-article="7"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Vie BBI — Séminaire annuel des formateurs : cap sur 2026</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+        </ul>
+        <ul class="tick-group" aria-hidden="true">
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=1" data-article="1" tabindex="-1"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Certification — 12 nouveaux formateurs certifiés</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=2" data-article="2" tabindex="-1"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Formations — Le catalogue des formations évolue</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=3" data-article="3" tabindex="-1"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Qualité — Qualiopi : notre audit blanc est une réussite</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=4" data-article="4" tabindex="-1"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Réseau — Trois nouvelles antennes BBI en Afrique de l’Ouest</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=6" data-article="6" tabindex="-1"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Formations — Lancement du module e-learning « Prospection digitale »</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+          <li class="tick-item"><a class="tick-link" href="#actualite?id=7" data-article="7" tabindex="-1"><span class="tick-itemTag" aria-hidden="true">À la une</span><span class="tick-itemLabel">Vie BBI — Séminaire annuel des formateurs : cap sur 2026</span><span class="tick-itemCta" aria-hidden="true">Lire la suite →</span></a></li>
+        </ul>
+      </div>
+    </div>
+    <a class="tick-seeAll" href="#actualites" data-nav="actualites">Tout voir →</a>
   </div>
 
   <header class="base-topbar base-topbarSolid" id="topbar">

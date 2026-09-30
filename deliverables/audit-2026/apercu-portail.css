@@ -44,47 +44,9 @@
   letter-spacing: -0.015em;
 }
 
-/* ---------- Bandeau d'information ---------- */
-.base-announcement {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 32px;
-  background: var(--bbi-navy);
-  color: #fff;
-  font-size: 13px;
-}
-
-.base-announcementDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--bbi-red);
-  flex: 0 0 auto;
-}
-
-.base-announcementText {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-}
-
-.base-announcementLink {
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  flex: 0 0 auto;
-}
-
-.base-announcementLink:hover {
-  border-bottom-color: #fff;
-}
-
 /* ---------- Barre de navigation ---------- */
+/* La barre porte toujours sa couleur de marque : elle reste lisible sur le
+   héros sombre de l'accueil comme sur les vues au fond clair. */
 .base-topbar {
   position: sticky;
   /* Sur le workbench, la valeur descend vers 0 au défilement (le bandeau
@@ -92,7 +54,9 @@
   top: var(--bbi-sticky-top, var(--bbi-chrome-offset));
   z-index: 60;
   width: 100%;
-  background: transparent;
+  background: rgba(14, 38, 92, 0.98);
+  box-shadow: 0 6px 22px rgba(9, 20, 48, 0.28);
+  backdrop-filter: blur(6px);
   transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -347,34 +311,67 @@
 }
 
 .base-quickLink {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 20px;
+  padding: 20px 54px 20px 20px;
   border: 1px solid var(--bbi-line);
   border-radius: 12px;
   background: #fff;
-  text-decoration: none;
   color: inherit;
+  text-decoration: none;
   transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
 }
 
 .base-quickLink:hover {
   transform: translateY(-3px);
-  border-color: transparent;
-  box-shadow: 0 14px 30px rgba(14, 38, 92, 0.16);
+  border-color: #d3dbea;
+  box-shadow: 0 14px 30px rgba(14, 38, 92, 0.12);
+}
+
+.base-quickLink:focus-visible {
+  outline: 3px solid var(--bbi-red);
+  outline-offset: 3px;
 }
 
 .base-quickIcon {
+  display: flex;
   width: 44px;
   height: 44px;
-  border-radius: 10px;
-  background: var(--bbi-navy);
-  color: #fff;
-  display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid #e0e6f0;
+  border-radius: 10px;
+  background: #f1f4f9;
+  color: var(--bbi-navy);
   font-size: 19px;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+
+.base-quickIcon svg {
+  display: block;
+}
+
+.base-quickLink:hover .base-quickIcon {
+  border-color: var(--bbi-navy);
+  background: var(--bbi-navy);
+  color: #fff;
+}
+
+.base-quickArrow {
+  position: absolute;
+  top: 31px;
+  right: 21px;
+  color: #7b8491;
+  font-size: 17px;
+  line-height: 1;
+  transition: color 0.16s ease, transform 0.16s ease;
+}
+
+.base-quickLink:hover .base-quickArrow {
+  transform: translateX(3px);
+  color: var(--bbi-red);
 }
 
 .base-quickLink strong {
@@ -915,6 +912,14 @@ a.base-sessionStatus:hover {
   display: none !important;
 }
 
+/* L'accueil s'arrête aux contenus de l'accueil : l'organigramme et la page
+   d'une actualités ont leur propre vue (#organigramme, #actualite?id=…).
+   Sans cette règle, l'accueil affichait en pied de page un encart
+   « Cette actualité n'est plus disponible » suivi de l'organigramme complet. */
+.base-home[data-view=accueil] [data-bbi-view=organigramme], .base-home[data-view=accueil] [data-bbi-view=actualite] {
+  display: none !important;
+}
+
 .base-home[data-view=sessions] [data-bbi-view=actualites], .base-home[data-view=actualites] [data-bbi-view=actualites] {
   grid-template-columns: minmax(0, 1fr);
   flex: 1 1 auto;
@@ -1232,14 +1237,9 @@ a.base-sessionStatus:hover {
 }
 
 /* ===== Héros en diaporama + chiffres clés — source : HomeHero.module.scss ===== */
-/* ============================================================
-   BBI — Héros en diaporama (images + textes) et chiffres clés
-   Le bandeau de chiffres clés vit HORS de la zone rognée (.stage) :
-   c'est ce qui garantit sa visibilité sur toutes les mises en page.
-   ============================================================ */
+/* BBI home hero — editorial photography, clear type and quiet controls. */
 .hero-heroWrap {
   position: relative;
-  /* Remonte sous la barre de navigation collante : bord-à-bord réel. */
   margin-top: calc(-1 * (var(--bbi-chrome-offset) + 64px));
   padding-top: calc(var(--bbi-chrome-offset) + 64px);
   color: #fff;
@@ -1247,25 +1247,27 @@ a.base-sessionStatus:hover {
 
 .hero-stage {
   position: relative;
-  min-height: calc(100vh - var(--bbi-chrome-offset) - 64px);
   display: flex;
+  min-height: max(640px, 100svh - var(--bbi-chrome-offset) - 64px);
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
+  isolation: isolate;
+  background: #0b1d42;
   color: #fff;
 }
 
 .hero-stageCompact {
-  min-height: 460px;
+  min-height: 470px;
 }
 
-/* ---------- Diapositives visuelles ---------- */
 .hero-media {
   position: absolute;
+  z-index: -2;
   inset: 0;
-  z-index: 0;
+  overflow: hidden;
   opacity: 0;
-  transition: opacity 1.1s ease;
+  transition: opacity 900ms ease;
 }
 
 .hero-mediaActive {
@@ -1278,11 +1280,11 @@ a.base-sessionStatus:hover {
   background-position: center 42%;
   background-size: cover;
   background-repeat: no-repeat;
-  transform: scale(1.02);
+  transform: scale(1.015);
 }
 
 .hero-mediaActive .hero-mediaImage {
-  animation: bbiKenBurns 22s ease-in-out infinite alternate;
+  animation: bbiKenBurns 18s ease-in-out infinite alternate;
 }
 
 .hero-visualDemo0 {
@@ -1303,23 +1305,23 @@ a.base-sessionStatus:hover {
 
 .hero-veil {
   position: absolute;
+  z-index: -1;
   inset: 0;
-  z-index: 1;
-  background: linear-gradient(100deg, rgba(9, 20, 48, 0.94) 0%, rgba(14, 38, 92, 0.76) 42%, rgba(14, 38, 92, 0.22) 78%, rgba(14, 38, 92, 0.06) 100%);
+  background: linear-gradient(90deg, rgba(8, 20, 48, 0.95) 0%, rgba(8, 20, 48, 0.82) 36%, rgba(8, 20, 48, 0.38) 70%, rgba(8, 20, 48, 0.12) 100%), linear-gradient(0deg, rgba(8, 20, 48, 0.68) 0%, transparent 42%, rgba(8, 20, 48, 0.16) 100%);
 }
 
 @keyframes bbiKenBurns {
   from {
-    transform: scale(1.02) translate3d(0, 0, 0);
+    transform: scale(1.015) translate3d(0, 0, 0);
   }
   to {
-    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
+    transform: scale(1.09) translate3d(-1%, -0.6%, 0);
   }
 }
 @keyframes bbiHeroRise {
   from {
     opacity: 0;
-    transform: translateY(18px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -1334,304 +1336,539 @@ a.base-sessionStatus:hover {
     transform: scaleX(1);
   }
 }
-/* ---------- Contenu texte ---------- */
 .hero-inner {
   position: relative;
-  z-index: 2;
+  z-index: 1;
+  width: 100%;
   max-width: var(--bbi-shell);
   margin: 0 auto;
-  padding: 56px 32px 108px;
-  width: 100%;
-}
-
-.hero-text {
-  max-width: 760px;
-}
-
-.hero-textAnimated {
-  animation: bbiHeroRise 0.7s ease both;
+  padding: clamp(48px, 8vh, 88px) 32px 150px;
 }
 
 .hero-greeting {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   width: fit-content;
-  margin: 0 0 16px;
-  padding: 7px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.32);
+  margin: 0 0 24px;
+  padding: 8px 15px 8px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  font-size: 13.5px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0.01em;
-  backdrop-filter: blur(4px);
+  backdrop-filter: blur(8px);
 }
 
 .hero-greetingWave {
-  font-size: 15px;
+  display: grid;
+  width: 25px;
+  height: 25px;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 14px;
   line-height: 1;
 }
 
+.hero-text {
+  max-width: 780px;
+}
+
+.hero-textAnimated {
+  animation: bbiHeroRise 650ms ease both;
+}
+
 .hero-eyebrow {
-  margin: 0 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px;
+  color: #f0c36c;
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.16em;
+  line-height: 1.4;
   text-transform: uppercase;
-  color: #9fb4dd;
+}
+
+.hero-eyebrow::before {
+  width: 30px;
+  height: 1px;
+  flex: 0 0 30px;
+  background: currentColor;
+  content: "";
 }
 
 .hero-title {
-  margin: 0 0 16px;
-  font-size: clamp(30px, 4.4vw, 56px);
-  line-height: 1.06;
-  font-weight: 700;
-  max-width: 20ch;
+  max-width: 19ch;
+  margin: 0 0 19px;
+  color: #fff;
+  font-size: clamp(38px, 5vw, 68px);
+  font-weight: 750;
+  letter-spacing: -0.045em;
+  line-height: 1.04;
   text-wrap: balance;
 }
 
+.hero-titleBreak {
+  display: block;
+}
+
+.hero-mobileTitleSpace {
+  display: none;
+}
+
 .hero-subtitle {
-  margin: 0 0 28px;
-  font-size: clamp(15px, 1.2vw, 18px);
-  line-height: 1.55;
-  color: #dce4f5;
   max-width: 58ch;
+  margin: 0 0 30px;
+  color: rgba(255, 255, 255, 0.84);
+  font-size: clamp(16px, 1.35vw, 19px);
+  line-height: 1.65;
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 12px;
 }
 
 .hero-primary, .hero-secondary {
   display: inline-flex;
+  min-height: 48px;
   align-items: center;
-  gap: 8px;
-  padding: 13px 26px;
-  border-radius: 8px;
-  font-size: 14.5px;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  font-size: 14px;
   font-weight: 700;
   text-decoration: none;
-  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
 .hero-primary {
+  border: 1px solid var(--bbi-red);
   background: var(--bbi-red);
   color: #fff;
-  box-shadow: 0 10px 24px rgba(210, 20, 25, 0.35);
+  box-shadow: 0 9px 22px rgba(9, 20, 48, 0.24);
 }
 
 .hero-primary:hover {
-  background: #b81015;
   transform: translateY(-2px);
+  border-color: #b81015;
+  background: #b81015;
+  box-shadow: 0 12px 26px rgba(9, 20, 48, 0.3);
 }
 
 .hero-secondary {
-  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.44);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
-  border: 1.5px solid rgba(255, 255, 255, 0.75);
-}
-
-.hero-secondary:hover {
-  background: rgba(255, 255, 255, 0.22);
-  transform: translateY(-2px);
-}
-
-.hero-primary:focus-visible, .hero-secondary:focus-visible, .hero-arrow:focus-visible, .hero-dot:focus-visible, .hero-explore:focus-visible {
-  outline: 3px solid #fff;
-  outline-offset: 3px;
-}
-
-/* ---------- Commandes du diaporama ---------- */
-.hero-controls {
-  position: absolute;
-  z-index: 4;
-  left: 50%;
-  bottom: 20px;
-  transform: translateX(-50%);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(9, 20, 48, 0.42);
   backdrop-filter: blur(6px);
 }
 
-.hero-dots {
-  position: relative;
+.hero-secondary:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.82);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.hero-primary:focus-visible, .hero-secondary:focus-visible, .hero-arrow:focus-visible, .hero-dot:focus-visible, .hero-explore:focus-visible {
+  outline: 3px solid #f0c36c;
+  outline-offset: 3px;
+}
+
+.hero-controls {
+  position: absolute;
+  z-index: 2;
+  right: 0;
+  bottom: 28px;
+  left: 0;
+  padding: 0 32px;
+}
+
+.hero-controlsInner {
+  display: flex;
+  width: 100%;
+  max-width: var(--bbi-shell);
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 auto;
+}
+
+.hero-controlGroup, .hero-arrows {
   display: flex;
   align-items: center;
+}
+
+.hero-controlGroup {
+  gap: 18px;
+}
+
+.hero-arrows {
   gap: 8px;
-  list-style: none;
+}
+
+.hero-slideCount {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+.hero-slideCount span {
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.hero-slideCount::first-letter {
+  color: #fff;
+}
+
+.hero-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .hero-dot {
-  display: block;
-  width: 10px;
-  height: 10px;
-  padding: 0;
-  border-radius: 999px;
-  border: 1.5px solid rgba(255, 255, 255, 0.8);
+  display: grid;
+  min-width: 28px;
+  height: 34px;
+  place-items: center;
+  padding: 0 2px;
+  border: 0;
   background: transparent;
   cursor: pointer;
-  transition: width 0.25s ease, background 0.25s ease;
 }
 
-.hero-dotActive {
-  width: 28px;
-  background: #fff;
+.hero-dotTrack {
+  position: relative;
+  display: block;
+  width: 26px;
+  height: 3px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.38);
+  transition: width 180ms ease;
 }
 
-.hero-progress {
+.hero-dot[aria-current=true] .hero-dotTrack {
+  width: 52px;
+}
+
+.hero-dotProgress {
   position: absolute;
-  left: 10px;
-  right: 10px;
-  bottom: 0;
-  height: 2px;
+  inset: 0;
+  transform: scaleX(0);
   transform-origin: left center;
-  background: rgba(255, 255, 255, 0.85);
-  animation-name: bbiHeroProgress;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-  border-radius: 2px;
+  border-radius: inherit;
+  background: #f0c36c;
+  animation: bbiHeroProgress linear forwards;
 }
 
 .hero-arrow {
-  width: 32px;
-  height: 32px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.32);
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
-  font-size: 17px;
+  font-size: 22px;
   line-height: 1;
   cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease;
 }
 
 .hero-arrow:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.hero-arrowPrev, .hero-arrowNext {
-  position: static;
+  border-color: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .hero-explore {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 2px 8px 12px;
   border: 0;
   background: transparent;
-  color: #dce4f5;
+  color: rgba(255, 255, 255, 0.78);
   font: inherit;
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   cursor: pointer;
-  padding: 4px 6px;
+}
+
+.hero-explore span {
+  color: #f0c36c;
+  font-size: 17px;
+  transition: transform 160ms ease;
 }
 
 .hero-explore:hover {
   color: #fff;
 }
 
-/* ---------- Bande de chiffres clés (jamais rognée) ---------- */
+.hero-explore:hover span {
+  transform: translateY(3px);
+}
+
+/* La bande des chiffres clés est posée SOUS le héros, dans le flux normal.
+   Elle remontait auparavant de 48 px par-dessus le diaporama et recouvrait
+   les pastilles, les flèches et le lien « Explorer » dès que le héros était
+   chargé (titre long, accroche longue, petits écrans). Aucune marge négative :
+   les chiffres ne peuvent plus masquer un bouton ni un texte. */
 .hero-kpiBand {
   position: relative;
   z-index: 3;
-  list-style: none;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-  gap: 1px;
-  /* Remonte sur le bas du héros : la bande reste dans le flux, donc jamais
-     coupée par l'overflow du diaporama. */
-  margin: -46px auto 0;
-  padding: 0 32px;
-  max-width: var(--bbi-shell);
-  width: 100%;
+  width: calc(100% - 64px);
+  max-width: calc(var(--bbi-shell) - 64px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  overflow: hidden;
+  margin: clamp(28px, 4.4vh, 52px) auto 0;
+  padding: 0;
+  border: 1px solid rgba(17, 32, 67, 0.06);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 18px 44px rgba(9, 20, 48, 0.18);
+  list-style: none;
 }
 
 .hero-kpi {
-  background: rgba(255, 255, 255, 0.97);
-  padding: 18px 22px;
-  border-left: 4px solid var(--bbi-red);
-  box-shadow: 0 14px 34px rgba(9, 20, 48, 0.2);
+  position: relative;
   display: flex;
+  min-width: 0;
   flex-direction: column;
-  gap: 4px;
+  justify-content: center;
+  gap: 5px;
+  padding: 23px 27px 21px;
+  transition: background 160ms ease;
+}
+
+.hero-kpi + .hero-kpi {
+  border-left: 1px solid #e8ebf0;
+}
+
+.hero-kpi:hover {
+  background: #f8f9fb;
+}
+
+.hero-kpi::before {
+  position: absolute;
+  top: 0;
+  left: 27px;
+  width: 30px;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--bbi-red);
+  content: "";
+  transition: width 180ms ease;
+}
+
+.hero-kpi:hover::before {
+  width: 48px;
 }
 
 .hero-kpi strong {
-  font-size: 26px;
-  font-weight: 700;
   color: var(--bbi-navy);
-  line-height: 1;
+  font-size: clamp(25px, 2.7vw, 35px);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
 }
 
 .hero-kpi span {
-  font-size: 12.5px;
-  color: var(--bbi-muted);
-  line-height: 1.35;
+  color: #646d7b;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
 .hero-visuallyHidden {
   position: absolute;
   width: 1px;
   height: 1px;
-  padding: 0;
-  margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
-  border: 0;
+  clip-path: inset(50%);
 }
 
-/* ---------- Adaptations ---------- */
 @media (max-width: 900px) {
+  .hero-stage {
+    min-height: max(620px, 100svh - var(--bbi-chrome-offset) - 64px);
+  }
+
   .hero-inner {
-    padding: 40px 20px 120px;
-  }
-
-  .hero-kpiBand {
-    grid-template-columns: repeat(2, 1fr);
-    margin-top: -32px;
-    padding: 0 20px;
-  }
-
-  .hero-kpi {
-    padding: 15px 16px;
-  }
-
-  .hero-kpi strong {
-    font-size: 22px;
+    padding: 54px 24px 142px;
   }
 
   .hero-controls {
+    padding: 0 24px;
+  }
+
+  .hero-kpiBand {
+    width: calc(100% - 48px);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 26px;
+  }
+
+  .hero-kpi {
+    padding: 20px 22px;
+  }
+
+  .hero-kpi:nth-child(3) {
+    border-left: 0;
+  }
+
+  .hero-kpi:nth-child(n+3) {
+    border-top: 1px solid #e8ebf0;
+  }
+
+  .hero-kpi::before {
+    left: 22px;
+  }
+}
+@media (max-width: 620px) {
+  .hero-stage {
+    min-height: 660px;
+  }
+
+  .hero-stageCompact {
+    min-height: 530px;
+  }
+
+  .hero-veil {
+    background: linear-gradient(90deg, rgba(8, 20, 48, 0.88), rgba(8, 20, 48, 0.38)), linear-gradient(0deg, rgba(8, 20, 48, 0.72), transparent 58%);
+  }
+
+  .hero-inner {
+    padding: 52px 22px 136px;
+  }
+
+  .hero-greeting {
+    margin-bottom: 20px;
+  }
+
+  .hero-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.13em;
+  }
+
+  .hero-eyebrow::before {
+    width: 20px;
+    flex-basis: 20px;
+  }
+
+  .hero-title {
+    max-width: 17ch;
+    font-size: clamp(37px, 11vw, 52px);
+    line-height: 1.04;
+  }
+
+  .hero-titleBreak {
+    display: none;
+  }
+
+  .hero-mobileTitleSpace {
+    display: inline;
+  }
+
+  .hero-subtitle {
+    margin-bottom: 24px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .hero-actions {
+    align-items: stretch;
+    gap: 9px;
+  }
+
+  .hero-primary, .hero-secondary {
+    min-height: 46px;
+    padding: 11px 17px;
+    font-size: 13px;
+  }
+
+  .hero-controls {
+    bottom: 22px;
+    padding: 0 20px;
+  }
+
+  .hero-controlsInner {
+    align-items: flex-end;
+  }
+
+  .hero-controlGroup {
+    flex-wrap: wrap;
     gap: 8px;
-    padding: 5px 8px;
+  }
+
+  .hero-slideCount {
+    display: none;
+  }
+
+  .hero-arrows {
+    gap: 6px;
+  }
+
+  .hero-arrow {
+    width: 36px;
+    height: 36px;
   }
 
   .hero-explore {
-    display: none;
+    padding-left: 0;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .hero-kpiBand {
+    width: calc(100% - 32px);
+    margin-top: 20px;
+    border-radius: 12px;
+  }
+
+  .hero-kpi {
+    gap: 3px;
+    padding: 17px 15px 16px;
+  }
+
+  .hero-kpi::before {
+    left: 15px;
+    width: 24px;
+  }
+
+  .hero-kpi strong {
+    font-size: 25px;
+  }
+
+  .hero-kpi span {
+    font-size: 11px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hero-mediaActive .hero-mediaImage {
+  .hero-mediaActive .hero-mediaImage, .hero-textAnimated, .hero-dotProgress {
     animation: none !important;
   }
 
-  .hero-textAnimated {
-    animation: none;
-  }
-
-  .hero-progress {
-    display: none;
-  }
-
-  .hero-primary, .hero-secondary, .hero-media, .hero-dot {
+  .hero-primary, .hero-secondary, .hero-media, .hero-dotTrack, .hero-arrow, .hero-kpi, .hero-kpi::before, .hero-explore span {
     transition: none;
   }
 }
@@ -2412,21 +2649,19 @@ a.base-sessionStatus:hover {
 }
 
 .team-employeeCard {
-  background: linear-gradient(135deg, #fff 0%, #f7f9fd 100%);
   position: relative;
   overflow: hidden;
+  background: linear-gradient(145deg, #fff 0%, #f7f9fc 100%);
 }
 
-.team-employeeCard::after {
-  content: "";
+.team-employeeCard::before {
   position: absolute;
-  right: -40px;
-  top: -40px;
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(210, 20, 25, 0.08) 0%, rgba(210, 20, 25, 0) 70%);
-  pointer-events: none;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--bbi-red), rgba(210, 20, 25, 0.12));
+  content: "";
 }
 
 .team-eyebrow {
@@ -2447,28 +2682,33 @@ a.base-sessionStatus:hover {
 
 .team-employeeBody {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
-  gap: 16px;
+  grid-template-columns: 124px minmax(0, 1fr);
+  gap: 20px;
   align-items: start;
-  margin-bottom: 12px;
+  margin: 5px 0 16px;
 }
 
 .team-photo {
   position: relative;
-  width: 96px;
-  height: 96px;
-  border-radius: 16px;
-  background-color: var(--bbi-navy);
-  background-position: center;
-  background-size: cover;
   display: flex;
+  width: 124px;
+  height: 142px;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgba(14, 38, 92, 0.08);
+  border-radius: 12px;
+  background-color: var(--bbi-navy);
+  background-position: center 34%;
+  background-size: cover;
   color: #fff;
   font-size: 26px;
   font-weight: 700;
-  overflow: hidden;
-  box-shadow: 0 8px 20px rgba(14, 38, 92, 0.18);
+  box-shadow: 0 8px 20px rgba(14, 38, 92, 0.12);
+}
+
+.team-demoPortrait {
+  background-image: url("assets/employee-lea-marchand.jpg");
 }
 
 .team-visual0 {
@@ -2497,42 +2737,46 @@ a.base-sessionStatus:hover {
 
 .team-name {
   display: block;
-  font-size: 17px;
   color: var(--bbi-ink);
+  font-size: 19px;
+  line-height: 1.25;
 }
 
 .team-role {
   display: block;
-  margin: 2px 0 8px;
-  font-size: 12.8px;
-  font-weight: 600;
+  margin: 5px 0 10px;
   color: var(--bbi-red);
+  font-size: 12.5px;
+  font-weight: 650;
+  line-height: 1.5;
 }
 
 .team-message {
   margin: 0;
-  font-size: 13.4px;
-  line-height: 1.6;
   color: var(--bbi-muted);
+  font-size: 13px;
+  line-height: 1.65;
 }
 
 .team-facts {
   grid-column: 1/-1;
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  margin: 2px 0 0;
+  gap: 7px;
+  margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 .team-facts li {
-  padding: 6px 12px;
-  border-radius: 999px;
-  background: #eef2fb;
+  padding: 6px 10px;
+  border: 1px solid #e2e7f0;
+  border-radius: 7px;
+  background: #f3f5f9;
   color: var(--bbi-navy-2);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
 }
 
 .team-certList {
@@ -2679,13 +2923,23 @@ a.base-sessionStatus:hover {
 }
 @media (max-width: 620px) {
   .team-employeeBody {
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 13px;
   }
 
   .team-photo {
-    width: 72px;
-    height: 72px;
+    width: 88px;
+    height: 108px;
+    border-radius: 10px;
     font-size: 20px;
+  }
+
+  .team-name {
+    font-size: 17px;
+  }
+
+  .team-message {
+    font-size: 12.5px;
   }
 
   .team-certItem {
@@ -3646,5 +3900,265 @@ a.base-sessionStatus:hover {
 
   .org-detailList {
     grid-column: 1/-1;
+  }
+}
+
+/* ===== Annonces déroulantes — source : AnnouncementTicker.module.scss ===== */
+/* ============================================================
+   BBI — Bandeau d'annonces déroulant
+   Au-dessus de la barre de navigation : un ruban d'annonces qui
+   défile en boucle et mène, au clic, à la page de détail.
+   ============================================================ */
+.tick-ticker {
+  position: relative;
+  /* Pas de z-index : le bandeau défile avec la page et doit passer DERRIÈRE
+     la barre de navigation collante (z-index 60) dès les premiers pixels de
+     défilement, jamais par-dessus elle. */
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  min-height: 42px;
+  padding: 5px 26px;
+  background: var(--bbi-navy-2, #1f3a70);
+  color: #fff;
+  font-size: 13px;
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.08);
+}
+
+/* ---------- Pastille « Annonces » ---------- */
+.tick-badge {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  padding: 4px 11px 4px 9px;
+  border-radius: 999px;
+  background: var(--bbi-red);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.tick-badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  animation: bbiTickerPulse 1.9s ease-in-out infinite;
+}
+
+/* ---------- Ruban défilant ---------- */
+.tick-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  /* Fondu sur les bords : le ruban « entre » et « sort » en douceur. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 26px, #000 calc(100% - 26px), transparent);
+}
+
+/* Animations réduites ou annonce unique : la liste reste lisible et
+   consultable au défilement natif, sans mouvement automatique. */
+.tick-viewportStill {
+  overflow-x: auto;
+  -webkit-mask-image: none;
+  mask-image: none;
+  scrollbar-width: thin;
+}
+
+.tick-track {
+  display: flex;
+  /* width: max-content SANS min-width: les deux groupes font exactement la
+     moitié du ruban, donc -50% repose le début du second groupe sur le
+     début du premier. Avec un min-width: 100 %, un ruban plus court que la
+     fenêtre rebouclerait sur du vide. */
+  width: max-content;
+  animation: bbiTickerScroll var(--bbi-ticker-cycle, 30s) linear infinite;
+}
+
+.tick-trackPaused {
+  animation-play-state: paused;
+}
+
+.tick-group {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tick-item {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  /* Marge portée par l'élément (et non par le conteneur) : les deux copies
+     du ruban mesurent exactement la même largeur, la boucle est donc
+     parfaitement continue. */
+  margin-right: 44px;
+}
+
+.tick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  padding: 5px 0;
+  color: rgba(255, 255, 255, 0.94);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.tick-link:hover {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.tick-link:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.tick-itemTag {
+  flex: 0 0 auto;
+  padding: 2px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.tick-itemLabel {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 78ch;
+}
+
+.tick-itemCta {
+  flex: 0 0 auto;
+  color: #f0c36c;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+
+.tick-item:hover .tick-itemCta, .tick-link:focus-visible .tick-itemCta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ---------- Lien permanent ---------- */
+.tick-seeAll {
+  flex: 0 0 auto;
+  padding: 3px 2px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.tick-seeAll:hover {
+  border-bottom-color: #fff;
+}
+
+.tick-seeAll:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ---------- Mouvements ---------- */
+@keyframes bbiTickerScroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+@keyframes bbiTickerPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+/* Survol et focus figent le ruban : on ne veut pas faire disparaître
+   l'annonce que l'utilisateur est en train de lire ou de viser. */
+.tick-ticker:hover .tick-track, .tick-ticker:focus-within .tick-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tick-track {
+    animation: none;
+  }
+
+  .tick-badgeDot {
+    animation: none;
+  }
+}
+/* ---------- Écrans étroits ---------- */
+@media (max-width: 900px) {
+  .tick-ticker {
+    gap: 11px;
+    padding: 5px 16px;
+  }
+
+  .tick-badge {
+    font-size: 9.5px;
+    padding: 3px 9px 3px 8px;
+  }
+
+  .tick-seeAll {
+    font-size: 12px;
+  }
+}
+@media (max-width: 640px) {
+  .tick-ticker {
+    /* Sur téléphone, la pastille et le lien permanent concurrencent le
+       ruban : on ne garde que le défilement des annonces. */
+    padding: 5px 0 5px 14px;
+  }
+
+  .tick-seeAll {
+    display: none;
+  }
+
+  .tick-itemCta {
+    display: none;
+  }
+
+  .tick-item {
+    margin-right: 28px;
+  }
+
+  .tick-viewport {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 14px, #000 calc(100% - 14px), transparent);
   }
 }

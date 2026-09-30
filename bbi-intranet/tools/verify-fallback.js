@@ -367,9 +367,8 @@ async function testArticle() {
 /* ------------------------------------------------------------------ */
 async function testHeroAndRoutes() {
   console.log('\nHéros en diaporama & navigation du portail');
-  const { parseHeroSlides, parseKpis, parsePortalRoute, looksLikeImage } = loadTsModule(
-    'src/webparts/bbiHome/components/homeLayout.ts'
-  );
+  const { parseHeroSlides, parseKpis, parsePortalRoute, looksLikeImage, parseAnnouncements } =
+    loadTsModule('src/webparts/bbiHome/components/homeLayout.ts');
 
   const slides = parseHeroSlides(
     [
@@ -406,6 +405,38 @@ async function testHeroAndRoutes() {
   check(
     'chiffres clés — libellé complet conservé',
     kpis[0].value === '1 500+' && kpis[0].label === 'Professionnels accompagnés'
+  );
+
+  // Bandeau d'annonces déroulant : une ligne par annonce, chacune avec sa
+  // page de détail. Sans ces contrôles, une annonce pourrait défiler sans
+  // destination, ou avec un lien que le portail ne sait pas ouvrir.
+  const annonces = parseAnnouncements(
+    [
+      '# commentaire ignoré',
+      'Qualité — audit blanc réussi | #actualite?id=12',
+      'Inscriptions ouvertes — session de mars | #sessions',
+      'Document de présentation | https://bbi.example.com/rapport',
+      'Message sans lien'
+    ].join('\n')
+  );
+  check('annonces — une entrée par ligne utile', annonces.length === 4, `${annonces.length}`);
+  check(
+    'annonces — libellé et lien lus',
+    annonces[0].label === 'Qualité — audit blanc réussi' && annonces[0].href === '#actualite?id=12'
+  );
+  check('annonces — lien externe conservé', annonces[2].href === 'https://bbi.example.com/rapport');
+  check(
+    'annonces — lien dangereux neutralisé',
+    parseAnnouncements('Piège | javascript:alert(1)')[0].href === '#actualites'
+  );
+  check(
+    'annonces — annonce sans lien mène aux actualités',
+    parseAnnouncements('Message seul')[0].href === '#actualites'
+  );
+  check('annonces — configuration vide', parseAnnouncements('').length === 0);
+  check(
+    'annonces — clés uniques (pas de collision React)',
+    new Set(annonces.map((item) => item.key)).size === annonces.length
   );
 
   const route = parsePortalRoute('#actualite?id=12');
@@ -448,6 +479,16 @@ async function testHeroAndRoutes() {
   check(
     'les vues ne sont pas prises pour des sections',
     anchorIdFromHash('#actualites') === '' && anchorIdFromHash('#organigramme') === ''
+  );
+
+  // Clic sur une annonce du bandeau déroulant : le lien doit être traité
+  // comme un lien interne du portail, sinon l'utilisateur quitterait la page
+  // au lieu d'atterrir sur la page de détail de l'annonce.
+  const annonceHref = parseAnnouncements('Une annonce | #actualite?id=12')[0].href;
+  check(
+    'annonce → page de détail d’une actualités',
+    viewFromHref(annonceHref) === 'actualite' && newsIdFromHash(annonceHref) === 12,
+    annonceHref
   );
 
   // Anciennes pages SharePoint : un clic ne doit pas quitter le portail.

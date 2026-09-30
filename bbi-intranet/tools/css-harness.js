@@ -279,6 +279,77 @@ setTimeout(() => {
   const slidesOk = slideCount >= 2;
   const paginationOk = !!pagination;
 
+  /* ------------------------------------------------------------------
+     Non-régressions de mise en page (bundle compilé, pas de navigateur).
+     ------------------------------------------------------------------ */
+
+  /** Règle CSS d'une classe hachée : `.hero_kpiBand_ab12cd{…}`. */
+  const ruleOf = (element, suffix) => {
+    if (!element) {
+      return '';
+    }
+    const className = (element.getAttribute('class') || '')
+      .split(/\s+/)
+      .find((name) => suffix.test(name));
+    if (!className) {
+      return '';
+    }
+    const start = allCss.indexOf('.' + className + '{');
+    return start === -1 ? '' : allCss.slice(start, allCss.indexOf('}', start));
+  };
+
+  /* 1. La barre de navigation reste bleue sur l'accueil comme ailleurs.
+        Elle était transparente tant que la vue courante était « accueil ». */
+  const topbar = hostDiv.querySelector('header');
+  const topbarRule = ruleOf(topbar, /topbar/i);
+  const topbarOpaque =
+    /background(?:-color)?:\s*rgba?\(/.test(topbarRule) &&
+    !/background(?:-color)?:\s*transparent/.test(topbarRule);
+  console.log(`Barre de navigation : ${topbarOpaque ? 'BLEUE (fond opaque)' : 'NON OPAQUE'}`);
+
+  /* 2. La bande de chiffres clés ne doit plus remonter sur le héros : sa
+        marge haute était négative et masquait boutons et textes. */
+  const kpiRule = ruleOf(kpiBand, /kpiBand/);
+  const kpiMargin = (kpiRule.match(/margin:\s*([^;]+)/) || [])[1] || '';
+  const kpiOverlaps = /margin:\s*-\d/.test(kpiRule);
+  console.log(
+    `Chiffres clés : marge « ${kpiMargin.trim()} » — ${
+      kpiOverlaps ? 'RECOUVRE LE HÉROS' : 'sous le héros'
+    }`
+  );
+
+  /* 3. L'accueil ne montre plus l'organigramme ni la page d'une actualité :
+        ces deux sections ont leur propre vue. Le minifieur retire les
+        guillemets des valeurs d'attributs : les deux écritures sont admises. */
+  const homeHides = /\[data-view=("?)accueil\1\][^{]*\[data-bbi-view=("?)organigramme\2\]/.test(
+    allCss
+  );
+  const homeHidesArticle = /\[data-view=("?)accueil\1\][^{]*\[data-bbi-view=("?)actualite\2\]/.test(
+    allCss
+  );
+  console.log(
+    `Accueil sans organigramme ni page d'actualité : ${
+      homeHides && homeHidesArticle ? 'OUI' : 'NON'
+    }`
+  );
+
+  /* 4. Bandeau d'annonces déroulant présent, et chaque annonce est un lien
+        vers sa page de détail. */
+  const ticker = hostDiv.querySelector('[aria-label="Annonces BBI"]');
+  const tickerLinks = ticker ? ticker.querySelectorAll('a[href]') : [];
+  const tickerHrefs = Array.from(tickerLinks).map((a) => a.getAttribute('href'));
+  const tickerOk =
+    !!ticker &&
+    tickerHrefs.length > 0 &&
+    tickerHrefs.every((href) => /^#(actualite\?id=\d+|actualites|accueil)/.test(href));
+  console.log(
+    `Annonces déroulantes : ${ticker ? `${tickerHrefs.length} lien(s)` : 'ABSENTES'} — ${
+      tickerOk ? 'chaque annonce ouvre une page' : 'LIEN MANQUANT'
+    }`
+  );
+
+  const chromeOk = topbarOpaque && !kpiOverlaps && homeHides && homeHidesArticle && tickerOk;
+
   const routeRoot = hostDiv.querySelector('#bbi-home-root');
   const trainingLink = hostDiv.querySelector('header nav a[href="#formations"]');
   if (trainingLink) {
@@ -300,11 +371,18 @@ setTimeout(() => {
   console.log(`Navigation SPA vers #organigramme : ${orgRouteOk ? 'OK' : 'ÉCHEC'}`);
 
   const allOk =
-    styleOk && trainingRouteOk && homeRouteOk && orgRouteOk && kpiOk && slidesOk && paginationOk;
+    styleOk &&
+    trainingRouteOk &&
+    homeRouteOk &&
+    orgRouteOk &&
+    kpiOk &&
+    slidesOk &&
+    paginationOk &&
+    chromeOk;
   console.log(
     `\n${
       allOk
-        ? '✓ CSS, HÉROS (DIAPORAMA + CHIFFRES CLÉS HORS ZONE ROGNÉE), PAGINATION ET NAVIGATION OK'
+        ? '✓ CSS, HÉROS (DIAPORAMA + CHIFFRES CLÉS HORS ZONE ROGNÉE), ANNONCES, PAGINATION ET NAVIGATION OK'
         : '✗ VÉRIFICATION EN ÉCHEC'
     } (mode ${mode})`
   );

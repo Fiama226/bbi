@@ -47,49 +47,10 @@
   letter-spacing: -0.015em;
 }
 
-/* ---------- Bandeau d'information ---------- */
-
-.announcement {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 9px 32px;
-  background: var(--bbi-navy);
-  color: #fff;
-  font-size: 13px;
-}
-
-.announcementDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--bbi-red);
-  flex: 0 0 auto;
-}
-
-.announcementText {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-weight: 600;
-}
-
-.announcementLink {
-  color: #fff;
-  font-weight: 600;
-  text-decoration: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-  flex: 0 0 auto;
-}
-
-.announcementLink:hover {
-  border-bottom-color: #fff;
-}
-
 /* ---------- Barre de navigation ---------- */
 
+/* La barre porte toujours sa couleur de marque : elle reste lisible sur le
+   héros sombre de l'accueil comme sur les vues au fond clair. */
 .topbar {
   position: sticky;
   /* Sur le workbench, la valeur descend vers 0 au défilement (le bandeau
@@ -97,7 +58,9 @@
   top: var(--bbi-sticky-top, var(--bbi-chrome-offset));
   z-index: 60;
   width: 100%;
-  background: transparent;
+  background: rgba(14, 38, 92, 0.98);
+  box-shadow: 0 6px 22px rgba(9, 20, 48, 0.28);
+  backdrop-filter: blur(6px);
   transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
@@ -984,6 +947,15 @@ a.sessionStatus:hover {
 /* La recherche n'existe que dans la vue « recherche » :
    jamais de « Résultats pour « » » vide sur l'accueil. */
 .home:not([data-view="recherche"]) [data-bbi-view="recherche"] {
+  display: none !important;
+}
+
+/* L'accueil s'arrête aux contenus de l'accueil : l'organigramme et la page
+   d'une actualités ont leur propre vue (#organigramme, #actualite?id=…).
+   Sans cette règle, l'accueil affichait en pied de page un encart
+   « Cette actualité n'est plus disponible » suivi de l'organigramme complet. */
+.home[data-view="accueil"] [data-bbi-view="organigramme"],
+.home[data-view="accueil"] [data-bbi-view="actualite"] {
   display: none !important;
 }
 
