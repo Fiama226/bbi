@@ -56,7 +56,7 @@ Les bandeaux « données de démonstration » sont masqués par défaut : option
 ## 2. Développement avec Docker (workbench)
 
 ⚠️ **À savoir** : depuis SPFx 1.20+ (pipeline Heft), le *workbench local* (`localhost:4321/temp/workbench.html`) **n'existe plus**. Le conteneur Docker héberge le **serveur de debug** (code compilé en continu sur `https://localhost:4321`), et la page de test est le **workbench hébergé de votre tenant** — pour BBI : `https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx`
-(également renseigné dans `config/serve.json` et `.vscode/launch.json`). Il vous faut donc un tenant M365 (le tenant développeur gratuit du *Microsoft 365 Developer Program* convient parfaitement).
+(également renseigné dans `webpack.dev.config.js` et `.vscode/launch.json` — ce projet est *éjecté*, donc `webpack.dev.config.js` fait autorité et non `config/serve.json`). Il vous faut donc un tenant M365 (le tenant développeur gratuit du *Microsoft 365 Developer Program* convient parfaitement).
 
 ### Démarrage
 
@@ -74,7 +74,7 @@ docker compose logs -f          # attendre « Started Webpack Dev Server » puis
 2. Ouvrir :
 
 ```
-https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/build/manifests.js
+https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js
 ```
 
 3. **+** → *Advanced* → ajouter **BBI Accueil** (ou les web parts individuelles) → les versions de *debug* (hot-reload) s'affichent.
@@ -96,6 +96,72 @@ npm install
 SPFX_SERVE_TENANT_DOMAIN=monTenant.sharepoint.com npm run start   # serveur de debug port 4321
 # puis même URL de workbench hébergé que ci-dessus
 ```
+
+---
+
+## 3 bis. Dépannage — « Script error » / « Something went wrong » au chargement d'une web part
+
+### Ce que signifie l'erreur
+
+```
+Could not load bbi-home-web-part in require. Error: Script error for "6a9b6e3b-44f1-4a70-8f0a-45c82b29126d_*"
+https://requirejs.org/docs/errors.html#scripterror
+    at makeError (...)
+    at HTMLScriptElement.onScriptError (...)
+```
+
+Une seule lecture possible : **le navigateur n'a pas réussi à télécharger le fichier JavaScript de la web part.**
+
+Le manifeste, lui, s'est bien chargé — sinon la web part n'apparaîtrait pas du tout dans la boîte à outils.
+C'est donc le **bundle** (`bbi-home-web-part_*.js`) qui est introuvable ou bloqué. Le chargeur SPFx
+(`@microsoft/sp-loader`) résout l'URL ainsi :
+
+```
+internalModuleBaseUrls[0]  +  "/"  +  scriptResources[entryModuleId]
+```
+
+* **mode debug** (workbench + `debugManifestsFile`) :
+  `https://localhost:4321/dist/` + `bbi-home-web-part_en-us_<hash>.js`
+* **mode production** (`.sppkg` déployé) :
+  `HTTPS://SPCLIENTSIDEASSETLIBRARY/` + `../assets/bbi-home-web-part_en-us_<hash>.js`
+
+### Le diagnostic en 30 secondes (à faire en premier)
+
+1. Ouvrez la page, appuyez sur **F12** → onglet **Réseau** (Network).
+2. Cochez **Conserver le journal** / *Preserve log*, puis rechargez et ajoutez la web part.
+3. Cherchez la requête en rouge (statut `404`, `failed`, `(blocked)` ou `ERR_CERT_*`).
+4. Regardez son URL : elle vous dit immédiatement laquelle des causes ci-dessous s'applique.
+
+| URL de la requête en échec | Cause | Correctif |
+|---|---|---|
+| `https://localhost:4321/dist/...` | Le serveur de debug n'est pas démarré, s'est arrêté, ou son certificat auto-signé n'est pas accepté | Relancer `npm run start`, ouvrir **une fois** `https://localhost:4321/` et valider le certificat |
+| `https://localhost:4321/dist/...` avec un **hash qui n'existe plus** dans `dist/` | Page du workbench périmée : webpack a recompilé (nouveaux hachages) sans rechargement | **Recharger** la page du workbench (F5) après chaque recompilation |
+| `https://<tenant>.sharepoint.com/.../ClientSideAssets/...` | La solution est *installée* mais pas **déployée** : la bibliothèque *Client Side Assets* est vide | Catalogue d'applications → solution → **Deploy** (et cocher « disponible pour tous les sites ») |
+| `https://<tenant>.sharepoint.com/...` en `404` | Version en cache côté SharePoint après un *Upgrade* | Attendre quelques minutes, puis `?web=0` / vider le cache ; au besoin ré-uploader le `.sppkg` en **Upgrade** |
+| `(blocked:mixed-content)` ou `ERR_CERT_*` | Page HTTPS + ressource HTTP, ou certificat non validé | Passer le workbench et le serveur de debug en HTTPS |
+
+### Vérifier le package avant de le téléverser
+
+Un package incohérent (manifeste qui pointe vers un bundle absent) produit **exactement** cette erreur.
+Le dépôt fournit un contrôle automatique, sans dépendance externe :
+
+```bash
+node tools/verify-package.js           # vérifie deliverables/spfx/bbi-intranet.sppkg
+node tools/verify-package.js --dev     # vérifie temp/manifests.js + dist/ (chemin workbench debug)
+```
+
+Le contrôle échoue (code de sortie 1) si un bundle référencé manque, si l'extension `js` n'est pas
+déclarée dans `[Content_Types].xml`, ou si le package contient des bundles orphelins.
+
+### Rappels de déploiement
+
+1. **Toujours reconstruire proprement** : `npm run build` nettoie désormais `release/` avant de compiler
+   (`heft clean && ...`). Sans ce nettoyage, d'anciens bundles s'accumulent dans `release/assets` et
+   finissent embarqués dans le `.sppkg` sans être référencés par aucun manifeste.
+2. **Copier** le résultat dans `../deliverables/spfx/` puis **Upgrade** dans le catalogue d'applications.
+3. **Vérifier le déploiement** : catalogue d'applications → la solution doit afficher *Deployed*
+   (et non seulement *Validated* / *Installed*).
+4. La web part à poser est **`BBI Accueil (plein écran)`** (id `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d`).
 
 ---
 
