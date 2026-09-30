@@ -22,8 +22,36 @@ const path = require('node:path');
 const { Terminal, ConsoleTerminalProvider } = require('@rushstack/terminal');
 const { SPFxDebugPageUrl, ServeInfoPlugin, DEFAULT_TEMP_FOLDER } = require('@microsoft/spfx-heft-plugins');
 const baseConfig = require('./webpack.config');
-const SERVE_INITIAL_PAGE = "https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx";
-const WEBPACK_DEV_SERVER_PORT = 4321;
+const DEFAULT_SERVE_INITIAL_PAGE = "https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx";
+/**
+ * Page de test ouverte (et URL de debug affichée) par le serveur de developpement.
+ *
+ * L'ordre de priorite est :
+ *   1. SPFX_SERVE_INITIAL_PAGE  : URL complete, telle quelle ;
+ *   2. SPFX_SERVE_TENANT_DOMAIN ou SPFX_TENANT_DOMAIN : domaine seul, accepte
+ *      « monTenant.sharepoint.com » comme « https://monTenant.sharepoint.com/ » ;
+ *   3. la valeur par defaut (tenant BBI).
+ *
+ * C'est cette variable que renseigne docker-compose.yml (SPFX_SERVE_TENANT_DOMAIN) :
+ * sans cela, la page de test restait bloquee sur le tenant BBI quelle que soit la
+ * variable d'environnement fournie.
+ */
+function resolveServeInitialPage() {
+    var explicit = process.env.SPFX_SERVE_INITIAL_PAGE;
+    if (explicit) {
+        return explicit;
+    }
+    var domain = process.env.SPFX_SERVE_TENANT_DOMAIN || process.env.SPFX_TENANT_DOMAIN;
+    if (domain) {
+        var host = String(domain).trim().replace(/\/+$/, "").replace(/^https?:\/\//i, "");
+        return "https://" + host + "/_layouts/15/workbench.aspx";
+    }
+    return DEFAULT_SERVE_INITIAL_PAGE;
+}
+const SERVE_INITIAL_PAGE = resolveServeInitialPage();
+const WEBPACK_DEV_SERVER_PORT = Number(process.env.SPFX_DEV_SERVER_PORT) || 4321;
+/** Hote utilise dans les URLs de debug (modifiable pour un conteneur distant). */
+const DEBUG_HOSTNAME = process.env.SPFX_DEV_SERVER_HOSTNAME || "localhost";
 function _getDependencyServeMap(referencedProjects, terminal) {
     const dependencyServeMap = new Map();
     for (const versionMap of Object.values(referencedProjects)){
@@ -101,7 +129,7 @@ function _getDependencyServeMap(referencedProjects, terminal) {
         hot: true,
         client: {
             webSocketURL: {
-                hostname: 'localhost',
+                hostname: DEBUG_HOSTNAME,
                 port: WEBPACK_DEV_SERVER_PORT,
                 protocol: 'wss'
             },
@@ -188,7 +216,7 @@ function getDevServerConfig(terminal) {
     const { referencedProjects } = baseConfig.getLinkedSPFxExternals(terminal, __dirname);
     const debugPageUrl = new SPFxDebugPageUrl();
     debugPageUrl.initialUrl = SERVE_INITIAL_PAGE;
-    debugPageUrl.addDebugManifestsFileParameter(`https://localhost:${WEBPACK_DEV_SERVER_PORT}/${DEFAULT_TEMP_FOLDER}/manifests.js`);
+    debugPageUrl.addDebugManifestsFileParameter(`https://${DEBUG_HOSTNAME}:${WEBPACK_DEV_SERVER_PORT}/${DEFAULT_TEMP_FOLDER}/manifests.js`);
     // Webpack Dev Server plugins
     const devServerPlugins = [
         new ServeInfoPlugin({
