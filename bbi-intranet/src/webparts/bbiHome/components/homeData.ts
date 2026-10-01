@@ -200,7 +200,7 @@ const body = (paragraphs: string[]): string =>
 export const DEMO_NEWS: IHomeNews[] = [
   {
     Id: 1,
-    Title: '12 nouveaux formateurs certifiés',
+    Title: '13 nouveaux formateurs certifiés',
     Summary: "La session de certification de septembre s'est achevée avec 100 % de réussite. Retour sur trois jours d'apprentissage collectif et sur ce que cela change pour nos clients.",
     Category: 'Certification',
     Published: daysAgo(4),

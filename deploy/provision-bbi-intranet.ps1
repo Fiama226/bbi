@@ -708,7 +708,7 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
     if ((Get-PnPListItem -List 'Actualites' -PageSize 1).Count -eq 0) {
         Invoke-Bbi "Insertion des actualités d'exemple" {
             Add-PnPListItem -List 'Actualites' -Values @{
-                Title = '12 nouveaux formateurs certifiés'
+                Title = '13 nouveaux formateurs certifiés'
                 Summary = "Trois jours d'apprentissage collectif et 100 % de réussite à la certification."
                 Category = 'Certification'
                 Published = $today.AddDays(-3)

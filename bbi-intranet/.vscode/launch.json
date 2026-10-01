@@ -5,10 +5,11 @@
       "name": "Hosted workbench",
       "type": "msedge",
       "request": "launch",
-      "url": "https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx",
-      "webRoot": "${workspaceRoot}",
+      "url": "https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx?debugManifestsFile=https%3A%2F%2Flocalhost%3A4321%2Ftemp%2Fbuild%2Fmanifests.js&debug=true&noredir=true",
+      "webRoot": "${workspaceRoot}/bbi-intranet",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
+        "webpack:///src/*": "${webRoot}/src/*",
         "webpack:///.././src/*": "${webRoot}/src/*",
         "webpack:///../../../src/*": "${webRoot}/src/*",
         "webpack:///../../../../src/*": "${webRoot}/src/*",
@@ -16,7 +17,8 @@
       },
       "runtimeArgs": [
         "--remote-debugging-port=9222",
-        "-incognito"
+        "-incognito",
+        "--ignore-certificate-errors"
       ]
     }
   ]
