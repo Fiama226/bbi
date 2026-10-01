@@ -58,16 +58,14 @@
   top: var(--bbi-sticky-top, var(--bbi-chrome-offset));
   z-index: 60;
   width: 100%;
-  background: rgba(14, 38, 92, 0.98);
+  background: #0e265c;
+  background-color: #0e265c !important;
   box-shadow: 0 6px 22px rgba(9, 20, 48, 0.28);
-  backdrop-filter: blur(6px);
-  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .topbarSolid {
-  background: rgba(14, 38, 92, 0.98);
+  background-color: #0e265c !important;
   box-shadow: 0 6px 22px rgba(9, 20, 48, 0.28);
-  backdrop-filter: blur(6px);
 }
 
 .topbarInner {

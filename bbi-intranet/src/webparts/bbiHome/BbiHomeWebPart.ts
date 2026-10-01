@@ -91,6 +91,37 @@ const DEFAULT_KPIS: string = [
 ].join('\n');
 
 const IMMERSIVE_HOME_STYLES: string = `
+  /* ------------------------------------------------------------------
+     Calque plein écran BBI : le portail est monté dans un conteneur fixe
+     rattaché au <body>, qui couvre 100 % de la fenêtre et défile seul.
+     Il ne dépend d'aucun sélecteur interne de SharePoint : barre de suite
+     Microsoft, navigation gauche, barre de commandes, bandeau développeur
+     et cadre d'édition du workbench passent tous derrière lui.
+     ------------------------------------------------------------------ */
+  html.bbi-portal-open,
+  body.bbi-portal-open {
+    overflow: hidden !important;
+    height: 100% !important;
+  }
+  .bbi-portal-host {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 1000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #ffffff;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
   /* Chrome SharePoint / Microsoft 365 : rendu comme un site autonome. */
   body.bbi-home-immersive #SuiteNavWrapper,
   body.bbi-home-immersive #O365_NavHeader,
@@ -220,6 +251,12 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
   private _immersiveStyle: HTMLStyleElement | undefined;
   private _chromeShortcut: ((event: KeyboardEvent) => void) | undefined;
   private _immersiveEnabled: boolean = true;
+  /** Conteneur fixe plein écran rattaché au <body> (calque BBI). */
+  private _portalHost: HTMLDivElement | undefined;
+  /** Bouton discret : bascule entre plein écran BBI et écran SharePoint. */
+  private _chromeToggle: HTMLButtonElement | undefined;
+  /** Élément DOM dans lequel React est actuellement monté. */
+  private _mountedIn: HTMLElement | undefined;
 
   protected onInit(): Promise<void> {
     if (!this.properties) {
@@ -270,6 +307,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
 
   public render(): void {
     this._enableImmersiveHome();
+    this._syncImmersiveEditingClass();
     const properties = this.properties || ({} as IBbiHomeWebPartProps);
     const connectedUser = this.context.pageContext.user;
     const element: React.ReactElement<IBbiHomeProps> = React.createElement(BbiHome, {
@@ -311,11 +349,133 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       themeVariant: this._themeVariant,
       strings
     });
-    ReactDom.render(element, this.domElement);
+    const overlay = this._shouldUseOverlay();
+    const target: HTMLElement = overlay ? this._ensurePortalHost() : this.domElement;
+    if (this._mountedIn && this._mountedIn !== target) {
+      ReactDom.unmountComponentAtNode(this._mountedIn);
+    }
+    if (!overlay) {
+      this._removePortalHost();
+    }
+    ReactDom.render(element, target);
+    this._mountedIn = target;
+    document.documentElement.classList.toggle('bbi-portal-open', overlay);
+    document.body.classList.toggle('bbi-portal-open', overlay);
+    this._renderChromeToggle(overlay);
   }
 
   protected onDisplayModeChanged(_oldDisplayMode: DisplayMode): void {
     this._syncImmersiveEditingClass();
+    // Page publiée → calque plein écran ; édition d'une page → intégré à la page.
+    this.render();
+  }
+
+  /**
+   * Le portail doit-il couvrir toute la fenêtre ?
+   *
+   * · workbench hébergé (lecture comme édition) : oui — c'est lui qui
+   *   affiche en permanence les barres natives SharePoint ;
+   * · page publiée (mode lecture) : oui ;
+   * · édition d'une page : non, sinon on ne pourrait plus la modifier ;
+   * · Teams / Viva Connections : non, l'hôte est déjà sans chrome ;
+   * · `?bbiChrome=1` dans l'URL ou Alt + Maj + E : retour à l'écran SharePoint.
+   */
+  private _shouldUseOverlay(): boolean {
+    if (!this._immersiveEnabled || typeof document === 'undefined') {
+      return false;
+    }
+    if (/[?&]bbiChrome=1\b/i.test(window.location.search)) {
+      return false;
+    }
+    if (this.context.sdks && this.context.sdks.microsoftTeams) {
+      return false;
+    }
+    return isHostedWorkbench() || this.displayMode === DisplayMode.Read;
+  }
+
+  private _ensurePortalHost(): HTMLDivElement {
+    if (!this._portalHost) {
+      const host = document.createElement('div');
+      host.className = 'bbi-portal-host';
+      host.id = 'bbi-portal-host';
+      host.setAttribute('data-bbi-scroller', 'true');
+      document.body.appendChild(host);
+      this._portalHost = host;
+    }
+    return this._portalHost;
+  }
+
+  private _removePortalHost(): void {
+    if (this._portalHost) {
+      ReactDom.unmountComponentAtNode(this._portalHost);
+      if (this._portalHost.parentElement) {
+        this._portalHost.parentElement.removeChild(this._portalHost);
+      }
+      this._portalHost = undefined;
+    }
+  }
+
+  /**
+   * Petit bouton d'accès aux barres SharePoint (supprimer / modifier la
+   * web part, ouvrir le volet de propriétés). Quasi invisible sur une page
+   * publiée, plus visible dans le workbench où l'on édite en permanence.
+   */
+  private _renderChromeToggle(overlay: boolean): void {
+    const workbench = isHostedWorkbench();
+    if (!this._chromeToggle) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.setAttribute('data-bbi-chrome-toggle', 'true');
+      button.style.cssText = [
+        'position:fixed',
+        'left:14px',
+        'bottom:14px',
+        'z-index:1000001',
+        'width:34px',
+        'height:34px',
+        'border-radius:50%',
+        'border:1px solid rgba(255,255,255,.55)',
+        'background:#0e265c',
+        'color:#fff',
+        'font:600 15px "Segoe UI",sans-serif',
+        'line-height:1',
+        'cursor:pointer',
+        'box-shadow:0 4px 14px rgba(9,20,48,.35)',
+        'transition:opacity .2s ease'
+      ].join(';');
+      button.addEventListener('mouseenter', () => { button.style.opacity = '1'; });
+      button.addEventListener('mouseleave', () => {
+        button.style.opacity = button.getAttribute('data-rest-opacity') || '0';
+      });
+      button.addEventListener('focus', () => { button.style.opacity = '1'; });
+      button.addEventListener('blur', () => {
+        button.style.opacity = button.getAttribute('data-rest-opacity') || '0';
+      });
+      button.addEventListener('click', () => { this._toggleChrome(); });
+      document.body.appendChild(button);
+      this._chromeToggle = button;
+    }
+    const rest = workbench ? '0.5' : '0';
+    this._chromeToggle.setAttribute('data-rest-opacity', rest);
+    this._chromeToggle.style.opacity = rest;
+    this._chromeToggle.textContent = overlay ? '⚙' : '⤢';
+    const label = overlay
+      ? 'Afficher les barres SharePoint pour modifier ou supprimer la web part (Alt + Maj + E)'
+      : 'Revenir au plein écran BBI (Alt + Maj + E)';
+    this._chromeToggle.title = label;
+    this._chromeToggle.setAttribute('aria-label', label);
+    // Hors workbench et hors calque : l'écran SharePoint est déjà visible,
+    // le bouton ne sert que si l'on a quitté le plein écran.
+    this._chromeToggle.style.display = overlay || !this._immersiveEnabled ? 'block' : 'none';
+  }
+
+  private _toggleChrome(): void {
+    this._applyImmersive(!this._immersiveEnabled);
+    this._syncImmersiveEditingClass();
+    this.render();
+    window.setTimeout(() => {
+      window.dispatchEvent(new Event('resize'));
+    }, 120);
   }
 
   private _enableImmersiveHome(): void {
@@ -324,7 +484,8 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       this._immersiveStyle.setAttribute('data-bbi-home-immersive', 'true');
       this._immersiveStyle.appendChild(document.createTextNode(IMMERSIVE_HOME_STYLES));
     }
-    this._applyImmersive(true);
+    // L'état choisi par l'utilisateur (Alt + Maj + E) survit aux re-rendus.
+    this._applyImmersive(this._immersiveEnabled);
     this._registerChromeShortcut();
   }
 
@@ -368,11 +529,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
         return;
       }
       event.preventDefault();
-      this._applyImmersive(!this._immersiveEnabled);
-      this._syncImmersiveEditingClass();
-      window.setTimeout(() => {
-        window.dispatchEvent(new Event('resize'));
-      }, 120);
+      this._toggleChrome();
     };
     document.addEventListener('keydown', this._chromeShortcut, true);
   }
@@ -383,6 +540,14 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
+    this._removePortalHost();
+    this._mountedIn = undefined;
+    document.documentElement.classList.remove('bbi-portal-open');
+    document.body.classList.remove('bbi-portal-open');
+    if (this._chromeToggle && this._chromeToggle.parentElement) {
+      this._chromeToggle.parentElement.removeChild(this._chromeToggle);
+    }
+    this._chromeToggle = undefined;
     document.body.classList.remove(
       'bbi-home-immersive',
       'bbi-home-editing',

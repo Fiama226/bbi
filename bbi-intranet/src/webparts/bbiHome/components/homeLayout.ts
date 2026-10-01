@@ -248,64 +248,114 @@ export const parseAnnouncements = (text: string): IAnnouncement[] => {
 };
 
 /**
- * Mesure la hauteur du « chrome » SharePoint situé au-dessus de la web part
- * (barre de suite Microsoft, en-tête de site…) afin de calculer une hauteur
- * de héros réellement plein écran, y compris dans le workbench.
+ * Conteneur qui défile réellement.
  *
- * Expose aussi `--bbi-sticky-top` : le positionnement de la barre de
- * navigation collante. Sur le workbench hébergé, le bandeau supérieur défile
- * avec la page → la barre remonte progressivement jusqu'en haut de l'écran,
- * comme sur un site classique. Sur une page moderne, le chrome SharePoint
- * reste visible → offset constant.
+ * · Plein écran BBI : l'hôte `[data-bbi-scroller]` (calque fixe qui couvre toute
+ *   la fenêtre) défile, pas la fenêtre ;
+ * · page moderne SharePoint : la zone `contentScrollRegion` défile, pas
+ *   la fenêtre non plus (c'est pourquoi `window.scrollY` valait toujours 0) ;
+ * · sinon : la fenêtre.
+ */
+export type ScrollerTarget = HTMLElement | Window;
+
+export const findScroller = (node: HTMLElement | null): ScrollerTarget => {
+  let current: HTMLElement | null = node ? node.parentElement : null;
+  while (current && current !== document.body && current !== document.documentElement) {
+    if (current.hasAttribute('data-bbi-scroller')) {
+      return current;
+    }
+    const overflowY = window.getComputedStyle(current).overflowY;
+    if ((overflowY === 'auto' || overflowY === 'scroll') && current.scrollHeight > current.clientHeight + 1) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+  return window;
+};
+
+export const isInBbiOverlay = (node: HTMLElement | null): boolean =>
+  !!node && !!node.closest('[data-bbi-scroller]');
+
+export const getScrollTop = (target: ScrollerTarget): number =>
+  target instanceof Window
+    ? window.pageYOffset || document.documentElement.scrollTop || 0
+    : target.scrollTop;
+
+export const scrollToTop = (target: ScrollerTarget, top: number, smooth: boolean = true): void => {
+  const options: ScrollToOptions = { top: Math.max(0, top), behavior: smooth ? 'smooth' : 'auto' };
+  if (target instanceof Window) {
+    window.scrollTo(options);
+  } else if (typeof target.scrollTo === 'function') {
+    target.scrollTo(options);
+  } else {
+    target.scrollTop = options.top || 0;
+  }
+};
+
+/** Position d'un élément dans le conteneur qui défile (haut du contenu = 0). */
+export const offsetWithinScroller = (target: ScrollerTarget, element: HTMLElement): number => {
+  const rect = element.getBoundingClientRect();
+  if (target instanceof Window) {
+    return rect.top + getScrollTop(target);
+  }
+  return rect.top - target.getBoundingClientRect().top + target.scrollTop;
+};
+
+/**
+ * Écoute le défilement de n'importe quel conteneur : l'événement `scroll`
+ * ne remonte pas, on l'attrape donc en phase de capture sur le document.
+ */
+export const onAnyScroll = (handler: () => void): (() => void) => {
+  document.addEventListener('scroll', handler, { passive: true, capture: true });
+  window.addEventListener('scroll', handler, { passive: true });
+  return () => {
+    document.removeEventListener('scroll', handler, true);
+    window.removeEventListener('scroll', handler);
+  };
+};
+
+/**
+ * Mesure la hauteur du « chrome » SharePoint situé au-dessus de la web part
+ * afin de calculer une hauteur de héros réellement plein écran.
+ *
+ * En plein écran BBI (calque fixe, workbench compris), il n'y a plus aucun
+ * chrome au-dessus du portail : décalage, débordement et position de la
+ * barre collante valent zéro. Sinon (page publiée, mode édition), on mesure
+ * le décalage et le débordement latéral à neutraliser.
+ *
+ * `ready` doit passer à vrai quand le nœud est monté : le portail affiche
+ * d'abord un écran de chargement, sans nœud racine à mesurer.
  */
 export const useChromeOffset = (
-  ref: React.RefObject<HTMLElement>
+  ref: React.RefObject<HTMLElement>,
+  ready: boolean = true
 ): void => {
   React.useEffect(() => {
-    if (!ref.current) {
+    if (!ready || !ref.current) {
       return undefined;
     }
-
-    const isWorkbench =
-      /workbench\.aspx/i.test(window.location.href) ||
-      !!document.getElementById('workbenchPageContent');
-
-    let chromeTop = 0;
-
-    const applyStickyTop = (): void => {
-      const node = ref.current;
-      if (!node) {
-        return;
-      }
-      const stickyTop = isWorkbench
-        ? Math.max(0, Math.round(chromeTop - window.scrollY))
-        : chromeTop;
-      node.style.setProperty('--bbi-sticky-top', `${stickyTop}px`);
-    };
 
     const measure = (): void => {
       const node = ref.current;
       if (!node) {
         return;
       }
+      if (isInBbiOverlay(node)) {
+        node.style.setProperty('--bbi-chrome-offset', '0px');
+        node.style.setProperty('--bbi-sticky-top', '0px');
+        node.style.setProperty('--bbi-bleed', '0px');
+        return;
+      }
+      const scroller = findScroller(node);
       const rect = node.getBoundingClientRect();
-
-      // 1) Hauteur du « chrome » SharePoint au-dessus de la web part.
-      //    Dans le workbench, l'extension plein écran et la web part
-      //    masquent toutes les barres natives : il ne reste donc rien à
-      //    déduire, et le portail doit occuper la fenêtre de bout en bout.
-      const immersiveWorkbench =
-        isWorkbench &&
-        (document.body.classList.contains('bbi-immersive') ||
-          document.body.classList.contains('bbi-home-immersive'));
-      const top = Math.round(rect.top + window.scrollY);
-      chromeTop = immersiveWorkbench ? 0 : Math.max(0, Math.min(140, top));
+      const scrollerTop = scroller instanceof Window ? 0 : scroller.getBoundingClientRect().top;
+      // Distance entre le haut du conteneur qui défile et la web part.
+      const chromeTop = Math.max(0, Math.min(140, Math.round(rect.top - scrollerTop + getScrollTop(scroller))));
       node.style.setProperty('--bbi-chrome-offset', `${chromeTop}px`);
+      node.style.setProperty('--bbi-sticky-top', '0px');
 
-      // 2) Débordement latéral bord-à-bord : on mesure la marge naturelle
-      //    (hors débordement déjà appliqué) et on la neutralise. Plafond
-      //    volontairement large : même sur écran ultra-large, le portail
-      //    doit occuper toute la largeur comme un site classique.
+      // Débordement latéral bord-à-bord : on mesure la marge naturelle
+      // (hors débordement déjà appliqué) et on la neutralise.
       const applied = parseFloat(node.style.getPropertyValue('--bbi-bleed')) || 0;
       const naturalLeft = rect.left + applied;
       const innerWidth = window.innerWidth;
@@ -320,8 +370,6 @@ export const useChromeOffset = (
       const candidate = Math.round(Math.min(naturalLeft, naturalRight));
       const bleed = symmetric && candidate > 0 && candidate <= 1200 ? candidate : 0;
       node.style.setProperty('--bbi-bleed', `${bleed}px`);
-
-      applyStickyTop();
     };
 
     measure();
@@ -330,35 +378,27 @@ export const useChromeOffset = (
       window.setTimeout(measure, 600),
       window.setTimeout(measure, 1600)
     ];
-    let frame = 0;
-    const onScroll = (): void => {
-      if (frame) {
-        return;
-      }
-      frame = window.requestAnimationFrame(() => {
-        frame = 0;
-        applyStickyTop();
-      });
-    };
     window.addEventListener('resize', measure);
     window.addEventListener('load', measure);
-    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('resize', measure);
       window.removeEventListener('load', measure);
-      window.removeEventListener('scroll', onScroll);
-      if (frame) {
-        window.cancelAnimationFrame(frame);
-      }
     };
-  }, [ref]);
+  }, [ref, ready]);
 };
 
-/** Vrai dès que la page est défilée au-delà du seuil (barre de navigation opaque). */
-export const useScrolled = (threshold: number = 48): boolean => {
+/** Vrai dès que la page est défilée au-delà du seuil (bouton « retour en haut »). */
+export const useScrolled = (
+  ref: React.RefObject<HTMLElement>,
+  threshold: number = 48,
+  ready: boolean = true
+): boolean => {
   const [scrolled, setScrolled] = React.useState<boolean>(false);
   React.useEffect(() => {
+    if (!ready) {
+      return undefined;
+    }
     let frame = 0;
     const onScroll = (): void => {
       if (frame) {
@@ -366,18 +406,18 @@ export const useScrolled = (threshold: number = 48): boolean => {
       }
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        setScrolled(window.scrollY > threshold);
+        setScrolled(getScrollTop(findScroller(ref.current)) > threshold);
       });
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const off = onAnyScroll(onScroll);
     onScroll();
     return () => {
       if (frame) {
         window.cancelAnimationFrame(frame);
       }
-      window.removeEventListener('scroll', onScroll);
+      off();
     };
-  }, [threshold]);
+  }, [ref, threshold, ready]);
   return scrolled;
 };
 
@@ -409,13 +449,13 @@ export const useActiveSection = (ids: string[]): string => {
         evaluate();
       });
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const off = onAnyScroll(onScroll);
     evaluate();
     return () => {
       if (frame) {
         window.cancelAnimationFrame(frame);
       }
-      window.removeEventListener('scroll', onScroll);
+      off();
     };
   }, [ids]);
   return active;

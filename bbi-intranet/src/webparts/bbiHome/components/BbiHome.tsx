@@ -37,6 +37,9 @@ import {
   parseQuickLinks,
   useChromeOffset,
   useScrolled,
+  findScroller,
+  offsetWithinScroller,
+  scrollToTop,
 } from "./homeLayout";
 import HomeHero from "./HomeHero";
 import AnnouncementTicker from "./AnnouncementTicker";
@@ -396,8 +399,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     };
   }, [activeView, props.siteUrl, props.spHttpClient, searchQuery]);
 
-  const scrolled = useScrolled(40);
-  useChromeOffset(rootRef);
+  const portalReady = status !== "loading";
+  const scrolled = useScrolled(rootRef, 40, portalReady);
+  useChromeOffset(rootRef, portalReady);
+
+  /** Remonte le conteneur qui défile (calque plein écran, zone SharePoint ou fenêtre). */
+  const scrollPortalToTop = (): void => {
+    scrollToTop(findScroller(rootRef.current), 0);
+  };
 
   /** Défilement doux vers une section du portail, sous la barre collante. */
   const scrollToSection = (id: string): void => {
@@ -405,13 +414,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     if (!target) {
       return;
     }
-    const node = rootRef.current;
-    const rawOffset = node
-      ? parseFloat(window.getComputedStyle(node).getPropertyValue("--bbi-chrome-offset"))
-      : 0;
-    const chrome = Number.isNaN(rawOffset) ? 0 : rawOffset;
-    const top = target.getBoundingClientRect().top + window.pageYOffset - (chrome + 72);
-    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    const scroller = findScroller(rootRef.current);
+    // Barre de navigation collante (≈ 64 px) + ruban d'annonces qui défile avec la page.
+    scrollToTop(scroller, offsetWithinScroller(scroller, target) - 76);
   };
 
   React.useEffect(() => {
@@ -632,7 +637,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       if (view === "actualites" || view === "accueil") {
         setPageIndex(0);
       }
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollPortalToTop();
     }
   };
 
@@ -1452,7 +1457,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             : styles.backToTop
         }
         onClick={() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          scrollPortalToTop();
         }}
         aria-label="Revenir en haut de la page"
       >
