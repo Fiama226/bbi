@@ -112,7 +112,7 @@ const IMMERSIVE_HOME_STYLES: string = `
     width: 100vw;
     height: 100vh;
     height: 100dvh;
-    z-index: 1000000 !important;
+    z-index: 2147483000 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow-x: hidden;
@@ -120,6 +120,15 @@ const IMMERSIVE_HOME_STYLES: string = `
     background: #ffffff;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+  }
+
+  /* Tout ce qui n'est pas le portail BBI est retiré de l'écran quand le
+     calque est ouvert : barres du workbench, barre de suite, volet latéral,
+     barres d'outils flottantes des web parts. Le bouton ⚙ (ou Alt + Maj + E)
+     ferme le calque et rend la page SharePoint pour la gérer. */
+  body.bbi-portal-open > *:not(#bbi-portal-host):not([data-bbi-chrome-toggle]):not(script):not(style):not(link) {
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   /* Chrome SharePoint / Microsoft 365 : rendu comme un site autonome. */
@@ -430,7 +439,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
         'position:fixed',
         'left:14px',
         'bottom:14px',
-        'z-index:1000001',
+        'z-index:2147483001',
         'width:34px',
         'height:34px',
         'border-radius:50%',

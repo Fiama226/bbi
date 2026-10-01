@@ -464,3 +464,12 @@
   .dotProgress { animation: none !important; }
   .primary, .secondary, .media, .dotTrack, .arrow, .kpi, .kpi::before, .explore span { transition: none; }
 }
+
+/* Chiffres clés déplacés sous « Vos espaces » : bloc autonome, pleine largeur
+   de la section, jamais superposé au diaporama ni à ses boutons. */
+.kpiBandStandalone {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  color: initial;
+}

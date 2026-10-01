@@ -41,7 +41,7 @@ import {
   offsetWithinScroller,
   scrollToTop,
 } from "./homeLayout";
-import HomeHero from "./HomeHero";
+import HomeHero, { KpiBand } from "./HomeHero";
 import AnnouncementTicker from "./AnnouncementTicker";
 import NewsBoard from "./NewsBoard";
 import NewsDetail from "./NewsDetail";
@@ -797,7 +797,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       {/* Barre de navigation : toujours bleue, sur l'accueil comme sur les
           autres vues. Le fond est appliqué par `.topbar` lui-même, l'état
           translucide d'autrefois masquait la barre sur l'accueil. */}
-      <header className={`${styles.topbar} ${styles.topbarSolid}`}>
+      <header
+        className={`${styles.topbar} ${styles.topbarSolid}`}
+        data-bbi-topbar="true"
+        style={{ backgroundColor: "#0e265c", background: "#0e265c" }}
+      >
         <div className={styles.topbarInner}>
           <a
             className={styles.brand}
@@ -998,7 +1002,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           primaryUrl={props.primaryCtaUrl || "#formations"}
           secondaryLabel={props.secondaryCtaLabel || "Voir les prochaines sessions"}
           secondaryUrl={props.secondaryCtaUrl || "#sessions"}
-          kpis={kpis}
+          kpis={[]}
           compact={props.layoutCompact === true}
           greeting={greetingOf(props.userName)}
           onExplore={() => {
@@ -1042,6 +1046,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             ))}
           </div>
         </section>
+
+        {kpis.length > 0 && (
+          <section
+            className={styles.section}
+            id="chiffres-cles"
+            data-bbi-view="accueil"
+            aria-label="Chiffres clés BBI"
+          >
+            <KpiBand kpis={kpis} />
+          </section>
+        )}
 
         <section
           className={styles.learningPath}
@@ -1350,7 +1365,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           data-bbi-view="actualite"
           aria-label="Actualité"
         >
-          <NewsDetail
+          {activeView === "actualite" && (<NewsDetail
             bundle={newsBundle}
             loading={newsBundleLoading}
             siteUrl={props.siteUrl}
@@ -1360,7 +1375,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               event.preventDefault();
               openView("actualites");
             }}
-          />
+          />)}
         </section>
 
         <section
@@ -1388,12 +1403,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               Annuaire des formateurs <span aria-hidden="true">→</span>
             </a>
           </div>
-          <OrgChart
-            nodes={orgChart.nodes}
-            isDemo={orgChart.isDemo}
-            showDataNotices={props.showDataNotices}
-            loading={orgLoading}
-          />
+          {activeView === "organigramme" && (
+            <OrgChart
+              nodes={orgChart.nodes}
+              isDemo={orgChart.isDemo}
+              showDataNotices={props.showDataNotices}
+              loading={orgLoading}
+            />
+          )}
         </section>
 
         <section

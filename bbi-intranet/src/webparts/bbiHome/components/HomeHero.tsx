@@ -382,4 +382,20 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
   );
 };
 
+/** Bande des chiffres clés, affichée plus bas dans l'accueil (hors héros). */
+export const KpiBand: React.FC<{ kpis: IKpi[] }> = ({ kpis }) => (
+  <ul
+    className={`${styles.kpiBand} ${styles.kpiBandStandalone}`}
+    data-bbi-kpi-band="true"
+    aria-label="Chiffres clés BBI"
+  >
+    {kpis.map((kpi) => (
+      <li key={`${kpi.value}-${kpi.label}`} className={styles.kpi}>
+        <strong>{kpi.value}</strong>
+        <span>{kpi.label}</span>
+      </li>
+    ))}
+  </ul>
+);
+
 export default HomeHero;

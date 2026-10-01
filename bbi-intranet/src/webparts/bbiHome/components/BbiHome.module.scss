@@ -1286,3 +1286,18 @@ a.sessionStatus:hover {
     min-height: 0;
   }
 }
+
+/* Accueil : plus de bloc « Actualités BBI » (les annonces défilantes le
+   remplacent) ; les prochaines sessions prennent toute la largeur. */
+.home[data-view="accueil"] [data-bbi-view="actualites"] {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.home[data-view="accueil"] [data-bbi-view="actualites"] .newsColumn {
+  display: none !important;
+}
+
+/* Barre de navigation : bleu BBI imposé sur toutes les vues, accueil compris. */
+.home header[data-bbi-topbar="true"] {
+  background: #0e265c !important;
+  background-color: #0e265c !important;
+}
