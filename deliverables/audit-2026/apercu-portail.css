@@ -54,16 +54,14 @@
   top: var(--bbi-sticky-top, var(--bbi-chrome-offset));
   z-index: 60;
   width: 100%;
-  background: rgba(14, 38, 92, 0.98);
+  background: #0e265c;
+  background-color: #0e265c !important;
   box-shadow: 0 6px 22px rgba(9, 20, 48, 0.28);
-  backdrop-filter: blur(6px);
-  transition: background 0.25s ease, box-shadow 0.25s ease;
 }
 
 .base-topbarSolid {
-  background: rgba(14, 38, 92, 0.98);
+  background-color: #0e265c !important;
   box-shadow: 0 6px 22px rgba(9, 20, 48, 0.28);
-  backdrop-filter: blur(6px);
 }
 
 .base-topbarInner {
@@ -1240,15 +1238,17 @@ a.base-sessionStatus:hover {
 /* BBI home hero — editorial photography, clear type and quiet controls. */
 .hero-heroWrap {
   position: relative;
-  margin-top: calc(-1 * (var(--bbi-chrome-offset) + 64px));
-  padding-top: calc(var(--bbi-chrome-offset) + 64px);
+  /* Le héros commence SOUS la barre de navigation (bleue, opaque) : plus de
+     marge négative qui glissait le visuel derrière la barre. */
+  margin: 0;
+  padding: 0;
   color: #fff;
 }
 
 .hero-stage {
   position: relative;
   display: flex;
-  min-height: max(640px, 100svh - var(--bbi-chrome-offset) - 64px);
+  min-height: max(600px, 100svh - var(--bbi-chrome-offset) - 64px - 40px);
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
@@ -1711,7 +1711,7 @@ a.base-sessionStatus:hover {
 
 @media (max-width: 900px) {
   .hero-stage {
-    min-height: max(620px, 100svh - var(--bbi-chrome-offset) - 64px);
+    min-height: max(580px, 100svh - var(--bbi-chrome-offset) - 64px - 40px);
   }
 
   .hero-inner {

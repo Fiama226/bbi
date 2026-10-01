@@ -15,7 +15,7 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 > Pour le déploiement standard : téléversez le package, puis ajoutez **uniquement `BBI Accueil — portail unifié`** à `accueil.aspx`. N'ajoutez pas les briques Catalogue, Galerie ou Documents séparément.
 
-Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.7.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
+Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.8.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
 
 ### Contenus de repli (production ready)
 
@@ -219,7 +219,7 @@ La première section au-dessus de la barre de navigation n'affiche plus un texte
 
 Le portail occupe toute la fenêtre, **y compris dans le workbench hébergé** : en-tête de site, barre de navigation gauche, barre de commandes, bandeau d'applications et cadre d'édition du workbench sont masqués, le canevas est élargi à 100 % sans marge ni bordure. L'extension **BBI Plein écran** applique le même traitement (elle masque aussi la barre de commandes dans le workbench, `hideCommandBar` vaut `true` par défaut).
 
-> **Alt + Maj + E** bascule le chrome SharePoint : pratique pour revenir à l'écran SharePoint classique et gérer la page (supprimer une web part, par exemple) sans toucher au code.
+> **Alt + Maj + E** bascule le chrome SharePoint : pratique pour revenir à l'écran SharePoint classique et gérer la page (supprimer une web part, par exemple) sans toucher au code. Le portail est monté dans un calque plein écran fixe (indépendant des classes internes de SharePoint) ; le bouton ⚙ en bas à gauche fait la même bascule. Un Application Customizer ne s’exécute pas dans le workbench : c’est la web part elle-même qui assure le plein écran.
 
 ### Chiffres clés sous le héros
 

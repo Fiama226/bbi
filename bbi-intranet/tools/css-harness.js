@@ -234,12 +234,16 @@ try {
 
 // Le composant charge ses données async (Promise) puis re-rend — on attend.
 setTimeout(() => {
+  // Plein écran : le portail est monté dans un calque fixe rattaché au <body>
+  // (workbench hébergé) ; sinon il vit dans l'élément de la web part.
+  const portalHost = window.document.getElementById('bbi-portal-host');
+  const renderRoot = portalHost || hostDiv;
   const styles = window.document.head.querySelectorAll('style');
   const allCss = Array.from(styles)
     .map((s) => s.textContent || '')
     .join('\n');
 
-  const rendered = hostDiv.innerHTML;
+  const rendered = renderRoot.innerHTML;
   const renderedClasses = [
     ...new Set((rendered.match(/class="[^"]+"/g) || []).join(' ').match(/[\w-]+_[A-Za-z0-9]{5,8}/g) || [])
   ];
@@ -262,11 +266,11 @@ setTimeout(() => {
 
   // Non-régression : la bande de chiffres clés ne doit jamais être rendue
   // dans la zone rognée du diaporama (c'était la cause de son invisibilité).
-  const kpiBand = hostDiv.querySelector('[data-bbi-kpi-band]');
-  const kpiInsideStage = hostDiv.querySelector('[data-bbi-hero-stage] [data-bbi-kpi-band]');
-  const kpiCount = hostDiv.querySelectorAll('[data-bbi-kpi-band] > li').length;
-  const slideCount = hostDiv.querySelectorAll('[data-bbi-hero-slide]').length;
-  const pagination = hostDiv.querySelector('[data-bbi-news-pagination]');
+  const kpiBand = renderRoot.querySelector('[data-bbi-kpi-band]');
+  const kpiInsideStage = renderRoot.querySelector('[data-bbi-hero-stage] [data-bbi-kpi-band]');
+  const kpiCount = renderRoot.querySelectorAll('[data-bbi-kpi-band] > li').length;
+  const slideCount = renderRoot.querySelectorAll('[data-bbi-hero-slide]').length;
+  const pagination = renderRoot.querySelector('[data-bbi-news-pagination]');
   console.log(
     `Bande de chiffres clés : ${kpiBand ? `${kpiCount} chiffre(s)` : 'ABSENTE'} — hors zone rognée : ${
       kpiBand && !kpiInsideStage ? 'OUI' : 'NON'
@@ -300,11 +304,17 @@ setTimeout(() => {
 
   /* 1. La barre de navigation reste bleue sur l'accueil comme ailleurs.
         Elle était transparente tant que la vue courante était « accueil ». */
-  const topbar = hostDiv.querySelector('header');
+  const topbar = renderRoot.querySelector('header');
   const topbarRule = ruleOf(topbar, /topbar/i);
   const topbarOpaque =
-    /background(?:-color)?:\s*rgba?\(/.test(topbarRule) &&
+    /background(?:-color)?:\s*(?:rgba?\(|#[0-9a-f]{3,8})/i.test(topbarRule) &&
     !/background(?:-color)?:\s*transparent/.test(topbarRule);
+  const overlayOk =
+    !!portalHost &&
+    portalHost.hasAttribute('data-bbi-scroller') &&
+    /\.bbi-portal-host\s*\{[^}]*position:\s*fixed/.test(allCss) &&
+    /\.bbi-portal-host\s*\{[^}]*bottom:\s*0/.test(allCss);
+  console.log(`Calque plein écran (workbench) : ${overlayOk ? 'OUI — fixe, 100 % de la fenêtre, défile seul' : 'ABSENT'}`);
   console.log(`Barre de navigation : ${topbarOpaque ? 'BLEUE (fond opaque)' : 'NON OPAQUE'}`);
 
   /* 2. La bande de chiffres clés ne doit plus remonter sur le héros : sa
@@ -335,7 +345,7 @@ setTimeout(() => {
 
   /* 4. Bandeau d'annonces déroulant présent, et chaque annonce est un lien
         vers sa page de détail. */
-  const ticker = hostDiv.querySelector('[aria-label="Annonces BBI"]');
+  const ticker = renderRoot.querySelector('[aria-label="Annonces BBI"]');
   const tickerLinks = ticker ? ticker.querySelectorAll('a[href]') : [];
   const tickerHrefs = Array.from(tickerLinks).map((a) => a.getAttribute('href'));
   const tickerOk =
@@ -350,20 +360,20 @@ setTimeout(() => {
 
   const chromeOk = topbarOpaque && !kpiOverlaps && homeHides && homeHidesArticle && tickerOk;
 
-  const routeRoot = hostDiv.querySelector('#bbi-home-root');
-  const trainingLink = hostDiv.querySelector('header nav a[href="#formations"]');
+  const routeRoot = renderRoot.querySelector('#bbi-home-root');
+  const trainingLink = renderRoot.querySelector('header nav a[href="#formations"]');
   if (trainingLink) {
     trainingLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
   }
   const trainingRouteOk = routeRoot && routeRoot.getAttribute('data-view') === 'formations';
-  const homeLink = hostDiv.querySelector('header nav a[href="#accueil"]');
+  const homeLink = renderRoot.querySelector('header nav a[href="#accueil"]');
   if (homeLink) {
     homeLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
   }
   const homeRouteOk = routeRoot && routeRoot.getAttribute('data-view') === 'accueil';
   console.log(`Navigation SPA (Accueil → Formations → Accueil) : ${trainingRouteOk && homeRouteOk ? 'OK' : 'ÉCHEC'}`);
 
-  const orgLink = hostDiv.querySelector('header nav a[href="#organigramme"]');
+  const orgLink = renderRoot.querySelector('header nav a[href="#organigramme"]');
   if (orgLink) {
     orgLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
   }
@@ -378,7 +388,8 @@ setTimeout(() => {
     kpiOk &&
     slidesOk &&
     paginationOk &&
-    chromeOk;
+    chromeOk &&
+    overlayOk;
   console.log(
     `\n${
       allOk
