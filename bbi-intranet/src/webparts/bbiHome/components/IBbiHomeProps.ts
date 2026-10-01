@@ -13,6 +13,8 @@ export interface IBbiHomeProps {
   employeeListTitle: string;
   certificationsListTitle: string;
   orgChartListTitle: string;
+  /** Liste SharePoint des annonces internes (mariages, anniversaires…). */
+  announcementsListTitle: string;
   maxItems: number;
 
   /* --- Héros --- */

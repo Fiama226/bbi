@@ -932,7 +932,8 @@ a.sessionStatus:hover {
 .home[data-view="communaute"] .content > :not([data-bbi-view="ressources"]),
 .home[data-view="recherche"] .content > :not([data-bbi-view="recherche"]),
 .home[data-view="actualite"] .content > :not([data-bbi-view="actualite"]),
-.home[data-view="organigramme"] .content > :not([data-bbi-view="organigramme"]) {
+.home[data-view="organigramme"] .content > :not([data-bbi-view="organigramme"]),
+.home[data-view="annonce"] .content > :not([data-bbi-view="annonce"]) {
   display: none !important;
 }
 
@@ -1285,4 +1286,21 @@ a.sessionStatus:hover {
   .pathCard {
     min-height: 0;
   }
+}
+
+/* Barre de navigation : bleu BBI imposé sur toutes les vues, accueil compris. */
+.home header[data-bbi-topbar="true"] {
+  background: #0e265c !important;
+  background-color: #0e265c !important;
+}
+
+/* Page de détail d'une annonce : visible uniquement dans sa vue. */
+.home:not([data-view="annonce"]) [data-bbi-view="annonce"] {
+  display: none !important;
+}
+.home[data-view="annonce"] [data-bbi-view="annonce"] {
+  flex: 1 1 auto;
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
 }

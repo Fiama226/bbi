@@ -281,7 +281,7 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
           )}
         </div>
       </div>,
-      document.body,
+      (document.getElementById("bbi-portal-host") || document.body),
     );
   };
 

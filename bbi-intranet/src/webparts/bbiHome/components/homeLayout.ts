@@ -227,8 +227,8 @@ export const parseKpis = (text: string): IKpi[] => {
  *
  *   libellé | lien
  *
- * Le lien peut être une ancre du portail (`#actualite?id=12`, `#sessions`…)
- * ou une URL externe. Sans lien, l'annonce mène à la liste des actualités :
+ * Le lien peut être une ancre du portail (`#annonce?id=12`, `#sessions`…)
+ * ou une URL externe. Sans lien, l'annonce mène à la liste des annonces :
  * une annonce sans destination n'aurait aucun sens au clic.
  */
 export const parseAnnouncements = (text: string): IAnnouncement[] => {
@@ -241,7 +241,7 @@ export const parseAnnouncements = (text: string): IAnnouncement[] => {
       return;
     }
     const raw = (parts[1] || '').trim();
-    const href = raw ? (safeHref(raw) || '#actualites') : '#actualites';
+    const href = raw ? (safeHref(raw) || '#annonces') : '#annonces';
     announcements.push({ key: `annonce-${index}`, label, href });
   });
   return announcements;

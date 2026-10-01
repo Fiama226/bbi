@@ -15,6 +15,7 @@ export type PortalView =
   | "sessions"
   | "actualites"
   | "actualite"
+  | "annonce"
   | "ressources"
   | "communaute"
   | "organigramme"
@@ -28,6 +29,7 @@ export const VIEW_FROM_HASH: { [key: string]: PortalView } = {
   sessions: "sessions", agenda: "sessions",
   actualites: "actualites", news: "actualites", "vie-bbi": "actualites",
   actualite: "actualite", article: "actualite", newsitem: "actualite",
+  annonce: "annonce", annonces: "annonce",
   ressources: "ressources", documents: "ressources", galerie: "ressources",
   communaute: "communaute", formateurs: "communaute", support: "communaute",
   "espace-formateurs": "communaute", equipe: "communaute",

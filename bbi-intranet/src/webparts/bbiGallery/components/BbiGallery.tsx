@@ -254,7 +254,7 @@ const BbiGallery: React.FC<IBbiGalleryProps> = (props) => {
           </figcaption>
         </figure>
       </div>,
-      document.body,
+      (document.getElementById("bbi-portal-host") || document.body),
     );
   };
 
