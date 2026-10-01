@@ -8,7 +8,7 @@
  *   2. que le CSS des .module.scss y figure,
  *   3. que le DOM rendu utilise bien les classes (hachées) du CSS.
  *
- * Exécution : node tools/css-harness.js [dist|release]
+ * Exécution : node tools/css-harness.js [dist|release] [workbench|page] [demo|live|empty]
  */
 'use strict';
 
@@ -18,6 +18,15 @@ const { JSDOM } = require('jsdom');
 
 const root = path.join(__dirname, '..');
 const mode = process.argv[2] === 'release' ? 'release' : 'dist';
+const pageMode = process.argv.includes('page') ? 'page' : 'workbench';
+const announcementScenario = process.argv.includes('live') ? 'live' : process.argv.includes('empty') ? 'empty' : 'demo';
+const requests = [];
+const announcementFixtures = [
+  { Id: 23, Title: 'Mariage de notre collègue', AnnonceType: 'Mariage', Body: '<p>MARIAGE_DETAIL_ONLY</p><script>bad()</script><img src="x" onerror="bad()">', Author: { Title: 'RH' } },
+  { Id: 24, Title: 'Joyeux anniversaire !', AnnonceType: 'Anniversaire', Body: '<p>ANNIVERSAIRE_DETAIL_ONLY</p>' },
+  { Id: 99, Title: 'Annonce accessible par lien direct', AnnonceType: 'Autre', Body: '<p>DIRECT_DETAIL_ONLY</p>' },
+];
+console.log(`Contexte : ${pageMode} · annonces : ${announcementScenario}`);
 const bundleName =
   mode === 'release'
     ? 'bbi-home-web-part_en-us_'
@@ -39,7 +48,9 @@ console.log(`Bundle testé : ${path.join(folder, bundleFile)}`);
 
 // --- Environnement DOM simulé ---------------------------------------------
 const dom = new JSDOM('<!doctype html><html><head></head><body></body></html>', {
-  url: 'https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx',
+  url: pageMode === 'page'
+    ? 'https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/accueil.aspx'
+    : 'https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx',
   runScripts: 'outside-only',
   pretendToBeVisual: true,
 });
@@ -174,6 +185,10 @@ if (typeof WpClass !== 'function') {
   process.exit(1);
 }
 
+const nativeChrome = window.document.createElement('div');
+nativeChrome.id = 'mock-sharepoint-chrome';
+nativeChrome.textContent = 'Commandes SharePoint';
+window.document.body.appendChild(nativeChrome);
 const hostDiv = window.document.createElement('div');
 window.document.body.appendChild(hostDiv);
 
@@ -198,7 +213,22 @@ wp.context = {
     )
   ),
   spHttpClient: {
-    get: () => Promise.reject(new Error('no network in harness')),
+    get: async (url) => {
+      requests.push(url);
+      if (announcementScenario !== 'demo' && url.includes("getbytitle('Annonces')")) {
+        if (url.includes('/fields')) {
+          const fields = ['Id', 'Title', 'Created', 'Author', 'Body', 'AnnonceType'];
+          return { ok: true, json: async () => ({ value: fields.map((InternalName) => ({ InternalName })) }) };
+        }
+        const filter = new URL(url).searchParams.get('$filter') || '';
+        const id = (filter.match(/^Id eq (\d+)$/) || [])[1];
+        const items = announcementScenario === 'empty' ? [] : id
+          ? announcementFixtures.filter((item) => item.Id === Number(id))
+          : announcementFixtures.filter((item) => item.Id !== 99);
+        return { ok: true, json: async () => ({ value: items }) };
+      }
+      throw new Error('no network in harness');
+    },
   },
   serviceScope: {
     consume: () => undefined,
@@ -233,7 +263,7 @@ try {
 }
 
 // Le composant charge ses données async (Promise) puis re-rend — on attend.
-setTimeout(() => {
+const verifyRender = async () => {
   // Plein écran : le portail est monté dans un calque fixe rattaché au <body>
   // (workbench hébergé) ; sinon il vit dans l'élément de la web part.
   const portalHost = window.document.getElementById('bbi-portal-host');
@@ -279,7 +309,12 @@ setTimeout(() => {
   console.log(`Diapositives du héros : ${slideCount}`);
   console.log(`Pagination des actualités : ${pagination ? 'PRÉSENTE' : 'ABSENTE'}`);
 
-  const kpiOk = !!kpiBand && !kpiInsideStage && kpiCount >= 3;
+  const spaces = renderRoot.querySelector('#acces');
+  const statsSection = renderRoot.querySelector('#chiffres-cles');
+  const kpiBelowSpaces = !!spaces && spaces.nextElementSibling === statsSection &&
+    !!statsSection && statsSection.contains(kpiBand) && !kpiBand.closest('[data-bbi-block="hero"]');
+  const kpiOk = !!kpiBand && !kpiInsideStage && kpiCount >= 3 && kpiBelowSpaces;
+  console.log(`Chiffres clés dans leur section après « Vos espaces » : ${kpiBelowSpaces ? 'OUI' : 'NON'}`);
   const slidesOk = slideCount >= 2;
   const paginationOk = !!pagination;
 
@@ -308,23 +343,25 @@ setTimeout(() => {
   const topbarRule = ruleOf(topbar, /topbar/i);
   const topbarOpaque =
     /background(?:-color)?:\s*(?:rgba?\(|#[0-9a-f]{3,8})/i.test(topbarRule) &&
-    !/background(?:-color)?:\s*transparent/.test(topbarRule);
+    !/background(?:-color)?:\s*transparent/.test(topbarRule) &&
+    window.getComputedStyle(topbar).backgroundColor === 'rgb(14, 38, 92)';
   const overlayOk =
     !!portalHost &&
     portalHost.hasAttribute('data-bbi-scroller') &&
     /\.bbi-portal-host\s*\{[^}]*position:\s*fixed/.test(allCss) &&
     /\.bbi-portal-host\s*\{[^}]*bottom:\s*0/.test(allCss);
-  console.log(`Calque plein écran (workbench) : ${overlayOk ? 'OUI — fixe, 100 % de la fenêtre, défile seul' : 'ABSENT'}`);
+  const nativeChromeHidden = window.getComputedStyle(nativeChrome).visibility === 'hidden';
+  console.log(`Calque plein écran (${pageMode}) : ${overlayOk && nativeChromeHidden ? 'OUI — fixe, chrome masqué, défile seul' : 'ABSENT / CHROME VISIBLE'}`);
   console.log(`Barre de navigation : ${topbarOpaque ? 'BLEUE (fond opaque)' : 'NON OPAQUE'}`);
 
   /* 2. La bande de chiffres clés ne doit plus remonter sur le héros : sa
         marge haute était négative et masquait boutons et textes. */
-  const kpiRule = ruleOf(kpiBand, /kpiBand/);
+  const kpiRule = ruleOf(kpiBand, /kpiBandStandalone/);
   const kpiMargin = (kpiRule.match(/margin:\s*([^;]+)/) || [])[1] || '';
   const kpiOverlaps = /margin:\s*-\d/.test(kpiRule);
   console.log(
     `Chiffres clés : marge « ${kpiMargin.trim()} » — ${
-      kpiOverlaps ? 'RECOUVRE LE HÉROS' : 'sous le héros'
+      kpiOverlaps ? 'RECOUVRE LE HÉROS' : 'bloc autonome après Vos espaces'
     }`
   );
 
@@ -343,22 +380,26 @@ setTimeout(() => {
     }`
   );
 
-  /* 4. Bandeau d'annonces déroulant présent, et chaque annonce est un lien
-        vers sa page de détail. */
-  const ticker = renderRoot.querySelector('[aria-label="Annonces BBI"]');
+  const newsColumn = renderRoot.querySelector('[class*="newsColumn_"]');
+  const homeNewsVisible = !!newsColumn && window.getComputedStyle(newsColumn).display !== 'none' &&
+    window.getComputedStyle(newsColumn.parentElement).display !== 'none';
+  const homeDetailAbsent = renderRoot.querySelector('[data-bbi-view="actualite"]').children.length === 0;
+  console.log(`Accueil : actualités conservées, détail vide non monté : ${homeNewsVisible && homeDetailAbsent ? 'OUI' : 'NON'}`);
+
+  /* 4. Annonces séparées des actualités : liens de détail #annonce?id=… */
+  const ticker = renderRoot.querySelector('[role="region"][aria-label="Annonces BBI"]');
   const tickerLinks = ticker ? ticker.querySelectorAll('a[href]') : [];
   const tickerHrefs = Array.from(tickerLinks).map((a) => a.getAttribute('href'));
-  const tickerOk =
-    !!ticker &&
-    tickerHrefs.length > 0 &&
-    tickerHrefs.every((href) => /^#(actualite\?id=\d+|actualites|accueil)/.test(href));
-  console.log(
-    `Annonces déroulantes : ${ticker ? `${tickerHrefs.length} lien(s)` : 'ABSENTES'} — ${
-      tickerOk ? 'chaque annonce ouvre une page' : 'LIEN MANQUANT'
-    }`
-  );
+  const tickerOk = announcementScenario === 'empty'
+    ? !ticker
+    : !!ticker && tickerHrefs.some((href) => /^#annonce\?id=\d+$/.test(href)) &&
+      tickerHrefs.every((href) => /^#annonce\?id=\d+$|^#annonces$/.test(href));
+  const tickerSourceOk = !ticker || !ticker.textContent.includes('12 nouveaux formateurs certifiés');
+  const examplesMarked = announcementScenario !== 'demo' || !!ticker && ticker.textContent.includes('Exemple —');
+  console.log(`Annonces : ${ticker ? `${tickerHrefs.length} lien(s)` : 'liste vide — bandeau masqué'} · source distincte : ${tickerOk && tickerSourceOk && examplesMarked ? 'OK' : 'ÉCHEC'}`);
 
-  const chromeOk = topbarOpaque && !kpiOverlaps && homeHides && homeHidesArticle && tickerOk;
+  const chromeOk = topbarOpaque && !kpiOverlaps && homeHides && homeHidesArticle &&
+    homeNewsVisible && homeDetailAbsent && tickerOk && tickerSourceOk && examplesMarked && nativeChromeHidden;
 
   const routeRoot = renderRoot.querySelector('#bbi-home-root');
   const trainingLink = renderRoot.querySelector('header nav a[href="#formations"]');
@@ -380,22 +421,80 @@ setTimeout(() => {
   const orgRouteOk = !!orgLink && routeRoot && routeRoot.getAttribute('data-view') === 'organigramme';
   console.log(`Navigation SPA vers #organigramme : ${orgRouteOk ? 'OK' : 'ÉCHEC'}`);
 
-  const allOk =
-    styleOk &&
-    trainingRouteOk &&
-    homeRouteOk &&
-    orgRouteOk &&
-    kpiOk &&
-    slidesOk &&
-    paginationOk &&
-    chromeOk &&
-    overlayOk;
-  console.log(
-    `\n${
-      allOk
-        ? '✓ CSS, HÉROS (DIAPORAMA + CHIFFRES CLÉS HORS ZONE ROGNÉE), ANNONCES, PAGINATION ET NAVIGATION OK'
-        : '✗ VÉRIFICATION EN ÉCHEC'
-    } (mode ${mode})`
-  );
+  // Attend une mutation du vrai DOM React, avec un délai maximal explicite.
+  const waitFor = (predicate, label) => new Promise((resolve, reject) => {
+    if (predicate()) { resolve(); return; }
+    const observer = new window.MutationObserver(() => {
+      if (predicate()) {
+        observer.disconnect();
+        clearTimeout(timeout);
+        resolve();
+      }
+    });
+    const timeout = setTimeout(() => {
+      observer.disconnect();
+      reject(new Error(`Délai dépassé : ${label}`));
+    }, 3000);
+    observer.observe(renderRoot, { subtree: true, childList: true, attributes: true, characterData: true });
+  });
+  const detailHeading = () => renderRoot.querySelector('[data-bbi-view="annonce"] h1');
+  const detailSection = () => renderRoot.querySelector('[data-bbi-view="annonce"]');
+
+  let announcementRouteOk = true;
+  let sanitizedOk = true;
+  if (announcementScenario !== 'empty') {
+    const link = Array.from(tickerLinks).find((node) => /^#annonce\?id=/.test(node.getAttribute('href')));
+    const expectedTitle = announcementScenario === 'live'
+      ? announcementFixtures[0].Title
+      : 'Félicitations à Aïcha et Moussa pour leur mariage !';
+    link.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+    await waitFor(() => detailHeading() && detailHeading().textContent === expectedTitle, 'détail de l’annonce');
+    announcementRouteOk = routeRoot.getAttribute('data-view') === 'annonce' &&
+      window.location.hash === link.getAttribute('href') &&
+      window.getComputedStyle(detailSection()).display !== 'none' &&
+      window.getComputedStyle(newsColumn.parentElement).display === 'none';
+    sanitizedOk = !detailSection().querySelector('script, [onerror]');
+    if (announcementScenario === 'live') {
+      sanitizedOk = sanitizedOk && detailSection().textContent.includes('MARIAGE_DETAIL_ONLY');
+      window.location.hash = '#annonce?id=99';
+      await waitFor(() => detailHeading() && detailHeading().textContent === announcementFixtures[2].Title, 'lien direct hors du bandeau');
+      announcementRouteOk = announcementRouteOk && detailSection().textContent.includes('DIRECT_DETAIL_ONLY') &&
+        requests.some((url) => url.includes("getbytitle('Annonces')") && url.includes('$filter=Id eq 99'));
+    }
+  }
+  console.log(`Détail d’annonce autonome, navigation et HTML nettoyé : ${announcementRouteOk && sanitizedOk ? 'OK' : 'ÉCHEC'}`);
+
+  window.location.hash = '#annonces';
+  await waitFor(() => detailHeading() && detailHeading().textContent === "Annonces de l'équipe", 'liste des annonces');
+  const overviewOk = routeRoot.getAttribute('data-view') === 'annonce' &&
+    !detailSection().textContent.includes('Annonce introuvable') &&
+    (announcementScenario !== 'empty' || detailSection().textContent.includes('Aucune annonce en cours'));
+  console.log(`Vue des dernières annonces / état vide réel : ${overviewOk ? 'OK' : 'ÉCHEC'}`);
+
+  const returnLink = detailSection().querySelector('a[href="#accueil"]');
+  returnLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  const announcementBackOk = routeRoot.getAttribute('data-view') === 'accueil' &&
+    window.getComputedStyle(detailSection()).display === 'none' &&
+    !renderRoot.querySelector('[data-bbi-view="actualite"]').children.length;
+
+  const toggle = window.document.querySelector('[data-bbi-chrome-toggle]');
+  toggle.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  const chromeRestored = !window.document.body.classList.contains('bbi-portal-open') &&
+    !window.document.getElementById('bbi-portal-host') &&
+    window.getComputedStyle(nativeChrome).visibility !== 'hidden';
+  console.log(`Retour à l’accueil puis accès aux commandes SharePoint : ${announcementBackOk && chromeRestored ? 'OK' : 'ÉCHEC'}`);
+
+  const allOk = styleOk && trainingRouteOk && homeRouteOk && orgRouteOk && kpiOk &&
+    slidesOk && paginationOk && chromeOk && overlayOk && announcementRouteOk &&
+    sanitizedOk && overviewOk && announcementBackOk && chromeRestored;
+  console.log(`\n${allOk
+    ? '✓ CSS, ACCUEIL, STATISTIQUES, ANNONCES DISTINCTES, NAVIGATION ET PLEIN ÉCRAN OK'
+    : '✗ VÉRIFICATION EN ÉCHEC'} (mode ${mode}, ${pageMode}, ${announcementScenario})`);
   process.exit(allOk ? 0 : 1);
+};
+setTimeout(() => {
+  verifyRender().catch((error) => {
+    console.error('✗ VÉRIFICATION EN ERREUR :', error.message);
+    process.exit(1);
+  });
 }, 300);

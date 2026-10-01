@@ -3,11 +3,11 @@ import styles from "./AnnouncementTicker.module.scss";
 import { IAnnouncement } from "./homeLayout";
 
 export interface IAnnouncementTickerProps {
-  /** Annonces à faire défiler (paramétrées ou issues des dernières actualités). */
+  /** Annonces à faire défiler (paramétrées ou issues de la liste Annonces). */
   items: IAnnouncement[];
   /** Ouvre la page de détail d'une annonce ; signature alignée sur les liens du portail. */
   onOpen: (event: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
-  /** Lien permanent vers toutes les actualités. */
+  /** Lien permanent vers les dernières annonces. */
   onSeeAll: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
@@ -37,7 +37,7 @@ const prefersReducedMotion = (): boolean => {
  * alors simplement défilable au doigt ou à la molette.
  *
  * Chaque annonce est un vrai lien vers sa page de détail partageable
- * (`#actualite?id=12`). La seconde copie du ruban, celle qui « rentre » par
+ * (`#annonce?id=12`). La seconde copie du ruban, celle qui « rentre » par
  * la droite, est masquée aux lecteurs d'écran et retirée du parcours de
  * tabulation : chaque annonce n'est donc annoncée et atteinte qu'une fois.
  */
@@ -47,7 +47,7 @@ const AnnouncementTicker: React.FC<IAnnouncementTickerProps> = (props) => {
   const [focused, setFocused] = React.useState<boolean>(false);
   const [still, setStill] = React.useState<boolean>(prefersReducedMotion);
 
-  // Le réglage « animations réduies » peut changer pendant la session.
+  // Le réglage « animations réduites » peut changer pendant la session.
   React.useEffect(() => {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
       return undefined;
@@ -85,16 +85,16 @@ const AnnouncementTicker: React.FC<IAnnouncementTickerProps> = (props) => {
         <li className={styles.item} key={`${duplicate ? "copie-" : ""}${item.key}`}>
           <a
             className={styles.link}
-            href={item.href || "#actualites"}
+            href={item.href || "#annonces"}
             /* La copie dupliquée reste cliquable à la souris, mais n'est pas
                un arrêt de tabulation supplémentaire. */
             tabIndex={duplicate ? -1 : undefined}
             onClick={(event) => {
-              onOpen(event, item.href);
+              onOpen(event, item.href || "#annonces");
             }}
           >
             <span className={styles.itemTag} aria-hidden="true">
-              À la une
+              Vie de l’équipe
             </span>
             <span className={styles.itemLabel}>{item.label}</span>
             <span className={styles.itemCta} aria-hidden="true">
@@ -146,12 +146,12 @@ const AnnouncementTicker: React.FC<IAnnouncementTickerProps> = (props) => {
 
       <a
         className={styles.seeAll}
-        href="#actualites"
+        href="#annonces"
         onClick={(event) => {
           onSeeAll(event);
         }}
       >
-        Tout voir <span aria-hidden="true">→</span>
+        Les annonces <span aria-hidden="true">→</span>
       </a>
     </div>
   );

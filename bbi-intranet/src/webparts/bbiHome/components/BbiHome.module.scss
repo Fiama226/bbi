@@ -932,7 +932,8 @@ a.sessionStatus:hover {
 .home[data-view="communaute"] .content > :not([data-bbi-view="ressources"]),
 .home[data-view="recherche"] .content > :not([data-bbi-view="recherche"]),
 .home[data-view="actualite"] .content > :not([data-bbi-view="actualite"]),
-.home[data-view="organigramme"] .content > :not([data-bbi-view="organigramme"]) {
+.home[data-view="organigramme"] .content > :not([data-bbi-view="organigramme"]),
+.home[data-view="annonce"] .content > :not([data-bbi-view="annonce"]) {
   display: none !important;
 }
 
@@ -1287,17 +1288,19 @@ a.sessionStatus:hover {
   }
 }
 
-/* Accueil : plus de bloc « Actualités BBI » (les annonces défilantes le
-   remplacent) ; les prochaines sessions prennent toute la largeur. */
-.home[data-view="accueil"] [data-bbi-view="actualites"] {
-  grid-template-columns: minmax(0, 1fr) !important;
-}
-.home[data-view="accueil"] [data-bbi-view="actualites"] .newsColumn {
-  display: none !important;
-}
-
 /* Barre de navigation : bleu BBI imposé sur toutes les vues, accueil compris. */
 .home header[data-bbi-topbar="true"] {
   background: #0e265c !important;
   background-color: #0e265c !important;
+}
+
+/* Page de détail d'une annonce : visible uniquement dans sa vue. */
+.home:not([data-view="annonce"]) [data-bbi-view="annonce"] {
+  display: none !important;
+}
+.home[data-view="annonce"] [data-bbi-view="annonce"] {
+  flex: 1 1 auto;
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
 }

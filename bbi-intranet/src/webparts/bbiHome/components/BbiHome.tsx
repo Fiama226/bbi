@@ -42,6 +42,12 @@ import {
   scrollToTop,
 } from "./homeLayout";
 import HomeHero, { KpiBand } from "./HomeHero";
+import AnnouncementDetail from "./AnnouncementDetail";
+import {
+  IAnnouncementResult,
+  loadAnnouncements,
+  iconForAnnouncement,
+} from "./announcementData";
 import AnnouncementTicker from "./AnnouncementTicker";
 import NewsBoard from "./NewsBoard";
 import NewsDetail from "./NewsDetail";
@@ -334,8 +340,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     isDemo: false,
   });
   const [newsBundleLoading, setNewsBundleLoading] = React.useState<boolean>(false);
-  const [announcementPage, setAnnouncementPage] =
-    React.useState<IHomeNewsPage>(emptyNewsPage());
+  const [announcementDetail, setAnnouncementDetail] =
+    React.useState<IAnnouncementResult & { itemId: number }>({ items: [], isDemo: false, itemId: 0 });
+  const [announcements, setAnnouncements] =
+    React.useState<IAnnouncementResult>({ items: [], isDemo: false });
+  const [announcementsLoading, setAnnouncementsLoading] = React.useState(true);
   const [sessions, setSessions] =
     React.useState<IHomeListResult<IHomeSession>>(emptyResult<IHomeSession>());
   const [trainers, setTrainers] =
@@ -524,32 +533,53 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     };
   }, [props.spHttpClient, props.siteUrl, props.newsListTitle, pageIndex, newsPageSize]);
 
-  // Annonces du bandeau déroulant : toujours les toutes premières actualités,
-  // quelle que soit la page d'actualités en cours de lecture, pour que le
-  // ruban ne change pas de contenu sous les yeux de l'utilisateur.
+  // Annonces internes : une source dédiée, jamais la liste des actualités.
   React.useEffect(() => {
     let cancelled = false;
-    loadNewsPage(
+    setAnnouncements({ items: [], isDemo: false });
+    setAnnouncementsLoading(true);
+    loadAnnouncements(
       props.spHttpClient,
       props.siteUrl,
-      props.newsListTitle,
-      0,
+      props.announcementsListTitle || "Annonces",
       ANNOUNCEMENT_MAX,
-    )
-      .then((page) => {
-        if (!cancelled) {
-          setAnnouncementPage(page);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setAnnouncementPage(emptyNewsPage());
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [props.spHttpClient, props.siteUrl, props.newsListTitle]);
+    ).then((result) => {
+      if (!cancelled) {
+        setAnnouncements(result);
+        setAnnouncementsLoading(false);
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setAnnouncementsLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [props.spHttpClient, props.siteUrl, props.announcementsListTitle]);
+
+  // Un lien direct charge l'annonce par ID, même hors du bandeau courant.
+  React.useEffect(() => {
+    if (activeView !== "annonce" || !newsId) {
+      return undefined;
+    }
+    let cancelled = false;
+    setAnnouncementDetail({ items: [], isDemo: false, itemId: 0 });
+    loadAnnouncements(
+      props.spHttpClient,
+      props.siteUrl,
+      props.announcementsListTitle || "Annonces",
+      1,
+      newsId,
+    ).then((result) => {
+      if (!cancelled) {
+        setAnnouncementDetail({ ...result, itemId: newsId });
+      }
+    }).catch(() => {
+      if (!cancelled) {
+        setAnnouncementDetail({ items: [], isDemo: false, itemId: newsId });
+      }
+    });
+    return () => { cancelled = true; };
+  }, [activeView, newsId, props.spHttpClient, props.siteUrl, props.announcementsListTitle]);
 
   // Actualité détaillée (#actualite?id=12) : chargée à la demande.
   React.useEffect(() => {
@@ -626,7 +656,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const openView = (view: PortalView, options?: { newsId?: number; silent?: boolean }): void => {
     const targetNewsId = options && options.newsId !== undefined ? options.newsId : 0;
     const hash =
-      view === "actualite" && targetNewsId ? `actualite?id=${targetNewsId}` : view;
+      (view === "actualite" || view === "annonce") && targetNewsId
+        ? `${view}?id=${targetNewsId}`
+        : view;
     if (window.location.hash !== `#${hash}`) {
       window.history.pushState(null, "", `#${hash}`);
     }
@@ -756,19 +788,30 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   };
 
   // Bandeau d'annonces : les annonces saisies dans les propriétés du
-  // portail priment ; à défaut, les dernières actualités font office
-  // d'annonces et mènent à leur page de détail.
+  // portail priment ; à défaut, la liste Annonces alimente le ruban.
+  // Les actualités ne sont jamais réutilisées comme source d'annonces.
   const announcementItems: IAnnouncement[] = React.useMemo(() => {
     const custom = parseAnnouncements(props.announcementText);
     if (custom.length > 0) {
       return custom;
     }
-    return announcementPage.items.map((item) => ({
-      key: `actualite-${item.Id}`,
-      label: `${item.Category ? `${item.Category} — ` : ""}${item.Title}`,
-      href: `#actualite?id=${item.Id}`,
+    return announcements.items.map((item) => ({
+      key: `annonce-${item.Id}`,
+      label: `${announcements.isDemo ? "Exemple — " : ""}${iconForAnnouncement(item.Type)} ${item.Type ? `${item.Type} — ` : ""}${item.Title}`,
+      href: `#annonce?id=${item.Id}`,
     }));
-  }, [props.announcementText, announcementPage.items]);
+  }, [props.announcementText, announcements.items, announcements.isDemo]);
+  const announcementDetailLoading = newsId
+    ? announcementDetail.itemId !== newsId
+    : announcementsLoading;
+  // Ne pas mélanger exemples et annonces réelles dans les suggestions.
+  const announcementDetailItems = newsId
+    ? announcementDetail.items.concat(
+      announcements.isDemo === announcementDetail.isDemo
+        ? announcements.items.filter((item) => item.Id !== newsId)
+        : [],
+    )
+    : announcements.items;
   const showAnnouncement =
     props.enableAnnouncement !== false && announcementItems.length > 0;
 
@@ -789,7 +832,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           items={announcementItems}
           onOpen={followPortalLink}
           onSeeAll={(event) => {
-            followPortalLink(event, "#actualites");
+            followPortalLink(event, "#annonces");
           }}
         />
       )}
@@ -1376,6 +1419,31 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               openView("actualites");
             }}
           />)}
+        </section>
+
+        <section
+          className={styles.section}
+          id="annonce"
+          data-bbi-view="annonce"
+          aria-label="Annonce"
+        >
+          {activeView === "annonce" && announcementDetailLoading && (
+            <p role="status">Chargement de l’annonce…</p>
+          )}
+          {activeView === "annonce" && !announcementDetailLoading && (
+            <AnnouncementDetail
+              items={announcementDetailItems}
+              announcementId={newsId}
+              isDemo={newsId ? announcementDetail.isDemo : announcements.isDemo}
+              onOpen={(id) => {
+                openView("annonce", { newsId: id });
+              }}
+              onBack={(event) => {
+                event.preventDefault();
+                openView("accueil");
+              }}
+            />
+          )}
         </section>
 
         <section

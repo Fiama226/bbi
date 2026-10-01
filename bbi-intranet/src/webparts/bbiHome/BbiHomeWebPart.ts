@@ -27,6 +27,7 @@ export interface IBbiHomeWebPartProps {
   employeeListTitle: string;
   certificationsListTitle: string;
   orgChartListTitle: string;
+  announcementsListTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
@@ -298,6 +299,9 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     if (!this.properties.orgChartListTitle) {
       this.properties.orgChartListTitle = 'Organigramme';
     }
+    if (!this.properties.announcementsListTitle) {
+      this.properties.announcementsListTitle = 'Annonces';
+    }
     if (!this.properties.heroSlides) {
       this.properties.heroSlides = DEFAULT_HERO_SLIDES;
     }
@@ -330,6 +334,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       employeeListTitle: properties.employeeListTitle || 'Employés du mois',
       certificationsListTitle: properties.certificationsListTitle || 'Certifications',
       orgChartListTitle: properties.orgChartListTitle || 'Organigramme',
+      announcementsListTitle: properties.announcementsListTitle || 'Annonces',
       maxItems: properties.maxItems || 5,
       heroEyebrow: properties.heroEyebrow || '',
       heroTitle: properties.heroTitle || '',
@@ -597,6 +602,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('employeeListTitle', { label: strings.EmployeeListFieldLabel }),
               PropertyPaneTextField('certificationsListTitle', { label: strings.CertificationsListFieldLabel }),
               PropertyPaneTextField('orgChartListTitle', { label: strings.OrgChartListFieldLabel }),
+              PropertyPaneTextField('announcementsListTitle', { label: strings.AnnouncementsListFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,

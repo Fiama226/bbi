@@ -413,7 +413,7 @@ async function testHeroAndRoutes() {
   const annonces = parseAnnouncements(
     [
       '# commentaire ignoré',
-      'Qualité — audit blanc réussi | #actualite?id=12',
+      'Mariage — félicitations à notre collègue | #annonce?id=12',
       'Inscriptions ouvertes — session de mars | #sessions',
       'Document de présentation | https://bbi.example.com/rapport',
       'Message sans lien'
@@ -422,16 +422,16 @@ async function testHeroAndRoutes() {
   check('annonces — une entrée par ligne utile', annonces.length === 4, `${annonces.length}`);
   check(
     'annonces — libellé et lien lus',
-    annonces[0].label === 'Qualité — audit blanc réussi' && annonces[0].href === '#actualite?id=12'
+    annonces[0].label === 'Mariage — félicitations à notre collègue' && annonces[0].href === '#annonce?id=12'
   );
   check('annonces — lien externe conservé', annonces[2].href === 'https://bbi.example.com/rapport');
   check(
     'annonces — lien dangereux neutralisé',
-    parseAnnouncements('Piège | javascript:alert(1)')[0].href === '#actualites'
+    parseAnnouncements('Piège | javascript:alert(1)')[0].href === '#annonces'
   );
   check(
-    'annonces — annonce sans lien mène aux actualités',
-    parseAnnouncements('Message seul')[0].href === '#actualites'
+    'annonces — annonce sans lien mène aux annonces',
+    parseAnnouncements('Message seul')[0].href === '#annonces'
   );
   check('annonces — configuration vide', parseAnnouncements('').length === 0);
   check(
@@ -484,12 +484,15 @@ async function testHeroAndRoutes() {
   // Clic sur une annonce du bandeau déroulant : le lien doit être traité
   // comme un lien interne du portail, sinon l'utilisateur quitterait la page
   // au lieu d'atterrir sur la page de détail de l'annonce.
-  const annonceHref = parseAnnouncements('Une annonce | #actualite?id=12')[0].href;
+  const annonceHref = parseAnnouncements('Une annonce | #annonce?id=12')[0].href;
   check(
-    'annonce → page de détail d’une actualités',
-    viewFromHref(annonceHref) === 'actualite' && newsIdFromHash(annonceHref) === 12,
+    'annonce → sa propre page de détail (pas une actualité)',
+    viewFromHref(annonceHref) === 'annonce' && newsIdFromHash(annonceHref) === 12,
     annonceHref
   );
+
+  check('annonces — lien de liste reconnu', viewFromHash('#annonces') === 'annonce');
+  check('annonces — lien direct après rechargement reconnu', viewFromHash('#annonce?id=99') === 'annonce');
 
   // Anciennes pages SharePoint : un clic ne doit pas quitter le portail.
   const legacy = 'https://businessbuilderinter.sharepoint.com/sites/intranet/SitePages/';

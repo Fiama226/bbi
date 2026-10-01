@@ -418,6 +418,14 @@ Ensure-BbiField -List 'Actualites' -DisplayName 'Lien (URL)'     -InternalName '
 Ensure-BbiView  -List 'Actualites' -Title 'À la une' -Fields @('Title','Category','Published','AuthorName') `
     -Query '<OrderBy><FieldRef Name="Published" Ascending="FALSE"/></OrderBy>'
 
+# --- Annonces internes : source distincte des actualités.
+Ensure-BbiList -Title 'Annonces' -Template GenericList | Out-Null
+Ensure-BbiField -List 'Annonces' -DisplayName 'Type d''annonce' -InternalName 'AnnonceType' -Type Choice -Choices @('Mariage','Anniversaire','Naissance','Arrivée','Départ','Félicitations','Autre')
+Ensure-BbiField -List 'Annonces' -DisplayName 'Détails' -InternalName 'Body' -Type Note
+Ensure-BbiField -List 'Annonces' -DisplayName 'Date de l''événement' -InternalName 'EventDate' -Type DateTime
+Ensure-BbiField -List 'Annonces' -DisplayName 'Image (URL)' -InternalName 'Image' -Type Hyperlink
+Ensure-BbiField -List 'Annonces' -DisplayName 'Expiration' -InternalName 'ExpiresOn' -Type DateTime
+
 # --- Sessions : IHomeSession { Title, StartDate, Modality, Location, Status, RegistrationUrl }
 Ensure-BbiList -Title 'Sessions' -Template GenericList | Out-Null
 Ensure-BbiField -List 'Sessions' -DisplayName 'Date de début' -InternalName 'StartDate' -Type DateTime
@@ -583,6 +591,7 @@ $homeProps = @{
     employeeListTitle     = 'Employés du mois'
     certificationsListTitle = 'Certifications'
     orgChartListTitle     = 'Organigramme'
+    announcementsListTitle = 'Annonces'
     maxItems              = 6
     enableGallery         = $true
     enableAnnouncement    = $true
