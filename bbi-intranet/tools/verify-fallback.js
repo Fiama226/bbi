@@ -1007,7 +1007,41 @@ async function testOfficesAndReferences() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 12. Organigramme                                                    */
+/* 12. Calendrier des sessions (Nos Plannings)                         */
+/* ------------------------------------------------------------------ */
+async function testSessionsCalendar() {
+  console.log('\nCalendrier des sessions (Nos Plannings)');
+  const { buildMonthGrid } = loadTsModule('src/webparts/bbiHome/components/sessionsCalendarGrid.ts');
+
+  // Mars 2026 : le 1er mars 2026 est un dimanche → 6 jours de bordure de
+  // février en tête de grille (semaine française lundi→dimanche).
+  const marchGrid = buildMonthGrid([], 2026, 2, new Date(2026, 2, 15));
+  check('calendrier — chaque semaine contient 7 jours', marchGrid.every((week) => week.length === 7));
+  check('calendrier — la grille couvre le mois entier (au moins 28 jours in-month)',
+    marchGrid.flat().filter((day) => day.inMonth).length === 31);
+  check('calendrier — bordure du mois précédent marquée hors-mois',
+    marchGrid[0][0].inMonth === false);
+  check('calendrier — le 15 mars est marqué aujourd\'hui',
+    marchGrid.flat().some((day) => day.inMonth && day.date.getDate() === 15 && day.isToday === true));
+
+  const sessions = [
+    { Id: 1, Title: 'Session ponctuelle', StartDate: new Date(2026, 2, 10, 9, 0).toISOString() },
+    { Id: 2, Title: 'Session 3 jours', StartDate: new Date(2026, 2, 20, 9, 0).toISOString(), EndDate: new Date(2026, 2, 22, 17, 0).toISOString() }
+  ];
+  const populated = buildMonthGrid(sessions, 2026, 2, new Date(2026, 2, 1));
+  const day10 = populated.flat().find((day) => day.inMonth && day.date.getDate() === 10);
+  check('calendrier — session ponctuelle sur son seul jour', day10.sessions.length === 1 && day10.sessions[0].Id === 1);
+
+  const multiDayCount = populated.flat().filter((day) => day.inMonth && day.date.getDate() >= 20 && day.date.getDate() <= 22)
+    .filter((day) => day.sessions.some((s) => s.Id === 2)).length;
+  check('calendrier — session multi-jours apparaît sur chacun de ses 3 jours', multiDayCount === 3);
+
+  const day19 = populated.flat().find((day) => day.inMonth && day.date.getDate() === 19);
+  check('calendrier — pas de session la veille d\'un intervalle multi-jours', day19.sessions.length === 0);
+}
+
+/* ------------------------------------------------------------------ */
+/* 13. Organigramme                                                    */
 /* ------------------------------------------------------------------ */
 async function testPortalSearch() {
   console.log('\nRecherche globale du portail');
@@ -1063,6 +1097,7 @@ async function testPortalSearch() {
   await testAnnouncements();
   await testSpirit();
   await testOfficesAndReferences();
+  await testSessionsCalendar();
   await testPortalSearch();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);

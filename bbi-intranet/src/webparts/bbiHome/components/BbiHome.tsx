@@ -32,6 +32,7 @@ import OfficeNetwork from "./OfficeNetwork";
 import ClientReferences from "./ClientReferences";
 import PedagogicalReferences from "./PedagogicalReferences";
 import DocumentShelf from "./DocumentShelf";
+import SessionsCalendar from "./SessionsCalendar";
 import {
   IHomeNewsBundle,
   IHomeNewsPage,
@@ -1452,6 +1453,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 Données de démonstration : la liste « {props.sessionsListTitle}{" "}
                 » est absente, non créée ou vide.
               </p>
+            )}
+            {activeView === "sessions" && (
+              <SessionsCalendar sessions={sessions.items} />
             )}
             {upcomingSessions.length > 0 ? (
               <ul className={styles.sessionList}>
