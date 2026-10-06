@@ -41,6 +41,9 @@ export const VIEW_FROM_HASH: { [key: string]: PortalView } = {
 export const HOME_ANCHORS: { [key: string]: string } = {
   "vie-equipe": "vie-equipe",
   acces: "acces",
+  identite: "identite",
+  references: "references",
+  implantations: "implantations",
 };
 // Remarque : `vie-bbi` reste l'alias de la vue « actualités » (ancienne page
 // vie-bbi.aspx) ; la section `#vie-bbi` de l'accueil n'est donc pas une ancre
