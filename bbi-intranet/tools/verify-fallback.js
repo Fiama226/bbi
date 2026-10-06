@@ -885,7 +885,74 @@ async function testSpirit() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 11. Organigramme                                                    */
+/* 11. Implantations et références clients                             */
+/* ------------------------------------------------------------------ */
+async function testOfficesAndReferences() {
+  console.log('\nImplantations et références clients');
+  const { loadHomeOffices, loadClientReferences } =
+    loadTsModule('src/webparts/bbiHome/components/homeData.ts');
+
+  const missing = fakeClient([{ match: /fields/, ok: false, status: 404 }]);
+  const demoOffices = await loadHomeOffices(missing, SITE, 'Implantations');
+  check('implantations — absente (404) — repli disponible', demoOffices.items.length >= 1 && demoOffices.isDemo === true);
+  check('implantations — le siège est en tête de liste', demoOffices.items[0].EstSiege === true);
+
+  const liveOffices = await loadHomeOffices(
+    fakeClient([
+      {
+        match: /fields/,
+        json: { value: [{ InternalName: 'EstSiege' }, { InternalName: 'Pays' }, { InternalName: 'Ordre' }] }
+      },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Filiale B', Pays: 'Mali', Ordre: 2, EstSiege: false },
+            { Id: 2, Title: 'Siège', Pays: 'France', Ordre: 0, EstSiege: true },
+            { Id: 3, Title: 'Filiale A', Pays: 'Sénégal', Ordre: 1, EstSiege: false }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'Implantations'
+  );
+  check(
+    'implantations — tri : siège d\'abord, puis Ordre croissant',
+    liveOffices.isDemo === false &&
+      liveOffices.items[0].Title === 'Siège' &&
+      liveOffices.items[1].Title === 'Filiale A' &&
+      liveOffices.items[2].Title === 'Filiale B'
+  );
+
+  const demoReferences = await loadClientReferences(missing, SITE, 'References', 10);
+  check('références clients — absente (404) — repli disponible', demoReferences.items.length >= 1 && demoReferences.isDemo === true);
+
+  const liveReferences = await loadClientReferences(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Secteur' }, { InternalName: 'Ordre' }] } },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Client B', Secteur: 'Industrie', Ordre: 1 },
+            { Id: 2, Title: 'Client A', Secteur: 'Banque', Ordre: 0 }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'References',
+    10
+  );
+  check(
+    'références clients — triées par Ordre',
+    liveReferences.isDemo === false && liveReferences.items[0].Title === 'Client A'
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 12. Organigramme                                                    */
 /* ------------------------------------------------------------------ */
 async function testPortalSearch() {
   console.log('\nRecherche globale du portail');
@@ -940,6 +1007,7 @@ async function testPortalSearch() {
   await testTeamHighlights();
   await testAnnouncements();
   await testSpirit();
+  await testOfficesAndReferences();
   await testPortalSearch();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);

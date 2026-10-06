@@ -111,6 +111,35 @@ export interface IHomeBirthday {
   Afficher?: boolean;
 }
 
+/** Implantation : siège ou filiale/antenne du réseau. */
+export interface IHomeOffice {
+  Id: number;
+  /** Nom de l'implantation (ex. « Siège » ou le nom de la filiale). */
+  Title: string;
+  EstSiege?: boolean;
+  Pays?: string;
+  Ville?: string;
+  Adresse?: string;
+  Telephone?: string;
+  Email?: string;
+  Responsable?: string;
+  LienCarte?: string;
+  Ordre?: number;
+}
+
+/** Référence client/partenaire. */
+export interface IHomeClientReference {
+  Id: number;
+  Title: string;
+  LogoUrl?: string;
+  SiteWebUrl?: string;
+  Contact?: string;
+  Pays?: string;
+  Ville?: string;
+  Secteur?: string;
+  Ordre?: number;
+}
+
 export interface IHomeListResult<T> {
   items: T[];
   isDemo: boolean;
@@ -554,6 +583,57 @@ export const DEMO_EMPLOYEES: IHomeEmployee[] = [
   }
 ];
 
+export const DEMO_OFFICES: IHomeOffice[] = [
+  {
+    Id: 1,
+    Title: 'Siège — Paris',
+    EstSiege: true,
+    Pays: 'France',
+    Ville: 'Paris',
+    Adresse: '12 rue de la Croissance, 75008 Paris',
+    Telephone: '+33 1 45 67 89 00',
+    Email: 'contact@businessbuilders.fr',
+    Responsable: 'Jean-Marc Okafor',
+    Ordre: 0
+  },
+  {
+    Id: 2,
+    Title: 'Filiale Abidjan',
+    Pays: "Côte d'Ivoire",
+    Ville: 'Abidjan',
+    Telephone: '+225 05 98 76 54 32',
+    Email: 'abidjan@businessbuilders.fr',
+    Responsable: 'Samuel Kouassi',
+    Ordre: 1
+  },
+  {
+    Id: 3,
+    Title: 'Antenne Bamako',
+    Pays: 'Mali',
+    Ville: 'Bamako',
+    Telephone: '+223 76 12 34 56',
+    Email: 'bamako@businessbuilders.fr',
+    Responsable: 'Awa Traoré',
+    Ordre: 2
+  },
+  {
+    Id: 4,
+    Title: 'Antenne Dakar',
+    Pays: 'Sénégal',
+    Ville: 'Dakar',
+    Email: 'dakar@businessbuilders.fr',
+    Ordre: 3
+  }
+];
+
+export const DEMO_CLIENT_REFERENCES: IHomeClientReference[] = [
+  { Id: 1, Title: 'Groupe Atlantide', Secteur: 'Banque & assurance', Pays: 'France', Ville: 'Paris', Ordre: 0 },
+  { Id: 2, Title: 'Orbis Industries', Secteur: 'Industrie', Pays: "Côte d'Ivoire", Ville: 'Abidjan', Ordre: 1 },
+  { Id: 3, Title: 'Sahel Energies', Secteur: 'Énergie', Pays: 'Mali', Ville: 'Bamako', Ordre: 2 },
+  { Id: 4, Title: 'Meridian Logistique', Secteur: 'Transport & logistique', Pays: 'Sénégal', Ville: 'Dakar', Ordre: 3 },
+  { Id: 5, Title: 'Fondation Horizon', Secteur: 'Formation & insertion', Pays: 'France', Ville: 'Lyon', Ordre: 4 }
+];
+
 export const DEMO_THOUGHTS: IHomeThought[] = [
   {
     Id: 1,
@@ -811,6 +891,28 @@ const EMPLOYEE_FIELDS: { [key: string]: string[] } = {
   PhotoUrl: ['PhotoUrl', 'Photo', 'Portrait', 'Avatar', 'Image']
 };
 
+const OFFICE_FIELDS: { [key: string]: string[] } = {
+  EstSiege: ['EstSiege', 'IsHeadquarters', 'Siege'],
+  Pays: ['Pays', 'Country'],
+  Ville: ['Ville', 'City'],
+  Adresse: ['Adresse', 'Address'],
+  Telephone: ['Telephone', 'Téléphone', 'Phone'],
+  Email: ['Email', 'Mail'],
+  Responsable: ['Responsable', 'Manager', 'Contact'],
+  LienCarte: ['LienCarte', 'MapUrl', 'Carte'],
+  Ordre: ['Ordre', 'SortOrder', 'Rang']
+};
+
+const CLIENT_REFERENCE_FIELDS: { [key: string]: string[] } = {
+  LogoUrl: ['LogoUrl', 'Logo'],
+  SiteWebUrl: ['SiteWebUrl', 'WebsiteUrl', 'SiteWeb'],
+  Contact: ['Contact', 'ContactNom'],
+  Pays: ['Pays', 'Country'],
+  Ville: ['Ville', 'City'],
+  Secteur: ['Secteur', 'Sector', 'Industrie'],
+  Ordre: ['Ordre', 'SortOrder', 'Rang']
+};
+
 const THOUGHT_FIELDS: { [key: string]: string[] } = {
   Auteur: ['Auteur', 'Author', 'Signataire'],
   DatePublication: ['DatePublication', 'PublishDate', 'DateDuJour', 'Date'],
@@ -970,6 +1072,38 @@ const asEmployee = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IH
   Message: mapping.Message ? textOf(raw[mapping.Message]) : undefined,
   Highlights: mapping.Highlights ? textOf(raw[mapping.Highlights]) : undefined,
   PhotoUrl: mapping.PhotoUrl ? relativeImage(textOf(raw[mapping.PhotoUrl])) : undefined
+});
+
+const asOffice = (
+  raw: { [key: string]: unknown },
+  mapping: IFieldMapping
+): IHomeOffice => ({
+  Id: Number(raw.Id),
+  Title: textOf(raw.Title) || '',
+  EstSiege: mapping.EstSiege ? booleanOf(raw[mapping.EstSiege]) : false,
+  Pays: mapping.Pays ? textOf(raw[mapping.Pays]) : undefined,
+  Ville: mapping.Ville ? textOf(raw[mapping.Ville]) : undefined,
+  Adresse: mapping.Adresse ? textOf(raw[mapping.Adresse]) : undefined,
+  Telephone: mapping.Telephone ? textOf(raw[mapping.Telephone]) : undefined,
+  Email: mapping.Email ? textOf(raw[mapping.Email]) : undefined,
+  Responsable: mapping.Responsable ? textOf(raw[mapping.Responsable]) : undefined,
+  LienCarte: mapping.LienCarte ? safeHref(textOf(raw[mapping.LienCarte]) || '') || undefined : undefined,
+  Ordre: mapping.Ordre ? asNumber(raw[mapping.Ordre]) : undefined
+});
+
+const asClientReference = (
+  raw: { [key: string]: unknown },
+  mapping: IFieldMapping
+): IHomeClientReference => ({
+  Id: Number(raw.Id),
+  Title: textOf(raw.Title) || '',
+  LogoUrl: mapping.LogoUrl ? relativeImage(textOf(raw[mapping.LogoUrl])) : undefined,
+  SiteWebUrl: mapping.SiteWebUrl ? safeHref(textOf(raw[mapping.SiteWebUrl]) || '') || undefined : undefined,
+  Contact: mapping.Contact ? textOf(raw[mapping.Contact]) : undefined,
+  Pays: mapping.Pays ? textOf(raw[mapping.Pays]) : undefined,
+  Ville: mapping.Ville ? textOf(raw[mapping.Ville]) : undefined,
+  Secteur: mapping.Secteur ? textOf(raw[mapping.Secteur]) : undefined,
+  Ordre: mapping.Ordre ? asNumber(raw[mapping.Ordre]) : undefined
 });
 
 const asThought = (
@@ -1184,6 +1318,73 @@ export const loadEmployeeOfMonth = async (
     return { items: [employee], isDemo: false };
   } catch {
     return { items: DEMO_EMPLOYEES, isDemo: true };
+  }
+};
+
+export const loadHomeOffices = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string
+): Promise<IHomeListResult<IHomeOffice>> => {
+  const sortOffices = (list: IHomeOffice[]): IHomeOffice[] =>
+    list
+      .slice()
+      .sort((a, b) => {
+        if (!!a.EstSiege !== !!b.EstSiege) {
+          return a.EstSiege ? -1 : 1;
+        }
+        return (a.Ordre ?? Number.MAX_SAFE_INTEGER) - (b.Ordre ?? Number.MAX_SAFE_INTEGER);
+      });
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, OFFICE_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const items = await queryItems(
+      spHttpClient,
+      siteUrl,
+      listTitle,
+      `$select=${select.join(',')}&$top=100`
+    );
+    const offices = items.map((raw) => asOffice(raw, mapping)).filter((item) => !!item.Title);
+    if (offices.length === 0) {
+      return { items: sortOffices(DEMO_OFFICES), isDemo: true };
+    }
+    return { items: sortOffices(offices), isDemo: false };
+  } catch {
+    return { items: sortOffices(DEMO_OFFICES), isDemo: true };
+  }
+};
+
+export const loadClientReferences = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string,
+  maxItems: number
+): Promise<IHomeListResult<IHomeClientReference>> => {
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, CLIENT_REFERENCE_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const items = await queryItems(
+      spHttpClient,
+      siteUrl,
+      listTitle,
+      `$select=${select.join(',')}&$top=${Math.max(1, maxItems)}`
+    );
+    const references = items
+      .map((raw) => asClientReference(raw, mapping))
+      .filter((item) => !!item.Title)
+      .sort((a, b) => (a.Ordre ?? Number.MAX_SAFE_INTEGER) - (b.Ordre ?? Number.MAX_SAFE_INTEGER));
+    if (references.length === 0) {
+      return { items: DEMO_CLIENT_REFERENCES.slice(0, Math.max(1, maxItems)), isDemo: true };
+    }
+    return { items: references, isDemo: false };
+  } catch {
+    return { items: DEMO_CLIENT_REFERENCES.slice(0, Math.max(1, maxItems)), isDemo: true };
   }
 };
 

@@ -5,21 +5,27 @@ import {
   IHomeAnnouncement,
   IHomeBirthday,
   IHomeCertification,
+  IHomeClientReference,
   IHomeEmployee,
+  IHomeOffice,
   IHomeSession,
   IHomeThought,
   IHomeTrainer,
   IHomeListResult,
+  loadClientReferences,
   loadEmployeeOfMonth,
   loadHomeAnnouncements,
   loadHomeBirthdays,
   loadHomeCertifications,
+  loadHomeOffices,
   loadHomeSessions,
   loadHomeTrainers,
   loadThoughtOfDay,
   mailtoUrl,
   telUrl,
 } from "./homeData";
+import OfficeNetwork from "./OfficeNetwork";
+import ClientReferences from "./ClientReferences";
 import {
   IHomeNewsBundle,
   IHomeNewsPage,
@@ -349,6 +355,12 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     React.useState<IHomeListResult<IHomeBirthday>>(
       emptyResult<IHomeBirthday>(),
     );
+  const [offices, setOffices] =
+    React.useState<IHomeListResult<IHomeOffice>>(emptyResult<IHomeOffice>());
+  const [clientReferences, setClientReferences] =
+    React.useState<IHomeListResult<IHomeClientReference>>(
+      emptyResult<IHomeClientReference>(),
+    );
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>(
@@ -494,6 +506,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         props.birthdaysListTitle,
         6,
       ),
+      loadHomeOffices(
+        props.spHttpClient,
+        props.siteUrl,
+        props.officesListTitle,
+      ),
+      loadClientReferences(
+        props.spHttpClient,
+        props.siteUrl,
+        props.clientReferencesListTitle,
+        10,
+      ),
     ])
       .then(
         ([
@@ -504,6 +527,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           loadedAnnouncements,
           loadedThought,
           loadedBirthdays,
+          loadedOffices,
+          loadedClientReferences,
         ]) => {
           if (cancelled) {
             return;
@@ -515,6 +540,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setAnnouncements(loadedAnnouncements);
           setThought(loadedThought);
           setBirthdays(loadedBirthdays);
+          setOffices(loadedOffices);
+          setClientReferences(loadedClientReferences);
           setStatus("ready");
         },
       )
@@ -527,6 +554,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setAnnouncements(emptyResult<IHomeAnnouncement>());
           setThought(emptyResult<IHomeThought>());
           setBirthdays(emptyResult<IHomeBirthday>());
+          setOffices(emptyResult<IHomeOffice>());
+          setClientReferences(emptyResult<IHomeClientReference>());
           setStatus("ready");
         }
       });
@@ -543,6 +572,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     props.announcementsListTitle,
     props.thoughtsListTitle,
     props.birthdaysListTitle,
+    props.officesListTitle,
+    props.clientReferencesListTitle,
     props.maxItems,
   ]);
 
@@ -1304,6 +1335,27 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           </div>
         </section>
 
+        {clientReferences.items.length > 0 && (
+          <section
+            className={styles.section}
+            id="references"
+            data-bbi-view="accueil"
+            aria-labelledby="references-title"
+          >
+            <div className={styles.sectionHeading}>
+              <div>
+                <p className={styles.eyebrow}>Ils nous font confiance</p>
+                <h2 id="references-title">Nos références</h2>
+              </div>
+            </div>
+            <ClientReferences
+              references={clientReferences.items}
+              isDemo={clientReferences.isDemo}
+              showDataNotices={props.showDataNotices}
+            />
+          </section>
+        )}
+
         <section
           className={styles.newsSessions}
           id="actualites"
@@ -1593,44 +1645,22 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         </section>
 
         <section
-          className={styles.topicLinks}
-          id="vie-bbi"
+          className={styles.section}
+          id="implantations"
           data-bbi-view="accueil"
-          aria-label="Vie d'entreprise et ressources pédagogiques"
+          aria-labelledby="implantations-title"
         >
-          <a
-            href="#ressources"
-            className={styles.topicLink}
-            onClick={(event) => {
-              followPortalLink(event, "#ressources");
-            }}
-          >
-            <span aria-hidden="true">⌘</span>
-            <strong>Méthodes &amp; outils d&apos;animation</strong>
-            <small>Kits, modèles et trames de séquence</small>
-          </a>
-          <a
-            href="#vie-equipe"
-            className={styles.topicLink}
-            onClick={(event) => {
-              followPortalLink(event, "#vie-equipe");
-            }}
-          >
-            <span aria-hidden="true">✳</span>
-            <strong>Qualité &amp; certification</strong>
-            <small>Qualiopi, évaluations, preuves de conformité</small>
-          </a>
-          <a
-            href="#actualites"
-            className={styles.topicLink}
-            onClick={(event) => {
-              followPortalLink(event, "#actualites");
-            }}
-          >
-            <span aria-hidden="true">◈</span>
-            <strong>Vie d'entreprise</strong>
-            <small>Événements, séminaires et temps forts</small>
-          </a>
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>Un réseau international</p>
+              <h2 id="implantations-title">Nos implantations</h2>
+            </div>
+          </div>
+          <OfficeNetwork
+            offices={offices.items}
+            isDemo={offices.isDemo}
+            showDataNotices={props.showDataNotices}
+          />
         </section>
       </main>
 

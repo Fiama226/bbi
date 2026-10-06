@@ -15,6 +15,8 @@ export interface IBbiHomeProps {
   announcementsListTitle: string;
   thoughtsListTitle: string;
   birthdaysListTitle: string;
+  officesListTitle: string;
+  clientReferencesListTitle: string;
   maxItems: number;
 
   /* --- Héros --- */

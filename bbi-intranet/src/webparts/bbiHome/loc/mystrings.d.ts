@@ -14,6 +14,8 @@ declare interface IBbiHomeWebPartStrings {
   AnnouncementsListFieldLabel: string;
   ThoughtsListFieldLabel: string;
   BirthdaysListFieldLabel: string;
+  OfficesListFieldLabel: string;
+  ClientReferencesListFieldLabel: string;
   MaxItemsFieldLabel: string;
 
   HeroPageDescription: string;

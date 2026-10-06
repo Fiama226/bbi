@@ -14,6 +14,8 @@
   "AnnouncementsListFieldLabel": "Announcements list",
   "ThoughtsListFieldLabel": "Thought-of-the-day list",
   "BirthdaysListFieldLabel": "Birthdays list",
+  "OfficesListFieldLabel": "Offices list (HQ and subsidiaries)",
+  "ClientReferencesListFieldLabel": "Client references list",
   "MaxItemsFieldLabel": "Items per section",
   "HeroPageDescription": "Full-screen hero, call-to-action buttons and page navigation.",
   "HeroGroupName": "Hero banner",
