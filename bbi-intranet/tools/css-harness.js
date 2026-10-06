@@ -279,6 +279,21 @@ setTimeout(() => {
   const slidesOk = slideCount >= 2;
   const paginationOk = !!pagination;
 
+  // Non-régression : toute section marquée data-bbi-view="X" doit avoir au
+  // moins une règle CSS qui référence [data-bbi-view="X"] (directe ou
+  // inverse), sinon elle ne sera jamais masquée sur les autres vues --
+  // c'était exactement le bug du bloc "actualité" visible sur l'accueil.
+  const renderedViewValues = [
+    ...new Set((rendered.match(/data-bbi-view="[^"]+"/g) || []).map((m) => m.match(/"([^"]+)"/)[1]))
+  ];
+  const orphanViews = renderedViewValues.filter(
+    (v) => !allCss.includes(`[data-bbi-view="${v}"]`) && !allCss.includes(`[data-bbi-view=${v}]`)
+  );
+  console.log(
+    `Sections data-bbi-view sans règle de visibilité CSS : ${orphanViews.length === 0 ? 'AUCUNE' : orphanViews.join(', ')}`
+  );
+  const orphanSectionsOk = orphanViews.length === 0;
+
   const routeRoot = hostDiv.querySelector('#bbi-home-root');
   const trainingLink = hostDiv.querySelector('header nav a[href="#formations"]');
   if (trainingLink) {
@@ -311,7 +326,7 @@ setTimeout(() => {
   }
 
   const allOk =
-    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk;
+    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk && orphanSectionsOk;
   console.log(
     `\n${
       allOk
