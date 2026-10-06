@@ -2,9 +2,9 @@
 
 Ce dossier contient **le script d'installation complet** de l'intranet BBI : il crée les listes,
 les bibliothèques, les colonnes, les vues, une seule page d'accueil applicative, le thème et l'identité
-visuelle. Sur cette page, **une seule web part BBI Accueil** fournit plusieurs vues internes (formations,
-sessions, actualités — avec page dédiée par actualité — ressources, communauté et organigramme) sans navigation
-vers des pages SharePoint séparées.
+visuelle. Sur cette page, **une seule web part BBI Accueil** fournit plusieurs vues internes (accueil,
+formations, sessions — liste et calendrier —, actualités avec page dédiée par actualité, ressources et
+communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
 > Expérience **sans aucun chrome SharePoint** (Teams / Viva Connections) : [`../teams/README.md`](../teams/README.md)
 > Fichier principal : [`provision-bbi-intranet.ps1`](./provision-bbi-intranet.ps1)
@@ -16,10 +16,11 @@ vers des pages SharePoint séparées.
 
 | Page | Type | Contenu |
 |---|---|---|
-| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil, Formations, Sessions, Actualités, Ressources (supports + galerie), Communauté et **Organigramme**. Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
+| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil (identité, annonces, vie de l'équipe, implantations, références), Formations (catalogue + références pédagogiques), Sessions (liste + calendrier), Actualités, Ressources (supports pédagogiques + documents administratifs + galerie), Communauté (**Trombinoscope**). Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
 
-Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Certifications`, `Organigramme`,
-`Formations`, `Supports publiés`, `Galerie médias`.
+Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Certifications`, `Annonces`,
+`Pensées du jour`, `Anniversaires`, `Implantations`, `Nos références`, `Références pédagogiques`,
+`Formations`, `Supports publiés`, `Documents administratifs`, `Galerie médias`.
 
 > **Le portail est présentable dès la fin du déploiement, même sans aucune donnée.** Si une liste ou une
 > bibliothèque est absente, non créée ou vide, la vue concernée présente un contenu de repli professionnel.
@@ -37,12 +38,16 @@ Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Ce
 |---|---|---|---|
 | Accueil / actualités | `Actualites` | À la une + flux d'actualités paginé + page dédiée par actualité | Publier une actualité |
 | Accueil — chiffres clés | *(propriétés de la web part)* | Les 4 chiffres par défaut, toujours visibles sous le héros | Modifier la propriété « Chiffres clés » |
-| Accueil — vie de l'équipe | `Employés du mois`, `Certifications` | Portraits et certifications d'exemple | Publier l'employé du mois, puis les certifications |
-| Sessions | `Sessions` | Planning de sessions à venir | Publier des sessions avec `Date de début` |
+| Accueil — identité | *(propriétés de la web part)* | Masquée si Vision/Mission/Objectifs sont vides | Renseigner les propriétés « Vision », « Mission », « Objectifs » |
+| Accueil — annonces | `Annonces` | Bandeau rotatif d'exemple (ou le texte configuré, ou la dernière actualité) | Publier une annonce avec une fenêtre de dates |
+| Accueil — vie de l'équipe | `Employés du mois`, `Certifications`, `Pensées du jour`, `Anniversaires` | Portraits, certifications, citation et anniversaires d'exemple | Publier dans chaque liste |
+| Accueil — implantations | `Implantations` | Siège + filiales d'exemple | Publier une implantation (cocher « Siège » pour une seule) |
+| Accueil — références | `Nos références` | Références clients d'exemple | Publier une référence client |
+| Sessions | `Sessions` | Planning de sessions à venir (liste et calendrier) | Publier des sessions avec `Date de début` |
 | Formations | `Formations` | Catalogue filtrable | Publier une formation (`Statut catalogue = Actif`) |
-| Ressources | `Supports publiés`, `Galerie médias` | Supports et galerie de démonstration | Publier des documents, photos ou vidéos |
-| Communauté | `Formateurs` | Annuaire d'exemple + fiches contact | Publier un formateur (photo, téléphone, e-mail, WhatsApp) |
-| Organigramme | `Organigramme` | Arbre de 12 postes d'exemple | Publier les postes avec leur `Responsable` |
+| Formations — références pédagogiques | `Références pédagogiques` | Références d'exemple groupées par catégorie | Publier une référence pédagogique |
+| Ressources | `Supports publiés`, `Documents administratifs`, `Galerie médias` | Supports, documents et galerie de démonstration | Publier des documents, photos ou vidéos |
+| Communauté (Trombinoscope) | `Formateurs` | Annuaire d'exemple + fiches contact, filtrable par catégorie | Publier un collaborateur (photo, téléphone, e-mail, WhatsApp, `Catégorie`) |
 
 Le remplacement se fait **source par source** : vous pouvez publier les actualités avant les sessions,
 l'accueil reste cohérent à chaque étape.
@@ -51,13 +56,18 @@ l'accueil reste cohérent à chaque étape.
 
 ```powershell
 cd ../bbi-intranet
-node tools/verify-fallback.js     # 100 contrôles : source absente, source vide, source alimentée
-node tools/css-harness.js dist    # styles réellement injectés, chiffres clés, pagination, navigation
+node tools/verify-fallback.js     # 141 contrôles : source absente, source vide, source alimentée
+node tools/css-harness.js dist    # styles réellement injectés, chiffres clés, pagination, navigation, sections orphelines
 node tools/preview-smoke.js       # 34 contrôles de parcours sur l'aperçu cliquable
 ```
 
+> `apercu-portail.html` et `preview-smoke.js` couvrent l'aperçu de conception et n'ont pas encore été
+> remis à jour avec les blocs ajoutés cette itération (annonces, implantations, références, trombinoscope,
+> calendrier des sessions) ni avec le retrait de l'organigramme — `tools/verify-fallback.js` et
+> `tools/css-harness.js` ci-dessus, eux, testent le code réel et sont à jour.
+
 Et pour parcourir le portail sans rien installer : ouvrez `deliverables/audit-2026/apercu-portail.html`
-(diaporama, actualités paginées et page dédiée, fiche formateur, organigramme).
+(diaporama, actualités paginées et page dédiée, fiche formateur).
 
 Pour voir le rendu sans rien installer, ouvrez `deliverables/audit-2026/apercu-repli.html` dans un
 navigateur : la galerie, le catalogue et les documents y sont présentés tels qu'ils apparaissent
@@ -252,13 +262,15 @@ restent des liens vers leur destination sécurisée SharePoint.
 et, pour la fiche formation : `Description` · `Objectifs pédagogiques` · `Programme` · `Prérequis` · `Public visé` · `Formateurs référents` · `Contact pédagogique`
 👉 Seuls les éléments **Actif** apparaissent (les autres restent visibles en interne).
 
-### Formateurs — liste `Formateurs`
+### Formateurs / Trombinoscope — liste `Formateurs`
 `Titre` (nom) · `Rôle` · `Filière` · `Initiales` (pastille) · **`Photo (URL)`** (laissez vide pour afficher
 les initiales) · `Téléphone` · `E-mail` · **`WhatsApp`** · `Localisation` · `Biographie` · `Spécialités` ·
-`Certifications` · `Profil LinkedIn`
-👉 Un clic sur une carte ouvre la fiche complète du formateur : coordonnées cliquables (téléphone, e-mail,
+`Certifications` · `Profil LinkedIn` · **`Catégorie`** (Formateur / Permanent / Direction / Appui) · `Ordre`
+👉 Un clic sur une carte ouvre la fiche complète : coordonnées cliquables (téléphone, e-mail,
 WhatsApp, Teams), spécialités, certifications et ses prochaines sessions. La colonne `WhatsApp` accepte
-toutes les écritures (`+33 6 …`, `0033…`, `0612…`) : le lien est normalisé automatiquement.
+toutes les écritures (`+33 6 …`, `0033…`, `0612…`) : le lien est normalisé automatiquement. La vue
+**Ressources** affiche un extrait filtré sur `Catégorie = Formateur` (8 max) ; la vue **Communauté**
+affiche l'annuaire complet avec un sélecteur de catégorie.
 
 ### Employé du mois — liste `Employés du mois`
 `Titre` (nom) · `Poste` · `Pôle` · `Mois` · `Message` · `Faits marquants` · `Photo (URL)`
@@ -268,16 +280,49 @@ toutes les écritures (`+33 6 …`, `0033…`, `0612…`) : le lien est normalis
 `Titre` · `Organisme` · `Périmètre` · `Valide jusqu'au` · `Statut`
 👉 Elles s'affichent à côté de l'employé du mois (Qualiopi, Datadock, certifications internes…).
 
-### Organigramme — liste `Organigramme`
-`Titre` (nom) · `Poste` · `Pôle` · **`Responsable`** (nom du manager, rattachement hiérarchique) ·
-`Ordre` (numéro d'affichage) · `Localisation` · `E-mail` · `Téléphone`
-👉 Laissez `Responsable` vide pour le dirigeant : il devient la racine de l'arbre. Les boucles de
-rattachement sont détectées et ne font perdre aucun poste. Un clic sur un poste affiche la fiche contact.
+### Pensées du jour — liste `Pensées du jour`
+`Titre` (texte de la citation) · `Auteur` · `Date de publication` · `Contexte`
+👉 Une citation dont la `Date de publication` correspond au jour courant est prioritaire ; sinon, la
+citation du jour tourne automatiquement (même citation pour tous, toute la journée).
+
+### Anniversaires — liste `Anniversaires`
+`Titre` (nom) · `Jour` · `Mois` · `Fonction` · `Photo (URL)` · `Message` · `Afficher` (case à cocher)
+👉 **RGPD : ne renseignez jamais l'année de naissance**, seuls `Jour` et `Mois` sont utilisés. Décochez
+`Afficher` pour qu'un collaborateur n'apparaisse jamais, même si sa date est dans la liste.
+
+### Annonces — liste `Annonces`
+`Titre` · `Message` · `Niveau` (Information / Important / Urgent) · `Date de début` · `Date de fin` ·
+`Lien (URL)` · `Ordre`
+👉 Remplace le bandeau configuré dans les propriétés de la web part (qui reste affiché en premier,
+épinglé, si renseigné). Seules les annonces dans leur fenêtre de dates sont affichées ; les bornes
+vides sont ouvertes (toujours actif).
+
+### Implantations — liste `Implantations`
+`Titre` · `Siège` (case à cocher) · `Pays` · `Ville` · `Adresse` · `Téléphone` · `E-mail` · `Responsable` ·
+`Lien (carte)` · `Ordre`
+👉 Cochez `Siège` sur une seule implantation : elle apparaît toujours en tête, suivie des filiales/
+antennes triées par `Ordre`.
+
+### Nos références — liste `Nos références`
+`Titre` (nom du client/partenaire) · `Logo (URL)` · `Site web` · `Contact` · `Pays` · `Ville` · `Secteur` ·
+`Ordre`
+👉 Sans logo, les initiales du nom s'affichent sur un fond dégradé. Un `Site web` renseigné rend la
+vignette cliquable (nouvel onglet).
+
+### Références pédagogiques — liste `Références pédagogiques`
+`Titre` · `Catégorie` (Ouvrage / Norme / Méthode / Étude / Outil) · `Auteur` · `Année` · `Lien (URL)` ·
+`Résumé` · `Ordre`
+👉 Affichées sous le catalogue des formations, regroupées par `Catégorie`.
 
 ### Documents — bibliothèque `Supports publiés`
 Déposer les fichiers **publiés** uniquement. Colonnes : `Code formation`, `Type de support`,
 `Statut`, `Date de validité`, `Formateur auteur`. Les documents sont ouverts **en lecture seule dans
 le navigateur** (`?web=1`), sans bouton de téléchargement.
+
+### Documents administratifs — bibliothèque `Documents administratifs`
+Distincte des supports pédagogiques ci-dessus : RH, juridique, finance, qualité, modèles. Colonnes :
+`Catégorie` (RH / Juridique / Finance / Qualité / Modèles), `Public` (Tous / Formateurs / Direction),
+`Référence`, `Date de validité`. Affichée dans la vue Ressources, sous les supports pédagogiques.
 
 ### Galerie — bibliothèque d'images `Galerie médias`
 1. *Téléverser* → photos (jpg/png) ou **vidéos (mp4)**.

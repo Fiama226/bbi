@@ -4,7 +4,7 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 | Web part | ID | Rôle |
 |---|---|---|
-| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil (héros en diaporama images + textes, chiffres clés, employé du mois, certifications), Formations, Sessions, Actualités (flux paginé + **page dédiée par actualité**), Ressources (documents + galerie), Communauté (annuaire des formateurs avec **photo et fiche contact WhatsApp/Teams**) et **Organigramme interactif**. La navigation change de vue sans recharger ni quitter cette page. Masque le chrome SharePoint en lecture, conserve les commandes en édition, et fonctionne dans le package publié comme dans le workbench hébergé. |
+| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil (héros en diaporama images + textes, chiffres clés, identité Vision/Mission/Objectifs, annonces, employé du mois, certifications, pensée du jour, anniversaires, implantations, références clients), Formations (catalogue + références pédagogiques), Sessions (liste + vue calendrier), Actualités (flux paginé + **page dédiée par actualité**), Ressources (documents pédagogiques + administratifs + galerie), Communauté (Trombinoscope : annuaire du personnel avec **photo, fiche contact WhatsApp/Teams et filtre par catégorie**). La navigation change de vue sans recharger ni quitter cette page. Le chrome SharePoint (en-tête, navigation, titre) est masqué en lecture par l'extension « BBI Plein écran » sur la page applicative ; la barre de suite Microsoft 365 reste toujours visible. Fonctionne dans le package publié comme dans le workbench hébergé. |
 | **BBI Catalogue des formations** | `d37a426e-48db-484f-bf10-c38675bb7b43` | Cartes filtrables (filière) + recherche, alimentées par la liste `Formations`. Affiche des données d'exemple si la liste n'existe pas encore. |
 | **BBI Galerie médias** | `f0f19a37-2c11-4812-9006-8aa71a9254f1` | Galerie photos/vidéos alimentée par la bibliothèque d'images « Galerie médias » : albums filtrables, mosaïque, visionneuse plein écran accessible (clavier, focus, `aria-modal`), vidéos mp4, vignettes générées par SharePoint. |
 | **BBI Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
@@ -24,14 +24,19 @@ Toutes les sources sont tolérantes : liste absente (404), liste non créée, **
 | Composant | Source | Si absente / vide |
 |---|---|---|
 | BBI Accueil | `Actualites`, `Sessions`, `Formateurs` | Actualités (12), sessions à venir (8) et formateurs d'exemple (10, coordonnées complètes) |
-| BBI Accueil — vie de l'équipe | `Employés du mois`, `Certifications` | 1 portrait (Léa Marchand) + 4 certifications (Qualiopi, Datadock, BBI, TOSA/ICDL) |
-| BBI Accueil — organigramme | `Organigramme` | Arbre de 12 postes (direction, 4 pôles, antennes) avec coordonnées |
+| BBI Accueil — vie de l'équipe | `Employés du mois`, `Certifications`, `Pensées du jour`, `Anniversaires` | 1 portrait (Léa Marchand) + 4 certifications (Qualiopi, Datadock, BBI, TOSA/ICDL) + citation du jour + anniversaires du mois |
+| BBI Accueil — annonces | `Annonces` | Bandeau rotatif de 3 annonces d'exemple (fenêtre de dates respectée) |
+| BBI Accueil — implantations | `Implantations` | Siège + 3 filiales/antennes d'exemple |
+| BBI Accueil — références | `Nos références` | 5 références clients d'exemple |
+| BBI Trombinoscope (Communauté) | `Formateurs` | Annuaire complet avec filtre par catégorie (Formateur/Permanent/Direction/Appui) |
 | BBI Catalogue | `Formations` | 5 formations BBI représentatives |
+| BBI Formations — références pédagogiques | `Références pédagogiques` | 5 références d'exemple réparties sur les 5 catégories |
 | BBI Fiche formation | `Formations`, `Sessions`, `Supports publiés`, `Formateurs` | Fiche complète (objectifs, programme, prérequis, sessions, supports, référent) — y compris pour un code inconnu |
-| BBI Sessions | `Sessions`, `Formations` | Planning de 6 sessions réparties sur les mois à venir |
+| BBI Sessions | `Sessions`, `Formations` | Planning de 6 sessions réparties sur les mois à venir ; vue calendrier dérivée de la même liste |
 | BBI Article | `Actualites` | Article rédigé (corps > 300 caractères) + 3 actualités liées + visuel embarqué |
 | BBI Galerie | `Galerie médias` | 8 photos réparties dans 4 albums (4 visuels embarqués) |
 | BBI Documents | `Supports publiés` | 4 supports ; le bouton d'ouverture est neutralisé (aucun fichier inexistant n'est appelé) |
+| BBI Ressources — documents administratifs | `Documents administratifs` | 5 documents d'exemple (RH, qualité, finance, juridique, modèles) |
 
 Les bandeaux « données de démonstration » sont masqués par défaut : option `showDataNotices` dans le volet de propriétés (manifeste : `false`).
 
