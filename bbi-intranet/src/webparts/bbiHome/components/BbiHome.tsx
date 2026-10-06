@@ -8,6 +8,7 @@ import {
   IHomeClientReference,
   IHomeEmployee,
   IHomeOffice,
+  IHomePedagogicalReference,
   IHomeSession,
   IHomeThought,
   IHomeTrainer,
@@ -20,12 +21,14 @@ import {
   loadHomeOffices,
   loadHomeSessions,
   loadHomeTrainers,
+  loadPedagogicalReferences,
   loadThoughtOfDay,
   mailtoUrl,
   telUrl,
 } from "./homeData";
 import OfficeNetwork from "./OfficeNetwork";
 import ClientReferences from "./ClientReferences";
+import PedagogicalReferences from "./PedagogicalReferences";
 import {
   IHomeNewsBundle,
   IHomeNewsPage,
@@ -361,6 +364,10 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     React.useState<IHomeListResult<IHomeClientReference>>(
       emptyResult<IHomeClientReference>(),
     );
+  const [pedagogicalReferences, setPedagogicalReferences] =
+    React.useState<IHomeListResult<IHomePedagogicalReference>>(
+      emptyResult<IHomePedagogicalReference>(),
+    );
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>(
@@ -517,6 +524,12 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         props.clientReferencesListTitle,
         10,
       ),
+      loadPedagogicalReferences(
+        props.spHttpClient,
+        props.siteUrl,
+        props.pedagogicalReferencesListTitle,
+        20,
+      ),
     ])
       .then(
         ([
@@ -529,6 +542,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           loadedBirthdays,
           loadedOffices,
           loadedClientReferences,
+          loadedPedagogicalReferences,
         ]) => {
           if (cancelled) {
             return;
@@ -542,6 +556,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setBirthdays(loadedBirthdays);
           setOffices(loadedOffices);
           setClientReferences(loadedClientReferences);
+          setPedagogicalReferences(loadedPedagogicalReferences);
           setStatus("ready");
         },
       )
@@ -556,6 +571,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setBirthdays(emptyResult<IHomeBirthday>());
           setOffices(emptyResult<IHomeOffice>());
           setClientReferences(emptyResult<IHomeClientReference>());
+          setPedagogicalReferences(emptyResult<IHomePedagogicalReference>());
           setStatus("ready");
         }
       });
@@ -574,6 +590,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     props.birthdaysListTitle,
     props.officesListTitle,
     props.clientReferencesListTitle,
+    props.pedagogicalReferencesListTitle,
     props.maxItems,
   ]);
 
@@ -1522,6 +1539,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           <LazyMount active={activeView === "formations"} minHeight={210}>
             <TrainingCatalog {...catalogProps} />
           </LazyMount>
+          <PedagogicalReferences
+            references={pedagogicalReferences.items}
+            isDemo={pedagogicalReferences.isDemo}
+            showDataNotices={props.showDataNotices}
+          />
         </section>
 
         <section

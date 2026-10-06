@@ -949,6 +949,36 @@ async function testOfficesAndReferences() {
     'références clients — triées par Ordre',
     liveReferences.isDemo === false && liveReferences.items[0].Title === 'Client A'
   );
+
+  const { loadPedagogicalReferences } = loadTsModule('src/webparts/bbiHome/components/homeData.ts');
+  const demoPedago = await loadPedagogicalReferences(missing, SITE, 'ReferencesPedagogiques', 20);
+  check('références pédagogiques — absente (404) — repli disponible', demoPedago.items.length >= 1 && demoPedago.isDemo === true);
+  check(
+    'références pédagogiques — plusieurs catégories représentées dans le repli',
+    new Set(demoPedago.items.map((item) => item.Categorie)).size >= 3
+  );
+
+  const livePedago = await loadPedagogicalReferences(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Categorie' }, { InternalName: 'Ordre' }] } },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Référence B', Categorie: 'Norme', Ordre: 1 },
+            { Id: 2, Title: 'Référence A', Categorie: 'Ouvrage', Ordre: 0 }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'ReferencesPedagogiques',
+    20
+  );
+  check(
+    'références pédagogiques — triées par Ordre',
+    livePedago.isDemo === false && livePedago.items[0].Title === 'Référence A'
+  );
 }
 
 /* ------------------------------------------------------------------ */

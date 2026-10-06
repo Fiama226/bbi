@@ -140,6 +140,19 @@ export interface IHomeClientReference {
   Ordre?: number;
 }
 
+/** Référence pédagogique (ouvrage, norme, méthode, étude, outil). */
+export interface IHomePedagogicalReference {
+  Id: number;
+  Title: string;
+  /** Ouvrage | Norme | Méthode | Étude | Outil. */
+  Categorie?: string;
+  Auteur?: string;
+  Annee?: number;
+  LienUrl?: string;
+  Resume?: string;
+  Ordre?: number;
+}
+
 export interface IHomeListResult<T> {
   items: T[];
   isDemo: boolean;
@@ -583,6 +596,48 @@ export const DEMO_EMPLOYEES: IHomeEmployee[] = [
   }
 ];
 
+export const DEMO_PEDAGOGICAL_REFERENCES: IHomePedagogicalReference[] = [
+  {
+    Id: 1,
+    Title: 'Les 7 habitudes de ceux qui réalisent tout ce qu\'ils entreprennent',
+    Categorie: 'Ouvrage',
+    Auteur: 'Stephen Covey',
+    Annee: 1989,
+    Resume: 'Référence sur le leadership personnel et la gestion des priorités, support de plusieurs modules management.',
+    Ordre: 0
+  },
+  {
+    Id: 2,
+    Title: 'Norme ISO 21001 — Organismes d\'éducation/formation',
+    Categorie: 'Norme',
+    Annee: 2018,
+    Resume: 'Cadre de référence qualité pour les organismes de formation, en complément de Qualiopi.',
+    Ordre: 1
+  },
+  {
+    Id: 3,
+    Title: 'Méthode BBI Leadership',
+    Categorie: 'Méthode',
+    Resume: 'Référentiel pédagogique interne utilisé dans les parcours management et coaching.',
+    Ordre: 2
+  },
+  {
+    Id: 4,
+    Title: 'Baromètre 2026 de la formation professionnelle en Afrique de l\'Ouest',
+    Categorie: 'Étude',
+    Annee: 2026,
+    Resume: 'Étude sectorielle citée dans le positionnement des parcours vente et management de proximité.',
+    Ordre: 3
+  },
+  {
+    Id: 5,
+    Title: 'Canevas de debrief à chaud',
+    Categorie: 'Outil',
+    Resume: 'Trame utilisée par les formateurs en fin de session pour structurer le retour d\'expérience.',
+    Ordre: 4
+  }
+];
+
 export const DEMO_OFFICES: IHomeOffice[] = [
   {
     Id: 1,
@@ -891,6 +946,15 @@ const EMPLOYEE_FIELDS: { [key: string]: string[] } = {
   PhotoUrl: ['PhotoUrl', 'Photo', 'Portrait', 'Avatar', 'Image']
 };
 
+const PEDAGOGICAL_REFERENCE_FIELDS: { [key: string]: string[] } = {
+  Categorie: ['Categorie', 'Catégorie', 'Category', 'Type'],
+  Auteur: ['Auteur', 'Author'],
+  Annee: ['Annee', 'Année', 'Year'],
+  LienUrl: ['LienUrl', 'LinkUrl', 'Lien'],
+  Resume: ['Resume', 'Résumé', 'Summary', 'Description'],
+  Ordre: ['Ordre', 'SortOrder', 'Rang']
+};
+
 const OFFICE_FIELDS: { [key: string]: string[] } = {
   EstSiege: ['EstSiege', 'IsHeadquarters', 'Siege'],
   Pays: ['Pays', 'Country'],
@@ -1072,6 +1136,20 @@ const asEmployee = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IH
   Message: mapping.Message ? textOf(raw[mapping.Message]) : undefined,
   Highlights: mapping.Highlights ? textOf(raw[mapping.Highlights]) : undefined,
   PhotoUrl: mapping.PhotoUrl ? relativeImage(textOf(raw[mapping.PhotoUrl])) : undefined
+});
+
+const asPedagogicalReference = (
+  raw: { [key: string]: unknown },
+  mapping: IFieldMapping
+): IHomePedagogicalReference => ({
+  Id: Number(raw.Id),
+  Title: textOf(raw.Title) || '',
+  Categorie: mapping.Categorie ? textOf(raw[mapping.Categorie]) || 'Ouvrage' : 'Ouvrage',
+  Auteur: mapping.Auteur ? textOf(raw[mapping.Auteur]) : undefined,
+  Annee: mapping.Annee ? asNumber(raw[mapping.Annee]) || undefined : undefined,
+  LienUrl: mapping.LienUrl ? safeHref(textOf(raw[mapping.LienUrl]) || '') || undefined : undefined,
+  Resume: mapping.Resume ? textOf(raw[mapping.Resume]) : undefined,
+  Ordre: mapping.Ordre ? asNumber(raw[mapping.Ordre]) : undefined
 });
 
 const asOffice = (
@@ -1318,6 +1396,37 @@ export const loadEmployeeOfMonth = async (
     return { items: [employee], isDemo: false };
   } catch {
     return { items: DEMO_EMPLOYEES, isDemo: true };
+  }
+};
+
+export const loadPedagogicalReferences = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string,
+  maxItems: number
+): Promise<IHomeListResult<IHomePedagogicalReference>> => {
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, PEDAGOGICAL_REFERENCE_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const items = await queryItems(
+      spHttpClient,
+      siteUrl,
+      listTitle,
+      `$select=${select.join(',')}&$top=${Math.max(1, maxItems)}`
+    );
+    const references = items
+      .map((raw) => asPedagogicalReference(raw, mapping))
+      .filter((item) => !!item.Title)
+      .sort((a, b) => (a.Ordre ?? Number.MAX_SAFE_INTEGER) - (b.Ordre ?? Number.MAX_SAFE_INTEGER));
+    if (references.length === 0) {
+      return { items: DEMO_PEDAGOGICAL_REFERENCES.slice(0, Math.max(1, maxItems)), isDemo: true };
+    }
+    return { items: references, isDemo: false };
+  } catch {
+    return { items: DEMO_PEDAGOGICAL_REFERENCES.slice(0, Math.max(1, maxItems)), isDemo: true };
   }
 };
 
