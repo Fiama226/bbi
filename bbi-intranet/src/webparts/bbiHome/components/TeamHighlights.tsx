@@ -1,12 +1,16 @@
 import * as React from "react";
 import styles from "./TeamHighlights.module.scss";
-import { IHomeCertification, IHomeEmployee } from "./homeData";
+import { IHomeBirthday, IHomeCertification, IHomeEmployee, IHomeThought } from "./homeData";
 
 export interface ITeamHighlightsProps {
   employee?: IHomeEmployee;
   employeeIsDemo: boolean;
   certifications: IHomeCertification[];
   certificationsIsDemo: boolean;
+  thought?: IHomeThought;
+  thoughtIsDemo: boolean;
+  birthdays: IHomeBirthday[];
+  birthdaysIsDemo: boolean;
   showDataNotices: boolean;
   /** Ouvre l'annuaire complet des formateurs (vue Communauté). */
   onOpenDirectory: (event: React.MouseEvent<HTMLAnchorElement>) => void;
@@ -77,17 +81,27 @@ const certBadgeClass = (index: number | undefined): string => {
  * · l'employé du mois (mise à l'honneur) ;
  * · les certifications et agréments de l'organisme.
  */
+const dayMonthLabel = (jour: number, mois: number): string => {
+  const date = new Date(2000, (mois || 1) - 1, jour || 1);
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "long" }).format(date);
+};
+
 const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
   const {
     employee,
     employeeIsDemo,
     certifications,
     certificationsIsDemo,
+    thought,
+    thoughtIsDemo,
+    birthdays,
+    birthdaysIsDemo,
     showDataNotices,
     onOpenDirectory,
   } = props;
 
   return (
+    <>
     <div className={styles.wrap}>
       <article className={styles.employeeCard} aria-labelledby="bbi-employee-month">
         <p className={styles.eyebrow}>Employé du mois</p>
@@ -187,6 +201,75 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
         )}
       </article>
     </div>
+
+    {(thought || birthdays.length > 0) && (
+      <div className={styles.spiritWrap}>
+        {thought && (
+          <article className={styles.thoughtCard} aria-labelledby="bbi-thought">
+            <p className={styles.eyebrow}>Pensée du jour</p>
+            {showDataNotices && thoughtIsDemo && (
+              <p className={styles.demoNote}>
+                Données de démonstration : la liste « Pensées du jour » est absente ou vide.
+              </p>
+            )}
+            <blockquote id="bbi-thought" className={styles.thoughtQuote}>
+              « {thought.Title} »
+            </blockquote>
+            {(thought.Auteur || thought.Contexte) && (
+              <p className={styles.thoughtAuthor}>
+                {thought.Auteur && <strong>{thought.Auteur}</strong>}
+                {thought.Auteur && thought.Contexte && " · "}
+                {thought.Contexte}
+              </p>
+            )}
+          </article>
+        )}
+
+        {birthdays.length > 0 && (
+          <article className={styles.birthdaysCard} aria-labelledby="bbi-birthdays">
+            <p className={styles.eyebrow}>Anniversaires</p>
+            <h2 id="bbi-birthdays" className={styles.title}>
+              Ce mois-ci
+            </h2>
+            {showDataNotices && birthdaysIsDemo && (
+              <p className={styles.demoNote}>
+                Données de démonstration : la liste « Anniversaires » est absente ou vide.
+              </p>
+            )}
+            <ul className={styles.birthdaysList}>
+              {birthdays.map((birthday) => (
+                <li key={birthday.Id} className={styles.birthdayItem}>
+                  <span
+                    className={
+                      birthday.PhotoUrl
+                        ? styles.birthdayPhoto
+                        : `${styles.birthdayPhoto} ${styles.birthdayPhotoFallback}`
+                    }
+                    style={
+                      birthday.PhotoUrl
+                        ? { backgroundImage: `url("${birthday.PhotoUrl}")` }
+                        : undefined
+                    }
+                    role="img"
+                    aria-label={birthday.Title}
+                  >
+                    {!birthday.PhotoUrl && initialsOf(birthday.Title)}
+                  </span>
+                  <span className={styles.birthdayText}>
+                    <strong>{birthday.Title}</strong>
+                    <small>
+                      {dayMonthLabel(birthday.Jour, birthday.Mois)}
+                      {birthday.Fonction ? ` · ${birthday.Fonction}` : ""}
+                    </small>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        )}
+      </div>
+    )}
+    </>
   );
 };
 

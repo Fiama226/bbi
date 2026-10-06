@@ -3,16 +3,20 @@ import styles from "./BbiHome.module.scss";
 import { IBbiHomeProps } from "./IBbiHomeProps";
 import {
   IHomeAnnouncement,
+  IHomeBirthday,
   IHomeCertification,
   IHomeEmployee,
   IHomeSession,
+  IHomeThought,
   IHomeTrainer,
   IHomeListResult,
   loadEmployeeOfMonth,
   loadHomeAnnouncements,
+  loadHomeBirthdays,
   loadHomeCertifications,
   loadHomeSessions,
   loadHomeTrainers,
+  loadThoughtOfDay,
   mailtoUrl,
   telUrl,
 } from "./homeData";
@@ -339,6 +343,12 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     React.useState<IHomeListResult<IHomeAnnouncement>>(
       emptyResult<IHomeAnnouncement>(),
     );
+  const [thought, setThought] =
+    React.useState<IHomeListResult<IHomeThought>>(emptyResult<IHomeThought>());
+  const [birthdays, setBirthdays] =
+    React.useState<IHomeListResult<IHomeBirthday>>(
+      emptyResult<IHomeBirthday>(),
+    );
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>(
@@ -473,6 +483,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         props.announcementsListTitle,
         8,
       ),
+      loadThoughtOfDay(
+        props.spHttpClient,
+        props.siteUrl,
+        props.thoughtsListTitle,
+      ),
+      loadHomeBirthdays(
+        props.spHttpClient,
+        props.siteUrl,
+        props.birthdaysListTitle,
+        6,
+      ),
     ])
       .then(
         ([
@@ -481,6 +502,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           loadedEmployee,
           loadedCertifications,
           loadedAnnouncements,
+          loadedThought,
+          loadedBirthdays,
         ]) => {
           if (cancelled) {
             return;
@@ -490,6 +513,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setEmployee(loadedEmployee);
           setCertifications(loadedCertifications);
           setAnnouncements(loadedAnnouncements);
+          setThought(loadedThought);
+          setBirthdays(loadedBirthdays);
           setStatus("ready");
         },
       )
@@ -500,6 +525,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setEmployee(emptyResult<IHomeEmployee>());
           setCertifications(emptyResult<IHomeCertification>());
           setAnnouncements(emptyResult<IHomeAnnouncement>());
+          setThought(emptyResult<IHomeThought>());
+          setBirthdays(emptyResult<IHomeBirthday>());
           setStatus("ready");
         }
       });
@@ -514,6 +541,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     props.employeeListTitle,
     props.certificationsListTitle,
     props.announcementsListTitle,
+    props.thoughtsListTitle,
+    props.birthdaysListTitle,
     props.maxItems,
   ]);
 
@@ -1415,6 +1444,10 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             employeeIsDemo={employee.isDemo}
             certifications={certifications.items}
             certificationsIsDemo={certifications.isDemo}
+            thought={thought.items[0]}
+            thoughtIsDemo={thought.isDemo}
+            birthdays={birthdays.items}
+            birthdaysIsDemo={birthdays.isDemo}
             showDataNotices={props.showDataNotices}
             onOpenDirectory={(event) => {
               followPortalLink(event, "#communaute");

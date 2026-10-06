@@ -13,6 +13,8 @@ export interface IBbiHomeProps {
   employeeListTitle: string;
   certificationsListTitle: string;
   announcementsListTitle: string;
+  thoughtsListTitle: string;
+  birthdaysListTitle: string;
   maxItems: number;
 
   /* --- Héros --- */

@@ -792,7 +792,100 @@ async function testAnnouncements() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 10. Organigramme                                                    */
+/* 10. Pensée du jour et anniversaires                                 */
+/* ------------------------------------------------------------------ */
+async function testSpirit() {
+  console.log('\nPensée du jour et anniversaires');
+  const { loadThoughtOfDay, loadHomeBirthdays } =
+    loadTsModule('src/webparts/bbiHome/components/homeData.ts');
+
+  const missing = fakeClient([{ match: /fields/, ok: false, status: 404 }]);
+  const demoThought = await loadThoughtOfDay(missing, SITE, 'Pensees');
+  check('pensée du jour — absente (404) — repli disponible', demoThought.items.length === 1 && demoThought.isDemo === true);
+
+  const emptyThought = await loadThoughtOfDay(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Auteur' }] } },
+      { match: /items/, json: { value: [] } }
+    ]),
+    SITE,
+    'Pensees'
+  );
+  check('pensée du jour — créée mais vide — repli disponible', emptyThought.items.length === 1 && emptyThought.isDemo === true);
+
+  const sameDayTwice = await Promise.all([
+    loadThoughtOfDay(missing, SITE, 'Pensees'),
+    loadThoughtOfDay(missing, SITE, 'Pensees')
+  ]);
+  check(
+    'pensée du jour — déterministe (même citation à chaque appel le même jour)',
+    sameDayTwice[0].items[0].Id === sameDayTwice[1].items[0].Id
+  );
+
+  const todayIso = new Date().toISOString();
+  const dated = await loadThoughtOfDay(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Auteur' }, { InternalName: 'DatePublication' }] } },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Citation générique', Auteur: 'Anonyme' },
+            { Id: 2, Title: "Citation du jour précise", Auteur: 'BBI', DatePublication: todayIso }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'Pensees'
+  );
+  check(
+    'pensée du jour — une DatePublication correspondant à aujourd\'hui prévaut',
+    dated.isDemo === false && dated.items[0].Id === 2
+  );
+
+  const demoBirthdays = await loadHomeBirthdays(missing, SITE, 'Anniversaires', 6);
+  check('anniversaires — absente (404) — repli disponible', demoBirthdays.items.length >= 1 && demoBirthdays.isDemo === true);
+  check(
+    'anniversaires — jamais d\'année de naissance exposée',
+    demoBirthdays.items.every((item) => typeof item.Jour === 'number' && typeof item.Mois === 'number' && !('Annee' in item))
+  );
+
+  const now = new Date();
+  const soonMonth = now.getMonth() === 11 ? 1 : now.getMonth() + 2;
+  const liveBirthdays = await loadHomeBirthdays(
+    fakeClient([
+      {
+        match: /fields/,
+        json: { value: [{ InternalName: 'Jour' }, { InternalName: 'Mois' }, { InternalName: 'Afficher' }] }
+      },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Loin', Jour: 15, Mois: soonMonth === 1 ? 11 : soonMonth - 1 },
+            { Id: 2, Title: 'Masqué', Jour: now.getDate(), Mois: now.getMonth() + 1, Afficher: false },
+            { Id: 3, Title: 'Aujourd\'hui', Jour: now.getDate(), Mois: now.getMonth() + 1 }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'Anniversaires',
+    6
+  );
+  check(
+    'anniversaires — opt-out Afficher=false exclu',
+    liveBirthdays.items.every((item) => item.Title !== 'Masqué')
+  );
+  check(
+    'anniversaires — trié par proximité (aujourd\'hui en premier)',
+    liveBirthdays.items[0].Title === "Aujourd'hui"
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 11. Organigramme                                                    */
 /* ------------------------------------------------------------------ */
 async function testPortalSearch() {
   console.log('\nRecherche globale du portail');
@@ -846,6 +939,7 @@ async function testPortalSearch() {
   await testNewsArchive();
   await testTeamHighlights();
   await testAnnouncements();
+  await testSpirit();
   await testPortalSearch();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);

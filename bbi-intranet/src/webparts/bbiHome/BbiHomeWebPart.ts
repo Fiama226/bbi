@@ -27,6 +27,8 @@ export interface IBbiHomeWebPartProps {
   employeeListTitle: string;
   certificationsListTitle: string;
   announcementsListTitle: string;
+  thoughtsListTitle: string;
+  birthdaysListTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
@@ -199,6 +201,8 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       employeeListTitle: properties.employeeListTitle || 'Employés du mois',
       certificationsListTitle: properties.certificationsListTitle || 'Certifications',
       announcementsListTitle: properties.announcementsListTitle || 'Annonces',
+      thoughtsListTitle: properties.thoughtsListTitle || 'Pensées du jour',
+      birthdaysListTitle: properties.birthdaysListTitle || 'Anniversaires',
       maxItems: properties.maxItems || 5,
       heroEyebrow: properties.heroEyebrow || '',
       heroTitle: properties.heroTitle || '',
@@ -279,6 +283,8 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('employeeListTitle', { label: strings.EmployeeListFieldLabel }),
               PropertyPaneTextField('certificationsListTitle', { label: strings.CertificationsListFieldLabel }),
               PropertyPaneTextField('announcementsListTitle', { label: strings.AnnouncementsListFieldLabel }),
+              PropertyPaneTextField('thoughtsListTitle', { label: strings.ThoughtsListFieldLabel }),
+              PropertyPaneTextField('birthdaysListTitle', { label: strings.BirthdaysListFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,

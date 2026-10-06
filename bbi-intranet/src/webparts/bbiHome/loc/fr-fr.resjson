@@ -12,6 +12,8 @@
   "EmployeeListFieldLabel": "Liste des employés du mois",
   "CertificationsListFieldLabel": "Liste des certifications",
   "AnnouncementsListFieldLabel": "Liste des annonces",
+  "ThoughtsListFieldLabel": "Liste des pensées du jour",
+  "BirthdaysListFieldLabel": "Liste des anniversaires",
   "MaxItemsFieldLabel": "Éléments affichés par section",
   "HeroPageDescription": "Héros plein écran, boutons d'action et navigation de la page.",
   "HeroGroupName": "Bandeau héros",

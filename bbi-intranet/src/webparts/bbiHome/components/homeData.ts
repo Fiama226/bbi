@@ -84,6 +84,30 @@ export interface IHomeAnnouncement {
   Ordre?: number;
 }
 
+/** Citation ou pensée du jour. */
+export interface IHomeThought {
+  Id: number;
+  /** Texte de la citation. */
+  Title: string;
+  Auteur?: string;
+  DatePublication?: string;
+  Contexte?: string;
+}
+
+/** Anniversaire d'un collaborateur : jour et mois uniquement (jamais l'année). */
+export interface IHomeBirthday {
+  Id: number;
+  /** Nom du collaborateur. */
+  Title: string;
+  Jour: number;
+  Mois: number;
+  Fonction?: string;
+  PhotoUrl?: string;
+  Message?: string;
+  /** Opt-out RGPD : faux = ne jamais afficher, même si la liste contient la date. */
+  Afficher?: boolean;
+}
+
 export interface IHomeListResult<T> {
   items: T[];
   isDemo: boolean;
@@ -525,6 +549,46 @@ export const DEMO_EMPLOYEES: IHomeEmployee[] = [
   }
 ];
 
+export const DEMO_THOUGHTS: IHomeThought[] = [
+  {
+    Id: 1,
+    Title: "La qualité n'est jamais un accident ; elle est toujours le résultat d'un effort intelligent.",
+    Auteur: 'John Ruskin',
+    Contexte: 'Exigence qualité'
+  },
+  {
+    Id: 2,
+    Title: "Le seul véritable échec est de ne pas essayer.",
+    Auteur: 'George Clemenceau',
+    Contexte: 'Culture de progrès'
+  },
+  {
+    Id: 3,
+    Title: "Former, c'est allumer un feu, pas remplir un vase.",
+    Auteur: 'Proverbe pédagogique',
+    Contexte: 'Pédagogie'
+  }
+];
+
+export const DEMO_BIRTHDAYS: IHomeBirthday[] = [
+  {
+    Id: 1,
+    Title: 'Camille Durand',
+    Jour: 12,
+    Mois: new Date().getMonth() + 1,
+    Fonction: 'Formatrice management',
+    Message: 'Joyeux anniversaire !'
+  },
+  {
+    Id: 2,
+    Title: 'Yannick Oyono',
+    Jour: 24,
+    Mois: new Date().getMonth() + 1,
+    Fonction: 'Responsable antenne Abidjan',
+    Message: 'Joyeux anniversaire !'
+  }
+];
+
 export const DEMO_ANNOUNCEMENTS: IHomeAnnouncement[] = [
   {
     Id: 1,
@@ -740,6 +804,21 @@ const EMPLOYEE_FIELDS: { [key: string]: string[] } = {
   PhotoUrl: ['PhotoUrl', 'Photo', 'Portrait', 'Avatar', 'Image']
 };
 
+const THOUGHT_FIELDS: { [key: string]: string[] } = {
+  Auteur: ['Auteur', 'Author', 'Signataire'],
+  DatePublication: ['DatePublication', 'PublishDate', 'DateDuJour', 'Date'],
+  Contexte: ['Contexte', 'Context', 'Source']
+};
+
+const BIRTHDAY_FIELDS: { [key: string]: string[] } = {
+  Jour: ['Jour', 'Day'],
+  Mois: ['Mois', 'Month'],
+  Fonction: ['Fonction', 'Role', 'Poste'],
+  PhotoUrl: ['PhotoUrl', 'Photo'],
+  Message: ['Message', 'Mot'],
+  Afficher: ['Afficher', 'Display', 'Visible']
+};
+
 const ANNOUNCEMENT_FIELDS: { [key: string]: string[] } = {
   Message: ['Message', 'Corps', 'Texte', 'Body'],
   Niveau: ['Niveau', 'Level', 'Priorite', 'Priorité'],
@@ -882,6 +961,36 @@ const asEmployee = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IH
   Message: mapping.Message ? textOf(raw[mapping.Message]) : undefined,
   Highlights: mapping.Highlights ? textOf(raw[mapping.Highlights]) : undefined,
   PhotoUrl: mapping.PhotoUrl ? relativeImage(textOf(raw[mapping.PhotoUrl])) : undefined
+});
+
+const asThought = (
+  raw: { [key: string]: unknown },
+  mapping: IFieldMapping
+): IHomeThought => ({
+  Id: Number(raw.Id),
+  Title: textOf(raw.Title) || '',
+  Auteur: mapping.Auteur ? textOf(raw[mapping.Auteur]) : undefined,
+  DatePublication: mapping.DatePublication ? textOf(raw[mapping.DatePublication]) : undefined,
+  Contexte: mapping.Contexte ? textOf(raw[mapping.Contexte]) : undefined
+});
+
+const asNumber = (value: unknown): number => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const asBirthday = (
+  raw: { [key: string]: unknown },
+  mapping: IFieldMapping
+): IHomeBirthday => ({
+  Id: Number(raw.Id),
+  Title: textOf(raw.Title) || '',
+  Jour: mapping.Jour ? asNumber(raw[mapping.Jour]) : 0,
+  Mois: mapping.Mois ? asNumber(raw[mapping.Mois]) : 0,
+  Fonction: mapping.Fonction ? textOf(raw[mapping.Fonction]) : undefined,
+  PhotoUrl: mapping.PhotoUrl ? relativeImage(textOf(raw[mapping.PhotoUrl])) : undefined,
+  Message: mapping.Message ? textOf(raw[mapping.Message]) : undefined,
+  Afficher: mapping.Afficher ? raw[mapping.Afficher] !== false : true
 });
 
 const asAnnouncement = (
@@ -1065,6 +1174,113 @@ export const loadEmployeeOfMonth = async (
     return { items: [employee], isDemo: false };
   } catch {
     return { items: DEMO_EMPLOYEES, isDemo: true };
+  }
+};
+
+/**
+ * Pensée du jour : choix déterministe (même citation pour tout le monde,
+ * toute la journée). Si une citation correspond à la date du jour via
+ * DatePublication, elle prévaut ; sinon, rotation par jour de l'année.
+ */
+export const loadThoughtOfDay = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string
+): Promise<IHomeListResult<IHomeThought>> => {
+  const pick = (thoughts: IHomeThought[], isDemo: boolean): IHomeListResult<IHomeThought> => {
+    if (thoughts.length === 0) {
+      return { items: [], isDemo };
+    }
+    const now = new Date();
+    const todayKey = `${now.getMonth() + 1}/${now.getDate()}`;
+    const dated = thoughts.find((thought) => {
+      if (!thought.DatePublication) {
+        return false;
+      }
+      const date = new Date(thought.DatePublication);
+      if (Number.isNaN(date.getTime())) {
+        return false;
+      }
+      return `${date.getMonth() + 1}/${date.getDate()}` === todayKey;
+    });
+    if (dated) {
+      return { items: [dated], isDemo };
+    }
+    const start = new Date(now.getFullYear(), 0, 0);
+    const dayOfYear = Math.floor((now.getTime() - start.getTime()) / 86400000);
+    return { items: [thoughts[dayOfYear % thoughts.length]], isDemo };
+  };
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, THOUGHT_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const items = await queryItems(
+      spHttpClient,
+      siteUrl,
+      listTitle,
+      `$select=${select.join(',')}&$top=200`
+    );
+    const thoughts = items.map((raw) => asThought(raw, mapping)).filter((item) => !!item.Title);
+    if (thoughts.length === 0) {
+      return pick(DEMO_THOUGHTS, true);
+    }
+    return pick(thoughts, false);
+  } catch {
+    return pick(DEMO_THOUGHTS, true);
+  }
+};
+
+/** Jours/mois jusqu'au prochain anniversaire (0 = aujourd'hui), pour trier par proximité. */
+const daysUntilNextBirthday = (jour: number, mois: number, now: Date): number => {
+  if (!jour || !mois) {
+    return Number.MAX_SAFE_INTEGER;
+  }
+  const year = now.getFullYear();
+  let next = new Date(year, mois - 1, jour);
+  next.setHours(0, 0, 0, 0);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (next.getTime() < today.getTime()) {
+    next = new Date(year + 1, mois - 1, jour);
+  }
+  return Math.round((next.getTime() - today.getTime()) / 86400000);
+};
+
+export const loadHomeBirthdays = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string,
+  maxItems: number
+): Promise<IHomeListResult<IHomeBirthday>> => {
+  const sortByNext = (list: IHomeBirthday[]): IHomeBirthday[] => {
+    const now = new Date();
+    return list
+      .filter((item) => item.Afficher !== false)
+      .slice()
+      .sort((a, b) => daysUntilNextBirthday(a.Jour, a.Mois, now) - daysUntilNextBirthday(b.Jour, b.Mois, now));
+  };
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, BIRTHDAY_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const items = await queryItems(
+      spHttpClient,
+      siteUrl,
+      listTitle,
+      `$select=${select.join(',')}&$top=200`
+    );
+    const birthdays = items
+      .map((raw) => asBirthday(raw, mapping))
+      .filter((item) => !!item.Title && item.Jour >= 1 && item.Jour <= 31 && item.Mois >= 1 && item.Mois <= 12);
+    if (birthdays.length === 0) {
+      return { items: sortByNext(DEMO_BIRTHDAYS).slice(0, Math.max(1, maxItems)), isDemo: true };
+    }
+    return { items: sortByNext(birthdays).slice(0, Math.max(1, maxItems)), isDemo: false };
+  } catch {
+    return { items: sortByNext(DEMO_BIRTHDAYS).slice(0, Math.max(1, maxItems)), isDemo: true };
   }
 };
 
