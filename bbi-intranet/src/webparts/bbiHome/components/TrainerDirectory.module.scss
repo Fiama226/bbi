@@ -4,6 +4,34 @@
   min-width: 0;
 }
 
+.categoryChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.categoryChip {
+  border: 1px solid var(--bbi-line);
+  background: #fff;
+  color: var(--bbi-navy);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.categoryChip:hover {
+  border-color: var(--bbi-navy-2);
+}
+
+.categoryChipActive {
+  background: var(--bbi-navy);
+  border-color: var(--bbi-navy);
+  color: #fff;
+}
+
 .grid {
   list-style: none;
   margin: 0;

@@ -1533,7 +1533,32 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               isDemo={trainers.isDemo}
               showDataNotices={props.showDataNotices}
               sessions={sessions.items}
-              maxItems={activeView === "communaute" ? 24 : 8}
+              maxItems={8}
+              filterCategory="Formateur"
+            />
+          </div>
+        </section>
+
+        <section
+          className={styles.resourcesPeople}
+          id="communaute"
+          data-bbi-view="communaute"
+          aria-label="Trombinoscope et communauté BBI"
+        >
+          <div className={styles.people}>
+            <div className={styles.sectionHeading}>
+              <div>
+                <p className={styles.eyebrow}>Qui sommes-nous</p>
+                <h2>Trombinoscope</h2>
+              </div>
+            </div>
+            <TrainerDirectory
+              trainers={trainers.items}
+              isDemo={trainers.isDemo}
+              showDataNotices={props.showDataNotices}
+              sessions={sessions.items}
+              maxItems={100}
+              showCategoryFilter
             />
             <div className={styles.community} id="support">
               <div>
@@ -1543,17 +1568,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                   Échanges de pratiques, entraide pédagogique et veille :
                   rejoignez la communauté BBI sur Teams et Viva Engage.
                 </p>
-              </div>
-              <div className={styles.communityActions}>
-                <a
-                  className={styles.textLink}
-                  href="#communaute"
-                  onClick={(event) => {
-                    followPortalLink(event, "#communaute");
-                  }}
-                >
-                  Découvrir la communauté <span aria-hidden="true">→</span>
-                </a>
               </div>
             </div>
           </div>

@@ -292,8 +292,26 @@ setTimeout(() => {
   const homeRouteOk = routeRoot && routeRoot.getAttribute('data-view') === 'accueil';
   console.log(`Navigation SPA (Accueil → Formations → Accueil) : ${trainingRouteOk && homeRouteOk ? 'OK' : 'ÉCHEC'}`);
 
+  const communityLink = hostDiv.querySelector('header nav a[href="#communaute"]');
+  if (communityLink) {
+    communityLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  }
+  const communitySection = hostDiv.querySelector('[data-bbi-view="communaute"]');
+  const resourcesSection = hostDiv.querySelector('[data-bbi-view="ressources"]');
+  const communityRouteOk =
+    routeRoot &&
+    routeRoot.getAttribute('data-view') === 'communaute' &&
+    !!communitySection &&
+    !!resourcesSection &&
+    communitySection !== resourcesSection &&
+    !resourcesSection.contains(communitySection);
+  console.log(`Vue Communauté dédiée (section #communaute distincte de #ressources) : ${communityRouteOk ? 'OK' : 'ÉCHEC'}`);
+  if (homeLink) {
+    homeLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
+  }
+
   const allOk =
-    styleOk && trainingRouteOk && homeRouteOk && kpiOk && slidesOk && paginationOk;
+    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk;
   console.log(
     `\n${
       allOk

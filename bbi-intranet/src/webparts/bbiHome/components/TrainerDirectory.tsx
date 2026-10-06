@@ -17,6 +17,10 @@ export interface ITrainerDirectoryProps {
   showDataNotices: boolean;
   sessions: IHomeSession[];
   maxItems: number;
+  /** Ne montre que cette catégorie, sans sélecteur (ex. rail « Formateurs référents »). */
+  filterCategory?: string;
+  /** Active le sélecteur de catégories (Trombinoscope) : « Tous » + une puce par catégorie trouvée. */
+  showCategoryFilter?: boolean;
 }
 
 const initialsOf = (trainer: IHomeTrainer): string => {
@@ -72,14 +76,46 @@ const sessionDate = (value?: string): string => {
  * spécialités et sessions animées.
  */
 const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
-  const { trainers, isDemo, showDataNotices, sessions, maxItems } = props;
+  const {
+    trainers,
+    isDemo,
+    showDataNotices,
+    sessions,
+    maxItems,
+    filterCategory,
+    showCategoryFilter,
+  } = props;
   const [openIndex, setOpenIndex] = React.useState<number>(-1);
+  const [activeCategory, setActiveCategory] = React.useState<string>("");
   const closeButtonRef = React.useRef<HTMLButtonElement>(
     undefined as unknown as HTMLButtonElement,
   );
   const lastFocusedRef = React.useRef<HTMLElement | undefined>(undefined);
 
-  const visible = trainers.slice(0, maxItems);
+  const categories = React.useMemo(() => {
+    if (!showCategoryFilter) {
+      return [];
+    }
+    const found = new Set<string>();
+    trainers.forEach((item) => {
+      if (item.Categorie) {
+        found.add(item.Categorie);
+      }
+    });
+    return Array.from(found).sort();
+  }, [trainers, showCategoryFilter]);
+
+  const scoped = React.useMemo(() => {
+    let list = trainers;
+    if (filterCategory) {
+      list = list.filter((item) => (item.Categorie || "Formateur") === filterCategory);
+    } else if (showCategoryFilter && activeCategory) {
+      list = list.filter((item) => item.Categorie === activeCategory);
+    }
+    return list;
+  }, [trainers, filterCategory, showCategoryFilter, activeCategory]);
+
+  const visible = scoped.slice(0, maxItems);
   const trainer = openIndex >= 0 ? visible[openIndex] : undefined;
 
   React.useEffect(() => {
@@ -285,10 +321,6 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
     );
   };
 
-  if (visible.length === 0) {
-    return <p className={styles.empty}>Aucun formateur référent publié.</p>;
-  }
-
   return (
     <div className={styles.directory}>
       {showDataNotices && isDemo && (
@@ -297,6 +329,39 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
         </p>
       )}
 
+      {showCategoryFilter && categories.length > 1 && (
+        <div className={styles.categoryChips} role="group" aria-label="Filtrer par catégorie">
+          <button
+            type="button"
+            className={
+              activeCategory === ""
+                ? `${styles.categoryChip} ${styles.categoryChipActive}`
+                : styles.categoryChip
+            }
+            onClick={() => setActiveCategory("")}
+          >
+            Tous
+          </button>
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className={
+                activeCategory === category
+                  ? `${styles.categoryChip} ${styles.categoryChipActive}`
+                  : styles.categoryChip
+              }
+              onClick={() => setActiveCategory(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {visible.length === 0 ? (
+        <p className={styles.empty}>Aucun collaborateur à afficher pour cette catégorie.</p>
+      ) : (
       <ul className={styles.grid}>
         {visible.map((item, index) => (
           <li className={styles.card} key={item.Id}>
@@ -334,6 +399,7 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
           </li>
         ))}
       </ul>
+      )}
 
       {renderModal()}
     </div>

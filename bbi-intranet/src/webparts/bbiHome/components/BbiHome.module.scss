@@ -713,16 +713,6 @@ a.sessionStatus:hover {
   color: #9fb4dd;
 }
 
-.community .textLink {
-  color: #fff;
-}
-
-.communityActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
 /* Encart agenda : remplit la colonne des sessions, sans espace perdu. */
 .agendaCard {
   margin-top: 14px;
@@ -1066,7 +1056,7 @@ a.sessionStatus:hover {
 .home[data-view="sessions"] .content > :not([data-bbi-view="actualites"]),
 .home[data-view="actualites"] .content > :not([data-bbi-view="actualites"]),
 .home[data-view="ressources"] .content > :not([data-bbi-view="ressources"]),
-.home[data-view="communaute"] .content > :not([data-bbi-view="ressources"]),
+.home[data-view="communaute"] .content > :not([data-bbi-view="communaute"]),
 .home[data-view="recherche"] .content > :not([data-bbi-view="recherche"]),
 .home[data-view="actualite"] .content > :not([data-bbi-view="actualite"]) {
   display: none !important;
@@ -1126,25 +1116,12 @@ a.sessionStatus:hover {
   padding-right: 0;
 }
 
-.home[data-view="ressources"] [data-bbi-view="ressources"],
-.home[data-view="communaute"] [data-bbi-view="ressources"] {
+.home[data-view="ressources"] [data-bbi-view="ressources"] {
   flex-direction: column;
 }
 
-.home[data-view="ressources"] [data-bbi-view="ressources"] .people,
-.home[data-view="communaute"] [data-bbi-view="ressources"] .resources {
-  display: none !important;
-}
-
-.home[data-view="ressources"] [data-bbi-view="ressources"] .resources {
-  /* Les deux colonnes documents + galerie restent côte à côte. */
-  display: grid !important;
-  width: 100%;
-  margin: 0 auto;
-}
-
-.home[data-view="communaute"] [data-bbi-view="ressources"] .people {
-  display: block !important;
+/* Le Trombinoscope (vue Communauté) est une liste centrée, sans la grille documents/galerie. */
+[data-bbi-view="communaute"] .people {
   max-width: 1000px;
   width: 100%;
   margin: 0 auto;

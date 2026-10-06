@@ -44,6 +44,9 @@ export interface IHomeTrainer {
   Certifications?: string;
   LinkedIn?: string;
   DemoIndex?: number;
+  /** Trombinoscope : Formateur | Permanent | Direction | Appui (par défaut Formateur). */
+  Categorie?: string;
+  Ordre?: number;
 }
 
 /** Collaborateur mis à l'honneur (Employé du mois). */
@@ -532,7 +535,9 @@ export const DEMO_TRAINERS: IHomeTrainer[] = TRAINER_SEED.map((seed, index) => (
   Bio: seed.Bio,
   Specialites: seed.Specialites,
   Certifications: seed.Certifications,
-  DemoIndex: index % 4
+  DemoIndex: index % 4,
+  Categorie: /directeur|directrice|direction/i.test(seed.Role) ? 'Direction' : 'Formateur',
+  Ordre: index
 }));
 
 export const DEMO_EMPLOYEES: IHomeEmployee[] = [
@@ -791,7 +796,9 @@ const TRAINER_FIELDS: { [key: string]: string[] } = {
   Bio: ['Bio', 'Biographie', 'Presentation', 'Description', 'Parcours'],
   Specialites: ['Specialites', 'Spécialités', 'Expertise', 'Specialite'],
   Certifications: ['Certifications', 'Titres', 'Habilitations'],
-  LinkedIn: ['LinkedIn', 'Linkedin', 'LinkedInUrl', 'Profil']
+  LinkedIn: ['LinkedIn', 'Linkedin', 'LinkedInUrl', 'Profil'],
+  Categorie: ['Categorie', 'Catégorie', 'Category', 'Type'],
+  Ordre: ['Ordre', 'SortOrder', 'Rang']
 };
 
 const EMPLOYEE_FIELDS: { [key: string]: string[] } = {
@@ -945,7 +952,9 @@ const asTrainer = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IHo
   Bio: mapping.Bio ? textOf(raw[mapping.Bio]) : undefined,
   Specialites: mapping.Specialites ? textOf(raw[mapping.Specialites]) : undefined,
   Certifications: mapping.Certifications ? textOf(raw[mapping.Certifications]) : undefined,
-  LinkedIn: mapping.LinkedIn ? safeHref(textOf(raw[mapping.LinkedIn])) : undefined
+  LinkedIn: mapping.LinkedIn ? safeHref(textOf(raw[mapping.LinkedIn])) : undefined,
+  Categorie: mapping.Categorie ? textOf(raw[mapping.Categorie]) || 'Formateur' : 'Formateur',
+  Ordre: mapping.Ordre ? asNumber(raw[mapping.Ordre]) : undefined
 });
 
 const booleanOf = (value: unknown): boolean =>
@@ -1104,7 +1113,8 @@ export const loadHomeTrainers = async (
         ...asTrainer(raw, mapping),
         DemoIndex: index % 4
       }))
-      .filter((trainer) => !!trainer.Title);
+      .filter((trainer) => !!trainer.Title)
+      .sort((a, b) => (a.Ordre ?? Number.MAX_SAFE_INTEGER) - (b.Ordre ?? Number.MAX_SAFE_INTEGER));
     if (trainers.length === 0) {
       return { items: DEMO_TRAINERS, isDemo: true };
     }
