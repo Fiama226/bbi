@@ -979,6 +979,31 @@ async function testOfficesAndReferences() {
     'références pédagogiques — triées par Ordre',
     livePedago.isDemo === false && livePedago.items[0].Title === 'Référence A'
   );
+
+  const { loadDocumentShelf } = loadTsModule('src/webparts/bbiHome/components/homeData.ts');
+  const demoAdminDocs = await loadDocumentShelf(missing, SITE, 'DocumentsAdministratifs', 12);
+  check('documents administratifs — absente (404) — repli disponible', demoAdminDocs.items.length >= 1 && demoAdminDocs.isDemo === true);
+
+  const liveAdminDocs = await loadDocumentShelf(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Categorie' }, { InternalName: 'Reference' }] } },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Note de service', FileRef: '/sites/intranet/Documents/note.pdf', FileLeafRef: 'note.pdf', Categorie: 'RH', Reference: 'RH-01' }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'DocumentsAdministratifs',
+    12
+  );
+  check(
+    'documents administratifs — données réelles lues et catégorisées',
+    liveAdminDocs.isDemo === false && liveAdminDocs.items[0].Categorie === 'RH' && liveAdminDocs.items[0].FileRef.indexOf('note.pdf') !== -1
+  );
 }
 
 /* ------------------------------------------------------------------ */

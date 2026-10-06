@@ -153,6 +153,21 @@ export interface IHomePedagogicalReference {
   Ordre?: number;
 }
 
+/** Document administratif (bibliothèque distincte des supports pédagogiques). */
+export interface IHomeAdminDocument {
+  Id: number;
+  Title: string;
+  FileRef: string;
+  FileLeafRef: string;
+  Modified?: string;
+  /** RH | Juridique | Finance | Qualité | Modèles. */
+  Categorie?: string;
+  /** Tous | Formateurs | Direction. */
+  Public?: string;
+  Reference?: string;
+  DateValidite?: string;
+}
+
 export interface IHomeListResult<T> {
   items: T[];
   isDemo: boolean;
@@ -596,6 +611,14 @@ export const DEMO_EMPLOYEES: IHomeEmployee[] = [
   }
 ];
 
+export const DEMO_ADMIN_DOCUMENTS: IHomeAdminDocument[] = [
+  { Id: 1, Title: 'Règlement intérieur 2026', FileRef: '#', FileLeafRef: 'Reglement-interieur-2026.pdf', Modified: daysAgo(40), Categorie: 'RH', Public: 'Tous', Reference: 'RH-2026-01' },
+  { Id: 2, Title: 'Charte Qualiopi', FileRef: '#', FileLeafRef: 'Charte-Qualiopi.pdf', Modified: daysAgo(90), Categorie: 'Qualité', Public: 'Formateurs', Reference: 'QUA-2026-03', DateValidite: dateInDays(300) },
+  { Id: 3, Title: 'Modèle de convention de formation', FileRef: '#', FileLeafRef: 'Modele-convention-formation.docx', Modified: daysAgo(15), Categorie: 'Modèles', Public: 'Direction' },
+  { Id: 4, Title: 'Barème de facturation inter-pays', FileRef: '#', FileLeafRef: 'Bareme-facturation.xlsx', Modified: daysAgo(60), Categorie: 'Finance', Public: 'Direction', Reference: 'FIN-2026-02' },
+  { Id: 5, Title: "Contrat type formateur indépendant", FileRef: '#', FileLeafRef: 'Contrat-type-formateur.pdf', Modified: daysAgo(120), Categorie: 'Juridique', Public: 'Direction' }
+];
+
 export const DEMO_PEDAGOGICAL_REFERENCES: IHomePedagogicalReference[] = [
   {
     Id: 1,
@@ -946,6 +969,13 @@ const EMPLOYEE_FIELDS: { [key: string]: string[] } = {
   PhotoUrl: ['PhotoUrl', 'Photo', 'Portrait', 'Avatar', 'Image']
 };
 
+const ADMIN_DOCUMENT_FIELDS: { [key: string]: string[] } = {
+  Categorie: ['Categorie', 'Catégorie', 'Category'],
+  Public: ['Public', 'Audience'],
+  Reference: ['Reference', 'Référence', 'Ref'],
+  DateValidite: ['DateValidite', 'DateValidité', 'ValidUntil', 'Echeance', 'Échéance']
+};
+
 const PEDAGOGICAL_REFERENCE_FIELDS: { [key: string]: string[] } = {
   Categorie: ['Categorie', 'Catégorie', 'Category', 'Type'],
   Auteur: ['Auteur', 'Author'],
@@ -1136,6 +1166,21 @@ const asEmployee = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IH
   Message: mapping.Message ? textOf(raw[mapping.Message]) : undefined,
   Highlights: mapping.Highlights ? textOf(raw[mapping.Highlights]) : undefined,
   PhotoUrl: mapping.PhotoUrl ? relativeImage(textOf(raw[mapping.PhotoUrl])) : undefined
+});
+
+const asAdminDocument = (
+  raw: { [key: string]: unknown },
+  mapping: IFieldMapping
+): IHomeAdminDocument => ({
+  Id: Number(raw.Id),
+  Title: textOf(raw.Title) || '',
+  FileRef: safeHref(textOf(raw.FileRef) || '') || '',
+  FileLeafRef: textOf(raw.FileLeafRef) || '',
+  Modified: textOf(raw.Modified),
+  Categorie: mapping.Categorie ? textOf(raw[mapping.Categorie]) : undefined,
+  Public: mapping.Public ? textOf(raw[mapping.Public]) || 'Tous' : 'Tous',
+  Reference: mapping.Reference ? textOf(raw[mapping.Reference]) : undefined,
+  DateValidite: mapping.DateValidite ? textOf(raw[mapping.DateValidite]) : undefined
 });
 
 const asPedagogicalReference = (
@@ -1396,6 +1441,36 @@ export const loadEmployeeOfMonth = async (
     return { items: [employee], isDemo: false };
   } catch {
     return { items: DEMO_EMPLOYEES, isDemo: true };
+  }
+};
+
+export const loadDocumentShelf = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  libraryTitle: string,
+  maxItems: number
+): Promise<IHomeListResult<IHomeAdminDocument>> => {
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, libraryTitle);
+    const mapping = buildMapping(fields, ADMIN_DOCUMENT_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title', 'FileRef', 'FileLeafRef', 'Modified'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const items = await queryItems(
+      spHttpClient,
+      siteUrl,
+      libraryTitle,
+      `$select=${select.join(',')}&$orderby=Modified desc&$top=${Math.max(1, maxItems)}`
+    );
+    const documents = items
+      .map((raw) => asAdminDocument(raw, mapping))
+      .filter((item) => !!item.Title || !!item.FileLeafRef);
+    if (documents.length === 0) {
+      return { items: DEMO_ADMIN_DOCUMENTS.slice(0, Math.max(1, maxItems)), isDemo: true };
+    }
+    return { items: documents, isDemo: false };
+  } catch {
+    return { items: DEMO_ADMIN_DOCUMENTS.slice(0, Math.max(1, maxItems)), isDemo: true };
   }
 };
 

@@ -32,6 +32,7 @@ export interface IBbiHomeWebPartProps {
   officesListTitle: string;
   clientReferencesListTitle: string;
   pedagogicalReferencesListTitle: string;
+  adminDocumentsLibraryTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
@@ -209,6 +210,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       officesListTitle: properties.officesListTitle || 'Implantations',
       clientReferencesListTitle: properties.clientReferencesListTitle || 'Nos références',
       pedagogicalReferencesListTitle: properties.pedagogicalReferencesListTitle || 'Références pédagogiques',
+      adminDocumentsLibraryTitle: properties.adminDocumentsLibraryTitle || 'Documents administratifs',
       maxItems: properties.maxItems || 5,
       heroEyebrow: properties.heroEyebrow || '',
       heroTitle: properties.heroTitle || '',
@@ -294,6 +296,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('officesListTitle', { label: strings.OfficesListFieldLabel }),
               PropertyPaneTextField('clientReferencesListTitle', { label: strings.ClientReferencesListFieldLabel }),
               PropertyPaneTextField('pedagogicalReferencesListTitle', { label: strings.PedagogicalReferencesListFieldLabel }),
+              PropertyPaneTextField('adminDocumentsLibraryTitle', { label: strings.AdminDocumentsLibraryFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,

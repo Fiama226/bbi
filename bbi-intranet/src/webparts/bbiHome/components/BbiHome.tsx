@@ -2,6 +2,7 @@ import * as React from "react";
 import styles from "./BbiHome.module.scss";
 import { IBbiHomeProps } from "./IBbiHomeProps";
 import {
+  IHomeAdminDocument,
   IHomeAnnouncement,
   IHomeBirthday,
   IHomeCertification,
@@ -14,6 +15,7 @@ import {
   IHomeTrainer,
   IHomeListResult,
   loadClientReferences,
+  loadDocumentShelf,
   loadEmployeeOfMonth,
   loadHomeAnnouncements,
   loadHomeBirthdays,
@@ -29,6 +31,7 @@ import {
 import OfficeNetwork from "./OfficeNetwork";
 import ClientReferences from "./ClientReferences";
 import PedagogicalReferences from "./PedagogicalReferences";
+import DocumentShelf from "./DocumentShelf";
 import {
   IHomeNewsBundle,
   IHomeNewsPage,
@@ -368,6 +371,10 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     React.useState<IHomeListResult<IHomePedagogicalReference>>(
       emptyResult<IHomePedagogicalReference>(),
     );
+  const [adminDocuments, setAdminDocuments] =
+    React.useState<IHomeListResult<IHomeAdminDocument>>(
+      emptyResult<IHomeAdminDocument>(),
+    );
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>(
@@ -530,6 +537,12 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         props.pedagogicalReferencesListTitle,
         20,
       ),
+      loadDocumentShelf(
+        props.spHttpClient,
+        props.siteUrl,
+        props.adminDocumentsLibraryTitle,
+        12,
+      ),
     ])
       .then(
         ([
@@ -543,6 +556,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           loadedOffices,
           loadedClientReferences,
           loadedPedagogicalReferences,
+          loadedAdminDocuments,
         ]) => {
           if (cancelled) {
             return;
@@ -557,6 +571,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setOffices(loadedOffices);
           setClientReferences(loadedClientReferences);
           setPedagogicalReferences(loadedPedagogicalReferences);
+          setAdminDocuments(loadedAdminDocuments);
           setStatus("ready");
         },
       )
@@ -572,6 +587,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setOffices(emptyResult<IHomeOffice>());
           setClientReferences(emptyResult<IHomeClientReference>());
           setPedagogicalReferences(emptyResult<IHomePedagogicalReference>());
+          setAdminDocuments(emptyResult<IHomeAdminDocument>());
           setStatus("ready");
         }
       });
@@ -591,6 +607,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     props.officesListTitle,
     props.clientReferencesListTitle,
     props.pedagogicalReferencesListTitle,
+    props.adminDocumentsLibraryTitle,
     props.maxItems,
   ]);
 
@@ -1572,6 +1589,21 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               <LazyMount active={activeView === "ressources"} minHeight={210}>
                 <SecureDocuments {...documentsProps} />
               </LazyMount>
+              {adminDocuments.items.length > 0 && (
+                <div className={styles.adminDocuments} id="documents-administratifs">
+                  <div className={styles.sectionHeading}>
+                    <div>
+                      <p className={styles.eyebrow}>RH, juridique, qualité</p>
+                      <h3>Documents administratifs</h3>
+                    </div>
+                  </div>
+                  <DocumentShelf
+                    documents={adminDocuments.items}
+                    isDemo={adminDocuments.isDemo}
+                    showDataNotices={props.showDataNotices}
+                  />
+                </div>
+              )}
             </div>
             <div className={styles.gallery} id="galerie">
               <div className={styles.sectionHeading}>

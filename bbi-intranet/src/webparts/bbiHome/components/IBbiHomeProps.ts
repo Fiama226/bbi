@@ -18,6 +18,7 @@ export interface IBbiHomeProps {
   officesListTitle: string;
   clientReferencesListTitle: string;
   pedagogicalReferencesListTitle: string;
+  adminDocumentsLibraryTitle: string;
   maxItems: number;
 
   /* --- Héros --- */

@@ -17,6 +17,7 @@
   "OfficesListFieldLabel": "Liste des implantations (siège et filiales)",
   "ClientReferencesListFieldLabel": "Liste des références clients",
   "PedagogicalReferencesListFieldLabel": "Liste des références pédagogiques",
+  "AdminDocumentsLibraryFieldLabel": "Bibliothèque des documents administratifs",
   "MaxItemsFieldLabel": "Éléments affichés par section",
   "HeroPageDescription": "Héros plein écran, boutons d'action et navigation de la page.",
   "HeroGroupName": "Bandeau héros",
