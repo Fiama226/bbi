@@ -2,12 +2,14 @@ import * as React from "react";
 import styles from "./BbiHome.module.scss";
 import { IBbiHomeProps } from "./IBbiHomeProps";
 import {
+  IHomeAnnouncement,
   IHomeCertification,
   IHomeEmployee,
   IHomeSession,
   IHomeTrainer,
   IHomeListResult,
   loadEmployeeOfMonth,
+  loadHomeAnnouncements,
   loadHomeCertifications,
   loadHomeSessions,
   loadHomeTrainers,
@@ -333,6 +335,10 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     React.useState<IHomeListResult<IHomeCertification>>(
       emptyResult<IHomeCertification>(),
     );
+  const [announcements, setAnnouncements] =
+    React.useState<IHomeListResult<IHomeAnnouncement>>(
+      emptyResult<IHomeAnnouncement>(),
+    );
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>(
@@ -461,6 +467,12 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         props.certificationsListTitle,
         6,
       ),
+      loadHomeAnnouncements(
+        props.spHttpClient,
+        props.siteUrl,
+        props.announcementsListTitle,
+        8,
+      ),
     ])
       .then(
         ([
@@ -468,6 +480,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           loadedTrainers,
           loadedEmployee,
           loadedCertifications,
+          loadedAnnouncements,
         ]) => {
           if (cancelled) {
             return;
@@ -476,6 +489,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setTrainers(loadedTrainers);
           setEmployee(loadedEmployee);
           setCertifications(loadedCertifications);
+          setAnnouncements(loadedAnnouncements);
           setStatus("ready");
         },
       )
@@ -485,6 +499,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           setTrainers(emptyResult<IHomeTrainer>());
           setEmployee(emptyResult<IHomeEmployee>());
           setCertifications(emptyResult<IHomeCertification>());
+          setAnnouncements(emptyResult<IHomeAnnouncement>());
           setStatus("ready");
         }
       });
@@ -498,6 +513,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     props.trainersListTitle,
     props.employeeListTitle,
     props.certificationsListTitle,
+    props.announcementsListTitle,
     props.maxItems,
   ]);
 
@@ -748,13 +764,60 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     strings: galleryStrings,
   };
 
-  const announcement =
-    (props.announcementText || "").trim() ||
-    (newsPage.items[0]
-      ? `${newsPage.items[0].Category || "À la une"} — ${newsPage.items[0].Title}`
-      : "");
-  const showAnnouncement = props.enableAnnouncement !== false && !!announcement;
   const featuredNews = newsPage.items[0];
+
+  interface IAnnouncementItem {
+    key: string;
+    text: string;
+    href?: string;
+  }
+  const pinnedAnnouncement = (props.announcementText || "").trim();
+  const announcementItems: IAnnouncementItem[] = React.useMemo(() => {
+    const items: IAnnouncementItem[] = [];
+    if (pinnedAnnouncement) {
+      items.push({ key: "pinned", text: pinnedAnnouncement, href: "#actualites" });
+    }
+    announcements.items.forEach((item) => {
+      items.push({
+        key: `ann-${item.Id}`,
+        text: item.Message ? `${item.Title} — ${item.Message}` : item.Title,
+        href: item.LienUrl,
+      });
+    });
+    if (items.length === 0 && featuredNews) {
+      items.push({
+        key: "news",
+        text: `${featuredNews.Category || "À la une"} — ${featuredNews.Title}`,
+        href: "#actualites",
+      });
+    }
+    return items;
+  }, [pinnedAnnouncement, announcements.items, featuredNews]);
+
+  const [announcementIndex, setAnnouncementIndex] = React.useState(0);
+  const [announcementPaused, setAnnouncementPaused] = React.useState(false);
+  React.useEffect(() => {
+    setAnnouncementIndex(0);
+  }, [announcementItems.length]);
+  React.useEffect(() => {
+    if (announcementItems.length <= 1 || announcementPaused) {
+      return undefined;
+    }
+    const reducedMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      return undefined;
+    }
+    const timer = window.setInterval(() => {
+      setAnnouncementIndex((index) => (index + 1) % announcementItems.length);
+    }, 7000);
+    return () => window.clearInterval(timer);
+  }, [announcementItems.length, announcementPaused]);
+
+  const currentAnnouncement = announcementItems[announcementIndex % Math.max(announcementItems.length, 1)];
+  const showAnnouncement = props.enableAnnouncement !== false && !!currentAnnouncement;
 
   if (status === "loading") {
     return (
@@ -773,25 +836,47 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       id="bbi-home-root"
       data-view={activeView}
     >
-      {showAnnouncement && (
+      {showAnnouncement && currentAnnouncement && (
         <div
           className={styles.announcement}
           role="region"
           aria-label="Information à la une"
+          aria-live="polite"
+          onMouseEnter={() => setAnnouncementPaused(true)}
+          onMouseLeave={() => setAnnouncementPaused(false)}
+          onFocus={() => setAnnouncementPaused(true)}
+          onBlur={() => setAnnouncementPaused(false)}
         >
           <span className={styles.announcementDot} aria-hidden="true" />
-          <span className={styles.announcementText}>{announcement}</span>
-          {featuredNews && (
+          <span className={styles.announcementText}>{currentAnnouncement.text}</span>
+          {currentAnnouncement.href && (
             <a
               className={styles.announcementLink}
-              href="#actualites"
+              href={currentAnnouncement.href}
               onClick={(event) => {
-                event.preventDefault();
-                openView("actualites");
+                const view = viewFromHref(currentAnnouncement.href || "");
+                if (view) {
+                  event.preventDefault();
+                  openView(view);
+                }
               }}
             >
               Voir les actualités <span aria-hidden="true">→</span>
             </a>
+          )}
+          {announcementItems.length > 1 && (
+            <span className={styles.announcementDots} aria-hidden="true">
+              {announcementItems.map((item, index) => (
+                <span
+                  key={item.key}
+                  className={
+                    index === announcementIndex % announcementItems.length
+                      ? `${styles.announcementDotNav} ${styles.announcementDotNavActive}`
+                      : styles.announcementDotNav
+                  }
+                />
+              ))}
+            </span>
           )}
         </div>
       )}

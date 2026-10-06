@@ -71,6 +71,19 @@ export interface IHomeCertification {
   DemoIndex?: number;
 }
 
+/** Annonce interne (bandeau d'information). */
+export interface IHomeAnnouncement {
+  Id: number;
+  Title: string;
+  Message?: string;
+  /** Information | Important | Urgent. */
+  Niveau?: string;
+  DateDebut?: string;
+  DateFin?: string;
+  LienUrl?: string;
+  Ordre?: number;
+}
+
 export interface IHomeListResult<T> {
   items: T[];
   isDemo: boolean;
@@ -512,6 +525,36 @@ export const DEMO_EMPLOYEES: IHomeEmployee[] = [
   }
 ];
 
+export const DEMO_ANNOUNCEMENTS: IHomeAnnouncement[] = [
+  {
+    Id: 1,
+    Title: 'Nouvelle session Qualiopi programmée',
+    Message: "L'audit de surveillance Qualiopi se tiendra le mois prochain. Merci de tenir vos dossiers formateurs à jour.",
+    Niveau: 'Important',
+    DateDebut: daysAgo(2),
+    DateFin: dateInDays(28),
+    LienUrl: '#actualites',
+    Ordre: 1
+  },
+  {
+    Id: 2,
+    Title: 'Maintenance de la plateforme ce week-end',
+    Message: "L'intranet sera indisponible samedi de 22h à 2h pour une mise à jour de sécurité.",
+    Niveau: 'Urgent',
+    DateDebut: daysAgo(1),
+    DateFin: dateInDays(4),
+    Ordre: 2
+  },
+  {
+    Id: 3,
+    Title: 'Nouveau catalogue de formations en ligne',
+    Message: '10 nouveaux modules sont disponibles au catalogue, dont 3 parcours certifiants.',
+    Niveau: 'Information',
+    LienUrl: '#formations',
+    Ordre: 3
+  }
+];
+
 export const DEMO_CERTIFICATIONS: IHomeCertification[] = [
   {
     Id: 1,
@@ -697,6 +740,15 @@ const EMPLOYEE_FIELDS: { [key: string]: string[] } = {
   PhotoUrl: ['PhotoUrl', 'Photo', 'Portrait', 'Avatar', 'Image']
 };
 
+const ANNOUNCEMENT_FIELDS: { [key: string]: string[] } = {
+  Message: ['Message', 'Corps', 'Texte', 'Body'],
+  Niveau: ['Niveau', 'Level', 'Priorite', 'Priorité'],
+  DateDebut: ['DateDebut', 'StartDate', 'Debut'],
+  DateFin: ['DateFin', 'EndDate', 'Fin'],
+  LienUrl: ['LienUrl', 'LinkUrl', 'Lien'],
+  Ordre: ['Ordre', 'SortOrder', 'Rang']
+};
+
 const CERTIFICATION_FIELDS: { [key: string]: string[] } = {
   Issuer: ['Issuer', 'Organisme', 'Certificateur'],
   Scope: ['Scope', 'Perimetre', 'Périmètre', 'Description', 'Objet'],
@@ -831,6 +883,24 @@ const asEmployee = (raw: { [key: string]: unknown }, mapping: IFieldMapping): IH
   Highlights: mapping.Highlights ? textOf(raw[mapping.Highlights]) : undefined,
   PhotoUrl: mapping.PhotoUrl ? relativeImage(textOf(raw[mapping.PhotoUrl])) : undefined
 });
+
+const asAnnouncement = (
+  raw: { [key: string]: unknown },
+  mapping: IFieldMapping
+): IHomeAnnouncement => {
+  const ordreRaw = mapping.Ordre ? raw[mapping.Ordre] : undefined;
+  const ordre = typeof ordreRaw === 'number' ? ordreRaw : Number(ordreRaw);
+  return {
+    Id: Number(raw.Id),
+    Title: textOf(raw.Title) || '',
+    Message: mapping.Message ? textOf(raw[mapping.Message]) : undefined,
+    Niveau: mapping.Niveau ? textOf(raw[mapping.Niveau]) : undefined,
+    DateDebut: mapping.DateDebut ? textOf(raw[mapping.DateDebut]) : undefined,
+    DateFin: mapping.DateFin ? textOf(raw[mapping.DateFin]) : undefined,
+    LienUrl: mapping.LienUrl ? safeHref(textOf(raw[mapping.LienUrl]) || '') || undefined : undefined,
+    Ordre: Number.isFinite(ordre) ? ordre : undefined
+  };
+};
 
 const asCertification = (
   raw: { [key: string]: unknown },
@@ -995,6 +1065,56 @@ export const loadEmployeeOfMonth = async (
     return { items: [employee], isDemo: false };
   } catch {
     return { items: DEMO_EMPLOYEES, isDemo: true };
+  }
+};
+
+/** Une annonce est active si la date courante est dans sa fenêtre (bornes ouvertes si absentes). */
+export const isAnnouncementActive = (announcement: IHomeAnnouncement, now: Date = new Date()): boolean => {
+  const time = now.getTime();
+  if (announcement.DateDebut) {
+    const start = new Date(announcement.DateDebut).getTime();
+    if (!Number.isNaN(start) && time < start) {
+      return false;
+    }
+  }
+  if (announcement.DateFin) {
+    const end = new Date(announcement.DateFin).getTime();
+    if (!Number.isNaN(end) && time > end) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const loadHomeAnnouncements = async (
+  spHttpClient: SPHttpClient,
+  siteUrl: string,
+  listTitle: string,
+  maxItems: number
+): Promise<IHomeListResult<IHomeAnnouncement>> => {
+  try {
+    const fields = await readFields(spHttpClient, siteUrl, listTitle);
+    const mapping = buildMapping(fields, ANNOUNCEMENT_FIELDS);
+    const select = baseSelect(fields, ['Id', 'Title', 'Created'])
+      .concat(Object.keys(mapping).map((key) => mapping[key]))
+      .filter((value, index, all) => all.indexOf(value) === index);
+    const items = await queryItems(
+      spHttpClient,
+      siteUrl,
+      listTitle,
+      `$select=${select.join(',')}&$orderby=Created desc&$top=${Math.max(1, maxItems)}`
+    );
+    const announcements = items
+      .map((raw) => asAnnouncement(raw, mapping))
+      .filter((item) => !!item.Title)
+      .filter((item) => isAnnouncementActive(item))
+      .sort((a, b) => (a.Ordre ?? 999) - (b.Ordre ?? 999));
+    if (announcements.length === 0) {
+      return { items: DEMO_ANNOUNCEMENTS.filter((item) => isAnnouncementActive(item)), isDemo: true };
+    }
+    return { items: announcements, isDemo: false };
+  } catch {
+    return { items: DEMO_ANNOUNCEMENTS.filter((item) => isAnnouncementActive(item)), isDemo: true };
   }
 };
 

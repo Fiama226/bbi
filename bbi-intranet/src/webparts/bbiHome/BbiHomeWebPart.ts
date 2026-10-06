@@ -26,6 +26,7 @@ export interface IBbiHomeWebPartProps {
   galleryLibraryTitle: string;
   employeeListTitle: string;
   certificationsListTitle: string;
+  announcementsListTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
@@ -197,6 +198,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       galleryLibraryTitle: properties.galleryLibraryTitle || 'Galerie médias',
       employeeListTitle: properties.employeeListTitle || 'Employés du mois',
       certificationsListTitle: properties.certificationsListTitle || 'Certifications',
+      announcementsListTitle: properties.announcementsListTitle || 'Annonces',
       maxItems: properties.maxItems || 5,
       heroEyebrow: properties.heroEyebrow || '',
       heroTitle: properties.heroTitle || '',
@@ -276,6 +278,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('galleryLibraryTitle', { label: strings.GalleryLibraryFieldLabel }),
               PropertyPaneTextField('employeeListTitle', { label: strings.EmployeeListFieldLabel }),
               PropertyPaneTextField('certificationsListTitle', { label: strings.CertificationsListFieldLabel }),
+              PropertyPaneTextField('announcementsListTitle', { label: strings.AnnouncementsListFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,

@@ -12,6 +12,7 @@ export interface IBbiHomeProps {
   galleryLibraryTitle: string;
   employeeListTitle: string;
   certificationsListTitle: string;
+  announcementsListTitle: string;
   maxItems: number;
 
   /* --- Héros --- */

@@ -714,7 +714,85 @@ async function testTeamHighlights() {
 }
 
 /* ------------------------------------------------------------------ */
-/* 9. Organigramme                                                     */
+/* 9. Annonces                                                         */
+/* ------------------------------------------------------------------ */
+async function testAnnouncements() {
+  console.log('\nAnnonces');
+  const { loadHomeAnnouncements, isAnnouncementActive } =
+    loadTsModule('src/webparts/bbiHome/components/homeData.ts');
+
+  const missing = fakeClient([{ match: /fields/, ok: false, status: 404 }]);
+  const demo = await loadHomeAnnouncements(missing, SITE, 'Annonces', 8);
+  check('annonces — absente (404) — repli disponible', demo.items.length >= 1 && demo.isDemo === true);
+
+  const empty = await loadHomeAnnouncements(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'Message' }, { InternalName: 'Ordre' }] } },
+      { match: /items/, json: { value: [] } }
+    ]),
+    SITE,
+    'Annonces',
+    8
+  );
+  check('annonces — créée mais vide — repli disponible', empty.items.length >= 1 && empty.isDemo === true);
+
+  const now = new Date();
+  const iso = (days) => new Date(now.getTime() + days * 86400000).toISOString();
+  const live = await loadHomeAnnouncements(
+    fakeClient([
+      {
+        match: /fields/,
+        json: {
+          value: [
+            { InternalName: 'Message' },
+            { InternalName: 'Niveau' },
+            { InternalName: 'DateDebut' },
+            { InternalName: 'DateFin' },
+            { InternalName: 'Ordre' }
+          ]
+        }
+      },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Annonce future', Message: 'Pas encore active', DateDebut: iso(10), Ordre: 1 },
+            { Id: 2, Title: 'Annonce expirée', Message: 'Déjà terminée', DateFin: iso(-5), Ordre: 2 },
+            { Id: 3, Title: 'Annonce active sans bornes', Message: 'Toujours affichée', Ordre: 3 },
+            { Id: 4, Title: 'Annonce active en fenêtre', Message: 'Dans la fenêtre', DateDebut: iso(-2), DateFin: iso(2), Ordre: 0 }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'Annonces',
+    8
+  );
+  check(
+    'annonces — fenêtre de dates : futures et expirées exclues',
+    live.isDemo === false && live.items.length === 2 && live.items.every((item) => item.Title !== 'Annonce future' && item.Title !== 'Annonce expirée')
+  );
+  check(
+    'annonces — triées par Ordre croissant',
+    live.items[0].Title === 'Annonce active en fenêtre' && live.items[1].Title === 'Annonce active sans bornes'
+  );
+
+  check(
+    'annonces — isAnnonceActive : bornes ouvertes = toujours active',
+    isAnnouncementActive({ Id: 1, Title: 'x' }) === true
+  );
+  check(
+    'annonces — isAnnonceActive : avant DateDebut = inactive',
+    isAnnouncementActive({ Id: 1, Title: 'x', DateDebut: iso(5) }) === false
+  );
+  check(
+    'annonces — isAnnonceActive : après DateFin = inactive',
+    isAnnouncementActive({ Id: 1, Title: 'x', DateFin: iso(-5) }) === false
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* 10. Organigramme                                                    */
 /* ------------------------------------------------------------------ */
 async function testPortalSearch() {
   console.log('\nRecherche globale du portail');
@@ -767,6 +845,7 @@ async function testPortalSearch() {
   await testHeroAndRoutes();
   await testNewsArchive();
   await testTeamHighlights();
+  await testAnnouncements();
   await testPortalSearch();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);
