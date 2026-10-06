@@ -249,6 +249,25 @@
   background: rgba(255, 255, 255, 0.32);
 }
 
+.supportLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  white-space: nowrap;
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.supportLink:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
 .visuallyHidden {
   position: absolute;
   width: 1px;
@@ -347,6 +366,43 @@
 .sectionFooterLink {
   margin-top: 18px;
   text-align: right;
+}
+
+/* ---------- Identité (vision, mission, objectifs) ---------- */
+
+.identityGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.identityCard {
+  padding: 24px;
+  border: 1px solid var(--bbi-line);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.identityCard h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--bbi-navy);
+}
+
+.identityCard p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--bbi-muted);
+}
+
+.identityList {
+  margin: 0;
+  padding: 0 0 0 18px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--bbi-muted);
 }
 
 /* ---------- Accès rapides ---------- */
@@ -771,6 +827,23 @@ a.sessionStatus:hover {
   text-decoration: underline;
 }
 
+.footerSupport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  flex: 1 1 100%;
+}
+
+.footerSupport a {
+  color: #c9d3e8;
+  font-size: 12.5px;
+  text-decoration: none;
+}
+
+.footerSupport a:hover {
+  text-decoration: underline;
+}
+
 .footerCopy {
   flex: 1 1 100%;
   font-size: 11.5px;
@@ -934,6 +1007,13 @@ a.sessionStatus:hover {
     width: 100%;
   }
 
+  .supportLink {
+    order: 4;
+    justify-content: center;
+    width: 100%;
+    margin-top: 6px;
+  }
+
   .section,
   .newsSessions,
   .resourcesPeople,
@@ -983,6 +1063,12 @@ a.sessionStatus:hover {
 /* La recherche n'existe que dans la vue « recherche » :
    jamais de « Résultats pour « » » vide sur l'accueil. */
 .home:not([data-view="recherche"]) [data-bbi-view="recherche"] {
+  display: none !important;
+}
+
+/* L'actualité détaillée n'existe que dans la vue « actualite » :
+   jamais de « Cette actualité n'est plus disponible » vide sur l'accueil. */
+.home:not([data-view="actualite"]) [data-bbi-view="actualite"] {
   display: none !important;
 }
 

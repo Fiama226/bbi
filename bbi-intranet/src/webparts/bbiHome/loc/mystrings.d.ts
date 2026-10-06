@@ -39,6 +39,13 @@ declare interface IBbiHomeWebPartStrings {
   QuickLinksFieldDescription: string;
   KpisFieldLabel: string;
   KpisFieldDescription: string;
+  IdentityGroupName: string;
+  VisionFieldLabel: string;
+  MissionFieldLabel: string;
+  ObjectivesFieldLabel: string;
+  ObjectivesFieldDescription: string;
+  SupportEmailFieldLabel: string;
+  SupportPhoneFieldLabel: string;
   OptionsGroupName: string;
   EnableAnnouncementFieldLabel: string;
   ShowDataNoticesFieldLabel: string;

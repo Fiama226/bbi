@@ -33,6 +33,16 @@ export interface IBbiHomeProps {
   announcementText: string;
   footerNote: string;
 
+  /* --- Identité (vision, mission, objectifs) --- */
+  visionText: string;
+  missionText: string;
+  /** Une ligne = un objectif. */
+  objectivesText: string;
+
+  /* --- Contact support --- */
+  supportEmail: string;
+  supportPhone: string;
+
   /* --- Options d'affichage --- */
   showDataNotices: boolean;
   enableAnnouncement: boolean;

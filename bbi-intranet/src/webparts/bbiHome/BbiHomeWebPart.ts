@@ -1,4 +1,4 @@
-import { DisplayMode, Version } from '@microsoft/sp-core-library';
+import { Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
   IPropertyPanePage,
@@ -44,6 +44,11 @@ export interface IBbiHomeWebPartProps {
   showDataNotices: boolean;
   enableAnnouncement: boolean;
   layoutCompact: boolean;
+  visionText: string;
+  missionText: string;
+  objectivesText: string;
+  supportEmail: string;
+  supportPhone: string;
 }
 
 const DEFAULT_NAV_LINKS: string = [
@@ -87,31 +92,21 @@ const DEFAULT_KPIS: string = [
   '96 % | De satisfaction constatée'
 ].join('\n');
 
+/**
+ * Marges du canevas uniquement — jamais le chrome SharePoint/M365.
+ *
+ * Le masquage du chrome (en-tête de site, navigation gauche, titre de page,
+ * barre de commandes) est la responsabilité exclusive de l'extension
+ * BbiFullScreenApplicationCustomizer : elle seule sait si la page est une
+ * SingleWebPartAppPage et doit donc appliquer ce traitement. La barre de
+ * suite Microsoft 365 (#SuiteNavWrapper) n'est JAMAIS masquée : ce n'est pas
+ * supporté par Microsoft et les utilisateurs doivent pouvoir y accéder.
+ *
+ * Cette feuille ne neutralise que les marges du canevas SharePoint, ce qui
+ * reste nécessaire ici pour le workbench hébergé : l'extension ne s'y
+ * applique pas (la page n'est pas une SingleWebPartAppPage provisionnée).
+ */
 const IMMERSIVE_HOME_STYLES: string = `
-  /* Chrome SharePoint / Microsoft 365 : rendu comme un site autonome. */
-  body.bbi-home-immersive #SuiteNavWrapper,
-  body.bbi-home-immersive #O365_NavHeader,
-  body.bbi-home-immersive #spSiteHeader,
-  body.bbi-home-immersive [data-automation-id="SiteHeader"],
-  body.bbi-home-immersive [data-automation-id="SuiteNav"],
-  body.bbi-home-immersive #sp-appBar,
-  body.bbi-home-immersive .sp-appBar,
-  body.bbi-home-immersive #spLeftNav,
-  body.bbi-home-immersive .spLeftNav,
-  body.bbi-home-immersive [data-automation-id="LeftNav"],
-  body.bbi-home-immersive [data-automation-id="pageHeader"],
-  body.bbi-home-immersive [data-automation-id="pageTitle"],
-  body.bbi-home-immersive #pageHeader,
-  body.bbi-home-immersive .pageTitle {
-    display: none !important;
-  }
-
-  /* Les commandes restent disponibles lors de l'édition / dans le workbench. */
-  body.bbi-home-immersive:not(.bbi-home-editing) #spCommandBar,
-  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="pageCommandBar"] {
-    display: none !important;
-  }
-
   /* Canevas sans marges, sur la page publiée comme dans le workbench hébergé. */
   body.bbi-home-immersive #workbenchPageContent,
   body.bbi-home-immersive #spPageCanvasContent,
@@ -190,9 +185,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
 
   public render(): void {
     this._enableImmersiveHome();
-    console.info('[BBI-HOME] webpart render entered');
-    console.info('[BBI-HOME] properties', typeof this.properties, Object.keys(this.properties || {}));
-    console.info('[BBI-HOME] context', !!this.context, !!this.context?.spHttpClient);
     const properties = this.properties || ({} as IBbiHomeWebPartProps);
     const connectedUser = this.context.pageContext.user;
     const element: React.ReactElement<IBbiHomeProps> = React.createElement(BbiHome, {
@@ -220,6 +212,11 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       kpis: properties.kpis || '',
       announcementText: properties.announcementText || '',
       footerNote: properties.footerNote || '',
+      visionText: properties.visionText || '',
+      missionText: properties.missionText || '',
+      objectivesText: properties.objectivesText || '',
+      supportEmail: properties.supportEmail || '',
+      supportPhone: properties.supportPhone || '',
       showDataNotices: properties.showDataNotices === true,
       enableAnnouncement: properties.enableAnnouncement !== false,
       layoutCompact: properties.layoutCompact === true,
@@ -233,13 +230,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       themeVariant: this._themeVariant,
       strings
     });
-    console.info('[BBI-HOME] React element created');
     ReactDom.render(element, this.domElement);
-    console.info('[BBI-HOME] ReactDOM render returned');
-  }
-
-  protected onDisplayModeChanged(_oldDisplayMode: DisplayMode): void {
-    this._syncImmersiveEditingClass();
   }
 
   private _enableImmersiveHome(): void {
@@ -250,16 +241,11 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       this._immersiveStyle.appendChild(document.createTextNode(IMMERSIVE_HOME_STYLES));
       document.head.appendChild(this._immersiveStyle);
     }
-    this._syncImmersiveEditingClass();
-  }
-
-  private _syncImmersiveEditingClass(): void {
-    document.body.classList.toggle('bbi-home-editing', this.displayMode === DisplayMode.Edit);
   }
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
-    document.body.classList.remove('bbi-home-immersive', 'bbi-home-editing');
+    document.body.classList.remove('bbi-home-immersive');
     if (this._immersiveStyle && this._immersiveStyle.parentElement) {
       this._immersiveStyle.parentElement.removeChild(this._immersiveStyle);
     }
@@ -376,6 +362,29 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
                 rows: 4,
                 description: strings.KpisFieldDescription
               })
+            ]
+          },
+          {
+            groupName: strings.IdentityGroupName,
+            groupFields: [
+              PropertyPaneTextField('visionText', {
+                label: strings.VisionFieldLabel,
+                multiline: true,
+                rows: 2
+              }),
+              PropertyPaneTextField('missionText', {
+                label: strings.MissionFieldLabel,
+                multiline: true,
+                rows: 2
+              }),
+              PropertyPaneTextField('objectivesText', {
+                label: strings.ObjectivesFieldLabel,
+                description: strings.ObjectivesFieldDescription,
+                multiline: true,
+                rows: 4
+              }),
+              PropertyPaneTextField('supportEmail', { label: strings.SupportEmailFieldLabel }),
+              PropertyPaneTextField('supportPhone', { label: strings.SupportPhoneFieldLabel })
             ]
           },
           {

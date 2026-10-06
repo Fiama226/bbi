@@ -54,7 +54,12 @@
         "layoutCompact": false,
         "employeeListTitle": "Employés du mois",
         "certificationsListTitle": "Certifications",
-        "heroSlides": ""
+        "heroSlides": "",
+        "visionText": "",
+        "missionText": "",
+        "objectivesText": "",
+        "supportEmail": "",
+        "supportPhone": ""
       }
     }
   ]

@@ -11,6 +11,8 @@ import {
   loadHomeCertifications,
   loadHomeSessions,
   loadHomeTrainers,
+  mailtoUrl,
+  telUrl,
 } from "./homeData";
 import {
   IHomeNewsBundle,
@@ -35,6 +37,7 @@ import {
   parseHeroSlides,
   parseKpis,
   parseNavLinks,
+  parseObjectives,
   parsePortalRoute,
   parseQuickLinks,
   useChromeOffset,
@@ -581,6 +584,10 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     [props.quickLinks],
   );
   const kpis: IKpi[] = React.useMemo(() => parseKpis(props.kpis), [props.kpis]);
+  const objectives: string[] = React.useMemo(
+    () => parseObjectives(props.objectivesText),
+    [props.objectivesText],
+  );
   const heroSlides: IHeroSlide[] = React.useMemo(
     () => parseHeroSlides(props.heroSlides, defaultHeroSlides(props)),
     [props],
@@ -884,6 +891,16 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               ⌕
             </button>
           </form>
+
+          {props.supportEmail && (
+            <a
+              className={styles.supportLink}
+              href={mailtoUrl(props.supportEmail)}
+              aria-label={`Contacter le support par e-mail : ${props.supportEmail}`}
+            >
+              <span aria-hidden="true">✉</span> Support
+            </a>
+          )}
         </div>
       </header>
 
@@ -1030,6 +1047,46 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           }}
           onInternalNavigate={followPortalLink}
         />
+
+        {(props.visionText || props.missionText || objectives.length > 0) && (
+          <section
+            className={styles.section}
+            id="identite"
+            data-bbi-view="accueil"
+            aria-labelledby="identity-title"
+          >
+            <div className={styles.sectionHeading}>
+              <div>
+                <p className={styles.eyebrow}>Qui nous sommes</p>
+                <h2 id="identity-title">Vision, mission et objectifs</h2>
+              </div>
+            </div>
+            <div className={styles.identityGrid}>
+              {props.visionText && (
+                <div className={styles.identityCard}>
+                  <h3>Vision</h3>
+                  <p>{props.visionText}</p>
+                </div>
+              )}
+              {props.missionText && (
+                <div className={styles.identityCard}>
+                  <h3>Mission</h3>
+                  <p>{props.missionText}</p>
+                </div>
+              )}
+              {objectives.length > 0 && (
+                <div className={styles.identityCard}>
+                  <h3>Objectifs</h3>
+                  <ul className={styles.identityList}>
+                    {objectives.map((objective, index) => (
+                      <li key={`${index}-${objective}`}>{objective}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         <section
           className={styles.section}
@@ -1496,6 +1553,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               Ressources
             </a>
           </nav>
+          {(props.supportEmail || props.supportPhone) && (
+            <div className={styles.footerSupport}>
+              {props.supportEmail && (
+                <a href={mailtoUrl(props.supportEmail)}>{props.supportEmail}</a>
+              )}
+              {props.supportPhone && <a href={telUrl(props.supportPhone)}>{props.supportPhone}</a>}
+            </div>
+          )}
           <small className={styles.footerCopy}>
             © {new Date().getFullYear()} Business Builders International · Tous
             droits réservés

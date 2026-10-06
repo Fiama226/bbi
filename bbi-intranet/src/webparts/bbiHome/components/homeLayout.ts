@@ -197,6 +197,9 @@ export const parseQuickLinks = (text: string, defaults: IQuickLink[]): IQuickLin
   return links.length > 0 ? links : defaults;
 };
 
+/** Objectifs : une ligne = un objectif (texte libre, puces affichées par le composant). */
+export const parseObjectives = (text: string): string[] => nonEmptyLines(text);
+
 /** Indicateurs : « valeur | libellé », 4 maximum affichés. */
 export const parseKpis = (text: string): IKpi[] => {
   const lines = nonEmptyLines(text);
