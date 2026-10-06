@@ -211,6 +211,11 @@ export const textOf = (value: unknown): string | undefined => {
   return String(value);
 };
 
+const asNumber = (value: unknown): number => {
+  const parsed = typeof value === 'number' ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 const dateInDays = (days: number): string => {
   const date = new Date();
   date.setDate(date.getDate() + days);
@@ -1239,11 +1244,6 @@ const asThought = (
   DatePublication: mapping.DatePublication ? textOf(raw[mapping.DatePublication]) : undefined,
   Contexte: mapping.Contexte ? textOf(raw[mapping.Contexte]) : undefined
 });
-
-const asNumber = (value: unknown): number => {
-  const parsed = typeof value === 'number' ? value : Number(value);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
 
 const asBirthday = (
   raw: { [key: string]: unknown },

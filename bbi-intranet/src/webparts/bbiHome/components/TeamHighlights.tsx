@@ -156,7 +156,7 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
         )}
         <div className={styles.cardFooter}>
           <a className={styles.link} href="#communaute" onClick={onOpenDirectory}>
-            Voir l'équipe <span aria-hidden="true">→</span>
+            Voir l&apos;équipe <span aria-hidden="true">→</span>
           </a>
         </div>
       </article>
