@@ -26,7 +26,6 @@ export interface IBbiHomeWebPartProps {
   galleryLibraryTitle: string;
   employeeListTitle: string;
   certificationsListTitle: string;
-  orgChartListTitle: string;
   maxItems: number;
   heroEyebrow: string;
   heroTitle: string;
@@ -53,8 +52,7 @@ const DEFAULT_NAV_LINKS: string = [
   '# Sessions | #sessions',
   '# Actualités | #actualites',
   '# Ressources | #ressources',
-  '# Communauté | #communaute',
-  '# Organigramme | #organigramme'
+  '# Communauté | #communaute'
 ].join('\n');
 
 /**
@@ -69,7 +67,7 @@ const DEFAULT_HERO_SLIDES: string = [
   '# image | sur-titre | titre | accroche | bouton | lien',
   ' | Business Builders International | L\'expertise qui fait grandir les dirigeants. | Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables. | Explorer les formations | #formations',
   ' | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions',
-  ' | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir l\'organisation | #organigramme',
+  ' | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir la communauté | #communaute',
   ' | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe'
 ].join('\n');
 
@@ -77,7 +75,6 @@ const DEFAULT_QUICK_LINKS: string = [
   '▦ | Catalogue des formations | Parcours, modalités et durées | #formations',
   '▣ | Prochaines sessions | Planning et inscriptions | #sessions',
   '▤ | Supports & médias | Documents, photos et vidéos | #ressources',
-  '◈ | Organigramme | Équipes, pôles et contacts | #organigramme',
   '◎ | Communauté BBI | Formateurs et experts | #communaute',
   '✦ | Actualités BBI | Les nouvelles du réseau | #actualites'
 ].join('\n');
@@ -175,9 +172,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     if (!this.properties.certificationsListTitle) {
       this.properties.certificationsListTitle = 'Certifications';
     }
-    if (!this.properties.orgChartListTitle) {
-      this.properties.orgChartListTitle = 'Organigramme';
-    }
     if (!this.properties.heroSlides) {
       this.properties.heroSlides = DEFAULT_HERO_SLIDES;
     }
@@ -211,7 +205,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       galleryLibraryTitle: properties.galleryLibraryTitle || 'Galerie médias',
       employeeListTitle: properties.employeeListTitle || 'Employés du mois',
       certificationsListTitle: properties.certificationsListTitle || 'Certifications',
-      orgChartListTitle: properties.orgChartListTitle || 'Organigramme',
       maxItems: properties.maxItems || 5,
       heroEyebrow: properties.heroEyebrow || '',
       heroTitle: properties.heroTitle || '',
@@ -297,7 +290,6 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('galleryLibraryTitle', { label: strings.GalleryLibraryFieldLabel }),
               PropertyPaneTextField('employeeListTitle', { label: strings.EmployeeListFieldLabel }),
               PropertyPaneTextField('certificationsListTitle', { label: strings.CertificationsListFieldLabel }),
-              PropertyPaneTextField('orgChartListTitle', { label: strings.OrgChartListFieldLabel }),
               PropertyPaneSlider('maxItems', {
                 label: strings.MaxItemsFieldLabel,
                 min: 3,

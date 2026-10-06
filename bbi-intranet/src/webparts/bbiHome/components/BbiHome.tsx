@@ -27,7 +27,6 @@ import {
   viewFromHash,
   viewFromHref,
 } from "./portalRoutes";
-import { IOrgChartResult, loadOrgChart } from "./orgData";
 import {
   IHeroSlide,
   IQuickLink,
@@ -45,7 +44,6 @@ import HomeHero from "./HomeHero";
 import NewsBoard from "./NewsBoard";
 import NewsDetail from "./NewsDetail";
 import TrainerDirectory from "./TrainerDirectory";
-import OrgChart from "./OrgChart";
 import TeamHighlights from "./TeamHighlights";
 import TrainingCatalog from "../../trainingCatalog/components/TrainingCatalog";
 import { ITrainingCatalogProps } from "../../trainingCatalog/components/ITrainingCatalogProps";
@@ -79,8 +77,6 @@ const emptyNewsPage = (): IHomeNewsPage => ({
   hasMore: false,
   isDemo: false,
 });
-
-const emptyOrgChart: IOrgChartResult = { nodes: [], isDemo: false };
 
 const formatDay = (value?: string): { day: string; month: string } => {
   if (!value) {
@@ -116,7 +112,6 @@ const DEFAULT_NAV: INavLink[] = [
   { label: "Actualités", url: "#actualites" },
   { label: "Ressources", url: "#ressources" },
   { label: "Communauté", url: "#communaute" },
-  { label: "Organigramme", url: "#organigramme" },
 ];
 
 /** Diapositives de repli : images et textes se succèdent automatiquement. */
@@ -146,8 +141,8 @@ const defaultHeroSlides = (props: IBbiHomeProps): IHeroSlide[] => [
     title: "9 pays, une même exigence de qualité.",
     subtitle:
       "Un référentiel pédagogique unique, des antennes locales et une communauté de formateurs qui partagent les bonnes pratiques.",
-    ctaLabel: "Découvrir l'organisation",
-    ctaUrl: "#organigramme",
+    ctaLabel: "Découvrir la communauté",
+    ctaUrl: "#communaute",
   },
   {
     imageUrl: "",
@@ -264,12 +259,6 @@ const DEFAULT_QUICK_LINKS: IQuickLink[] = [
     url: "#ressources",
   },
   {
-    icon: "◈",
-    title: "Organigramme",
-    subtitle: "Équipes, pôles et contacts",
-    url: "#organigramme",
-  },
-  {
     icon: "◎",
     title: "Communauté BBI",
     subtitle: "Formateurs et experts",
@@ -341,9 +330,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     React.useState<IHomeListResult<IHomeCertification>>(
       emptyResult<IHomeCertification>(),
     );
-  const [orgChart, setOrgChart] =
-    React.useState<IOrgChartResult>(emptyOrgChart);
-  const [orgLoading, setOrgLoading] = React.useState<boolean>(false);
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>(
@@ -585,33 +571,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     props.siteUrl,
     props.newsListTitle,
   ]);
-
-  // Organigramme : chargé uniquement à l'ouverture de sa vue.
-  const orgLoaded = React.useRef<boolean>(false);
-  React.useEffect(() => {
-    if (activeView !== "organigramme" || orgLoaded.current) {
-      return undefined;
-    }
-    let cancelled = false;
-    setOrgLoading(true);
-    loadOrgChart(props.spHttpClient, props.siteUrl, props.orgChartListTitle)
-      .then((result) => {
-        if (!cancelled) {
-          orgLoaded.current = true;
-          setOrgChart(result);
-          setOrgLoading(false);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setOrgChart(emptyOrgChart);
-          setOrgLoading(false);
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [activeView, props.spHttpClient, props.siteUrl, props.orgChartListTitle]);
 
   const navLinks = React.useMemo(
     () => parseNavLinks(props.navLinks, DEFAULT_NAV),
@@ -1318,9 +1277,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             onOpenDirectory={(event) => {
               followPortalLink(event, "#communaute");
             }}
-            onOpenOrgChart={(event) => {
-              followPortalLink(event, "#organigramme");
-            }}
           />
         </section>
 
@@ -1416,15 +1372,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               <div className={styles.communityActions}>
                 <a
                   className={styles.textLink}
-                  href="#organigramme"
-                  onClick={(event) => {
-                    followPortalLink(event, "#organigramme");
-                  }}
-                >
-                  Voir l&apos;organigramme <span aria-hidden="true">→</span>
-                </a>
-                <a
-                  className={styles.textLink}
                   href="#communaute"
                   onClick={(event) => {
                     followPortalLink(event, "#communaute");
@@ -1453,39 +1400,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               event.preventDefault();
               openView("actualites");
             }}
-          />
-        </section>
-
-        <section
-          className={styles.section}
-          id="organigramme"
-          data-bbi-view="organigramme"
-          aria-label="Organigramme de l'entreprise"
-        >
-          <div className={styles.sectionHeading}>
-            <div>
-              <p className={styles.eyebrow}>Notre organisation</p>
-              <h2>Organigramme BBI</h2>
-              <p className={styles.sectionLead}>
-                Direction, pôles et antennes : cliquez sur un poste pour
-                afficher la fiche et les coordonnées du collaborateur.
-              </p>
-            </div>
-            <a
-              className={styles.textLink}
-              href="#communaute"
-              onClick={(event) => {
-                followPortalLink(event, "#communaute");
-              }}
-            >
-              Annuaire des formateurs <span aria-hidden="true">→</span>
-            </a>
-          </div>
-          <OrgChart
-            nodes={orgChart.nodes}
-            isDemo={orgChart.isDemo}
-            showDataNotices={props.showDataNotices}
-            loading={orgLoading}
           />
         </section>
 
@@ -1525,19 +1439,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             }}
           >
             <span aria-hidden="true">◈</span>
-            <strong>Vie d&apos;entreprise</strong>
+            <strong>Vie d'entreprise</strong>
             <small>Événements, séminaires et temps forts</small>
-          </a>
-          <a
-            href="#organigramme"
-            className={styles.topicLink}
-            onClick={(event) => {
-              followPortalLink(event, "#organigramme");
-            }}
-          >
-            <span aria-hidden="true">⌗</span>
-            <strong>Organisation &amp; contacts</strong>
-            <small>Pôles, antennes et responsables</small>
           </a>
         </section>
       </main>
@@ -1591,14 +1494,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               }}
             >
               Ressources
-            </a>
-            <a
-              href="#organigramme"
-              onClick={(event) => {
-                followPortalLink(event, "#organigramme");
-              }}
-            >
-              Organigramme
             </a>
           </nav>
           <small className={styles.footerCopy}>

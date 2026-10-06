@@ -410,7 +410,6 @@ async function testHeroAndRoutes() {
 
   const route = parsePortalRoute('#actualite?id=12');
   check('route #actualite?id=12 reconnue', route.view === 'actualite' && route.params.id === '12');
-  check('route #organigramme reconnue', parsePortalRoute('#organigramme').view === 'organigramme');
   check('route #actualite/7 reconnue', parsePortalRoute('#actualite/7').params.id === '7');
   check('absence de hash → route vide', parsePortalRoute('').view === '');
 
@@ -419,7 +418,6 @@ async function testHeroAndRoutes() {
   const routes = loadTsModule('src/webparts/bbiHome/components/portalRoutes.ts');
   const { HOME_ANCHORS, anchorIdFromHash, newsIdFromHash, viewFromHash, viewFromHref } = routes;
 
-  check('route #organigramme → vue organigramme', viewFromHash('#organigramme') === 'organigramme');
   check('route inconnue → accueil', viewFromHash('#une-page-qui-nexiste-pas') === 'accueil');
   check('route vide → accueil', viewFromHash('') === 'accueil');
   check(
@@ -447,7 +445,7 @@ async function testHeroAndRoutes() {
   );
   check(
     'les vues ne sont pas prises pour des sections',
-    anchorIdFromHash('#actualites') === '' && anchorIdFromHash('#organigramme') === ''
+    anchorIdFromHash('#actualites') === '' && anchorIdFromHash('#ressources') === ''
   );
 
   // Anciennes pages SharePoint : un clic ne doit pas quitter le portail.
@@ -757,50 +755,6 @@ async function testPortalSearch() {
     results.length === 1 && results[0].title === 'Guide de formation' && results[0].href.endsWith('/Documents/guide.pdf') && results[0].description === 'Parcours de formation', JSON.stringify(results));
 }
 
-async function testOrgChart() {
-  console.log('\nOrganigramme de l’entreprise');
-  const { loadOrgChart, buildOrgTree, orgPoles } = loadTsModule(
-    'src/webparts/bbiHome/components/orgData.ts'
-  );
-
-  const missing = await loadOrgChart(fakeClient([{ match: /fields/, ok: false, status: 404 }]), SITE, 'Organigramme');
-  check('liste absente → organigramme de repli', missing.nodes.length >= 10 && missing.isDemo === true);
-  check('repli → coordonnées disponibles', missing.nodes.every((node) => !!node.Email && !!node.Location));
-
-  const live = await loadOrgChart(
-    fakeClient([
-      { match: /fields/, json: { value: [{ InternalName: 'Poste' }, { InternalName: 'Manager' }, { InternalName: 'Pole' }, { InternalName: 'Email' }] } },
-      {
-        match: /items/,
-        json: {
-          value: [
-            { Id: 1, Title: 'Direction', Poste: 'Directeur général', Pole: 'Direction' },
-            { Id: 2, Title: 'Pédagogie', Poste: 'Directrice pédagogique', Manager: 'Direction', Pole: 'Pédagogie', Email: 'peda@bbi.fr' },
-            { Id: 3, Title: 'Qualité', Poste: 'Auditrice', Manager: 'Direction', Pole: 'Qualité' }
-          ]
-        }
-      }
-    ]),
-    SITE,
-    'Organigramme'
-  );
-  const tree = buildOrgTree(live.nodes);
-  check('liste alimentée → nœuds réels', live.isDemo === false && live.nodes.length === 3);
-  check('arbre — une seule racine', tree.length === 1 && tree[0].Title === 'Direction');
-  check('arbre — deux rattachements', tree[0].children.length === 2);
-  check('arbre — profondeur calculée', tree[0].Depth === 0 && tree[0].children[0].Depth === 1);
-  check('pôles listés sans doublon', orgPoles(live.nodes).length === 3);
-
-  const cyclic = buildOrgTree([
-    { Id: 1, Title: 'A', ParentId: 2 },
-    { Id: 2, Title: 'B', ParentId: 1 }
-  ]);
-  check('arbre — boucle cassée sans perdre de poste', cyclic.length === 2);
-
-  const orphan = buildOrgTree([{ Id: 1, Title: 'Solo', ParentTitle: 'Inconnu' }]);
-  check('arbre — responsable inconnu → racine', orphan.length === 1 && orphan[0].Title === 'Solo');
-}
-
 /* ------------------------------------------------------------------ */
 (async () => {
   console.log('BBI — vérification des contenus de repli (production ready)');
@@ -813,7 +767,6 @@ async function testOrgChart() {
   await testHeroAndRoutes();
   await testNewsArchive();
   await testTeamHighlights();
-  await testOrgChart();
   await testPortalSearch();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);

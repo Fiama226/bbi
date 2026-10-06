@@ -3,7 +3,7 @@ import { parsePortalRoute } from "./homeLayout";
 /**
  * BBI — routage du portail.
  *
- * Tout ce qui traduit une URL (`#organigramme`, `#actualite?id=12`, anciennes
+ * Tout ce qui traduit une URL (`#actualite?id=12`, anciennes
  * pages .aspx) en vue applicative vit ici, sous forme de fonctions pures :
  * le comportement de navigation est ainsi vérifiable sans navigateur
  * (voir `tools/verify-fallback.js`, suite « Héros & navigation »).
@@ -17,7 +17,6 @@ export type PortalView =
   | "actualite"
   | "ressources"
   | "communaute"
-  | "organigramme"
   | "recherche";
 
 /** Alias d'URL acceptés : français, anglais et intitulés historiques. */
@@ -31,7 +30,6 @@ export const VIEW_FROM_HASH: { [key: string]: PortalView } = {
   ressources: "ressources", documents: "ressources", galerie: "ressources",
   communaute: "communaute", formateurs: "communaute", support: "communaute",
   "espace-formateurs": "communaute", equipe: "communaute",
-  organigramme: "organigramme", organisation: "organigramme", equipes: "organigramme",
   recherche: "recherche",
 };
 
@@ -63,7 +61,6 @@ export const viewFromHref = (href: string): PortalView | undefined => {
   if (legacyUrl.indexOf("sessions.aspx") !== -1) { return "sessions"; }
   if (legacyUrl.indexOf("vie-bbi.aspx") !== -1 || legacyUrl.indexOf("article.aspx") !== -1) { return "actualites"; }
   if (legacyUrl.indexOf("galerie.aspx") !== -1 || legacyUrl.indexOf("supports publiés") !== -1) { return "ressources"; }
-  if (legacyUrl.indexOf("organigramme") !== -1) { return "organigramme"; }
   if (legacyUrl.indexOf("espace-formateurs") !== -1 || legacyUrl.indexOf("formation.aspx") !== -1) { return "communaute"; }
   return undefined;
 };

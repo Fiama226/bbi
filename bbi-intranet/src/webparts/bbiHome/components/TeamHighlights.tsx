@@ -10,7 +10,6 @@ export interface ITeamHighlightsProps {
   showDataNotices: boolean;
   /** Ouvre l'annuaire complet des formateurs (vue Communauté). */
   onOpenDirectory: (event: React.MouseEvent<HTMLAnchorElement>) => void;
-  onOpenOrgChart: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 }
 
 const initialsOf = (value: string): string =>
@@ -86,7 +85,6 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
     certificationsIsDemo,
     showDataNotices,
     onOpenDirectory,
-    onOpenOrgChart,
   } = props;
 
   return (
@@ -144,10 +142,7 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
         )}
         <div className={styles.cardFooter}>
           <a className={styles.link} href="#communaute" onClick={onOpenDirectory}>
-            Voir l&apos;équipe <span aria-hidden="true">→</span>
-          </a>
-          <a className={styles.link} href="#organigramme" onClick={onOpenOrgChart}>
-            Organigramme <span aria-hidden="true">→</span>
+            Voir l'équipe <span aria-hidden="true">→</span>
           </a>
         </div>
       </article>

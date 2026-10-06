@@ -292,15 +292,8 @@ setTimeout(() => {
   const homeRouteOk = routeRoot && routeRoot.getAttribute('data-view') === 'accueil';
   console.log(`Navigation SPA (Accueil → Formations → Accueil) : ${trainingRouteOk && homeRouteOk ? 'OK' : 'ÉCHEC'}`);
 
-  const orgLink = hostDiv.querySelector('header nav a[href="#organigramme"]');
-  if (orgLink) {
-    orgLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
-  }
-  const orgRouteOk = !!orgLink && routeRoot && routeRoot.getAttribute('data-view') === 'organigramme';
-  console.log(`Navigation SPA vers #organigramme : ${orgRouteOk ? 'OK' : 'ÉCHEC'}`);
-
   const allOk =
-    styleOk && trainingRouteOk && homeRouteOk && orgRouteOk && kpiOk && slidesOk && paginationOk;
+    styleOk && trainingRouteOk && homeRouteOk && kpiOk && slidesOk && paginationOk;
   console.log(
     `\n${
       allOk

@@ -970,8 +970,7 @@ a.sessionStatus:hover {
 .home[data-view="ressources"] .content > :not([data-bbi-view="ressources"]),
 .home[data-view="communaute"] .content > :not([data-bbi-view="ressources"]),
 .home[data-view="recherche"] .content > :not([data-bbi-view="recherche"]),
-.home[data-view="actualite"] .content > :not([data-bbi-view="actualite"]),
-.home[data-view="organigramme"] .content > :not([data-bbi-view="organigramme"]) {
+.home[data-view="actualite"] .content > :not([data-bbi-view="actualite"]) {
   display: none !important;
 }
 
@@ -1011,15 +1010,13 @@ a.sessionStatus:hover {
 .home[data-view="ressources"] [data-bbi-view="ressources"],
 .home[data-view="communaute"] [data-bbi-view="ressources"],
 .home[data-view="recherche"] [data-bbi-view="recherche"],
-.home[data-view="actualite"] [data-bbi-view="actualite"],
-.home[data-view="organigramme"] [data-bbi-view="organigramme"] {
+.home[data-view="actualite"] [data-bbi-view="actualite"] {
   flex: 1 1 auto;
   align-content: start;
 }
 
 /* L'actualité se lit sur toute la largeur, sans marge inutile. */
-.home[data-view="actualite"] [data-bbi-view="actualite"],
-.home[data-view="organigramme"] [data-bbi-view="organigramme"] {
+.home[data-view="actualite"] [data-bbi-view="actualite"] {
   max-width: 100%;
   padding-left: 0;
   padding-right: 0;

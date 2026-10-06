@@ -24,7 +24,7 @@
         "default": "BBI Accueil (plein écran)"
       },
       "description": {
-        "default": "Page d'accueil BBI immersive : héros en diaporama (images + textes), chiffres clés, actualités paginées avec page dédiée, sessions, employé du mois, certifications, catalogue, supports, galerie, formateurs (photo et contact) et organigramme."
+        "default": "Page d'accueil BBI immersive : héros en diaporama (images + textes), chiffres clés, actualités paginées avec page dédiée, sessions, employé du mois, certifications, catalogue, supports, galerie et formateurs (photo et contact)."
       },
       "officeFabricIconFontName": "Home",
       "properties": {
@@ -54,7 +54,6 @@
         "layoutCompact": false,
         "employeeListTitle": "Employés du mois",
         "certificationsListTitle": "Certifications",
-        "orgChartListTitle": "Organigramme",
         "heroSlides": ""
       }
     }
