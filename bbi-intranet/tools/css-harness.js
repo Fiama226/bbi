@@ -279,6 +279,16 @@ setTimeout(() => {
   const slidesOk = slideCount >= 2;
   const paginationOk = !!pagination;
 
+  // Non-régression : cartes de sites (SiteNetwork) et annuaires de liens
+  // (LinkDirectory) présents, et leurs classes effectivement stylées.
+  const siteCards = hostDiv.querySelectorAll('[data-bbi-site-card]');
+  const siteCardOpen = hostDiv.querySelectorAll('[data-bbi-site-card] a[data-bbi-site-open]');
+  const linkDirectories = hostDiv.querySelectorAll('[data-bbi-link-directory]');
+  console.log(`Cartes de sites : ${siteCards.length} (dont ${siteCardOpen.length} avec « Ouvrir le site »)`);
+  console.log(`Annuaires de liens : ${linkDirectories.length}`);
+  const siteCardsOk = siteCards.length >= 2 && siteCardOpen.length >= 2;
+  const linkDirectoriesOk = linkDirectories.length >= 1;
+
   // Non-régression : toute section marquée data-bbi-view="X" doit avoir au
   // moins une règle CSS qui référence [data-bbi-view="X"] (directe ou
   // inverse), sinon elle ne sera jamais masquée sur les autres vues --
@@ -326,7 +336,7 @@ setTimeout(() => {
   }
 
   const allOk =
-    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk && orphanSectionsOk;
+    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk && orphanSectionsOk && siteCardsOk && linkDirectoriesOk;
   console.log(
     `\n${
       allOk

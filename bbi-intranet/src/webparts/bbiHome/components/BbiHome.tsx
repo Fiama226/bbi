@@ -28,7 +28,7 @@ import {
   mailtoUrl,
   telUrl,
 } from "./homeData";
-import OfficeNetwork from "./OfficeNetwork";
+import SiteNetwork from "./SiteNetwork";
 import ClientReferences from "./ClientReferences";
 import PedagogicalReferences from "./PedagogicalReferences";
 import DocumentShelf from "./DocumentShelf";
@@ -1719,11 +1719,11 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         >
           <div className={styles.sectionHeading}>
             <div>
-              <p className={styles.eyebrow}>Un réseau international</p>
-              <h2 id="implantations-title">Nos implantations</h2>
+              <p className={styles.eyebrow}>Nos sites</p>
+              <h2 id="implantations-title">Siège et filiales</h2>
             </div>
           </div>
-          <OfficeNetwork
+          <SiteNetwork
             offices={offices.items}
             isDemo={offices.isDemo}
             showDataNotices={props.showDataNotices}
