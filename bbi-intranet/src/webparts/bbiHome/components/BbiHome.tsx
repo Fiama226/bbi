@@ -30,8 +30,9 @@ import {
 } from "./homeData";
 import SiteNetwork from "./SiteNetwork";
 import ClientReferences from "./ClientReferences";
-import PedagogicalReferences from "./PedagogicalReferences";
-import DocumentShelf from "./DocumentShelf";
+import LinkDirectory from "./LinkDirectory";
+import AnnouncementsList from "./AnnouncementsList";
+import { adminDocumentsToGroups, pedagogicalReferencesToGroups } from "./linkDirectoryData";
 import SessionsCalendar from "./SessionsCalendar";
 import {
   IHomeNewsBundle,
@@ -378,6 +379,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     React.useState<IHomeListResult<IHomeAdminDocument>>(
       emptyResult<IHomeAdminDocument>(),
     );
+  const adminDocumentGroups = React.useMemo(
+    () => adminDocumentsToGroups(adminDocuments.items),
+    [adminDocuments.items]
+  );
+  const pedagogicalGroups = React.useMemo(
+    () => pedagogicalReferencesToGroups(pedagogicalReferences.items),
+    [pedagogicalReferences.items]
+  );
   const [search, setSearch] = React.useState("");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [portalResults, setPortalResults] = React.useState<IHomeSearchResult[]>(
@@ -1311,70 +1320,139 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         </section>
 
         <section
-          className={styles.learningPath}
-          data-bbi-view="accueil"
-          aria-labelledby="bbi-path-title"
+          className={styles.resourcesPeople}
+          id="communaute"
+          data-bbi-view="communaute"
+          aria-label="Trombinoscope et communauté BBI"
         >
-          <div className={styles.learningPathIntro}>
-            <p className={styles.eyebrow}>La méthode BBI</p>
-            <h2 id="bbi-path-title">
-              De l&apos;apprentissage à l&apos;impact.
-            </h2>
-            <p>
-              Une expérience qui relie les bons savoirs, la pratique sur le
-              terrain et le partage entre pairs.
-            </p>
+          <div className={styles.people}>
+            <div className={styles.sectionHeading}>
+              <div>
+                <p className={styles.eyebrow}>Qui sommes-nous</p>
+                <h2>Trombinoscope</h2>
+              </div>
+            </div>
+            <TrainerDirectory
+              trainers={trainers.items}
+              isDemo={trainers.isDemo}
+              showDataNotices={props.showDataNotices}
+              sessions={sessions.items}
+              maxItems={100}
+              showCategoryFilter
+            />
+            <div className={styles.community} id="support">
+              <div>
+                <p className={styles.eyebrow}>Communauté</p>
+                <h3>Réseau des formateurs</h3>
+                <p>
+                  Échanges de pratiques, entraide pédagogique et veille :
+                  rejoignez la communauté BBI sur Teams et Viva Engage.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className={styles.pathGrid}>
-            <article className={styles.pathCard}>
-              <span>01</span>
-              <h3>Choisir son parcours</h3>
-              <p>
-                Repérez les compétences utiles à vos enjeux et trouvez la
-                formation adaptée.
-              </p>
-              <a
-                href="#formations"
-                onClick={(event) => {
-                  followPortalLink(event, "#formations");
-                }}
-              >
-                Explorer le catalogue →
-              </a>
-            </article>
-            <article className={styles.pathCard}>
-              <span>02</span>
-              <h3>Apprendre en pratiquant</h3>
-              <p>
-                Progressez avec des ateliers concrets, des formateurs experts et
-                des mises en situation.
-              </p>
-              <a
-                href="#sessions"
-                onClick={(event) => {
-                  followPortalLink(event, "#sessions");
-                }}
-              >
-                Voir les sessions →
-              </a>
-            </article>
-            <article className={styles.pathCard}>
-              <span>03</span>
-              <h3>Ancrer et transmettre</h3>
-              <p>
-                Retrouvez vos supports, échangez avec la communauté et faites
-                vivre vos acquis.
-              </p>
-              <a
-                href="#ressources"
-                onClick={(event) => {
-                  followPortalLink(event, "#ressources");
-                }}
-              >
-                Accéder aux ressources →
-              </a>
-            </article>
+        </section>
+
+        <section
+          className={styles.section}
+          id="documents-parcours"
+          data-bbi-view="accueil"
+          aria-label="Documents administratifs et parcours pédagogiques"
+        >
+          <div className={styles.homeRow}>
+            <div className={styles.homeRowCell} id="documents-administratifs">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <p className={styles.eyebrow}>RH, juridique, qualité</p>
+                  <h2>Documents administratifs</h2>
+                </div>
+              </div>
+              <LinkDirectory
+                groups={adminDocumentGroups}
+                isDemo={adminDocuments.isDemo}
+                showDataNotices={props.showDataNotices}
+                demoNote="Données de démonstration : la bibliothèque « Documents administratifs » est absente, non créée ou vide."
+              />
+            </div>
+            <div className={styles.homeRowCell} id="parcours">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <p className={styles.eyebrow}>Se former</p>
+                  <h2>Parcours pédagogiques</h2>
+                </div>
+                <a
+                  className={styles.textLink}
+                  href="#sessions"
+                  onClick={(event) => {
+                    followPortalLink(event, "#sessions");
+                  }}
+                >
+                  Nos plannings <span aria-hidden="true">→</span>
+                </a>
+              </div>
+              <LazyMount active={activeView === "accueil"} minHeight={210}>
+                <TrainingCatalog {...catalogProps} />
+              </LazyMount>
+            </div>
           </div>
+        </section>
+
+        <section
+          className={styles.section}
+          id="vie-equipe"
+          data-bbi-view="accueil"
+          aria-label="Annonces et vie de l'équipe"
+        >
+          <div className={styles.homeRow}>
+            <div className={styles.homeRowCell} id="annonces">
+              <div className={styles.sectionHeading}>
+                <div>
+                  <p className={styles.eyebrow}>À savoir</p>
+                  <h2>Annonces</h2>
+                </div>
+              </div>
+              <AnnouncementsList
+                announcements={announcements.items}
+                isDemo={announcements.isDemo}
+                showDataNotices={props.showDataNotices}
+              />
+            </div>
+            <div className={styles.homeRowCell}>
+                <TeamHighlights
+                  employee={employee.items[0]}
+                  employeeIsDemo={employee.isDemo}
+                  certifications={certifications.items}
+                  certificationsIsDemo={certifications.isDemo}
+                  thought={thought.items[0]}
+                  thoughtIsDemo={thought.isDemo}
+                  birthdays={birthdays.items}
+                  birthdaysIsDemo={birthdays.isDemo}
+                  showDataNotices={props.showDataNotices}
+                  onOpenDirectory={(event) => {
+                    followPortalLink(event, "#communaute");
+                  }}
+                />
+            </div>
+          </div>
+        </section>
+
+        <section
+          className={styles.section}
+          id="implantations"
+          data-bbi-view="accueil"
+          aria-labelledby="implantations-title"
+        >
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>Nos sites</p>
+              <h2 id="implantations-title">Siège et filiales</h2>
+            </div>
+          </div>
+          <SiteNetwork
+            offices={offices.items}
+            isDemo={offices.isDemo}
+            showDataNotices={props.showDataNotices}
+          />
         </section>
 
         {clientReferences.items.length > 0 && (
@@ -1531,28 +1609,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         </section>
 
         <section
-          className={styles.teamSection}
-          id="vie-equipe"
-          data-bbi-view="accueil"
-          aria-label="Vie de l'équipe"
-        >
-          <TeamHighlights
-            employee={employee.items[0]}
-            employeeIsDemo={employee.isDemo}
-            certifications={certifications.items}
-            certificationsIsDemo={certifications.isDemo}
-            thought={thought.items[0]}
-            thoughtIsDemo={thought.isDemo}
-            birthdays={birthdays.items}
-            birthdaysIsDemo={birthdays.isDemo}
-            showDataNotices={props.showDataNotices}
-            onOpenDirectory={(event) => {
-              followPortalLink(event, "#communaute");
-            }}
-          />
-        </section>
-
-        <section
           className={styles.section}
           id="formations"
           data-bbi-view="formations"
@@ -1567,10 +1623,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           <LazyMount active={activeView === "formations"} minHeight={210}>
             <TrainingCatalog {...catalogProps} />
           </LazyMount>
-          <PedagogicalReferences
-            references={pedagogicalReferences.items}
+          <div className={styles.sectionHeading} id="references-pedagogiques">
+            <div>
+              <p className={styles.eyebrow}>Pour aller plus loin</p>
+              <h2>Références pédagogiques</h2>
+            </div>
+          </div>
+          <LinkDirectory
+            groups={pedagogicalGroups}
             isDemo={pedagogicalReferences.isDemo}
             showDataNotices={props.showDataNotices}
+            demoNote="Données de démonstration : la liste « Références pédagogiques » est absente, non créée ou vide."
           />
         </section>
 
@@ -1600,21 +1663,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               <LazyMount active={activeView === "ressources"} minHeight={210}>
                 <SecureDocuments {...documentsProps} />
               </LazyMount>
-              {adminDocuments.items.length > 0 && (
-                <div className={styles.adminDocuments} id="documents-administratifs">
-                  <div className={styles.sectionHeading}>
-                    <div>
-                      <p className={styles.eyebrow}>RH, juridique, qualité</p>
-                      <h3>Documents administratifs</h3>
-                    </div>
-                  </div>
-                  <DocumentShelf
-                    documents={adminDocuments.items}
-                    isDemo={adminDocuments.isDemo}
-                    showDataNotices={props.showDataNotices}
-                  />
-                </div>
-              )}
             </div>
             <div className={styles.gallery} id="galerie">
               <div className={styles.sectionHeading}>
@@ -1657,40 +1705,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         </section>
 
         <section
-          className={styles.resourcesPeople}
-          id="communaute"
-          data-bbi-view="communaute"
-          aria-label="Trombinoscope et communauté BBI"
-        >
-          <div className={styles.people}>
-            <div className={styles.sectionHeading}>
-              <div>
-                <p className={styles.eyebrow}>Qui sommes-nous</p>
-                <h2>Trombinoscope</h2>
-              </div>
-            </div>
-            <TrainerDirectory
-              trainers={trainers.items}
-              isDemo={trainers.isDemo}
-              showDataNotices={props.showDataNotices}
-              sessions={sessions.items}
-              maxItems={100}
-              showCategoryFilter
-            />
-            <div className={styles.community} id="support">
-              <div>
-                <p className={styles.eyebrow}>Communauté</p>
-                <h3>Réseau des formateurs</h3>
-                <p>
-                  Échanges de pratiques, entraide pédagogique et veille :
-                  rejoignez la communauté BBI sur Teams et Viva Engage.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
           className={styles.section}
           id="actualite"
           data-bbi-view="actualite"
@@ -1712,22 +1726,70 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         </section>
 
         <section
-          className={styles.section}
-          id="implantations"
+          className={styles.learningPath}
           data-bbi-view="accueil"
-          aria-labelledby="implantations-title"
+          aria-labelledby="bbi-path-title"
         >
-          <div className={styles.sectionHeading}>
-            <div>
-              <p className={styles.eyebrow}>Nos sites</p>
-              <h2 id="implantations-title">Siège et filiales</h2>
-            </div>
+          <div className={styles.learningPathIntro}>
+            <p className={styles.eyebrow}>La méthode BBI</p>
+            <h2 id="bbi-path-title">
+              De l&apos;apprentissage à l&apos;impact.
+            </h2>
+            <p>
+              Une expérience qui relie les bons savoirs, la pratique sur le
+              terrain et le partage entre pairs.
+            </p>
           </div>
-          <SiteNetwork
-            offices={offices.items}
-            isDemo={offices.isDemo}
-            showDataNotices={props.showDataNotices}
-          />
+          <div className={styles.pathGrid}>
+            <article className={styles.pathCard}>
+              <span>01</span>
+              <h3>Choisir son parcours</h3>
+              <p>
+                Repérez les compétences utiles à vos enjeux et trouvez la
+                formation adaptée.
+              </p>
+              <a
+                href="#formations"
+                onClick={(event) => {
+                  followPortalLink(event, "#formations");
+                }}
+              >
+                Explorer le catalogue →
+              </a>
+            </article>
+            <article className={styles.pathCard}>
+              <span>02</span>
+              <h3>Apprendre en pratiquant</h3>
+              <p>
+                Progressez avec des ateliers concrets, des formateurs experts et
+                des mises en situation.
+              </p>
+              <a
+                href="#sessions"
+                onClick={(event) => {
+                  followPortalLink(event, "#sessions");
+                }}
+              >
+                Voir les sessions →
+              </a>
+            </article>
+            <article className={styles.pathCard}>
+              <span>03</span>
+              <h3>Ancrer et transmettre</h3>
+              <p>
+                Retrouvez vos supports, échangez avec la communauté et faites
+                vivre vos acquis.
+              </p>
+              <a
+                href="#ressources"
+                onClick={(event) => {
+                  followPortalLink(event, "#ressources");
+                }}
+              >
+                Accéder aux ressources →
+              </a>
+            </article>
+          </div>
         </section>
       </main>
 

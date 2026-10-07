@@ -678,14 +678,17 @@ a.sessionStatus:hover {
   min-width: 0;
 }
 
-.adminDocuments {
-  margin-top: 28px;
+/* Ligne deux colonnes de l'accueil (croquis client). */
+.homeRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 30px;
+  align-items: start;
+  min-width: 0;
 }
 
-.adminDocuments h3 {
-  margin: 0;
-  font-size: 16px;
-  color: var(--bbi-navy);
+.homeRowCell {
+  min-width: 0;
 }
 
 .people {
@@ -976,6 +979,10 @@ a.sessionStatus:hover {
 }
 
 @media (max-width: 900px) {
+  .homeRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .menuButton {
     display: block;
   }
