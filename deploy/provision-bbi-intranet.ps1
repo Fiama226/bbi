@@ -39,6 +39,9 @@
     # Hub et filiales : simulation (sites d'équipe, rattachement au hub, navigation)
     .\provision-bbi-intranet.ps1 -ProvisionFiliales -DryRun
 
+    # Hub et filiales : une seule filiale (premier passage recommandé)
+    .\provision-bbi-intranet.ps1 -ProvisionFiliales -Filiale Abidjan
+
     # Autre site que celui par défaut (bbi-environnement.json)
     .\provision-bbi-intranet.ps1 -SiteUrl https://businessbuilderinter.sharepoint.com/sites/un-autre-site
 
@@ -75,7 +78,10 @@ param(
     [switch]$VerifyOnly,
 
     # Hub : enregistre le site comme hub, crée un site d'équipe par filiale (liste Implantations) et y déploie le portail
-    [switch]$ProvisionFiliales
+    [switch]$ProvisionFiliales,
+
+    # Limite -ProvisionFiliales aux lignes dont Ville correspond (comparaison via ConvertTo-BbiSlug : accents et casse ignorés)
+    [string[]]$Filiale
 )
 
 $ErrorActionPreference = 'Stop'
@@ -410,7 +416,9 @@ function Invoke-BbiSiteProvisioning {
         [Parameter(Mandatory)][string]$TargetUrl,
         [Parameter(Mandatory)][string]$DataUrl,
         [bool]$SeedDemo = $false,
-        [string]$StepPrefix = ''
+        [string]$StepPrefix = '',
+        # Re-run sur un site existant : ne remplace pas la web part BBI Accueil déjà posée (propriétés conservées)
+        [switch]$PreserveWebPart
     )
     # $SeedDemo : accepté pour compatibilité d'interface ; le jeu de démo reste en section 9/10 (siège uniquement).
     if ((Get-PnPConnection).Url.TrimEnd('/') -ne $TargetUrl.TrimEnd('/')) {
@@ -705,7 +713,22 @@ function Invoke-BbiSiteProvisioning {
 
         # --- Page d'accueil : page APPLICATIVE (aucun en-tête, aucune navigation)
         Ensure-BbiPage -Name 'accueil' -Title 'Accueil' -LayoutType 'SingleWebPartAppPage' | Out-Null
-        Ensure-BbiWebPart -Page 'accueil.aspx' -ComponentId $WP_HOME -PropertiesJson $homeProps -Name 'BBI Accueil (plein écran)'
+        $keepWebPart = $false
+        if ($PreserveWebPart) {
+            try {
+                # PnP.Core IPageWebPart : l'identifiant du composant est exposé par WebPartId
+                $keepWebPart = @(Get-PnPPageComponent -Page 'accueil.aspx' -ErrorAction SilentlyContinue |
+                    Where-Object { "$($_.WebPartId)".Trim('{', '}') -eq $WP_HOME }).Count -gt 0
+            } catch {
+                $keepWebPart = $false
+            }
+        }
+        if ($keepWebPart) {
+            Write-Host "  · ${StepPrefix}web part BBI Accueil déjà en place (propriétés conservées)" -ForegroundColor DarkGray
+            Add-Report "Web part BBI Accueil (plein écran) → accueil.aspx" 'OK' 'propriétés conservées'
+        } else {
+            Ensure-BbiWebPart -Page 'accueil.aspx' -ComponentId $WP_HOME -PropertiesJson $homeProps -Name 'BBI Accueil (plein écran)'
+        }
 
         # --- Le portail utilise une seule page SharePoint : les destinations du menu
         #     (formations, sessions, actualités, ressources, communauté) sont des vues
@@ -777,6 +800,7 @@ if ($ProvisionFiliales) {
         # 6.2 Filiales
         $tenantRoot = ([uri]$hubUrl).GetLeftPart([UriPartial]::Authority)
         $filialeSites = @()
+        $hubRow = $null
         if (Get-BbiList -Title 'Implantations') {
             $allRows = @(Get-PnPListItem -List 'Implantations' -PageSize 200)
             $hubRow = $allRows | Where-Object { [bool]$_['EstSiege'] } | Select-Object -First 1
@@ -789,46 +813,69 @@ if ($ProvisionFiliales) {
                 Invoke-Bbi "Siège : SiteUrl ← $hubUrl" { Set-PnPListItem -List 'Implantations' -Identity $hubRow.Id -Values @{ SiteUrl = "$hubUrl, $($hubRow['Title'])" } | Out-Null } | Out-Null
             }
 
+            $filialeFilter = @()
+            if ($Filiale) { $filialeFilter = @($Filiale | ForEach-Object { ConvertTo-BbiSlug -Value $_ } | Where-Object { $_ }) }
+            $usedSlugs = @{}
             foreach ($row in $rows) {
                 $title = "$($row['Title'])"
-                $slug  = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value "$($row['Ville'])"
-                if (-not $slug) { $slug = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value $title }
-                if (-not $slug) { Write-Warn2 "Ligne $($row.Id) « $title » : ni Ville ni Titre exploitable, ignorée."; continue }
-                $url = "$tenantRoot/sites/$slug"
-                # Site déjà créé lors d'un passage précédent (URL réelle écrite dans SiteUrl) : on la réutilise.
-                $known = "$($row['SiteUrl']?.Url)".TrimEnd('/')
-                if ($known -and $known -like "$tenantRoot/*" -and $known -ne $hubUrl) { $url = $known }
-
-                $existing = try { Get-PnPTenantSite -Url $url -ErrorAction Stop } catch { $null }
-                if ($existing) {
-                    Write-Skip "Site $url"
-                    Add-Report "Site filiale $title" 'OK' $url
-                } else {
-                    $created = Invoke-Bbi "Création du site d'équipe « $title » ($url)" {
-                        New-PnPSite -Type TeamSite -Title $title -Alias $slug -IsPublic:$false -Lcid 1036 -Wait
+                try {
+                    # Le slug (alias et URL du site) vient de Ville uniquement : pas de repli sur le titre.
+                    $ville = "$($row['Ville'])"
+                    $slug  = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value $ville
+                    if (-not $slug) {
+                        Write-Warn2 "Ligne $($row.Id) « $title » : Ville vide, ignorée (le slug du site vient de Ville)."
+                        Add-Report "Site filiale $title" 'IGNORÉ' 'Ville vide'
+                        continue
                     }
-                    if ($created) { $url = "$created".TrimEnd('/') }
-                    Add-Report "Site filiale $title" ($(if ($DryRun -or $VerifyOnly) { 'MANQUANT' } else { 'CRÉÉ' })) $url
-                }
+                    if ($filialeFilter.Count -gt 0 -and $filialeFilter -notcontains (ConvertTo-BbiSlug -Value $ville)) {
+                        Write-Host "  · « $title » ($ville) hors du filtre -Filiale, ignorée" -ForegroundColor DarkGray
+                        continue
+                    }
+                    if ($usedSlugs.ContainsKey($slug)) {
+                        Write-Warn2 "Ligne $($row.Id) « $title » : Ville en double avec « $($usedSlugs[$slug]) », ignorée."
+                        Add-Report "Site filiale $title" 'IGNORÉ' "Ville en double avec $($usedSlugs[$slug])"
+                        continue
+                    }
+                    $usedSlugs[$slug] = $title
+                    $url = "$tenantRoot/sites/$slug"
+                    # Site déjà créé lors d'un passage précédent (URL réelle écrite dans SiteUrl) : on la réutilise.
+                    $known = "$($row['SiteUrl']?.Url)".TrimEnd('/')
+                    if ($known -and $known -like "$tenantRoot/*" -and $known -ne $hubUrl) { $url = $known }
 
-                if (-not $DryRun -and -not $VerifyOnly) {
-                    if ($existing -and $hubIds.Count -gt 0 -and $hubIds -contains "$($existing.HubSiteId)") {
-                        Write-Skip "Rattachement au hub de $url"
+                    $existing = try { Get-PnPTenantSite -Url $url -ErrorAction Stop } catch { $null }
+                    if ($existing) {
+                        Write-Skip "Site $url"
+                        Add-Report "Site filiale $title" 'OK' $url
                     } else {
-                        Invoke-Bbi "Rattachement de $url au hub" {
-                            Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl
-                        } | Out-Null
+                        $created = Invoke-Bbi "Création du site d'équipe « $title » ($url)" {
+                            New-PnPSite -Type TeamSite -Title $title -Alias $slug -IsPublic:$false -Lcid 1036 -Wait
+                        }
+                        if ($created) { $url = "$created".TrimEnd('/') }
+                        Add-Report "Site filiale $title" ($(if ($DryRun -or $VerifyOnly) { 'MANQUANT' } else { 'CRÉÉ' })) $url
                     }
-                    $current = "$($row['SiteUrl']?.Url)"
-                    if ($current -notlike "$url*") {
-                        Invoke-Bbi "« $title » : SiteUrl ← $url" {
-                            Set-PnPListItem -List 'Implantations' -Identity $row.Id -Values @{ SiteUrl = "$url, $title" } | Out-Null
-                        } | Out-Null
+
+                    if (-not $DryRun -and -not $VerifyOnly) {
+                        if ($existing -and $hubIds.Count -gt 0 -and $hubIds -contains "$($existing.HubSiteId)") {
+                            Write-Skip "Rattachement au hub de $url"
+                        } else {
+                            Invoke-Bbi "Rattachement de $url au hub" {
+                                Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl
+                            } | Out-Null
+                        }
+                        $current = "$($row['SiteUrl']?.Url)"
+                        if ($current -notlike "$url*") {
+                            Invoke-Bbi "« $title » : SiteUrl ← $url" {
+                                Set-PnPListItem -List 'Implantations' -Identity $row.Id -Values @{ SiteUrl = "$url, $title" } | Out-Null
+                            } | Out-Null
+                        }
+                    } else {
+                        Write-Step "[SIMULATION] rattachement au hub + écriture de SiteUrl pour « $title »"
                     }
-                } else {
-                    Write-Step "[SIMULATION] rattachement au hub + écriture de SiteUrl pour « $title »"
+                    $filialeSites += [pscustomobject]@{ Title = $title; Url = $url; Ordre = [int]($row['Ordre'] ?? 9999); Existing = [bool]$existing }
+                } catch {
+                    Write-Warn2 "« $title » : $($_.Exception.Message)"
+                    Add-Report "Site filiale $title" 'ÉCHEC' $_.Exception.Message
                 }
-                $filialeSites += [pscustomobject]@{ Title = $title; Url = $url; Ordre = [int]($row['Ordre'] ?? 9999) }
             }
         } else {
             Write-Warn2 "Liste « Implantations » absente : filiales non évaluées."
@@ -839,22 +886,44 @@ if ($ProvisionFiliales) {
         $editors = @()
         try { $editors = Get-PnPGroupMember -Group $EditorsGroup -ErrorAction Stop } catch { Write-Warn2 "Groupe « $EditorsGroup » introuvable sur le hub : membres non recopiés." }
         foreach ($site in $filialeSites) {
-            if ($DryRun -or $VerifyOnly) {
+            if ($DryRun) {
                 Write-Step "[SIMULATION] portail BBI sur $($site.Url) (listes, bibliothèques, page accueil.aspx, web part)"
                 continue
             }
-            Invoke-BbiSiteProvisioning -TargetUrl $site.Url -DataUrl $site.Url -SeedDemo:$false -StepPrefix "[$($site.Title)] "
-            $members = Get-PnPGroup -AssociatedMemberGroup
-            foreach ($m in $editors) {
-                Invoke-Bbi "« $($site.Title) » : $($m.LoginName) ← Membres" {
-                    Add-PnPGroupMember -LoginName $m.LoginName -Group $members -ErrorAction SilentlyContinue
-                } | Out-Null
+            if ($VerifyOnly) {
+                # Audit : en -VerifyOnly, Invoke-BbiSiteProvisioning ne fait que signaler les éléments MANQUANT.
+                if (-not $site.Existing) {
+                    Write-Step "[AUDIT] $($site.Url) n'existe pas encore : portail non audité"
+                    continue
+                }
+                try {
+                    Invoke-BbiSiteProvisioning -TargetUrl $site.Url -DataUrl $site.Url -SeedDemo:$false -StepPrefix "[$($site.Title)] "
+                } catch {
+                    Write-Warn2 "« $($site.Title) » : $($_.Exception.Message)"
+                    Add-Report "Portail filiale $($site.Title)" 'ÉCHEC' $_.Exception.Message
+                }
+                continue
+            }
+            try {
+                # Site déjà présent avant ce passage : la web part BBI Accueil et ses réglages sont conservés.
+                Invoke-BbiSiteProvisioning -TargetUrl $site.Url -DataUrl $site.Url -SeedDemo:$false -StepPrefix "[$($site.Title)] " -PreserveWebPart:$site.Existing
+                $members = Get-PnPGroup -AssociatedMemberGroup
+                foreach ($m in $editors) {
+                    Invoke-Bbi "« $($site.Title) » : $($m.LoginName) ← Membres" {
+                        Add-PnPGroupMember -LoginName $m.LoginName -Group $members -ErrorAction SilentlyContinue
+                    } | Out-Null
+                }
+            } catch {
+                Write-Warn2 "« $($site.Title) » : $($_.Exception.Message)"
+                Add-Report "Portail filiale $($site.Title)" 'ÉCHEC' $_.Exception.Message
             }
         }
 
         # 6.4 Navigation hub (= navigation supérieure du site hub) : siège puis filiales par Ordre
         if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-PnPOnline -Url $hubUrl -Interactive }
-        Ensure-BbiNavNode -Title 'Siège' -Url "$hubUrl/SitePages/accueil.aspx"
+        $hubNavTitle = 'Siège'
+        if ($hubRow -and "$($hubRow['Title'])".Trim()) { $hubNavTitle = "$($hubRow['Title'])".Trim() }
+        Ensure-BbiNavNode -Title $hubNavTitle -Url "$hubUrl/SitePages/accueil.aspx"
         foreach ($site in ($filialeSites | Sort-Object Ordre)) {
             Ensure-BbiNavNode -Title $site.Title -Url "$($site.Url)/SitePages/accueil.aspx"
         }
@@ -928,7 +997,10 @@ if (-not $DryRun -and -not $VerifyOnly) {
         } | Out-Null
     }
 }
-Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
+# Avec -ProvisionFiliales, le nœud du siège (6.4) pointe déjà vers cette page : pas de doublon.
+if (-not $ProvisionFiliales) {
+    Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
+}
 # Le portail est mono-page : les autres vues sont des ancres/routes internes.
 
 # ==================================================================

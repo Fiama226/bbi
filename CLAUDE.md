@@ -101,4 +101,5 @@ cd deploy
 .\provision-bbi-intranet.ps1 -SeedDemoData  # install lists/libraries/home page + demo data
 .\provision-bbi-intranet.ps1 -ProvisionFiliales  # hub + one team site per filiale (needs SharePoint admin role)
 .\provision-bbi-intranet.ps1 -VerifyOnly    # audit existing provisioning
+.\provision-bbi-intranet.ps1 -ProvisionFiliales -Filiale Abidjan   # une seule filiale
 ```

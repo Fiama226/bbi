@@ -324,6 +324,25 @@ nouvelles filiales prend donc plusieurs minutes. Mettre `hubEnabled` à `false` 
 `bbi-environnement.json` désactive cette section.
 Pour ajouter une filiale : ajouter une ligne (Titre, Ville, Pays, Couleur, Initiales), relancer.
 
+**Premier passage : une seule filiale.** Créer d'abord un site, le vérifier, puis lancer pour toutes :
+```powershell
+.\provision-bbi-intranet.ps1 -ProvisionFiliales -Filiale Abidjan   # une seule filiale (Ville, accents et casse ignorés)
+.\provision-bbi-intranet.ps1 -ProvisionFiliales                    # puis toutes les filiales
+```
+- **Site neuf + `-SeedDemoData -ProvisionFiliales`** : la section filiales (6) s'exécute *avant* le jeu de
+  démo (9) ; au premier passage, `Implantations` est encore vide et aucune filiale n'est créée. Relancer
+  une seconde fois.
+- **Tenants dont les sites de groupe sont sous `/teams/`** : l'URL réelle renvoyée par SharePoint à la
+  création est utilisée et écrite dans `SiteUrl`.
+- **Membres** : les membres de `BBI-Concepteurs` (groupe `editorsGroup`) sont copiés une fois par
+  exécution (instantané) dans le groupe Membres de chaque filiale ; relancer pour propager les nouveaux.
+- **Relances** : les sites existants sont conservés, ainsi que les réglages de leur web part BBI Accueil
+  (elle n'est plus remplacée). Une ligne sans `Ville` est ignorée (le nom du site vient de `Ville`) ;
+  deux lignes avec la même `Ville` : la seconde est ignorée avec un avertissement. Une filiale en échec
+  n'interrompt pas les autres (statut `ÉCHEC` dans le rapport).
+- **`-VerifyOnly -ProvisionFiliales`** audite aussi chaque filiale existante (listes, bibliothèques, page
+  et web part) et signale les éléments manquants.
+
 ### Nos références — liste `Nos références`
 `Titre` (nom du client/partenaire) · `Logo (URL)` · `Site web` · `Contact` · `Pays` · `Ville` · `Secteur` ·
 `Ordre`
