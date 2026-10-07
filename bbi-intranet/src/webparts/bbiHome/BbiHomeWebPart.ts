@@ -1,4 +1,4 @@
-import { Version } from '@microsoft/sp-core-library';
+import { DisplayMode, Version } from '@microsoft/sp-core-library';
 import {
   IPropertyPaneConfiguration,
   IPropertyPanePage,
@@ -100,20 +100,80 @@ const DEFAULT_KPIS: string = [
 ].join('\n');
 
 /**
- * Marges du canevas uniquement — jamais le chrome SharePoint/M365.
+ * Plein écran autonome : le web part ne dépend ni de l'extension
+ * BbiFullScreenApplicationCustomizer ni du type de page (page de site,
+ * SingleWebPartAppPage ou workbench hébergé).
  *
- * Le masquage du chrome (en-tête de site, navigation gauche, titre de page,
- * barre de commandes) est la responsabilité exclusive de l'extension
- * BbiFullScreenApplicationCustomizer : elle seule sait si la page est une
- * SingleWebPartAppPage et doit donc appliquer ce traitement. La barre de
- * suite Microsoft 365 (#SuiteNavWrapper) n'est JAMAIS masquée : ce n'est pas
- * supporté par Microsoft et les utilisateurs doivent pouvoir y accéder.
- *
- * Cette feuille ne neutralise que les marges du canevas SharePoint, ce qui
- * reste nécessaire ici pour le workbench hébergé : l'extension ne s'y
- * applique pas (la page n'est pas une SingleWebPartAppPage provisionnée).
+ * - Lecture seule uniquement (`:not(.bbi-home-editing)`) : en édition, le
+ *   chrome reste visible pour que les éditeurs gardent leur barre de commandes.
+ * - La barre de suite Microsoft 365 (#SuiteNavWrapper) n'est JAMAIS masquée :
+ *   ce n'est pas supporté par Microsoft et les utilisateurs doivent y accéder.
+ * - Lecture seule : le web part est épinglé sous la barre de suite et défile
+ *   lui-même (`data-bbi-scroll-root`, comme Intranet-Coris) ; le composant lit
+ *   ce défilement via getScrollRoot() dans homeLayout.ts. En édition, il reste
+ *   dans le flux de la page et c'est la fenêtre qui défile.
  */
 const IMMERSIVE_HOME_STYLES: string = `
+  /* Chrome SharePoint masqué en lecture : en-tête, barre d'applis, navigation, titre, commandes, pied. */
+  body.bbi-home-immersive:not(.bbi-home-editing) #spSiteHeader,
+  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="SiteHeader"],
+  body.bbi-home-immersive:not(.bbi-home-editing) .sp-appBar,
+  body.bbi-home-immersive:not(.bbi-home-editing) #sp-appBar,
+  body.bbi-home-immersive:not(.bbi-home-editing) #spLeftNav,
+  body.bbi-home-immersive:not(.bbi-home-editing) .sp-pageLayout-leftNav,
+  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="pageHeader"],
+  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="pageTitle"],
+  body.bbi-home-immersive:not(.bbi-home-editing) #pageHeader,
+  body.bbi-home-immersive:not(.bbi-home-editing) #spCommandBar,
+  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="pageCommandBar"],
+  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="pageFooter"],
+  body.bbi-home-immersive:not(.bbi-home-editing) .sp-pageLayout-pageFooter,
+  body.bbi-home-immersive:not(.bbi-home-editing) #CommentsWrapper {
+    display: none !important;
+  }
+  /* Épinglage à la Coris : le web part occupe tout l'écran sous la barre de suite M365
+     et défile lui-même ; la page SharePoint en dessous ne défile plus. */
+  [data-bbi-scroll-root="true"] {
+    position: fixed !important;
+    top: var(--bbi-suite-offset, 48px) !important;
+    left: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: calc(100vh - var(--bbi-suite-offset, 48px)) !important;
+    max-height: calc(100vh - var(--bbi-suite-offset, 48px)) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    z-index: 10 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    background: #fff !important;
+  }
+  html:has(body.bbi-home-immersive:not(.bbi-home-editing)),
+  body.bbi-home-immersive:not(.bbi-home-editing),
+  body.bbi-home-immersive:not(.bbi-home-editing) [data-automation-id="contentScrollRegion"] {
+    overflow: hidden !important;
+  }
+  /* Une transformation sur un ancêtre ferait de lui le repère du position: fixed. */
+  body.bbi-home-immersive #spPageCanvasContent,
+  body.bbi-home-immersive .CanvasZone,
+  body.bbi-home-immersive .CanvasSection,
+  body.bbi-home-immersive .ControlZone {
+    transform: none !important;
+    filter: none !important;
+    contain: none !important;
+  }
+  /* Zone de contenu : aucune marge latérale résiduelle de la mise en page SharePoint. */
+  body.bbi-home-immersive #contentBox,
+  body.bbi-home-immersive #DeltaSPPageContentArea,
+  body.bbi-home-immersive [data-automation-id="contentScrollRegion"] > div {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: none !important;
+    width: 100% !important;
+  }
+
   /* Canevas sans marges, sur la page publiée comme dans le workbench hébergé. */
   body.bbi-home-immersive #workbenchPageContent,
   body.bbi-home-immersive #spPageCanvasContent,
@@ -249,6 +309,17 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
 
   private _enableImmersiveHome(): void {
     document.body.classList.add('bbi-home-immersive');
+    const editing = this.displayMode === DisplayMode.Edit;
+    document.body.classList.toggle('bbi-home-editing', editing);
+    if (editing) {
+      // Édition : le web part reste dans le flux de la page, la fenêtre défile.
+      this.domElement.removeAttribute('data-bbi-scroll-root');
+    } else {
+      const suiteBar = document.getElementById('SuiteNavWrapper') || document.getElementById('suiteBarDelta');
+      const suiteHeight = suiteBar && suiteBar.offsetHeight > 0 ? suiteBar.offsetHeight : 48;
+      this.domElement.style.setProperty('--bbi-suite-offset', `${suiteHeight}px`);
+      this.domElement.setAttribute('data-bbi-scroll-root', 'true');
+    }
     if (!this._immersiveStyle) {
       this._immersiveStyle = document.createElement('style');
       this._immersiveStyle.setAttribute('data-bbi-home-immersive', 'true');
@@ -259,7 +330,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
 
   protected onDispose(): void {
     ReactDom.unmountComponentAtNode(this.domElement);
-    document.body.classList.remove('bbi-home-immersive');
+    document.body.classList.remove('bbi-home-immersive', 'bbi-home-editing');
     if (this._immersiveStyle && this._immersiveStyle.parentElement) {
       this._immersiveStyle.parentElement.removeChild(this._immersiveStyle);
     }

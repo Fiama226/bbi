@@ -59,6 +59,8 @@ import {
   parseObjectives,
   parsePortalRoute,
   parseQuickLinks,
+  getScrollRoot,
+  scrollPortalTo,
   useChromeOffset,
   useScrolled,
 } from "./homeLayout";
@@ -451,9 +453,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         )
       : 0;
     const chrome = Number.isNaN(rawOffset) ? 0 : rawOffset;
-    const top =
-      target.getBoundingClientRect().top + window.pageYOffset - (chrome + 72);
-    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+    const scrollRoot = getScrollRoot();
+    // Racine épinglée : position relative au haut de la racine, plus son défilement interne.
+    const base = scrollRoot
+      ? target.getBoundingClientRect().top -
+        scrollRoot.getBoundingClientRect().top +
+        scrollRoot.scrollTop
+      : target.getBoundingClientRect().top + window.pageYOffset;
+    scrollPortalTo(Math.max(0, base - (chrome + 72)));
   };
 
   React.useEffect(() => {
@@ -724,7 +731,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       if (view === "actualites" || view === "accueil") {
         setPageIndex(0);
       }
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      scrollPortalTo(0);
     }
   };
 
@@ -1689,17 +1696,19 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           data-bbi-view="actualite"
           aria-label="Actualité"
         >
-          <NewsDetail
-            bundle={newsBundle}
-            loading={newsBundleLoading}
-            siteUrl={props.siteUrl}
-            showDataNotices={props.showDataNotices}
-            onOpenNews={openNews}
-            onBack={(event) => {
-              event.preventDefault();
-              openView("actualites");
-            }}
-          />
+          {activeView === "actualite" && (
+            <NewsDetail
+              bundle={newsBundle}
+              loading={newsBundleLoading}
+              siteUrl={props.siteUrl}
+              showDataNotices={props.showDataNotices}
+              onOpenNews={openNews}
+              onBack={(event) => {
+                event.preventDefault();
+                openView("actualites");
+              }}
+            />
+          )}
         </section>
 
         <section
@@ -1796,7 +1805,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             : styles.backToTop
         }
         onClick={() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          scrollPortalTo(0);
         }}
         aria-label="Revenir en haut de la page"
       >

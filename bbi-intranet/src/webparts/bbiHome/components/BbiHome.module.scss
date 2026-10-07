@@ -32,7 +32,7 @@
      ancré en bas même quand une vue est courte. */
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - var(--bbi-chrome-offset));
+  min-height: calc(100vh - var(--bbi-chrome-offset) - var(--bbi-suite-offset, 0px));
 }
 
 .home *,

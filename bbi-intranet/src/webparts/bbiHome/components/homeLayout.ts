@@ -214,6 +214,49 @@ export const parseKpis = (text: string): IKpi[] => {
 };
 
 /**
+ * Plein écran « à la Coris » : en lecture, le web part est épinglé sous la
+ * barre de suite M365 et défile lui-même (attribut `data-bbi-scroll-root`,
+ * posé par BbiHomeWebPart). Sinon (édition, hors web part) la fenêtre défile.
+ */
+export const getScrollRoot = (): HTMLElement | undefined => {
+  if (typeof document === 'undefined') {
+    return undefined;
+  }
+  return (
+    (document.querySelector('[data-bbi-scroll-root="true"]') as HTMLElement | null) || undefined
+  );
+};
+
+export const getScrollTop = (): number => {
+  const root = getScrollRoot();
+  return root ? root.scrollTop : window.scrollY;
+};
+
+export const scrollPortalTo = (top: number): void => {
+  const root = getScrollRoot();
+  if (root) {
+    root.scrollTo({ top, behavior: 'smooth' });
+  } else {
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+};
+
+/** Écoute le défilement de la fenêtre ET de la racine épinglée ; renvoie le désabonnement. */
+const onPortalScroll = (handler: () => void): (() => void) => {
+  const root = getScrollRoot();
+  window.addEventListener('scroll', handler, { passive: true });
+  if (root) {
+    root.addEventListener('scroll', handler, { passive: true });
+  }
+  return () => {
+    window.removeEventListener('scroll', handler);
+    if (root) {
+      root.removeEventListener('scroll', handler);
+    }
+  };
+};
+
+/**
  * Mesure la hauteur du « chrome » SharePoint situé au-dessus de la web part
  * (barre de suite Microsoft, en-tête de site…) afin de calculer une hauteur
  * de héros réellement plein écran, y compris dans le workbench.
@@ -243,9 +286,12 @@ export const useChromeOffset = (
       if (!node) {
         return;
       }
-      const stickyTop = isWorkbench
-        ? Math.max(0, Math.round(chromeTop - window.scrollY))
-        : chromeTop;
+      // Racine épinglée : le défilement est interne, la barre colle à 0.
+      const stickyTop = getScrollRoot()
+        ? 0
+        : isWorkbench
+          ? Math.max(0, Math.round(chromeTop - window.scrollY))
+          : chromeTop;
       node.style.setProperty('--bbi-sticky-top', `${stickyTop}px`);
     };
 
@@ -257,7 +303,8 @@ export const useChromeOffset = (
       const rect = node.getBoundingClientRect();
 
       // 1) Hauteur du « chrome » SharePoint au-dessus de la web part.
-      const top = Math.round(rect.top + window.scrollY);
+      // Racine épinglée : le contenu démarre au sommet de la racine → aucun chrome au-dessus.
+      const top = getScrollRoot() ? 0 : Math.round(rect.top + window.scrollY);
       chromeTop = Math.max(0, Math.min(140, top));
       node.style.setProperty('--bbi-chrome-offset', `${chromeTop}px`);
 
@@ -301,12 +348,12 @@ export const useChromeOffset = (
     };
     window.addEventListener('resize', measure);
     window.addEventListener('load', measure);
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const offScroll = onPortalScroll(onScroll);
     return () => {
       timers.forEach((timer) => window.clearTimeout(timer));
       window.removeEventListener('resize', measure);
       window.removeEventListener('load', measure);
-      window.removeEventListener('scroll', onScroll);
+      offScroll();
       if (frame) {
         window.cancelAnimationFrame(frame);
       }
@@ -325,16 +372,16 @@ export const useScrolled = (threshold: number = 48): boolean => {
       }
       frame = window.requestAnimationFrame(() => {
         frame = 0;
-        setScrolled(window.scrollY > threshold);
+        setScrolled(getScrollTop() > threshold);
       });
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const offScroll = onPortalScroll(onScroll);
     onScroll();
     return () => {
       if (frame) {
         window.cancelAnimationFrame(frame);
       }
-      window.removeEventListener('scroll', onScroll);
+      offScroll();
     };
   }, [threshold]);
   return scrolled;
@@ -368,13 +415,13 @@ export const useActiveSection = (ids: string[]): string => {
         evaluate();
       });
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
+    const offScroll = onPortalScroll(onScroll);
     evaluate();
     return () => {
       if (frame) {
         window.cancelAnimationFrame(frame);
       }
-      window.removeEventListener('scroll', onScroll);
+      offScroll();
     };
   }, [ids]);
   return active;
