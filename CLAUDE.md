@@ -66,8 +66,8 @@ Requires Node >= 22.14 (`engines` in package.json).
 ### Verification scripts (run before any delivery/package change)
 ```bash
 npx heft build
-node tools/verify-fallback.js      # 100 checks: data layers run against a simulated SharePoint client for each of the 3 source states (absent/empty/populated) — no network needed
-node tools/css-harness.js dist     # confirms styles/classes are actually injected (KPI band outside clipped hero area, pagination, nav)
+node tools/verify-fallback.js      # 173 checks: data layers run against a simulated SharePoint client for each of the 3 source states (absent/empty/populated) — no network needed
+node tools/css-harness.js dist     # confirms styles/classes are actually injected (KPI band outside clipped hero area, pagination, nav, site cards, link directories, nav bar permanently navy — never transparent)
 node tools/preview-smoke.js        # 34 journey checks against deliverables/audit-2026/apercu-portail.html
 node tools/verify-package.js       # validates deliverables/spfx/bbi-intranet.sppkg manifest-vs-bundle consistency
 node tools/verify-package.js --dev # same, but against temp/manifests.js + dist/ (debug path)
