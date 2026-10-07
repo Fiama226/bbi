@@ -335,8 +335,26 @@ setTimeout(() => {
     homeLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
   }
 
+  // Non-régression : la barre de navigation garde sa couleur bleu nuit dans
+  // TOUS les états (accueil non défilé compris). Elle ne doit jamais être
+  // transparente : derrière elle, la page est blanche dès que le héros ne la
+  // couvre pas exactement (barre repliée sur deux lignes, écouteur de
+  // défilement abonné avant l'épinglage, etc.).
+  const topbar = hostDiv.querySelector('header');
+  const topbarBaseClass = topbar ? (topbar.className.split(/\s+/)[0] || '') : '';
+  const topbarRuleMatch = topbarBaseClass
+    ? allCss.match(new RegExp(`\\.${topbarBaseClass}\\s*\\{([^}]*)\\}`))
+    : null;
+  const topbarRule = topbarRuleMatch ? topbarRuleMatch[1] : '';
+  const topbarHasNavy = /background:\s*var\(--bbi-navy\)/.test(topbarRule);
+  const topbarTransparent = /background:\s*transparent/.test(topbarRule);
+  console.log(
+    `Barre de navigation : fond bleu nuit permanent : ${topbarHasNavy && !topbarTransparent ? 'OUI' : 'NON'}`
+  );
+  const topbarOk = !!topbar && topbarHasNavy && !topbarTransparent;
+
   const allOk =
-    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk && orphanSectionsOk && siteCardsOk && linkDirectoriesOk;
+    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk && orphanSectionsOk && siteCardsOk && linkDirectoriesOk && topbarOk;
   console.log(
     `\n${
       allOk
