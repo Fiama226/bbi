@@ -125,6 +125,12 @@ export interface IHomeOffice {
   Responsable?: string;
   LienCarte?: string;
   Ordre?: number;
+  /** URL du site SharePoint de l'implantation (hub pour le siège). */
+  SiteUrl?: string;
+  /** Couleur d'accent `#RRGGBB` du bandeau de la carte. */
+  Couleur?: string;
+  /** 1 à 3 lettres affichées dans le carré logo. */
+  Initiales?: string;
 }
 
 /** Référence client/partenaire. */
@@ -273,6 +279,33 @@ export const externalUrl = (value?: string): string => {
     ? clean
     : `https://${clean.replace(/^\/+/, '')}`;
   return safeHref(candidate) || '';
+};
+
+/** Couleur hex sûre (`#RGB` ou `#RRGGBB`) normalisée en `#RRGGBB` majuscules, sinon undefined. */
+export const safeColor = (value?: string): string | undefined => {
+  const clean = (value || '').trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(clean)) {
+    return clean.toUpperCase();
+  }
+  if (/^#[0-9a-fA-F]{3}$/.test(clean)) {
+    return ('#' + clean.slice(1).split('').map((c) => c + c).join('')).toUpperCase();
+  }
+  return undefined;
+};
+
+/** Initiales d'une implantation : valeur explicite (3 max) ou première lettre de chaque mot du titre. */
+export const initialsOf = (title: string, explicit?: string): string => {
+  const given = (explicit || '').replace(/[^A-Za-z0-9À-ɏ]/g, '').toUpperCase();
+  if (given) {
+    return given.slice(0, 3);
+  }
+  const words = (title || '')
+    .split(/[\s\-—–·,/]+/)
+    .filter((w) => /[A-Za-z0-9À-ɏ]/.test(w));
+  if (words.length >= 2) {
+    return (words[0].charAt(0) + words[1].charAt(0)).toUpperCase();
+  }
+  return (words[0] || '??').slice(0, 2).toUpperCase();
 };
 
 const slug = (value: string): string =>
@@ -667,46 +700,10 @@ export const DEMO_PEDAGOGICAL_REFERENCES: IHomePedagogicalReference[] = [
 ];
 
 export const DEMO_OFFICES: IHomeOffice[] = [
-  {
-    Id: 1,
-    Title: 'Siège — Paris',
-    EstSiege: true,
-    Pays: 'France',
-    Ville: 'Paris',
-    Adresse: '12 rue de la Croissance, 75008 Paris',
-    Telephone: '+33 1 45 67 89 00',
-    Email: 'contact@businessbuilders.fr',
-    Responsable: 'Jean-Marc Okafor',
-    Ordre: 0
-  },
-  {
-    Id: 2,
-    Title: 'Filiale Abidjan',
-    Pays: "Côte d'Ivoire",
-    Ville: 'Abidjan',
-    Telephone: '+225 05 98 76 54 32',
-    Email: 'abidjan@businessbuilders.fr',
-    Responsable: 'Samuel Kouassi',
-    Ordre: 1
-  },
-  {
-    Id: 3,
-    Title: 'Antenne Bamako',
-    Pays: 'Mali',
-    Ville: 'Bamako',
-    Telephone: '+223 76 12 34 56',
-    Email: 'bamako@businessbuilders.fr',
-    Responsable: 'Awa Traoré',
-    Ordre: 2
-  },
-  {
-    Id: 4,
-    Title: 'Antenne Dakar',
-    Pays: 'Sénégal',
-    Ville: 'Dakar',
-    Email: 'dakar@businessbuilders.fr',
-    Ordre: 3
-  }
+  { Id: 1, Title: 'Siège — Paris', EstSiege: true, Pays: 'France', Ville: 'Paris', Adresse: '12 rue de la Croissance, 75008 Paris', Telephone: '+33 1 45 67 89 00', Email: 'contact@businessbuilders.fr', Responsable: 'Jean-Marc Okafor', Ordre: 0, SiteUrl: 'https://businessbuilderinter.sharepoint.com/sites/intranet', Couleur: '#0E265C', Initiales: 'SP' },
+  { Id: 2, Title: 'Filiale Abidjan', Pays: "Côte d'Ivoire", Ville: 'Abidjan', Telephone: '+225 05 98 76 54 32', Email: 'abidjan@businessbuilders.fr', Responsable: 'Samuel Kouassi', Ordre: 1, SiteUrl: 'https://businessbuilderinter.sharepoint.com/sites/intranet-abidjan', Couleur: '#C8102E', Initiales: 'AB' },
+  { Id: 3, Title: 'Antenne Bamako', Pays: 'Mali', Ville: 'Bamako', Telephone: '+223 76 12 34 56', Email: 'bamako@businessbuilders.fr', Responsable: 'Awa Traoré', Ordre: 2, SiteUrl: 'https://businessbuilderinter.sharepoint.com/sites/intranet-bamako', Couleur: '#6B2D8B', Initiales: 'BK' },
+  { Id: 4, Title: 'Antenne Dakar', Pays: 'Sénégal', Ville: 'Dakar', Email: 'dakar@businessbuilders.fr', Ordre: 3, SiteUrl: 'https://businessbuilderinter.sharepoint.com/sites/intranet-dakar', Couleur: '#B5651D', Initiales: 'DK' }
 ];
 
 export const DEMO_CLIENT_REFERENCES: IHomeClientReference[] = [
@@ -999,7 +996,10 @@ const OFFICE_FIELDS: { [key: string]: string[] } = {
   Email: ['Email', 'Mail'],
   Responsable: ['Responsable', 'Manager', 'Contact'],
   LienCarte: ['LienCarte', 'MapUrl', 'Carte'],
-  Ordre: ['Ordre', 'SortOrder', 'Rang']
+  Ordre: ['Ordre', 'SortOrder', 'Rang'],
+  SiteUrl: ['SiteUrl', 'SiteSharePoint', 'LienSite'],
+  Couleur: ['Couleur', 'Color', 'Accent'],
+  Initiales: ['Initiales', 'Initials']
 };
 
 const CLIENT_REFERENCE_FIELDS: { [key: string]: string[] } = {
@@ -1216,7 +1216,10 @@ const asOffice = (
   Email: mapping.Email ? textOf(raw[mapping.Email]) : undefined,
   Responsable: mapping.Responsable ? textOf(raw[mapping.Responsable]) : undefined,
   LienCarte: mapping.LienCarte ? safeHref(textOf(raw[mapping.LienCarte]) || '') || undefined : undefined,
-  Ordre: mapping.Ordre ? asNumber(raw[mapping.Ordre]) : undefined
+  Ordre: mapping.Ordre ? asNumber(raw[mapping.Ordre]) : undefined,
+  SiteUrl: mapping.SiteUrl ? safeHref(textOf(raw[mapping.SiteUrl]) || '') || undefined : undefined,
+  Couleur: mapping.Couleur ? safeColor(textOf(raw[mapping.Couleur])) : undefined,
+  Initiales: initialsOf(textOf(raw.Title) || '', mapping.Initiales ? textOf(raw[mapping.Initiales]) : undefined)
 });
 
 const asClientReference = (

@@ -1004,6 +1004,53 @@ async function testOfficesAndReferences() {
     'documents administratifs — données réelles lues et catégorisées',
     liveAdminDocs.isDemo === false && liveAdminDocs.items[0].Categorie === 'RH' && liveAdminDocs.items[0].FileRef.indexOf('note.pdf') !== -1
   );
+
+  // --- Colonnes de site (SiteUrl, Couleur, Initiales) ---
+  const { safeColor, initialsOf } = loadTsModule('src/webparts/bbiHome/components/homeData.ts');
+  check('couleur — hex valide conservé', safeColor('#0E265C') === '#0E265C');
+  check('couleur — hex court étendu', safeColor('#abc') === '#AABBCC');
+  check('couleur — valeur invalide rejetée', safeColor('bleu') === undefined && safeColor('#12') === undefined);
+  check('couleur — tentative d\'injection rejetée', safeColor('red;background:url(x)') === undefined);
+  check('initiales — explicites conservées (3 max)', initialsOf('Filiale Abidjan', 'ABJX') === 'ABJ');
+  check('initiales — repli sur le titre', initialsOf('Filiale Abidjan') === 'FA');
+  check('initiales — titre à un mot', initialsOf('Siège') === 'SI');
+  check('initiales — titre avec tiret cadratin', initialsOf('Siège — Paris') === 'SP');
+
+  const demoWithSites = await loadHomeOffices(missing, SITE, 'Implantations');
+  check('implantations — repli : chaque site a SiteUrl, Couleur et Initiales',
+    demoWithSites.items.every((o) => !!o.SiteUrl && !!o.Couleur && !!o.Initiales));
+
+  const legacyOffices = await loadHomeOffices(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'EstSiege' }, { InternalName: 'Ville' }] } },
+      { match: /items/, json: { value: [{ Id: 1, Title: 'Siège', EstSiege: true, Ville: 'Paris' }] } }
+    ]),
+    SITE,
+    'Implantations'
+  );
+  check('implantations — liste ancienne sans colonnes de site → rendu sans erreur',
+    legacyOffices.isDemo === false && legacyOffices.items[0].SiteUrl === undefined && legacyOffices.items[0].Couleur === undefined);
+
+  const siteOffices = await loadHomeOffices(
+    fakeClient([
+      { match: /fields/, json: { value: [{ InternalName: 'SiteUrl' }, { InternalName: 'Couleur' }, { InternalName: 'Initiales' }] } },
+      {
+        match: /items/,
+        json: {
+          value: [
+            { Id: 1, Title: 'Filiale Abidjan', SiteUrl: { Url: 'https://tenant.sharepoint.com/sites/intranet-abidjan', Description: 'Abidjan' }, Couleur: '#C8102E', Initiales: 'AB' },
+            { Id: 2, Title: 'Antenne Bamako', SiteUrl: 'javascript:alert(1)', Couleur: 'rouge', Initiales: '' }
+          ]
+        }
+      }
+    ]),
+    SITE,
+    'Implantations'
+  );
+  check('implantations — SiteUrl Hyperlink (objet) extrait', siteOffices.items[0].SiteUrl === 'https://tenant.sharepoint.com/sites/intranet-abidjan');
+  check('implantations — SiteUrl javascript: rejeté', siteOffices.items[1].SiteUrl === undefined);
+  check('implantations — Couleur invalide ignorée', siteOffices.items[1].Couleur === undefined);
+  check('implantations — Initiales vides → repli', siteOffices.items[1].Initiales === 'AB');
 }
 
 /* ------------------------------------------------------------------ */
