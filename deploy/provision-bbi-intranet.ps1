@@ -385,10 +385,343 @@ function Ensure-BbiNavNode {
     }
 }
 
+# Slug d'alias de site (filiales)
+. (Join-Path $scriptRoot 'BbiSlug.ps1')
+
+# ------------------------------------------------------------------
+# Provisionnement d'un site (sections 2 à 5) : réutilisé pour le siège et chaque filiale
+# ------------------------------------------------------------------
+function Invoke-BbiSiteProvisioning {
+    param(
+        [Parameter(Mandatory)][string]$TargetUrl,
+        [Parameter(Mandatory)][string]$DataUrl,
+        [bool]$SeedDemo = $false,
+        [string]$StepPrefix = ''
+    )
+    # $SeedDemo : accepté pour compatibilité d'interface ; le jeu de démo reste en section 9/10 (siège uniquement).
+    if ((Get-PnPConnection).Url.TrimEnd('/') -ne $TargetUrl.TrimEnd('/')) {
+        Connect-PnPOnline -Url $TargetUrl -Interactive
+        Write-Ok "Connecté à $TargetUrl"
+    }
+    $previousDataSite = $script:DataSiteUrl
+    $script:DataSiteUrl = $DataUrl
+    try {
+        # ==================================================================
+        # 2. LISTES MÉTIER (colonnes attendues par le code SPFx)
+        # ==================================================================
+        Write-Title "$StepPrefix 2/10 · Listes métier"
+
+        # --- Actualités : IHomeNews { Title, Summary, Category, Published, AuthorName, ImageUrl, LinkUrl }
+        Ensure-BbiList -Title 'Actualites' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Actualites' -DisplayName 'Résumé'        -InternalName 'Summary'    -Type Note
+        Ensure-BbiField -List 'Actualites' -DisplayName 'Corps de l''article' -InternalName 'Body' -Type Note
+        Ensure-BbiField -List 'Actualites' -DisplayName 'Rubrique'      -InternalName 'Category'   -Type Choice `
+            -Choices @('Certification','Formations','Vie BBI','Événement','Communiqué')
+        Ensure-BbiField -List 'Actualites' -DisplayName 'Date de publication' -InternalName 'Published' -Type DateTime
+        Ensure-BbiField -List 'Actualites' -DisplayName 'Auteur'         -InternalName 'AuthorName' -Type Text
+        Ensure-BbiField -List 'Actualites' -DisplayName 'Image (URL)'    -InternalName 'ImageUrl'   -Type Hyperlink
+        Ensure-BbiField -List 'Actualites' -DisplayName 'Lien (URL)'     -InternalName 'LinkUrl'    -Type Hyperlink
+        Ensure-BbiView  -List 'Actualites' -Title 'À la une' -Fields @('Title','Category','Published','AuthorName') `
+            -Query '<OrderBy><FieldRef Name="Published" Ascending="FALSE"/></OrderBy>'
+
+        # --- Sessions : IHomeSession { Title, StartDate, Modality, Location, Status, RegistrationUrl }
+        Ensure-BbiList -Title 'Sessions' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Date de début' -InternalName 'StartDate' -Type DateTime
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Date de fin'   -InternalName 'EndDate'   -Type DateTime
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Modalité'      -InternalName 'Modality' -Type Choice `
+            -Choices @('Présentiel','Distanciel','Hybride')
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Lieu'          -InternalName 'Location' -Type Text
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Statut'        -InternalName 'Status'   -Type Text
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Inscription (URL)' -InternalName 'RegistrationUrl' -Type Hyperlink
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Formateur'      -InternalName 'Trainer'   -Type Text
+        Ensure-BbiView  -List 'Sessions' -Title 'Prochaines sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
+            -Query '<Where><Geq><FieldRef Name="StartDate"/><Value Type="DateTime"><Today/></Value></Geq></Where><OrderBy><FieldRef Name="StartDate"/></OrderBy>'
+        Ensure-BbiView  -List 'Sessions' -Title 'Toutes les sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
+            -Query '<OrderBy><FieldRef Name="StartDate" Ascending="FALSE"/></OrderBy>'
+
+        # --- Formateurs : IHomeTrainer { Title, Role, Filiere, Initials, PhotoUrl, Phone, Email, WhatsApp, Location, Bio… }
+        Ensure-BbiList -Title 'Formateurs' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Rôle'        -InternalName 'Role'        -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Filière'     -InternalName 'Filiere'     -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Initiales'   -InternalName 'Initials'    -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Photo (URL)' -InternalName 'PhotoUrl'    -Type Hyperlink
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Téléphone'   -InternalName 'Phone'       -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'E-mail'      -InternalName 'Email'       -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'WhatsApp'    -InternalName 'WhatsApp'    -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Localisation' -InternalName 'Location'   -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Biographie'  -InternalName 'Bio'         -Type Note
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Spécialités' -InternalName 'Specialites' -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Certifications' -InternalName 'Certifications' -Type Text
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Profil LinkedIn' -InternalName 'LinkedIn' -Type Hyperlink
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Catégorie' -InternalName 'Categorie' -Type Choice `
+            -Choices @('Formateur','Permanent','Direction','Appui')
+        Ensure-BbiField -List 'Formateurs' -DisplayName 'Ordre' -InternalName 'Ordre' -Type Number
+        Ensure-BbiView  -List 'Formateurs' -Title 'Annuaire formateurs' -Fields @('Title','Role','Filiere','Phone','Email','Location') `
+            -Query '<OrderBy><FieldRef Name="Title"/></OrderBy>'
+
+        # --- Employés du mois : IHomeEmployee { Title, Role, Pole, Month, Message, Highlights, PhotoUrl }
+        Ensure-BbiList -Title 'Employés du mois' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Employés du mois' -DisplayName 'Poste'        -InternalName 'Role'       -Type Text
+        Ensure-BbiField -List 'Employés du mois' -DisplayName 'Pôle'         -InternalName 'Pole'       -Type Text
+        Ensure-BbiField -List 'Employés du mois' -DisplayName 'Mois'         -InternalName 'Month'      -Type Text
+        Ensure-BbiField -List 'Employés du mois' -DisplayName 'En cours'     -InternalName 'IsCurrent'  -Type Boolean
+        Ensure-BbiField -List 'Employés du mois' -DisplayName 'Motivation'   -InternalName 'Message'    -Type Note
+        Ensure-BbiField -List 'Employés du mois' -DisplayName 'Faits marquants' -InternalName 'Highlights' -Type Text
+        Ensure-BbiField -List 'Employés du mois' -DisplayName 'Photo (URL)'  -InternalName 'PhotoUrl'   -Type Hyperlink
+        Ensure-BbiView  -List 'Employés du mois' -Title 'Mises à l''honneur' -Fields @('Title','Role','Pole','Month','IsCurrent') `
+            -Query '<OrderBy><FieldRef Name="Created" Ascending="FALSE"/></OrderBy>'
+
+        # --- Certifications : IHomeCertification { Title, Issuer, Scope, ValidUntil, Status }
+        Ensure-BbiList -Title 'Certifications' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Certifications' -DisplayName 'Organisme'   -InternalName 'Issuer'     -Type Text
+        Ensure-BbiField -List 'Certifications' -DisplayName 'Périmètre'   -InternalName 'Scope'      -Type Note
+        Ensure-BbiField -List 'Certifications' -DisplayName 'Valable jusqu''au' -InternalName 'ValidUntil' -Type DateTime
+        Ensure-BbiField -List 'Certifications' -DisplayName 'Statut'      -InternalName 'Status'     -Type Text
+        Ensure-BbiView  -List 'Certifications' -Title 'Certifications & agréments' -Fields @('Title','Issuer','ValidUntil','Status') `
+            -Query '<OrderBy><FieldRef Name="Created"/></OrderBy>'
+
+        # --- Annonces : IHomeAnnouncement { Title, Message, Niveau, DateDebut, DateFin, LienUrl, Ordre }
+        Ensure-BbiList -Title 'Annonces' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Annonces' -DisplayName 'Message'      -InternalName 'Message'   -Type Note
+        Ensure-BbiField -List 'Annonces' -DisplayName 'Niveau'       -InternalName 'Niveau'    -Type Choice `
+            -Choices @('Information','Important','Urgent')
+        Ensure-BbiField -List 'Annonces' -DisplayName 'Date de début' -InternalName 'DateDebut' -Type DateTime
+        Ensure-BbiField -List 'Annonces' -DisplayName 'Date de fin'   -InternalName 'DateFin'   -Type DateTime
+        Ensure-BbiField -List 'Annonces' -DisplayName 'Lien (URL)'    -InternalName 'LienUrl'   -Type Hyperlink
+        Ensure-BbiField -List 'Annonces' -DisplayName 'Ordre'         -InternalName 'Ordre'     -Type Number
+        Ensure-BbiView  -List 'Annonces' -Title 'Annonces actives' -Fields @('Title','Niveau','DateDebut','DateFin') `
+            -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
+
+        # --- Pensées du jour : IHomeThought { Title (citation), Auteur, DatePublication, Contexte }
+        Ensure-BbiList -Title 'Pensées du jour' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Pensées du jour' -DisplayName 'Auteur'            -InternalName 'Auteur'          -Type Text
+        Ensure-BbiField -List 'Pensées du jour' -DisplayName 'Date de publication' -InternalName 'DatePublication' -Type DateTime
+        Ensure-BbiField -List 'Pensées du jour' -DisplayName 'Contexte'          -InternalName 'Contexte'        -Type Text
+        Ensure-BbiView  -List 'Pensées du jour' -Title 'Toutes les citations' -Fields @('Title','Auteur','DatePublication') `
+            -Query '<OrderBy><FieldRef Name="Title"/></OrderBy>'
+
+        # --- Anniversaires : IHomeBirthday { Title (nom), Jour, Mois, Fonction, PhotoUrl, Message, Afficher }
+        # RGPD : jour + mois uniquement — jamais l'année de naissance.
+        Ensure-BbiList -Title 'Anniversaires' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Anniversaires' -DisplayName 'Jour'      -InternalName 'Jour'      -Type Number
+        Ensure-BbiField -List 'Anniversaires' -DisplayName 'Mois'      -InternalName 'Mois'      -Type Number
+        Ensure-BbiField -List 'Anniversaires' -DisplayName 'Fonction'  -InternalName 'Fonction'  -Type Text
+        Ensure-BbiField -List 'Anniversaires' -DisplayName 'Photo (URL)' -InternalName 'PhotoUrl' -Type Hyperlink
+        Ensure-BbiField -List 'Anniversaires' -DisplayName 'Message'   -InternalName 'Message'   -Type Text
+        Ensure-BbiField -List 'Anniversaires' -DisplayName 'Afficher'  -InternalName 'Afficher'  -Type Boolean
+        Ensure-BbiView  -List 'Anniversaires' -Title 'Tous les anniversaires' -Fields @('Title','Jour','Mois','Fonction') `
+            -Query '<OrderBy><FieldRef Name="Mois"/><FieldRef Name="Jour"/></OrderBy>'
+
+        # --- Implantations : IHomeOffice { Title, EstSiege, Pays, Ville, Adresse, Telephone, Email, Responsable, LienCarte, Ordre }
+        Ensure-BbiList -Title 'Implantations' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Siège'        -InternalName 'EstSiege'    -Type Boolean
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Pays'         -InternalName 'Pays'        -Type Text
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Ville'        -InternalName 'Ville'       -Type Text
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Adresse'      -InternalName 'Adresse'     -Type Note
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Téléphone'    -InternalName 'Telephone'   -Type Text
+        Ensure-BbiField -List 'Implantations' -DisplayName 'E-mail'       -InternalName 'Email'       -Type Text
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Responsable'  -InternalName 'Responsable' -Type Text
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Lien (carte)' -InternalName 'LienCarte'   -Type Hyperlink
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Ordre'        -InternalName 'Ordre'       -Type Number
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Site SharePoint' -InternalName 'SiteUrl'   -Type Hyperlink
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Couleur'         -InternalName 'Couleur'   -Type Text
+        Ensure-BbiField -List 'Implantations' -DisplayName 'Initiales'       -InternalName 'Initiales' -Type Text
+        Ensure-BbiView  -List 'Implantations' -Title 'Réseau complet' -Fields @('Title','EstSiege','Pays','Ville') `
+            -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
+
+        # --- Nos références : IHomeClientReference { Title, LogoUrl, SiteWebUrl, Contact, Pays, Ville, Secteur, Ordre }
+        Ensure-BbiList -Title 'Nos références' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Nos références' -DisplayName 'Logo (URL)'  -InternalName 'LogoUrl'    -Type Hyperlink
+        Ensure-BbiField -List 'Nos références' -DisplayName 'Site web'    -InternalName 'SiteWebUrl' -Type Hyperlink
+        Ensure-BbiField -List 'Nos références' -DisplayName 'Contact'     -InternalName 'Contact'    -Type Text
+        Ensure-BbiField -List 'Nos références' -DisplayName 'Pays'        -InternalName 'Pays'       -Type Text
+        Ensure-BbiField -List 'Nos références' -DisplayName 'Ville'       -InternalName 'Ville'      -Type Text
+        Ensure-BbiField -List 'Nos références' -DisplayName 'Secteur'     -InternalName 'Secteur'    -Type Text
+        Ensure-BbiField -List 'Nos références' -DisplayName 'Ordre'       -InternalName 'Ordre'      -Type Number
+        Ensure-BbiView  -List 'Nos références' -Title 'Toutes les références' -Fields @('Title','Secteur','Pays','Ville') `
+            -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
+
+        # --- Références pédagogiques : IHomePedagogicalReference { Title, Categorie, Auteur, Annee, LienUrl, Resume, Ordre }
+        Ensure-BbiList -Title 'Références pédagogiques' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Catégorie' -InternalName 'Categorie' -Type Choice `
+            -Choices @('Ouvrage','Norme','Méthode','Étude','Outil')
+        Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Auteur'    -InternalName 'Auteur'  -Type Text
+        Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Année'     -InternalName 'Annee'   -Type Number
+        Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Lien (URL)' -InternalName 'LienUrl' -Type Hyperlink
+        Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Résumé'    -InternalName 'Resume'  -Type Note
+        Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Ordre'     -InternalName 'Ordre'   -Type Number
+        Ensure-BbiView  -List 'Références pédagogiques' -Title 'Toutes les références' -Fields @('Title','Categorie','Auteur','Annee') `
+            -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
+
+        # --- Formations : IFormation { Title, CodeFormation, Filiere, Modalite, DureeH, Niveau, StatutCatalogue }
+        Ensure-BbiList -Title 'Formations' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Formations' -DisplayName 'Code formation' -InternalName 'CodeFormation'  -Type Text
+        Ensure-BbiField -List 'Formations' -DisplayName 'Filière'        -InternalName 'Filiere'        -Type Text
+        Ensure-BbiField -List 'Formations' -DisplayName 'Modalité'       -InternalName 'Modalite'       -Type Choice `
+            -Choices @('Présentiel','Distanciel','Hybride')
+        Ensure-BbiField -List 'Formations' -DisplayName 'Durée (heures)' -InternalName 'DureeH'         -Type Number
+        Ensure-BbiField -List 'Formations' -DisplayName 'Niveau'         -InternalName 'Niveau'         -Type Choice `
+            -Choices @('Débutant','Intermédiaire','Confirmé','Expert')
+        Ensure-BbiField -List 'Formations' -DisplayName 'Statut catalogue' -InternalName 'StatutCatalogue' -Type Choice `
+            -Choices @('Actif','En refonte','Archivé')
+        Ensure-BbiField -List 'Formations' -DisplayName 'Description'     -InternalName 'Description'   -Type Note
+        Ensure-BbiField -List 'Formations' -DisplayName 'Objectifs pédagogiques' -InternalName 'Objectifs' -Type Note
+        Ensure-BbiField -List 'Formations' -DisplayName 'Programme'        -InternalName 'Programme'     -Type Note
+        Ensure-BbiField -List 'Formations' -DisplayName 'Prérequis'        -InternalName 'Prerequis'     -Type Note
+        Ensure-BbiField -List 'Formations' -DisplayName 'Public visé'      -InternalName 'PublicVise'    -Type Text
+        Ensure-BbiField -List 'Formations' -DisplayName 'Formateurs référents' -InternalName 'FormateursReferents' -Type Text
+        Ensure-BbiField -List 'Formations' -DisplayName 'Contact pédagogique'  -InternalName 'ContactReferent'     -Type Text
+        Ensure-BbiView  -List 'Formations' -Title 'Catalogue actif' -Fields @('Title','CodeFormation','Filiere','Modalite','DureeH','Niveau') `
+            -Query '<Where><Eq><FieldRef Name="StatutCatalogue"/><Value Type="Text">Actif</Value></Eq></Where><OrderBy><FieldRef Name="Title"/></OrderBy>'
+        Ensure-BbiView  -List 'Formations' -Title 'Par filière' -Fields @('Title','CodeFormation','Filiere','Modalite') `
+            -Query '<OrderBy><FieldRef Name="Filiere"/><FieldRef Name="Title"/></OrderBy>'
+
+        # ==================================================================
+        # 3. BIBLIOTHÈQUES DOCUMENTAIRES
+        # ==================================================================
+        Write-Title "$StepPrefix 3/10 · Bibliothèques"
+
+        # --- Supports publiés (lecture seule côté apprenants)
+        Ensure-BbiList -Title 'Supports publiés' -Template DocumentLibrary | Out-Null
+        Ensure-BbiField -List 'Supports publiés' -DisplayName 'Code formation' -InternalName 'CodeFormation' -Type Text
+        Ensure-BbiField -List 'Supports publiés' -DisplayName 'Type de support' -InternalName 'TypeSupport'  -Type Choice `
+            -Choices @('Slides animateur','Manuel participant','Exercices','Évaluation','Vidéo','Modèle')
+        Ensure-BbiField -List 'Supports publiés' -DisplayName 'Statut' -InternalName 'StatutSupport' -Type Choice `
+            -Choices @('Brouillon','À valider','Publié','À réviser')
+        Ensure-BbiField -List 'Supports publiés' -DisplayName 'Date de validité' -InternalName 'DateValidite' -Type DateTime
+        Ensure-BbiField -List 'Supports publiés' -DisplayName 'Formateur auteur' -InternalName 'FormateurAuteur' -Type Text
+        Ensure-BbiView  -List 'Supports publiés' -Title 'Récemment publiés' -Fields @('DocIcon','Title','CodeFormation','TypeSupport','Modified') `
+            -Query '<OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy>' -RowLimit 10
+        Ensure-BbiView  -List 'Supports publiés' -Title 'Par formation' -Fields @('DocIcon','Title','TypeSupport','StatutSupport','Modified') `
+            -Query '<OrderBy><FieldRef Name="CodeFormation"/><FieldRef Name="Title"/></OrderBy>'
+
+        # --- Galerie médias (bibliothèque d'images alimentant la web part BBI Galerie médias)
+        Ensure-BbiList -Title 'Galerie médias' -Template PictureLibrary | Out-Null
+        Ensure-BbiField -List 'Galerie médias' -DisplayName 'Album'    -InternalName 'Album'     -Type Choice `
+            -Choices @('Sessions de formation','Vie BBI','Certifications','Coulisses','Événements')
+        Ensure-BbiField -List 'Galerie médias' -DisplayName 'Lieu'      -InternalName 'Lieu'      -Type Text
+        Ensure-BbiField -List 'Galerie médias' -DisplayName 'Crédit photo' -InternalName 'Credit' -Type Text
+        Ensure-BbiField -List 'Galerie médias' -DisplayName 'Date de la photo' -InternalName 'DatePhoto' -Type DateTime
+        Ensure-BbiField -List 'Galerie médias' -DisplayName 'Lien vidéo (URL)' -InternalName 'LienVideo' -Type Hyperlink
+        Ensure-BbiView  -List 'Galerie médias' -Title 'Albums' -Fields @('DocIcon','Title','Album','Lieu','DatePhoto') `
+            -Query '<OrderBy><FieldRef Name="Album"/><FieldRef Name="DatePhoto" Ascending="FALSE"/></OrderBy>'
+        Ensure-BbiView  -List 'Galerie médias' -Title 'Derniers ajouts' -Fields @('DocIcon','Title','Album','Lieu','Modified') `
+            -Query '<OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy>'
+
+        # --- Documents administratifs : IHomeAdminDocument { Title, Categorie, Public, Reference, DateValidite }
+        # Bibliothèque distincte de « Supports publiés » (pédagogique) : RH, juridique, finance, qualité, modèles.
+        Ensure-BbiList -Title 'Documents administratifs' -Template DocumentLibrary | Out-Null
+        Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Catégorie' -InternalName 'Categorie' -Type Choice `
+            -Choices @('RH','Juridique','Finance','Qualité','Modèles')
+        Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Public' -InternalName 'Public' -Type Choice `
+            -Choices @('Tous','Formateurs','Direction')
+        Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Référence' -InternalName 'Reference' -Type Text
+        Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Date de validité' -InternalName 'DateValidite' -Type DateTime
+        Ensure-BbiView  -List 'Documents administratifs' -Title 'Récemment publiés' -Fields @('DocIcon','Title','Categorie','Public','Modified') `
+            -Query '<OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy>' -RowLimit 12
+        Ensure-BbiView  -List 'Documents administratifs' -Title 'Par catégorie' -Fields @('DocIcon','Title','Categorie','Reference','Modified') `
+            -Query '<OrderBy><FieldRef Name="Categorie"/><FieldRef Name="Title"/></OrderBy>'
+
+        # ==================================================================
+        # 4. SÉCURISATION DE LA BIBLIOTHÈQUE « SUPPORTS PUBLIÉS »
+        # ==================================================================
+        Write-Title "$StepPrefix 4/10 · Sécurité documentaire (lecture seule par défaut)"
+        if ($DryRun -or $VerifyOnly) {
+            Write-Step "[SIMULATION] héritage rompu sur « Supports publiés » + contribution réservée à $EditorsGroup"
+        } else {
+            try {
+                Set-PnPList -Identity 'Supports publiés' -BreakRoleInheritance -CopyRoleAssignments | Out-Null
+                Write-Ok "Héritage rompu : les apprenants conservent la Lecture."
+                try {
+                    Set-PnPListPermission -List 'Supports publiés' -Identity 'Membres du site' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
+                    Set-PnPListPermission -List 'Supports publiés' -Identity 'Visiteurs' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
+                } catch { Write-Warn2 "Ajustement des rôles par défaut ignoré : $($_.Exception.Message)" }
+                try {
+                    Set-PnPListPermission -List 'Supports publiés' -Identity $EditorsGroup -AddRole 'Contribute'
+                    Write-Ok "Contribution limitée au groupe « $EditorsGroup »."
+                } catch {
+                    Write-Warn2 "Groupe « $EditorsGroup » introuvable : accordez la contribution manuellement (Paramètres de la bibliothèque > Autorisations)."
+                }
+                Add-Report 'Sécurité « Supports publiés »' 'OK'
+            } catch {
+                Write-Warn2 "Sécurité non appliquée automatiquement : $($_.Exception.Message)"
+                Add-Report 'Sécurité « Supports publiés »' 'À FAIRE' 'Voir README § Sécurité'
+            }
+        }
+
+        # ==================================================================
+        # 5. PAGES + WEB PARTS
+        # ==================================================================
+        Write-Title "$StepPrefix 5/10 · Pages et web parts"
+        Write-Step "Astuce : les propriétés ci-dessous correspondent aux réglages recommandés (modifiables ensuite dans le volet Propriétés)."
+
+        $homeProps = @{
+            siteUrl               = $DataUrl
+            newsListTitle         = 'Actualites'
+            sessionsListTitle     = 'Sessions'
+            trainersListTitle     = 'Formateurs'
+            formationsListTitle   = 'Formations'
+            documentsLibraryTitle = 'Supports publiés'
+            galleryLibraryTitle   = 'Galerie médias'
+            employeeListTitle     = 'Employés du mois'
+            certificationsListTitle = 'Certifications'
+            announcementsListTitle = 'Annonces'
+            thoughtsListTitle     = 'Pensées du jour'
+            birthdaysListTitle    = 'Anniversaires'
+            officesListTitle      = 'Implantations'
+            clientReferencesListTitle = 'Nos références'
+            pedagogicalReferencesListTitle = 'Références pédagogiques'
+            adminDocumentsLibraryTitle = 'Documents administratifs'
+            maxItems              = 6
+            enableGallery         = $true
+            enableAnnouncement    = $true
+            layoutCompact         = $false
+            heroEyebrow           = 'Business Builders International'
+            heroTitle             = "L'expertise qui fait grandir les dirigeants."
+            heroSubtitle          = "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables."
+            heroSlides            = " | Business Builders International | L'expertise qui fait grandir les dirigeants. | Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables. | Explorer les formations | #formations`n | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions`n | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir nos implantations | #implantations`n | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe"
+            primaryCtaLabel       = 'Explorer les formations'
+            primaryCtaUrl         = '#formations'
+            secondaryCtaLabel     = 'Voir les prochaines sessions'
+            secondaryCtaUrl       = '#sessions'
+            navLinks              = "# Accueil | #accueil`n# Formations | #formations`n# Sessions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
+            quickLinks            = "▦ | Catalogue des formations | Parcours, modalités et durées | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
+            kpis                  = "1 500+ | Professionnels accompagnés`n10+ | Formations au catalogue`n9 | Pays couverts par le réseau`n96 % | De satisfaction constatée"
+        } | ConvertTo-Json -Compress
+
+        # --- Page d'accueil : page APPLICATIVE (aucun en-tête, aucune navigation)
+        Ensure-BbiPage -Name 'accueil' -Title 'Accueil' -LayoutType 'SingleWebPartAppPage' | Out-Null
+        Ensure-BbiWebPart -Page 'accueil.aspx' -ComponentId $WP_HOME -PropertiesJson $homeProps -Name 'BBI Accueil (plein écran)'
+
+        # --- Le portail utilise une seule page SharePoint : les destinations du menu
+        #     (formations, sessions, actualités, ressources, communauté) sont des vues
+        #     internes pilotées par la web part BBI Accueil, sans pages .aspx séparées.
+
+        # --- Page d'accueil du site = accueil.aspx
+        if (-not $DryRun -and -not $VerifyOnly) {
+            Invoke-Bbi "Définition de accueil.aspx comme page d'accueil du site" {
+                Set-PnPHomePage -RootFolderRelativeUrl 'SitePages/accueil.aspx'
+            } | Out-Null
+            Add-Report 'Page d''accueil du site' 'OK'
+        }
+
+        # --- Extension « BBI Plein écran » : rend la page applicative réellement bord à bord
+        Ensure-BbiCustomAction -Name 'BbiFullScreen' -Title 'BBI Plein écran' -ComponentId $EXT_FULLSCREEN `
+            -PropertiesJson (@{
+                mode            = 'appPage'
+                edgeToEdge      = $true
+                hidePageTitle   = $true
+                hideCommandBar  = $false
+            } | ConvertTo-Json -Compress)
+    } finally {
+        $script:DataSiteUrl = $previousDataSite
+    }
+}
+
 # ==================================================================
 # 1. CONNEXION
 # ==================================================================
-Write-Title "1/9 · Connexion à SharePoint"
+Write-Title "1/10 · Connexion à SharePoint"
 if (-not $DryRun -and -not $VerifyOnly) {
     Connect-PnPOnline -Url $SiteUrl -Interactive
     Write-Ok "Connecté à $SiteUrl"
@@ -400,318 +733,16 @@ if ($script:DataSiteUrl -ne $SiteUrl) {
     Write-Step "Les listes métier seront créées sur : $($script:DataSiteUrl)"
 }
 
-# ==================================================================
-# 2. LISTES MÉTIER (colonnes attendues par le code SPFx)
-# ==================================================================
-Write-Title "2/9 · Listes métier"
-
-# --- Actualités : IHomeNews { Title, Summary, Category, Published, AuthorName, ImageUrl, LinkUrl }
-Ensure-BbiList -Title 'Actualites' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Actualites' -DisplayName 'Résumé'        -InternalName 'Summary'    -Type Note
-Ensure-BbiField -List 'Actualites' -DisplayName 'Corps de l''article' -InternalName 'Body' -Type Note
-Ensure-BbiField -List 'Actualites' -DisplayName 'Rubrique'      -InternalName 'Category'   -Type Choice `
-    -Choices @('Certification','Formations','Vie BBI','Événement','Communiqué')
-Ensure-BbiField -List 'Actualites' -DisplayName 'Date de publication' -InternalName 'Published' -Type DateTime
-Ensure-BbiField -List 'Actualites' -DisplayName 'Auteur'         -InternalName 'AuthorName' -Type Text
-Ensure-BbiField -List 'Actualites' -DisplayName 'Image (URL)'    -InternalName 'ImageUrl'   -Type Hyperlink
-Ensure-BbiField -List 'Actualites' -DisplayName 'Lien (URL)'     -InternalName 'LinkUrl'    -Type Hyperlink
-Ensure-BbiView  -List 'Actualites' -Title 'À la une' -Fields @('Title','Category','Published','AuthorName') `
-    -Query '<OrderBy><FieldRef Name="Published" Ascending="FALSE"/></OrderBy>'
-
-# --- Sessions : IHomeSession { Title, StartDate, Modality, Location, Status, RegistrationUrl }
-Ensure-BbiList -Title 'Sessions' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Sessions' -DisplayName 'Date de début' -InternalName 'StartDate' -Type DateTime
-Ensure-BbiField -List 'Sessions' -DisplayName 'Date de fin'   -InternalName 'EndDate'   -Type DateTime
-Ensure-BbiField -List 'Sessions' -DisplayName 'Modalité'      -InternalName 'Modality' -Type Choice `
-    -Choices @('Présentiel','Distanciel','Hybride')
-Ensure-BbiField -List 'Sessions' -DisplayName 'Lieu'          -InternalName 'Location' -Type Text
-Ensure-BbiField -List 'Sessions' -DisplayName 'Statut'        -InternalName 'Status'   -Type Text
-Ensure-BbiField -List 'Sessions' -DisplayName 'Inscription (URL)' -InternalName 'RegistrationUrl' -Type Hyperlink
-Ensure-BbiField -List 'Sessions' -DisplayName 'Formateur'      -InternalName 'Trainer'   -Type Text
-Ensure-BbiView  -List 'Sessions' -Title 'Prochaines sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
-    -Query '<Where><Geq><FieldRef Name="StartDate"/><Value Type="DateTime"><Today/></Value></Geq></Where><OrderBy><FieldRef Name="StartDate"/></OrderBy>'
-Ensure-BbiView  -List 'Sessions' -Title 'Toutes les sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
-    -Query '<OrderBy><FieldRef Name="StartDate" Ascending="FALSE"/></OrderBy>'
-
-# --- Formateurs : IHomeTrainer { Title, Role, Filiere, Initials, PhotoUrl, Phone, Email, WhatsApp, Location, Bio… }
-Ensure-BbiList -Title 'Formateurs' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Rôle'        -InternalName 'Role'        -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Filière'     -InternalName 'Filiere'     -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Initiales'   -InternalName 'Initials'    -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Photo (URL)' -InternalName 'PhotoUrl'    -Type Hyperlink
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Téléphone'   -InternalName 'Phone'       -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'E-mail'      -InternalName 'Email'       -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'WhatsApp'    -InternalName 'WhatsApp'    -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Localisation' -InternalName 'Location'   -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Biographie'  -InternalName 'Bio'         -Type Note
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Spécialités' -InternalName 'Specialites' -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Certifications' -InternalName 'Certifications' -Type Text
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Profil LinkedIn' -InternalName 'LinkedIn' -Type Hyperlink
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Catégorie' -InternalName 'Categorie' -Type Choice `
-    -Choices @('Formateur','Permanent','Direction','Appui')
-Ensure-BbiField -List 'Formateurs' -DisplayName 'Ordre' -InternalName 'Ordre' -Type Number
-Ensure-BbiView  -List 'Formateurs' -Title 'Annuaire formateurs' -Fields @('Title','Role','Filiere','Phone','Email','Location') `
-    -Query '<OrderBy><FieldRef Name="Title"/></OrderBy>'
-
-# --- Employés du mois : IHomeEmployee { Title, Role, Pole, Month, Message, Highlights, PhotoUrl }
-Ensure-BbiList -Title 'Employés du mois' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Employés du mois' -DisplayName 'Poste'        -InternalName 'Role'       -Type Text
-Ensure-BbiField -List 'Employés du mois' -DisplayName 'Pôle'         -InternalName 'Pole'       -Type Text
-Ensure-BbiField -List 'Employés du mois' -DisplayName 'Mois'         -InternalName 'Month'      -Type Text
-Ensure-BbiField -List 'Employés du mois' -DisplayName 'En cours'     -InternalName 'IsCurrent'  -Type Boolean
-Ensure-BbiField -List 'Employés du mois' -DisplayName 'Motivation'   -InternalName 'Message'    -Type Note
-Ensure-BbiField -List 'Employés du mois' -DisplayName 'Faits marquants' -InternalName 'Highlights' -Type Text
-Ensure-BbiField -List 'Employés du mois' -DisplayName 'Photo (URL)'  -InternalName 'PhotoUrl'   -Type Hyperlink
-Ensure-BbiView  -List 'Employés du mois' -Title 'Mises à l''honneur' -Fields @('Title','Role','Pole','Month','IsCurrent') `
-    -Query '<OrderBy><FieldRef Name="Created" Ascending="FALSE"/></OrderBy>'
-
-# --- Certifications : IHomeCertification { Title, Issuer, Scope, ValidUntil, Status }
-Ensure-BbiList -Title 'Certifications' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Certifications' -DisplayName 'Organisme'   -InternalName 'Issuer'     -Type Text
-Ensure-BbiField -List 'Certifications' -DisplayName 'Périmètre'   -InternalName 'Scope'      -Type Note
-Ensure-BbiField -List 'Certifications' -DisplayName 'Valable jusqu''au' -InternalName 'ValidUntil' -Type DateTime
-Ensure-BbiField -List 'Certifications' -DisplayName 'Statut'      -InternalName 'Status'     -Type Text
-Ensure-BbiView  -List 'Certifications' -Title 'Certifications & agréments' -Fields @('Title','Issuer','ValidUntil','Status') `
-    -Query '<OrderBy><FieldRef Name="Created"/></OrderBy>'
-
-# --- Annonces : IHomeAnnouncement { Title, Message, Niveau, DateDebut, DateFin, LienUrl, Ordre }
-Ensure-BbiList -Title 'Annonces' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Annonces' -DisplayName 'Message'      -InternalName 'Message'   -Type Note
-Ensure-BbiField -List 'Annonces' -DisplayName 'Niveau'       -InternalName 'Niveau'    -Type Choice `
-    -Choices @('Information','Important','Urgent')
-Ensure-BbiField -List 'Annonces' -DisplayName 'Date de début' -InternalName 'DateDebut' -Type DateTime
-Ensure-BbiField -List 'Annonces' -DisplayName 'Date de fin'   -InternalName 'DateFin'   -Type DateTime
-Ensure-BbiField -List 'Annonces' -DisplayName 'Lien (URL)'    -InternalName 'LienUrl'   -Type Hyperlink
-Ensure-BbiField -List 'Annonces' -DisplayName 'Ordre'         -InternalName 'Ordre'     -Type Number
-Ensure-BbiView  -List 'Annonces' -Title 'Annonces actives' -Fields @('Title','Niveau','DateDebut','DateFin') `
-    -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
-
-# --- Pensées du jour : IHomeThought { Title (citation), Auteur, DatePublication, Contexte }
-Ensure-BbiList -Title 'Pensées du jour' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Pensées du jour' -DisplayName 'Auteur'            -InternalName 'Auteur'          -Type Text
-Ensure-BbiField -List 'Pensées du jour' -DisplayName 'Date de publication' -InternalName 'DatePublication' -Type DateTime
-Ensure-BbiField -List 'Pensées du jour' -DisplayName 'Contexte'          -InternalName 'Contexte'        -Type Text
-Ensure-BbiView  -List 'Pensées du jour' -Title 'Toutes les citations' -Fields @('Title','Auteur','DatePublication') `
-    -Query '<OrderBy><FieldRef Name="Title"/></OrderBy>'
-
-# --- Anniversaires : IHomeBirthday { Title (nom), Jour, Mois, Fonction, PhotoUrl, Message, Afficher }
-# RGPD : jour + mois uniquement — jamais l'année de naissance.
-Ensure-BbiList -Title 'Anniversaires' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Anniversaires' -DisplayName 'Jour'      -InternalName 'Jour'      -Type Number
-Ensure-BbiField -List 'Anniversaires' -DisplayName 'Mois'      -InternalName 'Mois'      -Type Number
-Ensure-BbiField -List 'Anniversaires' -DisplayName 'Fonction'  -InternalName 'Fonction'  -Type Text
-Ensure-BbiField -List 'Anniversaires' -DisplayName 'Photo (URL)' -InternalName 'PhotoUrl' -Type Hyperlink
-Ensure-BbiField -List 'Anniversaires' -DisplayName 'Message'   -InternalName 'Message'   -Type Text
-Ensure-BbiField -List 'Anniversaires' -DisplayName 'Afficher'  -InternalName 'Afficher'  -Type Boolean
-Ensure-BbiView  -List 'Anniversaires' -Title 'Tous les anniversaires' -Fields @('Title','Jour','Mois','Fonction') `
-    -Query '<OrderBy><FieldRef Name="Mois"/><FieldRef Name="Jour"/></OrderBy>'
-
-# --- Implantations : IHomeOffice { Title, EstSiege, Pays, Ville, Adresse, Telephone, Email, Responsable, LienCarte, Ordre }
-Ensure-BbiList -Title 'Implantations' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Implantations' -DisplayName 'Siège'        -InternalName 'EstSiege'    -Type Boolean
-Ensure-BbiField -List 'Implantations' -DisplayName 'Pays'         -InternalName 'Pays'        -Type Text
-Ensure-BbiField -List 'Implantations' -DisplayName 'Ville'        -InternalName 'Ville'       -Type Text
-Ensure-BbiField -List 'Implantations' -DisplayName 'Adresse'      -InternalName 'Adresse'     -Type Note
-Ensure-BbiField -List 'Implantations' -DisplayName 'Téléphone'    -InternalName 'Telephone'   -Type Text
-Ensure-BbiField -List 'Implantations' -DisplayName 'E-mail'       -InternalName 'Email'       -Type Text
-Ensure-BbiField -List 'Implantations' -DisplayName 'Responsable'  -InternalName 'Responsable' -Type Text
-Ensure-BbiField -List 'Implantations' -DisplayName 'Lien (carte)' -InternalName 'LienCarte'   -Type Hyperlink
-Ensure-BbiField -List 'Implantations' -DisplayName 'Ordre'        -InternalName 'Ordre'       -Type Number
-Ensure-BbiField -List 'Implantations' -DisplayName 'Site SharePoint' -InternalName 'SiteUrl'   -Type Hyperlink
-Ensure-BbiField -List 'Implantations' -DisplayName 'Couleur'         -InternalName 'Couleur'   -Type Text
-Ensure-BbiField -List 'Implantations' -DisplayName 'Initiales'       -InternalName 'Initiales' -Type Text
-Ensure-BbiView  -List 'Implantations' -Title 'Réseau complet' -Fields @('Title','EstSiege','Pays','Ville') `
-    -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
-
-# --- Nos références : IHomeClientReference { Title, LogoUrl, SiteWebUrl, Contact, Pays, Ville, Secteur, Ordre }
-Ensure-BbiList -Title 'Nos références' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Nos références' -DisplayName 'Logo (URL)'  -InternalName 'LogoUrl'    -Type Hyperlink
-Ensure-BbiField -List 'Nos références' -DisplayName 'Site web'    -InternalName 'SiteWebUrl' -Type Hyperlink
-Ensure-BbiField -List 'Nos références' -DisplayName 'Contact'     -InternalName 'Contact'    -Type Text
-Ensure-BbiField -List 'Nos références' -DisplayName 'Pays'        -InternalName 'Pays'       -Type Text
-Ensure-BbiField -List 'Nos références' -DisplayName 'Ville'       -InternalName 'Ville'      -Type Text
-Ensure-BbiField -List 'Nos références' -DisplayName 'Secteur'     -InternalName 'Secteur'    -Type Text
-Ensure-BbiField -List 'Nos références' -DisplayName 'Ordre'       -InternalName 'Ordre'      -Type Number
-Ensure-BbiView  -List 'Nos références' -Title 'Toutes les références' -Fields @('Title','Secteur','Pays','Ville') `
-    -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
-
-# --- Références pédagogiques : IHomePedagogicalReference { Title, Categorie, Auteur, Annee, LienUrl, Resume, Ordre }
-Ensure-BbiList -Title 'Références pédagogiques' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Catégorie' -InternalName 'Categorie' -Type Choice `
-    -Choices @('Ouvrage','Norme','Méthode','Étude','Outil')
-Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Auteur'    -InternalName 'Auteur'  -Type Text
-Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Année'     -InternalName 'Annee'   -Type Number
-Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Lien (URL)' -InternalName 'LienUrl' -Type Hyperlink
-Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Résumé'    -InternalName 'Resume'  -Type Note
-Ensure-BbiField -List 'Références pédagogiques' -DisplayName 'Ordre'     -InternalName 'Ordre'   -Type Number
-Ensure-BbiView  -List 'Références pédagogiques' -Title 'Toutes les références' -Fields @('Title','Categorie','Auteur','Annee') `
-    -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
-
-# --- Formations : IFormation { Title, CodeFormation, Filiere, Modalite, DureeH, Niveau, StatutCatalogue }
-Ensure-BbiList -Title 'Formations' -Template GenericList | Out-Null
-Ensure-BbiField -List 'Formations' -DisplayName 'Code formation' -InternalName 'CodeFormation'  -Type Text
-Ensure-BbiField -List 'Formations' -DisplayName 'Filière'        -InternalName 'Filiere'        -Type Text
-Ensure-BbiField -List 'Formations' -DisplayName 'Modalité'       -InternalName 'Modalite'       -Type Choice `
-    -Choices @('Présentiel','Distanciel','Hybride')
-Ensure-BbiField -List 'Formations' -DisplayName 'Durée (heures)' -InternalName 'DureeH'         -Type Number
-Ensure-BbiField -List 'Formations' -DisplayName 'Niveau'         -InternalName 'Niveau'         -Type Choice `
-    -Choices @('Débutant','Intermédiaire','Confirmé','Expert')
-Ensure-BbiField -List 'Formations' -DisplayName 'Statut catalogue' -InternalName 'StatutCatalogue' -Type Choice `
-    -Choices @('Actif','En refonte','Archivé')
-Ensure-BbiField -List 'Formations' -DisplayName 'Description'     -InternalName 'Description'   -Type Note
-Ensure-BbiField -List 'Formations' -DisplayName 'Objectifs pédagogiques' -InternalName 'Objectifs' -Type Note
-Ensure-BbiField -List 'Formations' -DisplayName 'Programme'        -InternalName 'Programme'     -Type Note
-Ensure-BbiField -List 'Formations' -DisplayName 'Prérequis'        -InternalName 'Prerequis'     -Type Note
-Ensure-BbiField -List 'Formations' -DisplayName 'Public visé'      -InternalName 'PublicVise'    -Type Text
-Ensure-BbiField -List 'Formations' -DisplayName 'Formateurs référents' -InternalName 'FormateursReferents' -Type Text
-Ensure-BbiField -List 'Formations' -DisplayName 'Contact pédagogique'  -InternalName 'ContactReferent'     -Type Text
-Ensure-BbiView  -List 'Formations' -Title 'Catalogue actif' -Fields @('Title','CodeFormation','Filiere','Modalite','DureeH','Niveau') `
-    -Query '<Where><Eq><FieldRef Name="StatutCatalogue"/><Value Type="Text">Actif</Value></Eq></Where><OrderBy><FieldRef Name="Title"/></OrderBy>'
-Ensure-BbiView  -List 'Formations' -Title 'Par filière' -Fields @('Title','CodeFormation','Filiere','Modalite') `
-    -Query '<OrderBy><FieldRef Name="Filiere"/><FieldRef Name="Title"/></OrderBy>'
+Invoke-BbiSiteProvisioning -TargetUrl $SiteUrl -DataUrl $script:DataSiteUrl -SeedDemo:$SeedDemoData
 
 # ==================================================================
-# 3. BIBLIOTHÈQUES DOCUMENTAIRES
+# 6/10 · Hub et filiales : voir -ProvisionFiliales (ajouté séparément)
 # ==================================================================
-Write-Title "3/9 · Bibliothèques"
-
-# --- Supports publiés (lecture seule côté apprenants)
-Ensure-BbiList -Title 'Supports publiés' -Template DocumentLibrary | Out-Null
-Ensure-BbiField -List 'Supports publiés' -DisplayName 'Code formation' -InternalName 'CodeFormation' -Type Text
-Ensure-BbiField -List 'Supports publiés' -DisplayName 'Type de support' -InternalName 'TypeSupport'  -Type Choice `
-    -Choices @('Slides animateur','Manuel participant','Exercices','Évaluation','Vidéo','Modèle')
-Ensure-BbiField -List 'Supports publiés' -DisplayName 'Statut' -InternalName 'StatutSupport' -Type Choice `
-    -Choices @('Brouillon','À valider','Publié','À réviser')
-Ensure-BbiField -List 'Supports publiés' -DisplayName 'Date de validité' -InternalName 'DateValidite' -Type DateTime
-Ensure-BbiField -List 'Supports publiés' -DisplayName 'Formateur auteur' -InternalName 'FormateurAuteur' -Type Text
-Ensure-BbiView  -List 'Supports publiés' -Title 'Récemment publiés' -Fields @('DocIcon','Title','CodeFormation','TypeSupport','Modified') `
-    -Query '<OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy>' -RowLimit 10
-Ensure-BbiView  -List 'Supports publiés' -Title 'Par formation' -Fields @('DocIcon','Title','TypeSupport','StatutSupport','Modified') `
-    -Query '<OrderBy><FieldRef Name="CodeFormation"/><FieldRef Name="Title"/></OrderBy>'
-
-# --- Galerie médias (bibliothèque d'images alimentant la web part BBI Galerie médias)
-Ensure-BbiList -Title 'Galerie médias' -Template PictureLibrary | Out-Null
-Ensure-BbiField -List 'Galerie médias' -DisplayName 'Album'    -InternalName 'Album'     -Type Choice `
-    -Choices @('Sessions de formation','Vie BBI','Certifications','Coulisses','Événements')
-Ensure-BbiField -List 'Galerie médias' -DisplayName 'Lieu'      -InternalName 'Lieu'      -Type Text
-Ensure-BbiField -List 'Galerie médias' -DisplayName 'Crédit photo' -InternalName 'Credit' -Type Text
-Ensure-BbiField -List 'Galerie médias' -DisplayName 'Date de la photo' -InternalName 'DatePhoto' -Type DateTime
-Ensure-BbiField -List 'Galerie médias' -DisplayName 'Lien vidéo (URL)' -InternalName 'LienVideo' -Type Hyperlink
-Ensure-BbiView  -List 'Galerie médias' -Title 'Albums' -Fields @('DocIcon','Title','Album','Lieu','DatePhoto') `
-    -Query '<OrderBy><FieldRef Name="Album"/><FieldRef Name="DatePhoto" Ascending="FALSE"/></OrderBy>'
-Ensure-BbiView  -List 'Galerie médias' -Title 'Derniers ajouts' -Fields @('DocIcon','Title','Album','Lieu','Modified') `
-    -Query '<OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy>'
-
-# --- Documents administratifs : IHomeAdminDocument { Title, Categorie, Public, Reference, DateValidite }
-# Bibliothèque distincte de « Supports publiés » (pédagogique) : RH, juridique, finance, qualité, modèles.
-Ensure-BbiList -Title 'Documents administratifs' -Template DocumentLibrary | Out-Null
-Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Catégorie' -InternalName 'Categorie' -Type Choice `
-    -Choices @('RH','Juridique','Finance','Qualité','Modèles')
-Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Public' -InternalName 'Public' -Type Choice `
-    -Choices @('Tous','Formateurs','Direction')
-Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Référence' -InternalName 'Reference' -Type Text
-Ensure-BbiField -List 'Documents administratifs' -DisplayName 'Date de validité' -InternalName 'DateValidite' -Type DateTime
-Ensure-BbiView  -List 'Documents administratifs' -Title 'Récemment publiés' -Fields @('DocIcon','Title','Categorie','Public','Modified') `
-    -Query '<OrderBy><FieldRef Name="Modified" Ascending="FALSE"/></OrderBy>' -RowLimit 12
-Ensure-BbiView  -List 'Documents administratifs' -Title 'Par catégorie' -Fields @('DocIcon','Title','Categorie','Reference','Modified') `
-    -Query '<OrderBy><FieldRef Name="Categorie"/><FieldRef Name="Title"/></OrderBy>'
-
-# ==================================================================
-# 4. SÉCURISATION DE LA BIBLIOTHÈQUE « SUPPORTS PUBLIÉS »
-# ==================================================================
-Write-Title "4/9 · Sécurité documentaire (lecture seule par défaut)"
-if ($DryRun -or $VerifyOnly) {
-    Write-Step "[SIMULATION] héritage rompu sur « Supports publiés » + contribution réservée à $EditorsGroup"
-} else {
-    try {
-        Set-PnPList -Identity 'Supports publiés' -BreakRoleInheritance -CopyRoleAssignments | Out-Null
-        Write-Ok "Héritage rompu : les apprenants conservent la Lecture."
-        try {
-            Set-PnPListPermission -List 'Supports publiés' -Identity 'Membres du site' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
-            Set-PnPListPermission -List 'Supports publiés' -Identity 'Visiteurs' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
-        } catch { Write-Warn2 "Ajustement des rôles par défaut ignoré : $($_.Exception.Message)" }
-        try {
-            Set-PnPListPermission -List 'Supports publiés' -Identity $EditorsGroup -AddRole 'Contribute'
-            Write-Ok "Contribution limitée au groupe « $EditorsGroup »."
-        } catch {
-            Write-Warn2 "Groupe « $EditorsGroup » introuvable : accordez la contribution manuellement (Paramètres de la bibliothèque > Autorisations)."
-        }
-        Add-Report 'Sécurité « Supports publiés »' 'OK'
-    } catch {
-        Write-Warn2 "Sécurité non appliquée automatiquement : $($_.Exception.Message)"
-        Add-Report 'Sécurité « Supports publiés »' 'À FAIRE' 'Voir README § Sécurité'
-    }
-}
-
-# ==================================================================
-# 5. PAGES + WEB PARTS
-# ==================================================================
-Write-Title "5/9 · Pages et web parts"
-Write-Step "Astuce : les propriétés ci-dessous correspondent aux réglages recommandés (modifiables ensuite dans le volet Propriétés)."
-
-$homeProps = @{
-    siteUrl               = $script:DataSiteUrl
-    newsListTitle         = 'Actualites'
-    sessionsListTitle     = 'Sessions'
-    trainersListTitle     = 'Formateurs'
-    formationsListTitle   = 'Formations'
-    documentsLibraryTitle = 'Supports publiés'
-    galleryLibraryTitle   = 'Galerie médias'
-    employeeListTitle     = 'Employés du mois'
-    certificationsListTitle = 'Certifications'
-    announcementsListTitle = 'Annonces'
-    thoughtsListTitle     = 'Pensées du jour'
-    birthdaysListTitle    = 'Anniversaires'
-    officesListTitle      = 'Implantations'
-    clientReferencesListTitle = 'Nos références'
-    pedagogicalReferencesListTitle = 'Références pédagogiques'
-    adminDocumentsLibraryTitle = 'Documents administratifs'
-    maxItems              = 6
-    enableGallery         = $true
-    enableAnnouncement    = $true
-    layoutCompact         = $false
-    heroEyebrow           = 'Business Builders International'
-    heroTitle             = "L'expertise qui fait grandir les dirigeants."
-    heroSubtitle          = "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables."
-    heroSlides            = " | Business Builders International | L'expertise qui fait grandir les dirigeants. | Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables. | Explorer les formations | #formations`n | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions`n | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir nos implantations | #implantations`n | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe"
-    primaryCtaLabel       = 'Explorer les formations'
-    primaryCtaUrl         = '#formations'
-    secondaryCtaLabel     = 'Voir les prochaines sessions'
-    secondaryCtaUrl       = '#sessions'
-    navLinks              = "# Accueil | #accueil`n# Formations | #formations`n# Sessions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
-    quickLinks            = "▦ | Catalogue des formations | Parcours, modalités et durées | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
-    kpis                  = "1 500+ | Professionnels accompagnés`n10+ | Formations au catalogue`n9 | Pays couverts par le réseau`n96 % | De satisfaction constatée"
-} | ConvertTo-Json -Compress
-
-# --- Page d'accueil : page APPLICATIVE (aucun en-tête, aucune navigation)
-Ensure-BbiPage -Name 'accueil' -Title 'Accueil' -LayoutType 'SingleWebPartAppPage' | Out-Null
-Ensure-BbiWebPart -Page 'accueil.aspx' -ComponentId $WP_HOME -PropertiesJson $homeProps -Name 'BBI Accueil (plein écran)'
-
-# --- Le portail utilise une seule page SharePoint : les destinations du menu
-#     (formations, sessions, actualités, ressources, communauté) sont des vues
-#     internes pilotées par la web part BBI Accueil, sans pages .aspx séparées.
-
-# --- Page d'accueil du site = accueil.aspx
-if (-not $DryRun -and -not $VerifyOnly) {
-    Invoke-Bbi "Définition de accueil.aspx comme page d'accueil du site" {
-        Set-PnPHomePage -RootFolderRelativeUrl 'SitePages/accueil.aspx'
-    } | Out-Null
-    Add-Report 'Page d''accueil du site' 'OK'
-}
-
-# --- Extension « BBI Plein écran » : rend la page applicative réellement bord à bord
-Ensure-BbiCustomAction -Name 'BbiFullScreen' -Title 'BBI Plein écran' -ComponentId $EXT_FULLSCREEN `
-    -PropertiesJson (@{
-        mode            = 'appPage'
-        edgeToEdge      = $true
-        hidePageTitle   = $true
-        hideCommandBar  = $false
-    } | ConvertTo-Json -Compress)
 
 # ==================================================================
 # 6. THÈME, EN-TÊTE, LOGO
 # ==================================================================
-Write-Title "6/9 · Identité visuelle"
+Write-Title "7/10 · Identité visuelle"
 $palette = @{
     'themePrimary'     = '#0E265C'
     'themeLighterAlt'  = '#F4F6FA'
@@ -764,7 +795,7 @@ if ($DryRun -or $VerifyOnly) {
 # ==================================================================
 # 7. NAVIGATION DU SITE
 # ==================================================================
-Write-Title "7/9 · Navigation"
+Write-Title "8/10 · Navigation"
 # Retire les anciens raccourcis du menu qui menaient vers des pages .aspx séparées.
 if (-not $DryRun -and -not $VerifyOnly) {
     $legacyNavTitles = @('Catalogue', 'Sessions', 'Galerie', "Vie d'entreprise", 'Support')
@@ -782,7 +813,7 @@ Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
 # 8. DONNÉES D'EXEMPLE
 # ==================================================================
 if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
-    Write-Title "8/9 · Données d'exemple"
+    Write-Title "9/10 · Données d'exemple"
     $today = Get-Date
 
     # Actualités
@@ -977,7 +1008,7 @@ foreach ($check in $optionalChecks) {
     }
 }
 
-Write-Title "9/9 · Rapport"
+Write-Title "10/10 · Rapport"
 if ($VerifyOnly -or $DryRun) {
     $missing = $script:Report | Where-Object { $_.Statut -eq 'MANQUANT' }
     if ($missing.Count -eq 0) {
