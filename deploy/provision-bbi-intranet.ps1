@@ -12,7 +12,9 @@
       5. vues internes Catalogue, Sessions, Actualités, Ressources et Communauté ;
       6. extension « BBI Plein écran » (bord à bord) via une Custom Action ;
       7. thème « BBI Bleu nuit », logo, en-tête, navigation et pied de page ;
-      8. jeu de données d'exemple (optionnel) pour valider immédiatement.
+      8. jeu de données d'exemple (optionnel) pour valider immédiatement ;
+      9. hub et filiales (optionnel, -ProvisionFiliales) : site hub, un site d'équipe par
+         filiale de la liste « Implantations », portail BBI sur chacun et navigation hub.
 
     Le script est IDEMPOTENT : relancez-le autant de fois que nécessaire, il ne recrée
     pas ce qui existe déjà. Utilisez -DryRun pour simuler sans rien modifier.
@@ -31,6 +33,9 @@
 
     # Audit uniquement : vérifie que tout est conforme au code SPFx
     .\provision-bbi-intranet.ps1 -VerifyOnly
+
+    # Hub et filiales : simulation (sites d'équipe, rattachement au hub, navigation)
+    .\provision-bbi-intranet.ps1 -ProvisionFiliales -DryRun
 
     # Autre site que celui par défaut (bbi-environnement.json)
     .\provision-bbi-intranet.ps1 -SiteUrl https://businessbuilderinter.sharepoint.com/sites/un-autre-site
@@ -65,7 +70,10 @@ param(
     [switch]$DryRun,
 
     # Vérifie la configuration et affiche un rapport, sans rien modifier
-    [switch]$VerifyOnly
+    [switch]$VerifyOnly,
+
+    # Hub : enregistre le site comme hub, crée un site d'équipe par filiale (liste Implantations) et y déploie le portail
+    [switch]$ProvisionFiliales
 )
 
 $ErrorActionPreference = 'Stop'
@@ -97,6 +105,10 @@ if (-not $DataSiteUrl) {
 if (-not $EditorsGroup) {
     if ($BbiEnv -and $BbiEnv.editorsGroup) { $EditorsGroup = "$($BbiEnv.editorsGroup)" } else { $EditorsGroup = 'BBI-Concepteurs' }
 }
+$HubEnabled = $true
+if ($BbiEnv -and $null -ne $BbiEnv.hubEnabled) { $HubEnabled = [bool]$BbiEnv.hubEnabled }
+$FilialePrefix = 'intranet-'
+if ($BbiEnv -and $BbiEnv.filialeSitePrefix) { $FilialePrefix = "$($BbiEnv.filialeSitePrefix)" }
 
 $script:DataSiteUrl = $DataSiteUrl
 $script:Changes = 0
@@ -409,7 +421,7 @@ function Invoke-BbiSiteProvisioning {
         # ==================================================================
         # 2. LISTES MÉTIER (colonnes attendues par le code SPFx)
         # ==================================================================
-        Write-Title "$StepPrefix 2/10 · Listes métier"
+        Write-Title "${StepPrefix}2/10 · Listes métier"
 
         # --- Actualités : IHomeNews { Title, Summary, Category, Published, AuthorName, ImageUrl, LinkUrl }
         Ensure-BbiList -Title 'Actualites' -Template GenericList | Out-Null
@@ -579,7 +591,7 @@ function Invoke-BbiSiteProvisioning {
         # ==================================================================
         # 3. BIBLIOTHÈQUES DOCUMENTAIRES
         # ==================================================================
-        Write-Title "$StepPrefix 3/10 · Bibliothèques"
+        Write-Title "${StepPrefix}3/10 · Bibliothèques"
 
         # --- Supports publiés (lecture seule côté apprenants)
         Ensure-BbiList -Title 'Supports publiés' -Template DocumentLibrary | Out-Null
@@ -625,7 +637,7 @@ function Invoke-BbiSiteProvisioning {
         # ==================================================================
         # 4. SÉCURISATION DE LA BIBLIOTHÈQUE « SUPPORTS PUBLIÉS »
         # ==================================================================
-        Write-Title "$StepPrefix 4/10 · Sécurité documentaire (lecture seule par défaut)"
+        Write-Title "${StepPrefix}4/10 · Sécurité documentaire (lecture seule par défaut)"
         if ($DryRun -or $VerifyOnly) {
             Write-Step "[SIMULATION] héritage rompu sur « Supports publiés » + contribution réservée à $EditorsGroup"
         } else {
@@ -652,7 +664,7 @@ function Invoke-BbiSiteProvisioning {
         # ==================================================================
         # 5. PAGES + WEB PARTS
         # ==================================================================
-        Write-Title "$StepPrefix 5/10 · Pages et web parts"
+        Write-Title "${StepPrefix}5/10 · Pages et web parts"
         Write-Step "Astuce : les propriétés ci-dessous correspondent aux réglages recommandés (modifiables ensuite dans le volet Propriétés)."
 
         $homeProps = @{
@@ -736,11 +748,103 @@ if ($script:DataSiteUrl -ne $SiteUrl) {
 Invoke-BbiSiteProvisioning -TargetUrl $SiteUrl -DataUrl $script:DataSiteUrl -SeedDemo:$SeedDemoData
 
 # ==================================================================
-# 6/10 · Hub et filiales : voir -ProvisionFiliales (ajouté séparément)
+# 6. HUB ET SITES DE FILIALE (liste Implantations → un site d'équipe par filiale)
 # ==================================================================
+if ($ProvisionFiliales) {
+    Write-Title "6/10 · Hub et filiales"
+    if (-not $HubEnabled) {
+        Write-Warn2 "hubEnabled = false dans bbi-environnement.json : section ignorée."
+    } else {
+        $hubUrl = $SiteUrl.TrimEnd('/')
+        if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-PnPOnline -Url $hubUrl -Interactive }
+
+        # 6.1 Hub
+        $hub = Get-PnPHubSite -Identity $hubUrl -ErrorAction SilentlyContinue
+        if ($hub) {
+            Write-Skip "Site hub $hubUrl"
+            Add-Report 'Site hub' 'OK'
+        } else {
+            Invoke-Bbi "Enregistrement de $hubUrl comme site hub" {
+                Register-PnPHubSite -Site $hubUrl | Out-Null
+            } | Out-Null
+            Add-Report 'Site hub' ($(if ($DryRun -or $VerifyOnly) { 'MANQUANT' } else { 'CRÉÉ' }))
+        }
+
+        # 6.2 Filiales
+        $tenantRoot = ([uri]$hubUrl).GetLeftPart([UriPartial]::Authority)
+        $rows = Get-PnPListItem -List 'Implantations' -PageSize 200 |
+            Where-Object { -not [bool]$_['EstSiege'] } |
+            Sort-Object { [int]($_['Ordre'] ?? 9999) }
+        if (-not $rows) { Write-Warn2 "Aucune filiale dans « Implantations » (lignes avec Siège décoché)." }
+
+        $hubRow = Get-PnPListItem -List 'Implantations' -PageSize 200 | Where-Object { [bool]$_['EstSiege'] } | Select-Object -First 1
+        if ($hubRow -and -not $hubRow['SiteUrl']) {
+            Invoke-Bbi "Siège : SiteUrl ← $hubUrl" { Set-PnPListItem -List 'Implantations' -Identity $hubRow.Id -Values @{ SiteUrl = "$hubUrl, $($hubRow['Title'])" } | Out-Null } | Out-Null
+        }
+
+        $filialeSites = @()
+        foreach ($row in $rows) {
+            $title = "$($row['Title'])"
+            $slug  = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value "$($row['Ville'])"
+            if (-not $slug) { $slug = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value $title }
+            if (-not $slug) { Write-Warn2 "Ligne $($row.Id) « $title » : ni Ville ni Titre exploitable, ignorée."; continue }
+            $url = "$tenantRoot/sites/$slug"
+
+            $existing = Get-PnPTenantSite -Url $url -ErrorAction SilentlyContinue
+            if ($existing) {
+                Write-Skip "Site $url"
+                Add-Report "Site filiale $title" 'OK' $url
+            } else {
+                Invoke-Bbi "Création du site d'équipe « $title » ($url)" {
+                    New-PnPSite -Type TeamSite -Title $title -Alias $slug -IsPublic:$false -Lcid 1036 | Out-Null
+                } | Out-Null
+                Add-Report "Site filiale $title" ($(if ($DryRun -or $VerifyOnly) { 'MANQUANT' } else { 'CRÉÉ' })) $url
+            }
+
+            if (-not $DryRun -and -not $VerifyOnly) {
+                Invoke-Bbi "Rattachement de $url au hub" {
+                    Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl
+                } | Out-Null
+                $current = "$($row['SiteUrl'])"
+                if ($current -notlike "$url*") {
+                    Invoke-Bbi "« $title » : SiteUrl ← $url" {
+                        Set-PnPListItem -List 'Implantations' -Identity $row.Id -Values @{ SiteUrl = "$url, $title" } | Out-Null
+                    } | Out-Null
+                }
+            } else {
+                Write-Step "[SIMULATION] rattachement au hub + écriture de SiteUrl pour « $title »"
+            }
+            $filialeSites += [pscustomobject]@{ Title = $title; Url = $url; Ordre = [int]($row['Ordre'] ?? 9999) }
+        }
+
+        # 6.3 Portail sur chaque filiale (listes vides → repli démo côté web part)
+        $editors = @()
+        try { $editors = Get-PnPGroupMember -Group $EditorsGroup -ErrorAction Stop } catch { Write-Warn2 "Groupe « $EditorsGroup » introuvable sur le hub : membres non recopiés." }
+        foreach ($site in $filialeSites) {
+            if ($DryRun -or $VerifyOnly) {
+                Write-Step "[SIMULATION] portail BBI sur $($site.Url) (listes, bibliothèques, page accueil.aspx, web part)"
+                continue
+            }
+            Invoke-BbiSiteProvisioning -TargetUrl $site.Url -DataUrl $site.Url -SeedDemo:$false -StepPrefix "[$($site.Title)] "
+            $members = Get-PnPGroup -AssociatedMemberGroup
+            foreach ($m in $editors) {
+                Invoke-Bbi "« $($site.Title) » : $($m.LoginName) ← Membres" {
+                    Add-PnPGroupMember -LoginName $m.LoginName -Group $members -ErrorAction SilentlyContinue
+                } | Out-Null
+            }
+        }
+
+        # 6.4 Navigation hub (= navigation supérieure du site hub) : siège puis filiales par Ordre
+        Connect-PnPOnline -Url $hubUrl -Interactive
+        Ensure-BbiNavNode -Title 'Siège' -Url "$hubUrl/SitePages/accueil.aspx"
+        foreach ($site in ($filialeSites | Sort-Object Ordre)) {
+            Ensure-BbiNavNode -Title $site.Title -Url "$($site.Url)/SitePages/accueil.aspx"
+        }
+    }
+}
 
 # ==================================================================
-# 6. THÈME, EN-TÊTE, LOGO
+# 7. THÈME, EN-TÊTE, LOGO
 # ==================================================================
 Write-Title "7/10 · Identité visuelle"
 $palette = @{
@@ -793,7 +897,7 @@ if ($DryRun -or $VerifyOnly) {
 }
 
 # ==================================================================
-# 7. NAVIGATION DU SITE
+# 8. NAVIGATION DU SITE
 # ==================================================================
 Write-Title "8/10 · Navigation"
 # Retire les anciens raccourcis du menu qui menaient vers des pages .aspx séparées.
@@ -810,7 +914,7 @@ Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
 # Le portail est mono-page : les autres vues sont des ancres/routes internes.
 
 # ==================================================================
-# 8. DONNÉES D'EXEMPLE
+# 9. DONNÉES D'EXEMPLE
 # ==================================================================
 if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
     Write-Title "9/10 · Données d'exemple"
@@ -968,7 +1072,7 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
 }
 
 # ==================================================================
-# 9. RAPPORT
+# 10. RAPPORT
 # ==================================================================
 # Contrôle des colonnes optionnelles attendues par les modèles de page
 Write-Title "Contrôle des colonnes optionnelles (modèles de page)"
@@ -1025,6 +1129,9 @@ Write-Host ""
 Write-Host "Composants attendus sur le site (solution bbi-intranet 1.3.0.0) :" -ForegroundColor White
 Write-Host "  Accueil plein écran · Catalogue · Fiche formation (modèle) · Sessions & inscriptions ·" -ForegroundColor Gray
 Write-Host "  Article d'actualité (modèle) · Galerie médias · Supports publiés · extension BBI Plein écran" -ForegroundColor Gray
+if ($ProvisionFiliales) {
+    Write-Host "Hub et filiales : relancez avec -VerifyOnly -ProvisionFiliales pour auditer ; ajoutez une ligne dans « Implantations » puis relancez pour créer un nouveau site." -ForegroundColor Gray
+}
 Write-Host ""
 Write-Host "Étapes suivantes recommandées :" -ForegroundColor White
 Write-Host "  1. Activez les étiquettes de confidentialité + IRM « afficher uniquement » sur « Supports publiés »." -ForegroundColor Gray
