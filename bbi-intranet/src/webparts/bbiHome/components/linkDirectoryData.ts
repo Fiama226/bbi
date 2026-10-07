@@ -27,11 +27,14 @@ const PEDAGOGICAL_ICONS: { [category: string]: string } = {
 };
 const GENERIC_ICON = "📄";
 
+const extensionOf = (fileName: string): string => {
+  const parts = (fileName || "").split(".");
+  return parts.length > 1 ? (parts.pop() || "").toLowerCase() : "";
+};
+
 /** Icône selon l'extension du fichier ; générique si inconnue ou absente. */
 export const iconForFile = (fileName: string): string => {
-  const parts = (fileName || "").split(".");
-  const ext = parts.length > 1 ? (parts.pop() || "").toLowerCase() : "";
-  switch (ext) {
+  switch (extensionOf(fileName)) {
     case "pdf":
       return "📕";
     case "doc":
@@ -70,6 +73,43 @@ const groupBy = <T>(
   return [...known, ...extra, ...tail].map((title) => ({ title, items: buckets.get(title)! }));
 };
 
+/** Fichiers Office ouverts dans le navigateur (?web=1) plutôt que téléchargés. */
+const OFFICE_EXTENSIONS = ["doc", "docx", "xls", "xlsx", "ppt", "pptx"];
+
+const formatDate = (iso?: string): string => {
+  if (!iso) {
+    return "";
+  }
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+  return new Intl.DateTimeFormat("fr-FR", { day: "2-digit", month: "short", year: "numeric" }).format(date);
+};
+
+/** Lien d'un document : aucun pour une démo (« # ») ou une URL refusée ; ?web=1 pour Office. */
+const documentHref = (doc: IHomeAdminDocument): string | undefined => {
+  const ref = (doc.FileRef || "").trim();
+  if (!ref || ref === "#") {
+    return undefined;
+  }
+  const href = safeHref(ref);
+  if (!href) {
+    return undefined;
+  }
+  const ext = extensionOf(doc.FileLeafRef || ref);
+  if (OFFICE_EXTENSIONS.indexOf(ext) === -1) {
+    return href;
+  }
+  return `${href}${href.indexOf("?") === -1 ? "?" : "&"}web=1`;
+};
+
+const documentHint = (doc: IHomeAdminDocument): string => {
+  const base = doc.Reference || doc.FileLeafRef;
+  const validity = formatDate(doc.DateValidite);
+  return validity ? `${base} · valide jusqu'au ${validity}` : base;
+};
+
 export const adminDocumentsToGroups = (docs: IHomeAdminDocument[]): ILinkGroup[] =>
   groupBy(
     docs,
@@ -79,8 +119,8 @@ export const adminDocumentsToGroups = (docs: IHomeAdminDocument[]): ILinkGroup[]
       key: `doc-${d.Id}`,
       icon: iconForFile(d.FileLeafRef),
       label: d.Title || d.FileLeafRef,
-      href: safeHref(d.FileRef),
-      hint: d.Reference || d.FileLeafRef
+      href: documentHref(d),
+      hint: documentHint(d)
     })
   );
 

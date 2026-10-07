@@ -1458,8 +1458,19 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 </a>
               </div>
               <LazyMount active={activeView === "accueil"} minHeight={210}>
-                <TrainingCatalog {...catalogProps} />
+                <TrainingCatalog {...catalogProps} maxItems={6} />
               </LazyMount>
+              <p>
+                <a
+                  className={styles.textLink}
+                  href="#formations"
+                  onClick={(event) => {
+                    followPortalLink(event, "#formations");
+                  }}
+                >
+                  Voir tout le catalogue <span aria-hidden="true">→</span>
+                </a>
+              </p>
             </div>
           </div>
         </section>

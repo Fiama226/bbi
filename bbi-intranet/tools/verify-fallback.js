@@ -1156,12 +1156,24 @@ async function testLinkDirectory() {
   const autres = mixed.filter((g) => g.title === 'Autres')[0];
   const finance = mixed.filter((g) => g.title === 'Finance')[0];
   check('annuaire documents — catégorie vide → « Autres »', !!autres && autres.items[0].label === 'Sans catégorie');
-  check('annuaire documents — extension inconnue → icône générique', finance.items[0].icon === iconForFile('readme'));
+  check('annuaire documents — extension inconnue → icône générique', finance.items[0].icon === '📄');
+  check('icône fichier — sans extension → icône générique', iconForFile('readme') === '📄');
   check('annuaire documents — href dangereux → tuile sans lien', finance.items[1].href === undefined);
   check('annuaire documents — href sûr conservé', typeof finance.items[0].href === 'string' && finance.items[0].href.indexOf('b.zip') !== -1);
   check('annuaire documents — indice = référence ou nom de fichier', finance.items[0].hint === 'b.zip');
   check('icône fichier — pdf / docx / xlsx / pptx distinctes',
     new Set(['a.pdf', 'b.docx', 'c.xlsx', 'd.pptx'].map(iconForFile)).size === 4);
+  check('annuaire documents — démo (FileRef « # ») → tuiles sans lien',
+    docGroups.every((g) => g.items.every((item) => item.href === undefined)));
+  const office = adminDocumentsToGroups([
+    { Id: 5, Title: 'Contrat', FileRef: '/sites/intranet/Docs/contrat.docx', FileLeafRef: 'contrat.docx', Categorie: 'RH' },
+    { Id: 6, Title: 'Charte', FileRef: '/sites/intranet/Docs/charte.pdf', FileLeafRef: 'charte.pdf', Categorie: 'RH' },
+    { Id: 7, Title: 'Agrément', FileRef: '/sites/intranet/Docs/agrement.pdf', FileLeafRef: 'agrement.pdf', Categorie: 'RH', Reference: 'QUA-01', DateValidite: '2027-03-31T00:00:00Z' }
+  ])[0].items;
+  check('annuaire documents — .docx ouvert dans le navigateur (?web=1)', typeof office[0].href === 'string' && office[0].href.slice(-6) === "?web=1");
+  check('annuaire documents — .pdf sans ?web=1', typeof office[1].href === 'string' && office[1].href.indexOf('web=1') === -1);
+  check("annuaire documents — DateValidite → « valide jusqu'au » dans l'indice",
+    typeof office[2].hint === 'string' && office[2].hint.indexOf("valide jusqu'au") !== -1 && office[2].hint.indexOf('QUA-01') === 0);
 
   const refGroups = pedagogicalReferencesToGroups(DEMO_PEDAGOGICAL_REFERENCES);
   check('annuaire références — ordre Ouvrage, Norme, Méthode, Étude, Outil',
