@@ -1130,6 +1130,49 @@ async function testPortalSearch() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Annuaires de liens (tuiles icône + libellé)                          */
+/* ------------------------------------------------------------------ */
+async function testLinkDirectory() {
+  console.log('\nAnnuaires de liens');
+  const { adminDocumentsToGroups, pedagogicalReferencesToGroups, iconForFile } = loadTsModule(
+    'src/webparts/bbiHome/components/linkDirectoryData.ts'
+  );
+  const { DEMO_ADMIN_DOCUMENTS, DEMO_PEDAGOGICAL_REFERENCES } = loadTsModule(
+    'src/webparts/bbiHome/components/homeData.ts'
+  );
+
+  check('annuaire — liste vide → aucun groupe', adminDocumentsToGroups([]).length === 0 && pedagogicalReferencesToGroups([]).length === 0);
+
+  const docGroups = adminDocumentsToGroups(DEMO_ADMIN_DOCUMENTS);
+  check('annuaire documents — groupes par catégorie', docGroups.length >= 4 && docGroups.every((g) => g.items.length > 0));
+  check('annuaire documents — ordre des catégories métier (RH en premier)', docGroups[0].title === 'RH');
+
+  const mixed = adminDocumentsToGroups([
+    { Id: 1, Title: 'Sans catégorie', FileRef: '/sites/intranet/Docs/a.pdf', FileLeafRef: 'a.pdf' },
+    { Id: 2, Title: 'Archive', FileRef: '/sites/intranet/Docs/b.zip', FileLeafRef: 'b.zip', Categorie: 'Finance' },
+    { Id: 3, Title: 'Piégé', FileRef: 'javascript:alert(1)', FileLeafRef: 'x.pdf', Categorie: 'Finance' },
+    { Id: 4, Title: 'Sans extension', FileRef: '/sites/intranet/Docs/readme', FileLeafRef: 'readme', Categorie: 'Finance' }
+  ]);
+  const autres = mixed.filter((g) => g.title === 'Autres')[0];
+  const finance = mixed.filter((g) => g.title === 'Finance')[0];
+  check('annuaire documents — catégorie vide → « Autres »', !!autres && autres.items[0].label === 'Sans catégorie');
+  check('annuaire documents — extension inconnue → icône générique', finance.items[0].icon === iconForFile('readme'));
+  check('annuaire documents — href dangereux → tuile sans lien', finance.items[1].href === undefined);
+  check('annuaire documents — href sûr conservé', typeof finance.items[0].href === 'string' && finance.items[0].href.indexOf('b.zip') !== -1);
+  check('annuaire documents — indice = référence ou nom de fichier', finance.items[0].hint === 'b.zip');
+  check('icône fichier — pdf / docx / xlsx / pptx distinctes',
+    new Set(['a.pdf', 'b.docx', 'c.xlsx', 'd.pptx'].map(iconForFile)).size === 4);
+
+  const refGroups = pedagogicalReferencesToGroups(DEMO_PEDAGOGICAL_REFERENCES);
+  check('annuaire références — ordre Ouvrage, Norme, Méthode, Étude, Outil',
+    refGroups.map((g) => g.title).join(',') === 'Ouvrage,Norme,Méthode,Étude,Outil');
+  check('annuaire références — sans LienUrl → tuile sans lien', refGroups[0].items[0].href === undefined);
+  check('annuaire références — indice = auteur · année', refGroups[0].items[0].hint === 'Stephen Covey · 1989');
+  const withLink = pedagogicalReferencesToGroups([{ Id: 9, Title: 'X', Categorie: 'Inconnue', LienUrl: 'https://example.org/x' }]);
+  check('annuaire références — catégorie inconnue placée après les connues', withLink[0].title === 'Inconnue' && withLink[0].items[0].href === 'https://example.org/x');
+}
+
+/* ------------------------------------------------------------------ */
 (async () => {
   console.log('BBI — vérification des contenus de repli (production ready)');
   console.log('Aucune source SharePoint disponible : les pages doivent rester complètes.');
@@ -1146,6 +1189,7 @@ async function testPortalSearch() {
   await testOfficesAndReferences();
   await testSessionsCalendar();
   await testPortalSearch();
+  await testLinkDirectory();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);
 })();
