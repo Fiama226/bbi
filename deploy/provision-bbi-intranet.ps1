@@ -23,6 +23,8 @@
     PnP.PowerShell 2.x :  Install-Module PnP.PowerShell -Scope CurrentUser
     Droits : administrateur SharePoint (propriétaire du site au minimum).
     La solution bbi-intranet.sppkg doit être déployée dans le catalogue d'applications.
+    -ProvisionFiliales : rôle Administrateur SharePoint requis (Register-PnPHubSite,
+    Get-PnPTenantSite, Get-PnPHubSite) + droit de créer des groupes Microsoft 365.
 
 .EXEMPLES
     # Simulation (aucune modification)
@@ -759,7 +761,7 @@ if ($ProvisionFiliales) {
         if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-PnPOnline -Url $hubUrl -Interactive }
 
         # 6.1 Hub
-        $hub = Get-PnPHubSite -Identity $hubUrl -ErrorAction SilentlyContinue
+        $hub = try { Get-PnPHubSite -Identity $hubUrl -ErrorAction Stop } catch { $null }
         if ($hub) {
             Write-Skip "Site hub $hubUrl"
             Add-Report 'Site hub' 'OK'
@@ -769,52 +771,68 @@ if ($ProvisionFiliales) {
             } | Out-Null
             Add-Report 'Site hub' ($(if ($DryRun -or $VerifyOnly) { 'MANQUANT' } else { 'CRÉÉ' }))
         }
+        $hubIds = @()
+        if ($hub) { $hubIds = @("$($hub.ID)", "$($hub.SiteId)") | Where-Object { $_ -and $_ -ne [Guid]::Empty.ToString() } }
 
         # 6.2 Filiales
         $tenantRoot = ([uri]$hubUrl).GetLeftPart([UriPartial]::Authority)
-        $rows = Get-PnPListItem -List 'Implantations' -PageSize 200 |
-            Where-Object { -not [bool]$_['EstSiege'] } |
-            Sort-Object { [int]($_['Ordre'] ?? 9999) }
-        if (-not $rows) { Write-Warn2 "Aucune filiale dans « Implantations » (lignes avec Siège décoché)." }
-
-        $hubRow = Get-PnPListItem -List 'Implantations' -PageSize 200 | Where-Object { [bool]$_['EstSiege'] } | Select-Object -First 1
-        if ($hubRow -and -not $hubRow['SiteUrl']) {
-            Invoke-Bbi "Siège : SiteUrl ← $hubUrl" { Set-PnPListItem -List 'Implantations' -Identity $hubRow.Id -Values @{ SiteUrl = "$hubUrl, $($hubRow['Title'])" } | Out-Null } | Out-Null
-        }
-
         $filialeSites = @()
-        foreach ($row in $rows) {
-            $title = "$($row['Title'])"
-            $slug  = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value "$($row['Ville'])"
-            if (-not $slug) { $slug = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value $title }
-            if (-not $slug) { Write-Warn2 "Ligne $($row.Id) « $title » : ni Ville ni Titre exploitable, ignorée."; continue }
-            $url = "$tenantRoot/sites/$slug"
+        if (Get-BbiList -Title 'Implantations') {
+            $allRows = @(Get-PnPListItem -List 'Implantations' -PageSize 200)
+            $hubRow = $allRows | Where-Object { [bool]$_['EstSiege'] } | Select-Object -First 1
+            $rows = $allRows |
+                Where-Object { -not [bool]$_['EstSiege'] } |
+                Sort-Object { [int]($_['Ordre'] ?? 9999) }
+            if (-not $rows) { Write-Warn2 "Aucune filiale dans « Implantations » (lignes avec Siège décoché)." }
 
-            $existing = Get-PnPTenantSite -Url $url -ErrorAction SilentlyContinue
-            if ($existing) {
-                Write-Skip "Site $url"
-                Add-Report "Site filiale $title" 'OK' $url
-            } else {
-                Invoke-Bbi "Création du site d'équipe « $title » ($url)" {
-                    New-PnPSite -Type TeamSite -Title $title -Alias $slug -IsPublic:$false -Lcid 1036 | Out-Null
-                } | Out-Null
-                Add-Report "Site filiale $title" ($(if ($DryRun -or $VerifyOnly) { 'MANQUANT' } else { 'CRÉÉ' })) $url
+            if ($hubRow -and -not $hubRow['SiteUrl']?.Url) {
+                Invoke-Bbi "Siège : SiteUrl ← $hubUrl" { Set-PnPListItem -List 'Implantations' -Identity $hubRow.Id -Values @{ SiteUrl = "$hubUrl, $($hubRow['Title'])" } | Out-Null } | Out-Null
             }
 
-            if (-not $DryRun -and -not $VerifyOnly) {
-                Invoke-Bbi "Rattachement de $url au hub" {
-                    Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl
-                } | Out-Null
-                $current = "$($row['SiteUrl'])"
-                if ($current -notlike "$url*") {
-                    Invoke-Bbi "« $title » : SiteUrl ← $url" {
-                        Set-PnPListItem -List 'Implantations' -Identity $row.Id -Values @{ SiteUrl = "$url, $title" } | Out-Null
-                    } | Out-Null
+            foreach ($row in $rows) {
+                $title = "$($row['Title'])"
+                $slug  = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value "$($row['Ville'])"
+                if (-not $slug) { $slug = ConvertTo-BbiSlug -Prefix $FilialePrefix -Value $title }
+                if (-not $slug) { Write-Warn2 "Ligne $($row.Id) « $title » : ni Ville ni Titre exploitable, ignorée."; continue }
+                $url = "$tenantRoot/sites/$slug"
+                # Site déjà créé lors d'un passage précédent (URL réelle écrite dans SiteUrl) : on la réutilise.
+                $known = "$($row['SiteUrl']?.Url)".TrimEnd('/')
+                if ($known -and $known -like "$tenantRoot/*" -and $known -ne $hubUrl) { $url = $known }
+
+                $existing = try { Get-PnPTenantSite -Url $url -ErrorAction Stop } catch { $null }
+                if ($existing) {
+                    Write-Skip "Site $url"
+                    Add-Report "Site filiale $title" 'OK' $url
+                } else {
+                    $created = Invoke-Bbi "Création du site d'équipe « $title » ($url)" {
+                        New-PnPSite -Type TeamSite -Title $title -Alias $slug -IsPublic:$false -Lcid 1036 -Wait
+                    }
+                    if ($created) { $url = "$created".TrimEnd('/') }
+                    Add-Report "Site filiale $title" ($(if ($DryRun -or $VerifyOnly) { 'MANQUANT' } else { 'CRÉÉ' })) $url
                 }
-            } else {
-                Write-Step "[SIMULATION] rattachement au hub + écriture de SiteUrl pour « $title »"
+
+                if (-not $DryRun -and -not $VerifyOnly) {
+                    if ($existing -and $hubIds.Count -gt 0 -and $hubIds -contains "$($existing.HubSiteId)") {
+                        Write-Skip "Rattachement au hub de $url"
+                    } else {
+                        Invoke-Bbi "Rattachement de $url au hub" {
+                            Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl
+                        } | Out-Null
+                    }
+                    $current = "$($row['SiteUrl']?.Url)"
+                    if ($current -notlike "$url*") {
+                        Invoke-Bbi "« $title » : SiteUrl ← $url" {
+                            Set-PnPListItem -List 'Implantations' -Identity $row.Id -Values @{ SiteUrl = "$url, $title" } | Out-Null
+                        } | Out-Null
+                    }
+                } else {
+                    Write-Step "[SIMULATION] rattachement au hub + écriture de SiteUrl pour « $title »"
+                }
+                $filialeSites += [pscustomobject]@{ Title = $title; Url = $url; Ordre = [int]($row['Ordre'] ?? 9999) }
             }
-            $filialeSites += [pscustomobject]@{ Title = $title; Url = $url; Ordre = [int]($row['Ordre'] ?? 9999) }
+        } else {
+            Write-Warn2 "Liste « Implantations » absente : filiales non évaluées."
+            Add-Report 'Liste Implantations' 'MANQUANT'
         }
 
         # 6.3 Portail sur chaque filiale (listes vides → repli démo côté web part)
@@ -835,7 +853,7 @@ if ($ProvisionFiliales) {
         }
 
         # 6.4 Navigation hub (= navigation supérieure du site hub) : siège puis filiales par Ordre
-        Connect-PnPOnline -Url $hubUrl -Interactive
+        if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-PnPOnline -Url $hubUrl -Interactive }
         Ensure-BbiNavNode -Title 'Siège' -Url "$hubUrl/SitePages/accueil.aspx"
         foreach ($site in ($filialeSites | Sort-Object Ordre)) {
             Ensure-BbiNavNode -Title $site.Title -Url "$($site.Url)/SitePages/accueil.aspx"
