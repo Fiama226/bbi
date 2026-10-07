@@ -17,6 +17,8 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.6.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
 
+L'Accueil affiche les **cartes de sites** (siège et filiales, lues dans `Implantations`) et deux **annuaires de tuiles** (Documents administratifs, Références pédagogiques) ; le même portail est déployé sur chaque site de filiale (voir `deploy/README.md`, § Hub et filiales).
+
 ### Contenus de repli (production ready)
 
 Toutes les sources sont tolérantes : liste absente (404), liste non créée, **ou liste créée mais vide** → la page reste complète.

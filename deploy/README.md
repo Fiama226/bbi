@@ -41,7 +41,9 @@ Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Ce
 | Accueil — identité | *(propriétés de la web part)* | Masquée si Vision/Mission/Objectifs sont vides | Renseigner les propriétés « Vision », « Mission », « Objectifs » |
 | Accueil — annonces | `Annonces` | Bandeau rotatif d'exemple (ou le texte configuré, ou la dernière actualité) | Publier une annonce avec une fenêtre de dates |
 | Accueil — vie de l'équipe | `Employés du mois`, `Certifications`, `Pensées du jour`, `Anniversaires` | Portraits, certifications, citation et anniversaires d'exemple | Publier dans chaque liste |
-| Accueil — implantations | `Implantations` | Siège + filiales d'exemple | Publier une implantation (cocher « Siège » pour une seule) |
+| Accueil — siège et filiales | `Implantations` | Cartes de sites d'exemple | Publier une implantation ; `-ProvisionFiliales` renseigne `SiteUrl` |
+| Accueil — Documents administratifs | `Documents administratifs` | Annuaire de tuiles (icône + libellé) d'exemple | Publier un document administratif |
+| Accueil — Références pédagogiques | `Références pédagogiques` | Annuaire de tuiles (icône + libellé) d'exemple | Publier une référence pédagogique |
 | Accueil — références | `Nos références` | Références clients d'exemple | Publier une référence client |
 | Sessions | `Sessions` | Planning de sessions à venir (liste et calendrier) | Publier des sessions avec `Date de début` |
 | Formations | `Formations` | Catalogue filtrable | Publier une formation (`Statut catalogue = Actif`) |
@@ -302,6 +304,25 @@ vides sont ouvertes (toujours actif).
 `Lien (carte)` · `Ordre` · `Site SharePoint` (SiteUrl) · `Couleur` (#RRGGBB) · `Initiales` (1-3 lettres)
 👉 Cochez `Siège` sur une seule implantation : elle apparaît toujours en tête, suivie des filiales/
 antennes triées par `Ordre`. `SiteUrl` est renseigné automatiquement par `-ProvisionFiliales` (voir § Hub et filiales).
+
+### Hub et filiales — `-ProvisionFiliales`
+Le site intranet devient **hub**. Chaque ligne d'`Implantations` dont `Siège` est décoché reçoit un
+**site d'équipe** (groupe Microsoft 365) à l'adresse `/sites/<filialeSitePrefix><ville>` (ex.
+`/sites/intranet-abidjan`), rattaché au hub, avec le même portail BBI et ses propres listes (vides au
+départ : le portail y affiche le contenu de repli). `SiteUrl` est réécrit dans la ligne ; la navigation
+hub liste le siège puis les filiales par `Ordre`.
+
+```powershell
+.\provision-bbi-intranet.ps1 -ProvisionFiliales -DryRun      # simulation
+.\provision-bbi-intranet.ps1 -ProvisionFiliales              # création
+.\provision-bbi-intranet.ps1 -ProvisionFiliales -VerifyOnly  # audit
+```
+Prérequis : le `.sppkg` doit être **Déployé** dans le catalogue avant d'exécuter la commande, et le compte
+doit avoir le rôle d'**administrateur SharePoint** ainsi que le droit de créer des groupes Microsoft 365.
+La création de chaque site attend la fin du provisionnement (`-Wait`) : une exécution avec plusieurs
+nouvelles filiales prend donc plusieurs minutes. Mettre `hubEnabled` à `false` dans
+`bbi-environnement.json` désactive cette section.
+Pour ajouter une filiale : ajouter une ligne (Titre, Ville, Pays, Couleur, Initiales), relancer.
 
 ### Nos références — liste `Nos références`
 `Titre` (nom du client/partenaire) · `Logo (URL)` · `Site web` · `Contact` · `Pays` · `Ville` · `Secteur` ·

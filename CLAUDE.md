@@ -18,6 +18,8 @@ Although the solution manifest declares 7 web parts + 1 extension, **production 
 
 The Accueil view now also carries several client-requested blocks beyond the original hero/news/sessions layout: Vision/Mission/Objectifs (identity), a rotating Annonces banner, Pensée du jour + Anniversaires (inside "vie de l'équipe"), Implantations (siège/filiales), Nos références (client logos), and Références pédagogiques (under Formations). Communauté is its own dedicated section — a staff Trombinoscope with category filter chips — not an alias of Ressources. Sessions carries a calendar-grid view (`SessionsCalendar.tsx` / `sessionsCalendarGrid.ts`) alongside the original text list, both reading the same `Sessions` data.
 
+The siège Accueil also renders `SiteNetwork` (site cards read from `Implantations`, columns `SiteUrl`/`Couleur`/`Initiales`) and `LinkDirectory` (icon + label tiles fed by `linkDirectoryData.ts`, used for Documents administratifs and Références pédagogiques). The same web part runs on every filiale site: `-ProvisionFiliales` turns the intranet into a hub and creates one team site per non-siège `Implantations` row.
+
 Routing lives in `src/webparts/bbiHome/components/portalRoutes.ts` + `homeLayout.ts` as pure functions (hash → view, e.g. `#actualite?id=12`), deliberately testable without a browser — see `tools/verify-fallback.js`.
 
 ## Fallback-data pattern (important, pervasive)
@@ -97,5 +99,6 @@ Lists/libraries the `bbiHome` web part expects, with exact internal column names
 cd deploy
 .\provision-bbi-intranet.ps1 -DryRun        # simulate
 .\provision-bbi-intranet.ps1 -SeedDemoData  # install lists/libraries/home page + demo data
+.\provision-bbi-intranet.ps1 -ProvisionFiliales  # hub + one team site per filiale (needs SharePoint admin role)
 .\provision-bbi-intranet.ps1 -VerifyOnly    # audit existing provisioning
 ```
