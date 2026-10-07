@@ -517,6 +517,9 @@ Ensure-BbiField -List 'Implantations' -DisplayName 'E-mail'       -InternalName 
 Ensure-BbiField -List 'Implantations' -DisplayName 'Responsable'  -InternalName 'Responsable' -Type Text
 Ensure-BbiField -List 'Implantations' -DisplayName 'Lien (carte)' -InternalName 'LienCarte'   -Type Hyperlink
 Ensure-BbiField -List 'Implantations' -DisplayName 'Ordre'        -InternalName 'Ordre'       -Type Number
+Ensure-BbiField -List 'Implantations' -DisplayName 'Site SharePoint' -InternalName 'SiteUrl'   -Type Hyperlink
+Ensure-BbiField -List 'Implantations' -DisplayName 'Couleur'         -InternalName 'Couleur'   -Type Text
+Ensure-BbiField -List 'Implantations' -DisplayName 'Initiales'       -InternalName 'Initiales' -Type Text
 Ensure-BbiView  -List 'Implantations' -Title 'Réseau complet' -Fields @('Title','EstSiege','Pays','Ville') `
     -Query '<OrderBy><FieldRef Name="Ordre"/></OrderBy>'
 
@@ -877,9 +880,10 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
     # Implantations
     if ((Get-PnPListItem -List 'Implantations' -PageSize 1).Count -eq 0) {
         Invoke-Bbi "Insertion des implantations d'exemple" {
-            Add-PnPListItem -List 'Implantations' -Values @{ Title = 'Siège — Paris'; EstSiege = $true; Pays = 'France'; Ville = 'Paris'; Adresse = '12 rue de la Croissance, 75008 Paris'; Telephone = '+33 1 45 67 89 00'; Email = 'contact@businessbuilders.fr'; Responsable = 'Jean-Marc Okafor'; Ordre = 0 } | Out-Null
-            Add-PnPListItem -List 'Implantations' -Values @{ Title = 'Filiale Abidjan'; Pays = "Côte d'Ivoire"; Ville = 'Abidjan'; Telephone = '+225 05 98 76 54 32'; Email = 'abidjan@businessbuilders.fr'; Responsable = 'Khadija Diallo'; Ordre = 1 } | Out-Null
-            Add-PnPListItem -List 'Implantations' -Values @{ Title = 'Antenne Dakar'; Pays = 'Sénégal'; Ville = 'Dakar'; Email = 'dakar@businessbuilders.fr'; Ordre = 2 } | Out-Null
+            Add-PnPListItem -List 'Implantations' -Values @{ Title = 'Siège — Paris'; EstSiege = $true; Pays = 'France'; Ville = 'Paris'; Adresse = '12 rue de la Croissance, 75008 Paris'; Telephone = '+33 1 45 67 89 00'; Email = 'contact@businessbuilders.fr'; Responsable = 'Jean-Marc Okafor'; Ordre = 0; Couleur = '#0E265C'; Initiales = 'SP' } | Out-Null
+            Add-PnPListItem -List 'Implantations' -Values @{ Title = 'Filiale Abidjan'; Pays = "Côte d'Ivoire"; Ville = 'Abidjan'; Telephone = '+225 05 98 76 54 32'; Email = 'abidjan@businessbuilders.fr'; Responsable = 'Khadija Diallo'; Ordre = 1; Couleur = '#C8102E'; Initiales = 'AB' } | Out-Null
+            Add-PnPListItem -List 'Implantations' -Values @{ Title = 'Antenne Bamako'; Pays = 'Mali'; Ville = 'Bamako'; Telephone = '+223 76 12 34 56'; Email = 'bamako@businessbuilders.fr'; Responsable = 'Awa Traoré'; Ordre = 2; Couleur = '#6B2D8B'; Initiales = 'BK' } | Out-Null
+            Add-PnPListItem -List 'Implantations' -Values @{ Title = 'Antenne Dakar'; Pays = 'Sénégal'; Ville = 'Dakar'; Email = 'dakar@businessbuilders.fr'; Ordre = 3; Couleur = '#B5651D'; Initiales = 'DK' } | Out-Null
         } | Out-Null
     }
 
@@ -958,6 +962,9 @@ $optionalChecks = @(
     @{ List = 'Annonces';    Field = 'Niveau';             UsedBy = 'Bandeau d''annonces — niveau d''urgence' },
     @{ List = 'Annonces';    Field = 'DateDebut';          UsedBy = 'Bandeau d''annonces — fenêtre de diffusion' },
     @{ List = 'Implantations'; Field = 'EstSiege';         UsedBy = 'Implantations — siège affiché en premier' },
+    @{ List = 'Implantations'; Field = 'SiteUrl';   UsedBy = 'Cartes de sites — bouton « Ouvrir le site »' },
+    @{ List = 'Implantations'; Field = 'Couleur';   UsedBy = 'Cartes de sites — couleur du bandeau' },
+    @{ List = 'Implantations'; Field = 'Initiales'; UsedBy = 'Cartes de sites — carré logo' },
     @{ List = 'Références pédagogiques'; Field = 'Categorie'; UsedBy = 'Références pédagogiques — regroupement par catégorie' }
 )
 foreach ($check in $optionalChecks) {

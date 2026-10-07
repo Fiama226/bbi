@@ -299,9 +299,9 @@ vides sont ouvertes (toujours actif).
 
 ### Implantations — liste `Implantations`
 `Titre` · `Siège` (case à cocher) · `Pays` · `Ville` · `Adresse` · `Téléphone` · `E-mail` · `Responsable` ·
-`Lien (carte)` · `Ordre`
+`Lien (carte)` · `Ordre` · `Site SharePoint` (SiteUrl) · `Couleur` (#RRGGBB) · `Initiales` (1-3 lettres)
 👉 Cochez `Siège` sur une seule implantation : elle apparaît toujours en tête, suivie des filiales/
-antennes triées par `Ordre`.
+antennes triées par `Ordre`. `SiteUrl` est renseigné automatiquement par `-ProvisionFiliales` (voir § Hub et filiales).
 
 ### Nos références — liste `Nos références`
 `Titre` (nom du client/partenaire) · `Logo (URL)` · `Site web` · `Contact` · `Pays` · `Ville` · `Secteur` ·

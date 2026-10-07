@@ -14,6 +14,10 @@
   "_concepteurs": "Groupe SharePoint autorisé à modifier les supports publiés et à utiliser les modèles de page.",
   "editorsGroup": "BBI-Concepteurs",
 
+  "_hub": "Hub SharePoint : le site intranet devient hub, chaque filiale de la liste Implantations reçoit un site d'équipe rattaché (-ProvisionFiliales).",
+  "hubEnabled": true,
+  "filialeSitePrefix": "intranet-",
+
   "_workbench": "Page de test « workbench hébergé » utilisée en développement (SPFx 1.20+ : plus de workbench local).",
   "workbenchUrl": "https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx"
 }
