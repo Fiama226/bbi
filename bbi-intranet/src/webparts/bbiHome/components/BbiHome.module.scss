@@ -330,13 +330,6 @@
   width: 100%;
 }
 
-.teamSection {
-  width: 100%;
-  max-width: var(--bbi-shell);
-  margin: 0 auto;
-  padding: 6px 32px 50px;
-}
-
 .sectionLead {
   margin: 8px 0 0;
   max-width: 620px;
@@ -1042,8 +1035,7 @@ a.sessionStatus:hover {
   .section,
   .newsSessions,
   .resourcesPeople,
-  .topicLinks,
-  .teamSection {
+  .topicLinks {
     padding: 38px 20px;
   }
 }

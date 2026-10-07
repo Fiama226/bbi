@@ -9,7 +9,7 @@ export interface IAnnouncementsListProps {
   showDataNotices: boolean;
 }
 
-/** Annonces actives, de la plus urgente à la moins urgente, puis par Ordre. */
+/** Annonces actives, dans l'ordre fourni par le chargeur (Ordre). */
 const AnnouncementsList: React.FC<IAnnouncementsListProps> = (props) => {
   const { announcements, isDemo, showDataNotices } = props;
   const active = announcements.filter((a) => isAnnouncementActive(a));

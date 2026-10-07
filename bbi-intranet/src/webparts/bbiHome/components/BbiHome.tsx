@@ -1320,6 +1320,73 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
         </section>
 
         <section
+          className={styles.learningPath}
+          data-bbi-view="accueil"
+          aria-labelledby="bbi-path-title"
+        >
+          <div className={styles.learningPathIntro}>
+            <p className={styles.eyebrow}>La méthode BBI</p>
+            <h2 id="bbi-path-title">
+              De l&apos;apprentissage à l&apos;impact.
+            </h2>
+            <p>
+              Une expérience qui relie les bons savoirs, la pratique sur le
+              terrain et le partage entre pairs.
+            </p>
+          </div>
+          <div className={styles.pathGrid}>
+            <article className={styles.pathCard}>
+              <span>01</span>
+              <h3>Choisir son parcours</h3>
+              <p>
+                Repérez les compétences utiles à vos enjeux et trouvez la
+                formation adaptée.
+              </p>
+              <a
+                href="#formations"
+                onClick={(event) => {
+                  followPortalLink(event, "#formations");
+                }}
+              >
+                Explorer le catalogue →
+              </a>
+            </article>
+            <article className={styles.pathCard}>
+              <span>02</span>
+              <h3>Apprendre en pratiquant</h3>
+              <p>
+                Progressez avec des ateliers concrets, des formateurs experts et
+                des mises en situation.
+              </p>
+              <a
+                href="#sessions"
+                onClick={(event) => {
+                  followPortalLink(event, "#sessions");
+                }}
+              >
+                Voir les sessions →
+              </a>
+            </article>
+            <article className={styles.pathCard}>
+              <span>03</span>
+              <h3>Ancrer et transmettre</h3>
+              <p>
+                Retrouvez vos supports, échangez avec la communauté et faites
+                vivre vos acquis.
+              </p>
+              <a
+                href="#ressources"
+                onClick={(event) => {
+                  followPortalLink(event, "#ressources");
+                }}
+              >
+                Accéder aux ressources →
+              </a>
+            </article>
+          </div>
+        </section>
+
+        <section
           className={styles.resourcesPeople}
           id="communaute"
           data-bbi-view="communaute"
@@ -1418,20 +1485,20 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               />
             </div>
             <div className={styles.homeRowCell}>
-                <TeamHighlights
-                  employee={employee.items[0]}
-                  employeeIsDemo={employee.isDemo}
-                  certifications={certifications.items}
-                  certificationsIsDemo={certifications.isDemo}
-                  thought={thought.items[0]}
-                  thoughtIsDemo={thought.isDemo}
-                  birthdays={birthdays.items}
-                  birthdaysIsDemo={birthdays.isDemo}
-                  showDataNotices={props.showDataNotices}
-                  onOpenDirectory={(event) => {
-                    followPortalLink(event, "#communaute");
-                  }}
-                />
+              <TeamHighlights
+                employee={employee.items[0]}
+                employeeIsDemo={employee.isDemo}
+                certifications={certifications.items}
+                certificationsIsDemo={certifications.isDemo}
+                thought={thought.items[0]}
+                thoughtIsDemo={thought.isDemo}
+                birthdays={birthdays.items}
+                birthdaysIsDemo={birthdays.isDemo}
+                showDataNotices={props.showDataNotices}
+                onOpenDirectory={(event) => {
+                  followPortalLink(event, "#communaute");
+                }}
+              />
             </div>
           </div>
         </section>
@@ -1723,73 +1790,6 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               }}
             />
           )}
-        </section>
-
-        <section
-          className={styles.learningPath}
-          data-bbi-view="accueil"
-          aria-labelledby="bbi-path-title"
-        >
-          <div className={styles.learningPathIntro}>
-            <p className={styles.eyebrow}>La méthode BBI</p>
-            <h2 id="bbi-path-title">
-              De l&apos;apprentissage à l&apos;impact.
-            </h2>
-            <p>
-              Une expérience qui relie les bons savoirs, la pratique sur le
-              terrain et le partage entre pairs.
-            </p>
-          </div>
-          <div className={styles.pathGrid}>
-            <article className={styles.pathCard}>
-              <span>01</span>
-              <h3>Choisir son parcours</h3>
-              <p>
-                Repérez les compétences utiles à vos enjeux et trouvez la
-                formation adaptée.
-              </p>
-              <a
-                href="#formations"
-                onClick={(event) => {
-                  followPortalLink(event, "#formations");
-                }}
-              >
-                Explorer le catalogue →
-              </a>
-            </article>
-            <article className={styles.pathCard}>
-              <span>02</span>
-              <h3>Apprendre en pratiquant</h3>
-              <p>
-                Progressez avec des ateliers concrets, des formateurs experts et
-                des mises en situation.
-              </p>
-              <a
-                href="#sessions"
-                onClick={(event) => {
-                  followPortalLink(event, "#sessions");
-                }}
-              >
-                Voir les sessions →
-              </a>
-            </article>
-            <article className={styles.pathCard}>
-              <span>03</span>
-              <h3>Ancrer et transmettre</h3>
-              <p>
-                Retrouvez vos supports, échangez avec la communauté et faites
-                vivre vos acquis.
-              </p>
-              <a
-                href="#ressources"
-                onClick={(event) => {
-                  followPortalLink(event, "#ressources");
-                }}
-              >
-                Accéder aux ressources →
-              </a>
-            </article>
-          </div>
         </section>
       </main>
 
