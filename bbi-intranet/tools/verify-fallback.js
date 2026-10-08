@@ -1156,8 +1156,13 @@ async function testLinkDirectory() {
   const autres = mixed.filter((g) => g.title === 'Autres')[0];
   const finance = mixed.filter((g) => g.title === 'Finance')[0];
   check('annuaire documents — catégorie vide → « Autres »', !!autres && autres.items[0].label === 'Sans catégorie');
-  check('annuaire documents — extension inconnue → icône générique', finance.items[0].icon === '📄');
-  check('icône fichier — sans extension → icône générique', iconForFile('readme') === '📄');
+  check('annuaire documents — extension inconnue → icône générique (Fluent « Page »)', finance.items[0].icon === 'Page');
+  check('icône fichier — sans extension → icône générique', iconForFile('readme') === 'Page');
+  check('icône fichier — noms d\'icônes Fluent UI (pas d\'emoji)',
+    ['a.pdf', 'b.docx', 'c.xlsx', 'd.pptx', 'e.zip'].map(iconForFile).every((name) => /^[A-Za-z]+$/.test(name)));
+  check('icône fichier — pdf → PDF, docx → WordDocument, xlsx → ExcelDocument, pptx → PowerPointDocument',
+    iconForFile('a.pdf') === 'PDF' && iconForFile('b.docx') === 'WordDocument' &&
+    iconForFile('c.xlsx') === 'ExcelDocument' && iconForFile('d.pptx') === 'PowerPointDocument');
   check('annuaire documents — href dangereux → tuile sans lien', finance.items[1].href === undefined);
   check('annuaire documents — href sûr conservé', typeof finance.items[0].href === 'string' && finance.items[0].href.indexOf('b.zip') !== -1);
   check('annuaire documents — indice = référence ou nom de fichier', finance.items[0].hint === 'b.zip');

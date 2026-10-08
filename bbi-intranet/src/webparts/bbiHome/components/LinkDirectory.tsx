@@ -1,4 +1,5 @@
 import * as React from "react";
+import { Icon } from "@fluentui/react/lib/Icon";
 import styles from "./LinkDirectory.module.scss";
 import { ILinkGroup } from "./linkDirectoryData";
 
@@ -26,7 +27,9 @@ const LinkDirectory: React.FC<ILinkDirectoryProps> = (props) => {
             {group.items.map((item) => {
               const body = (
                 <>
-                  <span className={styles.icon} aria-hidden="true">{item.icon}</span>
+                  <span className={styles.icon} aria-hidden="true">
+                    <Icon iconName={item.icon} />
+                  </span>
                   <span className={styles.text}>
                     <span className={styles.label}>{item.label}</span>
                     {item.hint && <small className={styles.hint}>{item.hint}</small>}

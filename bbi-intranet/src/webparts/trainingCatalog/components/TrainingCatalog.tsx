@@ -113,6 +113,7 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
 
       {showDataNotices && isDemo && <div className={styles.demoBanner}>💡 {strings.DemoBanner}</div>}
 
+      {!props.compact && (
       <div className={styles.toolbar}>
         <input
           type="search"
@@ -142,6 +143,7 @@ export const TrainingCatalog: React.FC<ITrainingCatalogProps> = (props) => {
           ))}
         </div>
       </div>
+      )}
 
       {filtered.length === 0 ? (
         <div className={styles.empty}>

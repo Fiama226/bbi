@@ -8,6 +8,15 @@ export interface ISiteNetworkProps {
   showDataNotices: boolean;
 }
 
+/** Libellé du bandeau : Siège, ou le type lu en tête du titre (Antenne, Bureau, Agence…), sinon Filiale. */
+const kindOf = (office: IHomeOffice): string => {
+  if (office.EstSiege) {
+    return "Siège";
+  }
+  const match = /^(Antenne|Bureau|Agence|Représentation|Filiale)\b/i.exec((office.Title || "").trim());
+  return match ? match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase() : "Filiale";
+};
+
 /** Réseau des sites BBI : une carte par implantation (siège en tête), style tableau de bord. */
 const SiteNetwork: React.FC<ISiteNetworkProps> = (props) => {
   const { offices, isDemo, showDataNotices } = props;
@@ -34,7 +43,7 @@ const SiteNetwork: React.FC<ISiteNetworkProps> = (props) => {
                 <span className={styles.logo} style={{ color: accent }} aria-hidden="true">
                   {office.Initiales || "BBI"}
                 </span>
-                <span className={styles.kind}>{office.EstSiege ? "Siège" : "Filiale"}</span>
+                <span className={styles.kind}>{kindOf(office)}</span>
               </div>
               <div className={styles.body}>
                 <strong className={styles.name}>{office.Title}</strong>

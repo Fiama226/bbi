@@ -353,8 +353,26 @@ setTimeout(() => {
   );
   const topbarOk = !!topbar && topbarHasNavy && !topbarTransparent;
 
+  // Non-régression : l'accueil s'arrête à « Nos références ». Les vues
+  // Formations / Ressources / Actualités / Communauté ne doivent pas être
+  // empilées sous l'accueil : une règle CSS masque, sur data-view="accueil",
+  // tout enfant de .content qui n'est ni un bloc accueil ni le héros.
+  // (classes hachées par CSS Modules, guillemets d'attributs retirés par le minifieur)
+  const accueilOnlyRule =
+    /\.home_[A-Za-z0-9]+\[data-view="?accueil"?\]\s+\.content_[A-Za-z0-9]+\s*>\s*:not\(\[data-bbi-view="?accueil"?\]\):not\(\[data-bbi-block="?hero"?\]\)\s*\{[^}]*display:\s*none/.test(allCss);
+  // Le trombinoscope de l'accueil est un bloc accueil propre (bande), distinct de la vue Communauté.
+  const trombinoscopeBand = hostDiv.querySelector('[data-bbi-view="accueil"][data-bbi-trombinoscope]');
+  // Employé du mois + certifications ont leur propre rangée pleine largeur,
+  // hors de la rangée deux colonnes Annonces | Pensée + Anniversaires.
+  const recognitionRow = hostDiv.querySelector('[data-bbi-view="accueil"][data-bbi-recognition]');
+  const recognitionInsideHomeRow = hostDiv.querySelector('[data-bbi-recognition] [class*="homeRow"]');
+  console.log(`Accueil borné (règle CSS de masquage des autres vues) : ${accueilOnlyRule ? 'OUI' : 'NON'}`);
+  console.log(`Bande Trombinoscope sur l'accueil : ${trombinoscopeBand ? 'PRÉSENTE' : 'ABSENTE'}`);
+  console.log(`Rangée Employé du mois + Certifications pleine largeur : ${recognitionRow && !recognitionInsideHomeRow ? 'OUI' : 'NON'}`);
+  const accueilBoundedOk = accueilOnlyRule && !!trombinoscopeBand && !!recognitionRow && !recognitionInsideHomeRow;
+
   const allOk =
-    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk && orphanSectionsOk && siteCardsOk && linkDirectoriesOk && topbarOk;
+    styleOk && trainingRouteOk && homeRouteOk && communityRouteOk && kpiOk && slidesOk && paginationOk && orphanSectionsOk && siteCardsOk && linkDirectoriesOk && topbarOk && accueilBoundedOk;
   console.log(
     `\n${
       allOk

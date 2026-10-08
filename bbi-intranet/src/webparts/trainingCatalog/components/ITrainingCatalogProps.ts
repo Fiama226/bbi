@@ -13,6 +13,8 @@ export interface ITrainingCatalogProps {
   themeVariant?: IReadonlyTheme;
   /** true : intégré dans un portail (la page fournit déjà le titre). */
   embedded?: boolean;
+  /** true : aperçu compact (pas de champ de recherche ni de filtres par filière). */
+  compact?: boolean;
   strings: ITrainingCatalogWebPartStrings;
 }
 

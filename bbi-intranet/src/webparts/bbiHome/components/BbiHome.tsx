@@ -1422,6 +1422,37 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
 
         <section
           className={styles.section}
+          id="trombinoscope"
+          data-bbi-view="accueil"
+          data-bbi-trombinoscope=""
+          aria-labelledby="trombinoscope-title"
+        >
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>Qui sommes-nous</p>
+              <h2 id="trombinoscope-title">Trombinoscope</h2>
+            </div>
+            <a
+              className={styles.textLink}
+              href="#communaute"
+              onClick={(event) => {
+                followPortalLink(event, "#communaute");
+              }}
+            >
+              Annuaire complet <span aria-hidden="true">→</span>
+            </a>
+          </div>
+          <TrainerDirectory
+            trainers={trainers.items}
+            isDemo={trainers.isDemo}
+            showDataNotices={props.showDataNotices}
+            sessions={sessions.items}
+            maxItems={8}
+          />
+        </section>
+
+        <section
+          className={styles.section}
           id="documents-parcours"
           data-bbi-view="accueil"
           aria-label="Documents administratifs et parcours pédagogiques"
@@ -1458,7 +1489,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 </a>
               </div>
               <LazyMount active={activeView === "accueil"} minHeight={210}>
-                <TrainingCatalog {...catalogProps} maxItems={6} />
+                <TrainingCatalog {...catalogProps} maxItems={6} compact />
               </LazyMount>
               <p>
                 <a
@@ -1506,12 +1537,37 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 birthdays={birthdays.items}
                 birthdaysIsDemo={birthdays.isDemo}
                 showDataNotices={props.showDataNotices}
+                variant="spirit"
                 onOpenDirectory={(event) => {
                   followPortalLink(event, "#communaute");
                 }}
               />
             </div>
           </div>
+        </section>
+
+        <section
+          className={styles.section}
+          id="reconnaissance"
+          data-bbi-view="accueil"
+          data-bbi-recognition=""
+          aria-label="Employé du mois et certifications"
+        >
+          <TeamHighlights
+            employee={employee.items[0]}
+            employeeIsDemo={employee.isDemo}
+            certifications={certifications.items}
+            certificationsIsDemo={certifications.isDemo}
+            thought={thought.items[0]}
+            thoughtIsDemo={thought.isDemo}
+            birthdays={birthdays.items}
+            birthdaysIsDemo={birthdays.isDemo}
+            showDataNotices={props.showDataNotices}
+            variant="recognition"
+            onOpenDirectory={(event) => {
+              followPortalLink(event, "#communaute");
+            }}
+          />
         </section>
 
         <section
@@ -1853,6 +1909,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               }}
             >
               Ressources
+            </a>
+            <a
+              href="#communaute"
+              onClick={(event) => {
+                followPortalLink(event, "#communaute");
+              }}
+            >
+              Communauté
             </a>
           </nav>
           {(props.supportEmail || props.supportPhone) && (

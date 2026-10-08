@@ -14,6 +14,12 @@ export interface ITeamHighlightsProps {
   showDataNotices: boolean;
   /** Ouvre l'annuaire complet des formateurs (vue Communauté). */
   onOpenDirectory: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+  /**
+   * Partie à rendre : « recognition » = Employé du mois + Certifications
+   * (rangée pleine largeur), « spirit » = Pensée du jour + Anniversaires
+   * (colonne du croquis client), « all » = les deux (défaut).
+   */
+  variant?: "all" | "recognition" | "spirit";
 }
 
 const initialsOf = (value: string): string =>
@@ -99,9 +105,13 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
     showDataNotices,
     onOpenDirectory,
   } = props;
+  const variant = props.variant || "all";
+  const showRecognition = variant !== "spirit";
+  const showSpirit = variant !== "recognition";
 
   return (
     <>
+    {showRecognition && (
     <div className={styles.wrap}>
       <article className={styles.employeeCard} aria-labelledby="bbi-employee-month">
         <p className={styles.eyebrow}>Employé du mois</p>
@@ -201,8 +211,9 @@ const TeamHighlights: React.FC<ITeamHighlightsProps> = (props) => {
         )}
       </article>
     </div>
+    )}
 
-    {(thought || birthdays.length > 0) && (
+    {showSpirit && (thought || birthdays.length > 0) && (
       <div className={styles.spiritWrap}>
         {thought && (
           <article className={styles.thoughtCard} aria-labelledby="bbi-thought">

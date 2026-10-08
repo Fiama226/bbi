@@ -1078,6 +1078,13 @@ a.sessionStatus:hover {
   display: none !important;
 }
 
+/* Et réciproquement : l'accueil s'arrête à « Nos références ». Les vues
+   Formations, Sessions/Actualités, Ressources et Communauté ne sont plus
+   empilées sous l'accueil ; elles se rejoignent par le menu. */
+.home[data-view="accueil"] .content > :not([data-bbi-view="accueil"]):not([data-bbi-block="hero"]) {
+  display: none !important;
+}
+
 /* La recherche n'existe que dans la vue « recherche » :
    jamais de « Résultats pour « » » vide sur l'accueil. */
 .home:not([data-view="recherche"]) [data-bbi-view="recherche"] {
@@ -1130,11 +1137,10 @@ a.sessionStatus:hover {
   flex-direction: column;
 }
 
-/* Le Trombinoscope (vue Communauté) est une liste centrée, sans la grille documents/galerie. */
+/* Le Trombinoscope (vue Communauté) occupe la même largeur de gabarit que
+   toutes les autres sections : un seul bord gauche sur toute la page. */
 [data-bbi-view="communaute"] .people {
-  max-width: 1000px;
   width: 100%;
-  margin: 0 auto;
 }
 
 .newsArchive {

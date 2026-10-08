@@ -18,14 +18,16 @@ const ADMIN_CATEGORY_ORDER = ["RH", "Juridique", "Finance", "Qualité", "Modèle
 const PEDAGOGICAL_CATEGORY_ORDER = ["Ouvrage", "Norme", "Méthode", "Étude", "Outil"];
 const FALLBACK_CATEGORY = "Autres";
 
+/* Noms d'icônes Fluent UI (jeu déjà chargé par SharePoint) — pas d'emoji :
+   rendu identique sur tous les postes et cohérent avec le reste du portail. */
 const PEDAGOGICAL_ICONS: { [category: string]: string } = {
-  Ouvrage: "📚",
-  Norme: "📜",
-  Méthode: "🧭",
-  Étude: "📈",
-  Outil: "🧰"
+  Ouvrage: "ReadingMode",
+  Norme: "Certificate",
+  Méthode: "Compass",
+  Étude: "BarChartVertical",
+  Outil: "Toolbox"
 };
-const GENERIC_ICON = "📄";
+const GENERIC_ICON = "Page";
 
 const extensionOf = (fileName: string): string => {
   const parts = (fileName || "").split(".");
@@ -36,16 +38,16 @@ const extensionOf = (fileName: string): string => {
 export const iconForFile = (fileName: string): string => {
   switch (extensionOf(fileName)) {
     case "pdf":
-      return "📕";
+      return "PDF";
     case "doc":
     case "docx":
-      return "📘";
+      return "WordDocument";
     case "xls":
     case "xlsx":
-      return "📗";
+      return "ExcelDocument";
     case "ppt":
     case "pptx":
-      return "📙";
+      return "PowerPointDocument";
     default:
       return GENERIC_ICON;
   }
