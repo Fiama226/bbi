@@ -127,21 +127,24 @@
 }
 
 .topbarInner {
-  max-width: var(--bbi-shell);
-  margin: 0 auto;
-  padding: 12px 32px;
+  /* Pleine largeur : le logo et le nom restent collés au bord gauche, ce qui
+     laisse à la navigation la place de tenir sur une seule ligne. */
+  max-width: none;
+  margin: 0;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-decoration: none;
   color: #fff;
   flex: 0 0 auto;
+  margin-right: 8px;
 }
 
 .logoImage {
@@ -173,14 +176,17 @@
 .navigation {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   flex: 1 1 auto;
-  flex-wrap: wrap;
+  min-width: 0;
+  /* Les liens restent sur une seule ligne ; sous 900px le menu bascule en
+     liste verticale (voir la règle @media plus bas). */
+  flex-wrap: nowrap;
 }
 
 .navLink {
   position: relative;
-  padding: 9px 14px;
+  padding: 9px 11px;
   color: #dce4f5;
   font-size: 13.5px;
   font-weight: 600;
@@ -232,7 +238,10 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  flex: 0 0 auto;
+  /* Peut se rétrécir pour laisser la navigation sur une ligne. */
+  flex: 0 1 210px;
+  min-width: 120px;
+  margin-left: auto;
   background: rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   padding: 3px 4px 3px 12px;
@@ -245,7 +254,9 @@
   color: #fff;
   font-size: 13px;
   padding: 7px 0;
-  width: 150px;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
   outline: none;
 }
 

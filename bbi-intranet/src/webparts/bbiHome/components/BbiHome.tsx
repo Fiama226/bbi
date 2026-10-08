@@ -130,13 +130,20 @@ const iconForModality = (modality?: string): string => {
   return "⌂";
 };
 
-const DEFAULT_NAV: INavLink[] = [
+/** Chemin de la bibliothèque « Documents partagés », relatif à la racine du site. */
+const DOCUMENTS_LIBRARY_PATH = "Documents%20partages/Forms/AllItems.aspx";
+
+const defaultNav = (siteUrl: string): INavLink[] => [
   { label: "Accueil", url: "#accueil" },
   { label: "Formations", url: "#formations" },
   { label: "Sessions", url: "#sessions" },
   { label: "Actualités", url: "#actualites" },
   { label: "Ressources", url: "#ressources" },
   { label: "Communauté", url: "#communaute" },
+  {
+    label: "Documents",
+    url: `${(siteUrl || "").replace(/\/+$/, "")}/${DOCUMENTS_LIBRARY_PATH}`,
+  },
 ];
 
 /** Diapositives de repli : images et textes se succèdent automatiquement. */
@@ -703,8 +710,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   ]);
 
   const navLinks = React.useMemo(
-    () => parseNavLinks(props.navLinks, DEFAULT_NAV),
-    [props.navLinks],
+    () => parseNavLinks(props.navLinks, defaultNav(props.siteUrl)),
+    [props.navLinks, props.siteUrl],
   );
   const quickLinks = React.useMemo(
     () => parseQuickLinks(props.quickLinks, DEFAULT_QUICK_LINKS),

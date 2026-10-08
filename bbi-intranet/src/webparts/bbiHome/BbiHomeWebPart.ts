@@ -58,7 +58,8 @@ export interface IBbiHomeWebPartProps {
   supportPhone: string;
 }
 
-const DEFAULT_NAV_LINKS: string = [
+/** Menu par défaut avant l'ajout du bouton « Documents » (sert à la migration). */
+const LEGACY_NAV_LINKS: string = [
   '# Accueil | #accueil',
   '# Formations | #formations',
   '# Sessions | #sessions',
@@ -66,6 +67,16 @@ const DEFAULT_NAV_LINKS: string = [
   '# Ressources | #ressources',
   '# Communauté | #communaute'
 ].join('\n');
+
+/** Chemin de la bibliothèque « Documents partagés », relatif à la racine du site. */
+const DOCUMENTS_LIBRARY_PATH = 'Documents%20partages/Forms/AllItems.aspx';
+
+/** Ligne de menu « Documents » pointant vers la bibliothèque du site courant. */
+const documentsNavLine = (siteUrl: string): string =>
+  `# Documents | ${siteUrl.replace(/\/+$/, '')}/${DOCUMENTS_LIBRARY_PATH}`;
+
+const defaultNavLinks = (siteUrl: string): string =>
+  `${LEGACY_NAV_LINKS}\n${documentsNavLine(siteUrl)}`;
 
 /**
  * Diaporama du héros. Une ligne = une diapositive :
@@ -214,7 +225,11 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       this.properties.siteUrl = this.context.pageContext.web.absoluteUrl;
     }
     if (!this.properties.navLinks) {
-      this.properties.navLinks = DEFAULT_NAV_LINKS;
+      this.properties.navLinks = defaultNavLinks(this.properties.siteUrl);
+    } else if (this.properties.navLinks.trim() === LEGACY_NAV_LINKS) {
+      // Migration : les instances créées avant l'ajout du bouton « Documents »
+      // gardaient l'ancien menu par défaut → on y ajoute le lien.
+      this.properties.navLinks = defaultNavLinks(this.properties.siteUrl);
     }
     if (!this.properties.quickLinks) {
       this.properties.quickLinks = DEFAULT_QUICK_LINKS;
