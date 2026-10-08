@@ -1130,6 +1130,22 @@ async function testPortalSearch() {
 }
 
 /* ------------------------------------------------------------------ */
+/* Drapeaux des implantations (Pays → code ISO, repli initiales)        */
+/* ------------------------------------------------------------------ */
+async function testCountryFlags() {
+  console.log('\nDrapeaux des implantations');
+  const { flagCodeOf, FLAG_COUNTRIES } = loadTsModule('src/webparts/bbiHome/components/countryFlags.ts');
+  check('drapeau — France → fr', flagCodeOf('France') === 'fr');
+  check('drapeau — accents et casse ignorés (COTE D\'IVOIRE → ci)', flagCodeOf("COTE D'IVOIRE") === 'ci');
+  check('drapeau — apostrophe typographique (Côte d’Ivoire → ci)', flagCodeOf('Côte d’Ivoire') === 'ci');
+  check('drapeau — Sénégal / Mali / Burkina Faso', flagCodeOf('Sénégal') === 'sn' && flagCodeOf('Mali') === 'ml' && flagCodeOf('Burkina Faso') === 'bf');
+  check('drapeau — RD Congo (plusieurs libellés)', flagCodeOf('RD Congo') === 'cd' && flagCodeOf('République démocratique du Congo') === 'cd');
+  check('drapeau — pays inconnu → undefined (repli initiales)', flagCodeOf('Atlantide') === undefined);
+  check('drapeau — valeur vide → undefined', flagCodeOf('') === undefined && flagCodeOf(undefined) === undefined);
+  check('drapeau — 16 pays référencés', Object.keys(FLAG_COUNTRIES).length === 16);
+}
+
+/* ------------------------------------------------------------------ */
 /* Annuaires de liens (tuiles icône + libellé)                          */
 /* ------------------------------------------------------------------ */
 async function testLinkDirectory() {
@@ -1207,6 +1223,7 @@ async function testLinkDirectory() {
   await testSessionsCalendar();
   await testPortalSearch();
   await testLinkDirectory();
+  await testCountryFlags();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);
 })();

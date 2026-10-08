@@ -630,7 +630,7 @@ export const DEMO_TRAINERS: IHomeTrainer[] = TRAINER_SEED.map((seed, index) => (
   Bio: seed.Bio,
   Specialites: seed.Specialites,
   Certifications: seed.Certifications,
-  DemoIndex: index % 4,
+  DemoIndex: index,
   Categorie: /directeur|directrice|direction/i.test(seed.Role) ? 'Direction' : 'Formateur',
   Ordre: index
 }));

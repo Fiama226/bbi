@@ -1,12 +1,23 @@
 import * as React from "react";
 import styles from "./SiteNetwork.module.scss";
 import { IHomeOffice, mailtoUrl, telUrl } from "./homeData";
+import { flagCodeOf } from "./countryFlags";
 
 export interface ISiteNetworkProps {
   offices: IHomeOffice[];
   isDemo: boolean;
   showDataNotices: boolean;
 }
+
+/** Classe SCSS du drapeau embarqué pour le pays (assets/flags/<code>.svg), ou undefined → initiales. */
+const flagClassOf = (country?: string): string | undefined => {
+  const code = flagCodeOf(country);
+  if (!code) {
+    return undefined;
+  }
+  const key = `flag${code.charAt(0).toUpperCase()}${code.slice(1)}`;
+  return (styles as unknown as { [k: string]: string })[key];
+};
 
 /** Libellé du bandeau : Siège, ou le type lu en tête du titre (Antenne, Bureau, Agence…), sinon Filiale. */
 const kindOf = (office: IHomeOffice): string => {
@@ -40,9 +51,17 @@ const SiteNetwork: React.FC<ISiteNetworkProps> = (props) => {
               data-bbi-site-card=""
             >
               <div className={styles.band} style={{ background: accent }}>
-                <span className={styles.logo} style={{ color: accent }} aria-hidden="true">
-                  {office.Initiales || "BBI"}
-                </span>
+                {flagClassOf(office.Pays) ? (
+                  <span
+                    className={`${styles.logo} ${styles.logoFlag} ${flagClassOf(office.Pays)}`}
+                    role="img"
+                    aria-label={office.Pays}
+                  />
+                ) : (
+                  <span className={styles.logo} style={{ color: accent }} aria-hidden="true">
+                    {office.Initiales || "BBI"}
+                  </span>
+                )}
                 <span className={styles.kind}>{kindOf(office)}</span>
               </div>
               <div className={styles.body}>

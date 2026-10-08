@@ -1112,9 +1112,16 @@ a.sessionStatus:hover {
 .home[data-view="sessions"] [data-bbi-view="actualites"] .sessionsColumn,
 .home[data-view="actualites"] [data-bbi-view="actualites"] .newsColumn {
   display: block !important;
-  max-width: 900px;
+  /* Vue Actualités : toute la largeur du gabarit (plus de colonne étroite). */
+  max-width: var(--bbi-shell);
   width: 100%;
   margin: 0 auto;
+}
+
+/* Vue Actualités : moins de marge verticale, le contenu remplit l'écran. */
+.home[data-view="actualites"] [data-bbi-view="actualites"] {
+  padding-top: 28px;
+  padding-bottom: 28px;
 }
 
 .home[data-view="formations"] [data-bbi-view="formations"],

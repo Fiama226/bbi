@@ -1011,7 +1011,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           >
             <span className={styles.logoImage} role="img" aria-label="BBI" />
             <span className={styles.brandText}>
-              <strong>BBI Intranet</strong>
+              <strong>Business Builders International</strong>
               <small>Propulseur de croissance · Créateur d&apos;impacts</small>
             </span>
           </a>
@@ -1622,15 +1622,17 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 <p className={styles.eyebrow}>À la une</p>
                 <h2>Actualités BBI</h2>
               </div>
-              <a
-                className={styles.textLink}
-                href="#actualites"
-                onClick={(event) => {
-                  followPortalLink(event, "#actualites");
-                }}
-              >
-                Toutes les actualités <span aria-hidden="true">→</span>
-              </a>
+              {activeView !== "actualites" && (
+                <a
+                  className={styles.textLink}
+                  href="#actualites"
+                  onClick={(event) => {
+                    followPortalLink(event, "#actualites");
+                  }}
+                >
+                  Toutes les actualités <span aria-hidden="true">→</span>
+                </a>
+              )}
             </div>
             <NewsBoard
               items={newsPage.items}

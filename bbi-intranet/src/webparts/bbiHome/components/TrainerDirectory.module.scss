@@ -107,6 +107,33 @@
   background-image: linear-gradient(135deg, #2e4a86, #6b7fac);
 }
 
+/* Portraits de démonstration (données de repli) : photos libres de droits
+   embarquées, une par collaborateur d'exemple. */
+.portrait0,
+.portrait1,
+.portrait2,
+.portrait3,
+.portrait4,
+.portrait5,
+.portrait6,
+.portrait7,
+.portrait8,
+.portrait9 {
+  background-size: cover;
+  background-position: center top;
+}
+
+.portrait0 { background-image: url("../assets/portraits/trainer-01.jpg"); }
+.portrait1 { background-image: url("../assets/portraits/trainer-02.jpg"); }
+.portrait2 { background-image: url("../assets/portraits/trainer-03.jpg"); }
+.portrait3 { background-image: url("../assets/portraits/trainer-04.jpg"); }
+.portrait4 { background-image: url("../assets/portraits/trainer-05.jpg"); }
+.portrait5 { background-image: url("../assets/portraits/trainer-06.jpg"); }
+.portrait6 { background-image: url("../assets/portraits/trainer-07.jpg"); }
+.portrait7 { background-image: url("../assets/portraits/trainer-08.jpg"); }
+.portrait8 { background-image: url("../assets/portraits/trainer-09.jpg"); }
+.portrait9 { background-image: url("../assets/portraits/trainer-10.jpg"); }
+
 .photoInitials {
   letter-spacing: 0.02em;
 }

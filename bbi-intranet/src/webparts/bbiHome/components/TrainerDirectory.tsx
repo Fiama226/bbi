@@ -36,6 +36,10 @@ const initialsOf = (trainer: IHomeTrainer): string => {
     .toUpperCase();
 };
 
+/** Portrait de démonstration embarqué (assets/portraits/trainer-01..10.jpg) pour les données de repli. */
+const demoPortraitClass = (index: number | undefined): string =>
+  (styles as unknown as { [key: string]: string })[`portrait${(index || 0) % 10}`] || styles.visual0;
+
 const visualClass = (index: number | undefined): string => {
   switch ((index || 0) % 4) {
     case 1:
@@ -190,7 +194,9 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
               className={
                 trainer.PhotoUrl
                   ? styles.modalPhoto
-                  : `${styles.modalPhoto} ${visualClass(trainer.DemoIndex)}`
+                  : isDemo
+                    ? `${styles.modalPhoto} ${demoPortraitClass(trainer.DemoIndex)}`
+                    : `${styles.modalPhoto} ${visualClass(trainer.DemoIndex)}`
               }
               style={
                 trainer.PhotoUrl ? { backgroundImage: `url("${trainer.PhotoUrl}")` } : undefined
@@ -198,7 +204,7 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
               role="img"
               aria-label={trainer.Title}
             >
-              {!trainer.PhotoUrl && <span>{initialsOf(trainer)}</span>}
+              {!trainer.PhotoUrl && !isDemo && <span>{initialsOf(trainer)}</span>}
             </span>
             <div className={styles.modalIdentity}>
               <h2 className={styles.modalName}>{trainer.Title}</h2>
@@ -377,7 +383,9 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
                 className={
                   item.PhotoUrl
                     ? styles.photo
-                    : `${styles.photo} ${visualClass(item.DemoIndex !== undefined ? item.DemoIndex : index)}`
+                    : isDemo
+                      ? `${styles.photo} ${demoPortraitClass(item.DemoIndex !== undefined ? item.DemoIndex : index)}`
+                      : `${styles.photo} ${visualClass(item.DemoIndex !== undefined ? item.DemoIndex : index)}`
                 }
                 style={
                   item.PhotoUrl ? { backgroundImage: `url("${item.PhotoUrl}")` } : undefined
@@ -385,7 +393,7 @@ const TrainerDirectory: React.FC<ITrainerDirectoryProps> = (props) => {
                 role="img"
                 aria-label={item.Title}
               >
-                {!item.PhotoUrl && <span className={styles.photoInitials}>{initialsOf(item)}</span>}
+                {!item.PhotoUrl && !isDemo && <span className={styles.photoInitials}>{initialsOf(item)}</span>}
               </span>
               <span className={styles.identity}>
                 <strong>{item.Title}</strong>

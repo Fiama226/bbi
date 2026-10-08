@@ -57,6 +57,31 @@
   letter-spacing: 0.04em;
 }
 
+/* Drapeau du pays à la place des initiales quand le pays est connu
+   (assets/flags/<code>.svg, domaine public). */
+.logoFlag {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.flagFr { background-image: url("../assets/flags/fr.svg"); }
+.flagCi { background-image: url("../assets/flags/ci.svg"); }
+.flagMl { background-image: url("../assets/flags/ml.svg"); }
+.flagSn { background-image: url("../assets/flags/sn.svg"); }
+.flagBf { background-image: url("../assets/flags/bf.svg"); }
+.flagBj { background-image: url("../assets/flags/bj.svg"); }
+.flagTg { background-image: url("../assets/flags/tg.svg"); }
+.flagNe { background-image: url("../assets/flags/ne.svg"); }
+.flagGn { background-image: url("../assets/flags/gn.svg"); }
+.flagCm { background-image: url("../assets/flags/cm.svg"); }
+.flagGa { background-image: url("../assets/flags/ga.svg"); }
+.flagCd { background-image: url("../assets/flags/cd.svg"); }
+.flagMa { background-image: url("../assets/flags/ma.svg"); }
+.flagTn { background-image: url("../assets/flags/tn.svg"); }
+.flagDz { background-image: url("../assets/flags/dz.svg"); }
+.flagBe { background-image: url("../assets/flags/be.svg"); }
+
 .kind {
   align-self: flex-start;
   margin-top: 10px;

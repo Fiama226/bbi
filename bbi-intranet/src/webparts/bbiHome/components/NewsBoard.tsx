@@ -157,7 +157,7 @@ const NewsBoard: React.FC<INewsBoardProps> = (props) => {
     <li className={styles.card} key={item.Id}>
       <button
         type="button"
-        className={styles.cardButton}
+        className={variant === "archive" ? `${styles.cardButton} ${styles.cardStacked}` : styles.cardButton}
         onClick={() => {
           onOpenNews(item.Id);
         }}
@@ -247,7 +247,9 @@ const NewsBoard: React.FC<INewsBoardProps> = (props) => {
           )}
 
           {rest.length > 0 && (
-            <ul className={styles.grid}>{rest.map((item) => renderCard(item))}</ul>
+            <ul className={variant === "archive" ? `${styles.grid} ${styles.gridArchive}` : styles.grid}>
+              {rest.map((item) => renderCard(item))}
+            </ul>
           )}
 
           {(hasMore || page > 0) && (

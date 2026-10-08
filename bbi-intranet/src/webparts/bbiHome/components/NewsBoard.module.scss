@@ -7,11 +7,61 @@
   min-width: 0;
 }
 
+/* Vue Actualités : toute la largeur du gabarit, images plus grandes,
+   pagination alignée à droite. */
 .boardWide {
-  max-width: 1080px;
+  max-width: none;
   margin: 0 auto;
   width: 100%;
+  gap: 24px;
+}
+
+.boardWide .featuredImage {
+  min-height: 320px;
+}
+
+.boardWide .pagination {
+  justify-content: flex-end;
+}
+
+/* Préfixées par .boardWide : spécificité supérieure aux règles de base
+   (.grid, .cardButton) déclarées plus bas dans ce fichier. */
+.boardWide .gridArchive {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 20px;
+}
+
+.boardWide .cardStacked {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: 190px auto;
+}
+
+.boardWide .cardStacked .cardImage {
+  min-height: 190px;
+}
+
+.boardWide .cardStacked .cardBody {
+  padding: 16px 18px 16px;
+}
+
+.boardWide .cardStacked .cardTitle {
+  font-size: 16px;
+}
+
+.boardWide .cardStacked .cardSummary {
+  -webkit-line-clamp: 4;
+}
+
+@media (max-width: 1000px) {
+  .boardWide .gridArchive {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .boardWide .gridArchive {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .featured {
