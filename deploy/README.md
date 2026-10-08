@@ -58,7 +58,7 @@ l'accueil reste cohérent à chaque étape.
 
 ```powershell
 cd ../bbi-intranet
-node tools/verify-fallback.js     # 175 contrôles : source absente, source vide, source alimentée
+node tools/verify-fallback.js     # 183 contrôles : source absente, source vide, source alimentée
 node tools/css-harness.js dist    # styles réellement injectés, chiffres clés, pagination, navigation, sections orphelines,
                                   # cartes de sites, annuaires de tuiles, barre de navigation bleu nuit permanente
 node tools/preview-smoke.js       # 34 contrôles de parcours sur l'aperçu cliquable
