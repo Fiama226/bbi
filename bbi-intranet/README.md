@@ -42,7 +42,7 @@ Toutes les sources sont tolérantes : liste absente (404), liste non créée, **
 
 Les bandeaux « données de démonstration » sont masqués par défaut : option `showDataNotices` dans le volet de propriétés (manifeste : `false`).
 
-**Vérifications :** `node tools/verify-fallback.js` — **183 contrôles** exécutés sur les couches de données réelles (aucun accès réseau requis) · `node tools/css-harness.js dist` — styles et classes réellement injectés, chiffres clés hors zone rognée, pagination, navigation, cartes de sites, annuaires de tuiles, barre de navigation au fond bleu nuit permanent (jamais transparente) · `node tools/preview-smoke.js` — **34 contrôles** de parcours sur l'aperçu cliquable (`deliverables/audit-2026/apercu-portail.html`).
+**Vérifications :** `node tools/verify-fallback.js` — **211 contrôles** exécutés sur les couches de données réelles (aucun accès réseau requis) · `node tools/css-harness.js dist` — styles et classes réellement injectés, chiffres clés hors zone rognée, pagination, navigation, cartes de sites, annuaires de tuiles, barre de navigation au fond bleu nuit permanent (jamais transparente) · `node tools/preview-smoke.js` — **34 contrôles** de parcours sur l'aperçu cliquable (`deliverables/audit-2026/apercu-portail.html`).
 
 > **Provisionnement** : `../deploy/provision-bbi-intranet.ps1` crée les listes, bibliothèques (dont « Galerie médias »), **une page d'accueil et une web part**. Les anciennes pages éventuellement déjà présentes ne sont pas supprimées ; le nouveau menu ne les utilise plus. Guide : `../deploy/README.md`.
 

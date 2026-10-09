@@ -305,7 +305,7 @@ setTimeout(() => {
   const orphanSectionsOk = orphanViews.length === 0;
 
   const routeRoot = hostDiv.querySelector('#bbi-home-root');
-  const trainingLink = hostDiv.querySelector('header nav a[href="#formations"]');
+  const trainingLink = hostDiv.querySelector('header nav a[href="#offres"], header nav a[href="#formations"]');
   if (trainingLink) {
     trainingLink.dispatchEvent(new window.MouseEvent('click', { bubbles: true, cancelable: true }));
   }
