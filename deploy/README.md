@@ -20,7 +20,7 @@ communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
 Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Certifications`, `Annonces`,
 `Pensées du jour`, `Anniversaires`, `Implantations`, `Nos références`, `Références pédagogiques`,
-`Formations`, `Supports publiés`, `Documents administratifs`, `Galerie médias`.
+`Formations` (catalogue autonome historique), `Offres`, `Supports publiés`, `Documents administratifs`, `Galerie médias`.
 
 > **Le portail est présentable dès la fin du déploiement, même sans aucune donnée.** Si une liste ou une
 > bibliothèque est absente, non créée ou vide, la vue concernée présente un contenu de repli professionnel.
@@ -46,7 +46,7 @@ Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Ce
 | Accueil — Références pédagogiques | `Références pédagogiques` | Annuaire de tuiles (icône + libellé) d'exemple | Publier une référence pédagogique |
 | Accueil — références | `Nos références` | Références clients d'exemple | Publier une référence client |
 | Sessions | `Sessions` | Planning de sessions à venir (liste et calendrier) | Publier des sessions avec `Date de début` |
-| Formations | `Formations` | Catalogue filtrable | Publier une formation (`Statut catalogue = Actif`) |
+| Nos offres | `Offres` | Catalogue filtrable par pôle (Formation, Conseil, Coaching) puis par filière | Publier une offre (`Pôle`, `Statut catalogue = Actif`) |
 | Formations — références pédagogiques | `Références pédagogiques` | Références d'exemple groupées par catégorie | Publier une référence pédagogique |
 | Ressources | `Supports publiés`, `Documents administratifs`, `Galerie médias` | Supports, documents et galerie de démonstration | Publier des documents, photos ou vidéos |
 | Communauté (Trombinoscope) | `Formateurs` | Annuaire d'exemple + fiches contact, filtrable par catégorie | Publier un collaborateur (photo, téléphone, e-mail, WhatsApp, `Catégorie`) |
@@ -238,7 +238,7 @@ Le menu et les tuiles restent dans le portail :
 | Vue | Fragment |
 |---|---|
 | Accueil | `#accueil` |
-| Formations | `#formations` |
+| Nos offres | `#offres` ou `#offres?pole=conseil` (`#formations` reste valide) |
 | Sessions | `#sessions` |
 | Actualités | `#actualites` |
 | Ressources et galerie | `#ressources` |
@@ -264,6 +264,26 @@ restent des liens vers leur destination sécurisée SharePoint.
 `Titre` · `Code formation` · `Filière` · `Modalité` · `Durée (heures)` · `Niveau` · `Statut catalogue`
 et, pour la fiche formation : `Description` · `Objectifs pédagogiques` · `Programme` · `Prérequis` · `Public visé` · `Formateurs référents` · `Contact pédagogique`
 👉 Seuls les éléments **Actif** apparaissent (les autres restent visibles en interne).
+
+### Offres — liste `Offres`
+Catalogue du portail (pôles Formation, Conseil, Coaching). Une ligne sans `Pôle` est comptée comme Formation.
+
+| Colonne (nom interne) | Type | Contenu |
+|---|---|---|
+| `Title` | Texte | Intitulé de l'offre |
+| `Pole` | Choix | Formation / Conseil / Coaching |
+| `CodeOffre` | Texte | Code (ex. `BBI-CON-101`) |
+| `Filiere` | Texte | Filière ou domaine |
+| `Format` | Choix | Présentiel / Distanciel / Hybride / Sur site client |
+| `Duree` | Texte | Durée libre (« 2 jours », « 3 à 6 semaines »…) |
+| `PublicCible` | Texte | Public visé |
+| `Niveau` | Choix | Débutant / Intermédiaire / Confirmé / Expert |
+| `StatutCatalogue` | Choix | Actif / En refonte / Archivé (seul `Actif` est affiché) |
+| `Description` | Texte long | Présentation |
+| `Objectifs` | Texte long | Objectifs |
+| `Programme` | Texte long | Programme ou démarche |
+| `Prerequis` | Texte long | Prérequis |
+| `Livrables` | Texte long | Livrables attendus |
 
 ### Formateurs / Trombinoscope — liste `Formateurs`
 `Titre` (nom) · `Rôle` · `Filière` · `Initiales` (pastille) · **`Photo (URL)`** (laissez vide pour afficher

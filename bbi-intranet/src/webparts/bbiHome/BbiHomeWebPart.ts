@@ -89,14 +89,14 @@ const defaultNavLinks = (siteUrl: string): string =>
 const DEFAULT_HERO_SLIDES: string = [
   '# Une ligne par diapositive du héros (les lignes # sont des commentaires)',
   '# image | sur-titre | titre | accroche | bouton | lien',
-  ' | Business Builders International | L\'expertise qui fait grandir les dirigeants. | Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables. | Explorer les formations | #formations',
-  ' | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions',
+  ' | Business Builders International | Renforcer les capacités de vos équipes et de vos organisations. | Formation, conseil et coaching pour transformer vos ambitions en résultats durables. | Découvrir nos offres | #offres',
+  ' | Notre méthode | Des accompagnements conçus pour le terrain. | Des mises en situation concrètes, des experts certifiés et un suivi à 30 jours. | Voir les sessions et missions | #sessions',
   ' | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir la communauté | #communaute',
   ' | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe'
 ].join('\n');
 
 const DEFAULT_QUICK_LINKS: string = [
-  '▦ | Catalogue des formations | Parcours, modalités et durées | #formations',
+  '▦ | Nos offres | Formation, conseil et coaching | #offres',
   '▣ | Prochaines sessions | Planning et inscriptions | #sessions',
   '▤ | Supports & médias | Documents, photos et vidéos | #ressources',
   '◎ | Communauté BBI | Formateurs et experts | #communaute',
@@ -106,7 +106,7 @@ const DEFAULT_QUICK_LINKS: string = [
 const DEFAULT_KPIS: string = [
   '# Une ligne par chiffre : valeur | libellé (modifiez librement ci-dessous)',
   '1 500+ | Professionnels accompagnés',
-  '10+ | Formations au catalogue',
+  '3 | Pôles : formation, conseil, coaching',
   '9 | Pays couverts par le réseau',
   '96 % | De satisfaction constatée'
 ].join('\n');

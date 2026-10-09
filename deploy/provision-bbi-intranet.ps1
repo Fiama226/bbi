@@ -598,6 +598,30 @@ function Invoke-BbiSiteProvisioning {
         Ensure-BbiView  -List 'Formations' -Title 'Par filière' -Fields @('Title','CodeFormation','Filiere','Modalite') `
             -Query '<OrderBy><FieldRef Name="Filiere"/><FieldRef Name="Title"/></OrderBy>'
 
+        # --- Offres : IOffer { Title, Pole, CodeOffre, Filiere, Format, Duree, PublicCible, Niveau, StatutCatalogue }
+        Ensure-BbiList -Title 'Offres' -Template GenericList | Out-Null
+        Ensure-BbiField -List 'Offres' -DisplayName 'Pôle'            -InternalName 'Pole'            -Type Choice `
+            -Choices @('Formation','Conseil','Coaching')
+        Ensure-BbiField -List 'Offres' -DisplayName 'Code'            -InternalName 'CodeOffre'       -Type Text
+        Ensure-BbiField -List 'Offres' -DisplayName 'Filière'         -InternalName 'Filiere'         -Type Text
+        Ensure-BbiField -List 'Offres' -DisplayName 'Format'          -InternalName 'Format'          -Type Choice `
+            -Choices @('Présentiel','Distanciel','Hybride','Sur site client')
+        Ensure-BbiField -List 'Offres' -DisplayName 'Durée'           -InternalName 'Duree'           -Type Text
+        Ensure-BbiField -List 'Offres' -DisplayName 'Public cible'    -InternalName 'PublicCible'     -Type Text
+        Ensure-BbiField -List 'Offres' -DisplayName 'Niveau'          -InternalName 'Niveau'          -Type Choice `
+            -Choices @('Débutant','Intermédiaire','Confirmé','Expert')
+        Ensure-BbiField -List 'Offres' -DisplayName 'Statut catalogue' -InternalName 'StatutCatalogue' -Type Choice `
+            -Choices @('Actif','En refonte','Archivé')
+        Ensure-BbiField -List 'Offres' -DisplayName 'Description'     -InternalName 'Description'     -Type Note
+        Ensure-BbiField -List 'Offres' -DisplayName 'Objectifs'       -InternalName 'Objectifs'       -Type Note
+        Ensure-BbiField -List 'Offres' -DisplayName 'Programme ou démarche' -InternalName 'Programme'  -Type Note
+        Ensure-BbiField -List 'Offres' -DisplayName 'Prérequis'       -InternalName 'Prerequis'       -Type Note
+        Ensure-BbiField -List 'Offres' -DisplayName 'Livrables'       -InternalName 'Livrables'       -Type Note
+        Ensure-BbiView  -List 'Offres' -Title 'Catalogue actif' -Fields @('Title','Pole','CodeOffre','Filiere','Format','Duree','Niveau') `
+            -Query '<Where><Eq><FieldRef Name="StatutCatalogue"/><Value Type="Text">Actif</Value></Eq></Where><OrderBy><FieldRef Name="Title"/></OrderBy>'
+        Ensure-BbiView  -List 'Offres' -Title 'Par pôle' -Fields @('Title','Pole','CodeOffre','Filiere','Format','Duree') `
+            -Query '<OrderBy><FieldRef Name="Pole"/><FieldRef Name="Title"/></OrderBy>'
+
         # ==================================================================
         # 3. BIBLIOTHÈQUES DOCUMENTAIRES
         # ==================================================================
@@ -683,6 +707,7 @@ function Invoke-BbiSiteProvisioning {
             sessionsListTitle     = 'Sessions'
             trainersListTitle     = 'Formateurs'
             formationsListTitle   = 'Formations'
+            offersListTitle       = 'Offres'
             documentsLibraryTitle = 'Supports publiés'
             galleryLibraryTitle   = 'Galerie médias'
             employeeListTitle     = 'Employés du mois'
@@ -699,16 +724,19 @@ function Invoke-BbiSiteProvisioning {
             enableAnnouncement    = $true
             layoutCompact         = $false
             heroEyebrow           = 'Business Builders International'
-            heroTitle             = "L'expertise qui fait grandir les dirigeants."
-            heroSubtitle          = "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables."
-            heroSlides            = " | Business Builders International | L'expertise qui fait grandir les dirigeants. | Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables. | Explorer les formations | #formations`n | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions`n | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir nos implantations | #implantations`n | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe"
-            primaryCtaLabel       = 'Explorer les formations'
-            primaryCtaUrl         = '#formations'
+            heroTitle             = "Renforcer les capacités de vos équipes et de vos organisations."
+            heroSubtitle          = "Formation, conseil et coaching pour transformer vos ambitions en résultats durables."
+            heroSlides            = " | Business Builders International | Renforcer les capacités de vos équipes et de vos organisations. | Formation, conseil et coaching pour transformer vos ambitions en résultats durables. | Découvrir nos offres | #offres`n | Notre méthode | Des parcours conçus pour le terrain. | Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours. | Voir les prochaines sessions | #sessions`n | Réseau international | 9 pays, une même exigence de qualité. | Un référentiel pédagogique unique et des antennes locales dans chaque région. | Découvrir nos implantations | #implantations`n | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe"
+            primaryCtaLabel       = 'Découvrir nos offres'
+            primaryCtaUrl         = '#offres'
             secondaryCtaLabel     = 'Voir les prochaines sessions'
             secondaryCtaUrl       = '#sessions'
-            navLinks              = "# Accueil | #accueil`n# Formations | #formations`n# Sessions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
-            quickLinks            = "▦ | Catalogue des formations | Parcours, modalités et durées | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
-            kpis                  = "1 500+ | Professionnels accompagnés`n10+ | Formations au catalogue`n9 | Pays couverts par le réseau`n96 % | De satisfaction constatée"
+            navLinks              = "# Accueil | #accueil`n# Nos offres | #offres`n# Sessions & missions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
+            quickLinks            = "▦ | Nos offres | Formation, conseil et coaching | #offres`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
+            kpis                  = "1 500+ | Professionnels accompagnés`n3 | Pôles : formation, conseil, coaching`n9 | Pays couverts par le réseau`n96 % | De satisfaction constatée"
+            visionText            = "Être le partenaire de référence du renforcement de capacités des dirigeants, des équipes et des organisations en Afrique et au-delà."
+            missionText           = "Accompagner nos clients par la formation, le conseil et le coaching, pour transformer leurs compétences en résultats durables."
+            objectivesText        = "Proposer trois pôles d'expertise complémentaires : formation, conseil et coaching`nMesurer l'impact de chaque accompagnement sur le terrain`nPartager un référentiel de qualité commun à tout le réseau`nRenforcer la présence locale dans chaque pays d'implantation"
         } | ConvertTo-Json -Compress
 
         # --- Page d'accueil : page APPLICATIVE (aucun en-tête, aucune navigation)
@@ -1009,6 +1037,30 @@ if (-not $ProvisionFiliales) {
 if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
     Write-Title "9/10 · Données d'exemple"
     $today = Get-Date
+
+    # Offres (formation, conseil, coaching)
+    if ((Get-PnPListItem -List 'Offres' -PageSize 1).Count -eq 0) {
+        Invoke-Bbi "Insertion des offres d'exemple" {
+            $offres = @(
+                @{ Title = "Management d'équipe"; Pole = 'Formation'; CodeOffre = 'BBI-FOR-101'; Filiere = 'Management'; Format = 'Présentiel'; Duree = '2 jours'; Niveau = 'Confirmé'; PublicCible = 'Managers de proximité' },
+                @{ Title = 'Vendre la valeur, pas le prix'; Pole = 'Formation'; CodeOffre = 'BBI-FOR-110'; Filiere = 'Commerce'; Format = 'Présentiel'; Duree = '1 jour'; Niveau = 'Débutant'; PublicCible = 'Équipes commerciales' },
+                @{ Title = 'Prospection digitale'; Pole = 'Formation'; CodeOffre = 'BBI-FOR-140'; Filiere = 'Digital'; Format = 'Distanciel'; Duree = '½ journée'; Niveau = 'Débutant'; PublicCible = 'Commerciaux et indépendants' },
+                @{ Title = 'Fondamentaux Qualiopi'; Pole = 'Formation'; CodeOffre = 'BBI-FOR-301'; Filiere = 'Qualité & Certification'; Format = 'Distanciel'; Duree = '1 jour'; Niveau = 'Intermédiaire'; PublicCible = 'Responsables qualité' },
+                @{ Title = 'Leadership & gestion du changement'; Pole = 'Formation'; CodeOffre = 'BBI-FOR-210'; Filiere = 'Management'; Format = 'Hybride'; Duree = '3 jours'; Niveau = 'Confirmé'; PublicCible = 'Cadres dirigeants' },
+                @{ Title = 'Diagnostic organisationnel'; Pole = 'Conseil'; CodeOffre = 'BBI-CON-101'; Filiere = 'Organisation'; Format = 'Sur site client'; Duree = '3 à 6 semaines'; Niveau = 'Confirmé'; PublicCible = 'Directions générales' },
+                @{ Title = "Structuration d'un dispositif de formation"; Pole = 'Conseil'; CodeOffre = 'BBI-CON-120'; Filiere = 'Ingénierie de formation'; Format = 'Hybride'; Duree = '2 à 4 mois'; Niveau = 'Confirmé'; PublicCible = 'Organismes et directions RH' },
+                @{ Title = 'Accompagnement au changement'; Pole = 'Conseil'; CodeOffre = 'BBI-CON-210'; Filiere = 'Organisation'; Format = 'Sur site client'; Duree = '3 à 9 mois'; Niveau = 'Expert'; PublicCible = 'Comités de direction' },
+                @{ Title = 'Mise en conformité qualité (Qualiopi, ISO 21001)'; Pole = 'Conseil'; CodeOffre = 'BBI-CON-301'; Filiere = 'Qualité & Certification'; Format = 'Hybride'; Duree = '6 à 10 semaines'; Niveau = 'Confirmé'; PublicCible = 'Organismes de formation' },
+                @{ Title = 'Coaching de dirigeants'; Pole = 'Coaching'; CodeOffre = 'BBI-COA-101'; Filiere = 'Leadership'; Format = 'Hybride'; Duree = '6 mois'; Niveau = 'Expert'; PublicCible = 'Dirigeants et cadres supérieurs' },
+                @{ Title = "Coaching d'équipe"; Pole = 'Coaching'; CodeOffre = 'BBI-COA-120'; Filiere = 'Management'; Format = 'Présentiel'; Duree = '4 mois'; Niveau = 'Confirmé'; PublicCible = 'Équipes de direction' },
+                @{ Title = "Cycle d'accompagnement d'entrepreneurs"; Pole = 'Coaching'; CodeOffre = 'BBI-COA-201'; Filiere = 'Entrepreneuriat'; Format = 'Hybride'; Duree = '6 mois'; Niveau = 'Intermédiaire'; PublicCible = 'Porteurs de projet' }
+            )
+            foreach ($offre in $offres) {
+                $offre['StatutCatalogue'] = 'Actif'
+                Add-PnPListItem -List 'Offres' -Values $offre | Out-Null
+            }
+        } | Out-Null
+    }
 
     # Actualités
     if ((Get-PnPListItem -List 'Actualites' -PageSize 1).Count -eq 0) {
