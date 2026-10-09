@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 This repo delivers a SharePoint Online intranet for **Business Builders International (BBI)**, a professional training organization. There are two layers:
 
 - `bbi-intranet/` — the actual SPFx (SharePoint Framework) source project, 1.22.2, TypeScript 5.8, React 17. This is where almost all code work happens.
-- `deliverables/` — static HTML design deliverables (audit, mockups, theme JSON) and the installable package `deliverables/spfx/bbi-intranet.sppkg`. These are generated/handwritten design artifacts, not build output — don't regenerate them casually.
+- `deliverables/` — static HTML design deliverables (audit, mockups, theme JSON) and the installable package `deliverables/spfx/bbi-portail.sppkg`. These are generated/handwritten design artifacts, not build output — don't regenerate them casually.
 - `deploy/provision-bbi-intranet.ps1` and `teams/New-BbiTeamsPackage.ps1` — PowerShell provisioning scripts that read tenant/site config from `bbi-environnement.json` (single source of truth: tenant `businessbuilderinter.sharepoint.com`, site `/sites/intranet`).
 
 All substantive commands below are run from `bbi-intranet/` unless noted.
@@ -69,9 +69,9 @@ npx heft build
 node tools/verify-fallback.js      # 183 checks: data layers run against a simulated SharePoint client for each of the 3 source states (absent/empty/populated) — no network needed
 node tools/css-harness.js dist     # confirms styles/classes are actually injected (KPI band outside clipped hero area, pagination, nav, site cards, link directories, nav bar permanently navy — never transparent)
 node tools/preview-smoke.js        # 34 journey checks against deliverables/audit-2026/apercu-portail.html
-node tools/verify-package.js       # validates deliverables/spfx/bbi-intranet.sppkg manifest-vs-bundle consistency
+node tools/verify-package.js       # validates deliverables/spfx/bbi-portail.sppkg manifest-vs-bundle consistency
 node tools/verify-package.js --dev # same, but against temp/manifests.js + dist/ (debug path)
-npm run build                      # full production rebuild -> sharepoint/solution/bbi-intranet.sppkg
+npm run build                      # full production rebuild -> sharepoint/solution/bbi-portail.sppkg
 ```
 After `npm run build`, copy the resulting `.sppkg` to `deliverables/spfx/` and re-upload as an **Upgrade** in the SharePoint App Catalog — don't forget to confirm the catalog shows **Deployed**, not just *Validated*/*Installed*.
 

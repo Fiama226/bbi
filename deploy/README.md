@@ -8,7 +8,7 @@ communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
 > Expérience **sans aucun chrome SharePoint** (Teams / Viva Connections) : [`../teams/README.md`](../teams/README.md)
 > Fichier principal : [`provision-bbi-intranet.ps1`](./provision-bbi-intranet.ps1)
-> Package SPFx à installer avant : [`../deliverables/spfx/bbi-intranet.sppkg`](../deliverables/spfx/bbi-intranet.sppkg) (v1.6.0.0)
+> Package SPFx à installer avant : [`../deliverables/spfx/bbi-portail.sppkg`](../deliverables/spfx/bbi-portail.sppkg) (v1.6.0.0)
 
 ---
 
@@ -94,7 +94,7 @@ Droits nécessaires : **administrateur SharePoint** (ou propriétaire du site + 
 
 ## 2. Étape 1 — Déployer la solution SPFx
 
-1. Téléverser `bbi-intranet.sppkg` dans le **catalogue d'applications** (Centre d'administration SharePoint → *Autres fonctionnalités* → *Catalogue d'applications* → *Distribuer des applications*).
+1. Téléverser `bbi-portail.sppkg` dans le **catalogue d'applications** (Centre d'administration SharePoint → *Autres fonctionnalités* → *Catalogue d'applications* → *Distribuer des applications*).
 2. Cocher **« Rendre cette solution disponible pour tous les sites »** puis **Déployer**.
 3. Dans le site BBI : ⚙️ → *Ajouter une application* → **BBI Intranet** (ou attendez la propagation automatique, `skipFeatureDeployment` est activé).
 
@@ -394,7 +394,7 @@ Distincte des supports pédagogiques ci-dessus : RH, juridique, finance, qualit�
 
 ```powershell
 cd bbi-intranet
-npm run build                       # → sharepoint/solution/bbi-intranet.sppkg
+npm run build                       # → sharepoint/solution/bbi-portail.sppkg
 # (version à incrémenter dans config/package-solution.json avant le build)
 ```
 

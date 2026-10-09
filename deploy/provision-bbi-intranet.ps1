@@ -22,7 +22,7 @@
 .PREREQUIS
     PnP.PowerShell 2.x :  Install-Module PnP.PowerShell -Scope CurrentUser
     Droits : administrateur SharePoint (propriétaire du site au minimum).
-    La solution bbi-intranet.sppkg doit être déployée dans le catalogue d'applications.
+    La solution bbi-portail.sppkg doit être déployée dans le catalogue d'applications.
     -ProvisionFiliales : rôle Administrateur SharePoint requis (Register-PnPHubSite,
     Get-PnPTenantSite, Get-PnPHubSite) + droit de créer des groupes Microsoft 365.
 

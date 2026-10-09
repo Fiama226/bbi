@@ -15,7 +15,7 @@ Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le pac
 
 > Pour le déploiement standard : téléversez le package, puis ajoutez **uniquement `BBI Accueil — portail unifié`** à `accueil.aspx`. N'ajoutez pas les briques Catalogue, Galerie ou Documents séparément.
 
-Package prêt à installer : **`../deliverables/spfx/bbi-intranet.sppkg`** — version **1.6.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
+Package prêt à installer : **`../deliverables/spfx/bbi-portail.sppkg`** — version **1.6.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
 
 L'Accueil affiche les **cartes de sites** (siège et filiales, lues dans `Implantations`) et deux **annuaires de tuiles** (Documents administratifs, Références pédagogiques) ; le même portail est déployé sur chaque site de filiale (voir `deploy/README.md`, § Hub et filiales).
 
@@ -50,7 +50,7 @@ Les bandeaux « données de démonstration » sont masqués par défaut : option
 
 ## 1. Test rapide sans Docker (production) — 5 minutes
 
-1. Télécharger `deliverables/spfx/bbi-intranet.sppkg`.
+1. Télécharger `deliverables/spfx/bbi-portail.sppkg`.
 2. SharePoint admin center → **More features** → **App catalog** (ou la page du catalogue) → *Distribute apps for SharePoint*.
 3. **Upload** du `.sppkg` → cocher *Make this solution available to all sites* → **Deploy**.
 4. Ouvrir une page moderne → **Éditer** → **+** → catégorie *Advanced* (ou recherche « BBI ») → ajouter **BBI Accueil**. Il peut être placé seul sur une page pleine largeur.
@@ -153,7 +153,7 @@ Un package incohérent (manifeste qui pointe vers un bundle absent) produit **ex
 Le dépôt fournit un contrôle automatique, sans dépendance externe :
 
 ```bash
-node tools/verify-package.js           # vérifie deliverables/spfx/bbi-intranet.sppkg
+node tools/verify-package.js           # vérifie deliverables/spfx/bbi-portail.sppkg
 node tools/verify-package.js --dev     # vérifie temp/manifests.js + dist/ (chemin workbench debug)
 ```
 
@@ -176,7 +176,7 @@ déclarée dans `[Content_Types].xml`, ou si le package contient des bundles orp
 
 ```bash
 npm run build            # lint + TS + bundle production
-# → sharepoint/solution/bbi-intranet.sppkg
+# → sharepoint/solution/bbi-portail.sppkg
 ```
 
 Copier ensuite le `.sppkg` vers `../deliverables/spfx/` et le redéployer sur l'App Catalog (l'App Catalog propose « *Upgrade/Add* » — les instances existantes des web parts se mettent à jour).

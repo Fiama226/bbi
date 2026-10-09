@@ -24,7 +24,7 @@
  *   6. il signale les bundles orphelins (embarqués mais référencés par personne).
  *
  * Usage :
- *   node tools/verify-package.js                       # deliverables/spfx/bbi-intranet.sppkg
+ *   node tools/verify-package.js                       # deliverables/spfx/bbi-portail.sppkg
  *   node tools/verify-package.js chemin/package.sppkg  # un package précis
  *   node tools/verify-package.js --dev                 # vérifie le chemin « workbench debug »
  *                                                        (temp/manifests.js + dist/) après npm run start
@@ -40,9 +40,9 @@ const zlib = require('node:zlib');
 const ROOT = path.resolve(__dirname, '..');
 /** Emplacements possibles du package livré (racine du dépôt ou du projet). */
 const PACKAGE_CANDIDATES = [
-  path.join(ROOT, 'deliverables', 'spfx', 'bbi-intranet.sppkg'),
-  path.join(ROOT, '..', 'deliverables', 'spfx', 'bbi-intranet.sppkg'),
-  path.join(ROOT, 'sharepoint', 'solution', 'bbi-intranet.sppkg'),
+  path.join(ROOT, 'deliverables', 'spfx', 'bbi-portail.sppkg'),
+  path.join(ROOT, '..', 'deliverables', 'spfx', 'bbi-portail.sppkg'),
+  path.join(ROOT, 'sharepoint', 'solution', 'bbi-portail.sppkg'),
 ];
 function findDefaultPackage() {
   return PACKAGE_CANDIDATES.find((p) => fs.existsSync(p)) || PACKAGE_CANDIDATES[0];
@@ -215,7 +215,7 @@ function verifyPackage(packagePath, report) {
       `${C.dim}   Emplacements cherchés :\n` +
         PACKAGE_CANDIDATES.map((p) => `     ${p}`).join('\n') +
         `\n   Générez-le avec :  npm run clean && npm run build  ` +
-        `puis copiez sharepoint/solution/bbi-intranet.sppkg vers deliverables/spfx/${C.off}`,
+        `puis copiez sharepoint/solution/bbi-portail.sppkg vers deliverables/spfx/${C.off}`,
     );
     return;
   }
