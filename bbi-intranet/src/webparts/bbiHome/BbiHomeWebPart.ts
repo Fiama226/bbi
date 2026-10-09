@@ -22,6 +22,7 @@ export interface IBbiHomeWebPartProps {
   sessionsListTitle: string;
   trainersListTitle: string;
   formationsListTitle: string;
+  offersListTitle: string;
   documentsLibraryTitle: string;
   galleryLibraryTitle: string;
   employeeListTitle: string;
@@ -275,6 +276,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       sessionsListTitle: properties.sessionsListTitle || 'Sessions',
       trainersListTitle: properties.trainersListTitle || 'Formateurs',
       formationsListTitle: properties.formationsListTitle || 'Formations',
+      offersListTitle: properties.offersListTitle || 'Offres',
       documentsLibraryTitle: properties.documentsLibraryTitle || 'Supports publiés',
       galleryLibraryTitle: properties.galleryLibraryTitle || 'Galerie médias',
       employeeListTitle: properties.employeeListTitle || 'Employés du mois',
@@ -372,6 +374,7 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
               PropertyPaneTextField('sessionsListTitle', { label: strings.SessionsListFieldLabel }),
               PropertyPaneTextField('trainersListTitle', { label: strings.TrainersListFieldLabel }),
               PropertyPaneTextField('formationsListTitle', { label: strings.FormationsListFieldLabel }),
+              PropertyPaneTextField('offersListTitle', { label: strings.OffersListFieldLabel }),
               PropertyPaneTextField('documentsLibraryTitle', { label: strings.DocumentsLibraryFieldLabel }),
               PropertyPaneTextField('galleryLibraryTitle', { label: strings.GalleryLibraryFieldLabel }),
               PropertyPaneTextField('employeeListTitle', { label: strings.EmployeeListFieldLabel }),

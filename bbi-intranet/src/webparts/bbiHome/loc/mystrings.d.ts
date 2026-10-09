@@ -7,6 +7,7 @@ declare interface IBbiHomeWebPartStrings {
   SessionsListFieldLabel: string;
   TrainersListFieldLabel: string;
   FormationsListFieldLabel: string;
+  OffersListFieldLabel: string;
   DocumentsLibraryFieldLabel: string;
   GalleryLibraryFieldLabel: string;
   EmployeeListFieldLabel: string;

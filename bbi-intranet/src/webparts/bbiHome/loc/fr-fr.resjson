@@ -7,6 +7,7 @@
   "SessionsListFieldLabel": "Liste des sessions",
   "TrainersListFieldLabel": "Liste des formateurs référents (photo, e-mail, téléphone, WhatsApp, localisation)",
   "FormationsListFieldLabel": "Liste des formations",
+  "OffersListFieldLabel": "Liste des offres (formation, conseil, coaching)",
   "DocumentsLibraryFieldLabel": "Bibliothèque des supports publiés",
   "GalleryLibraryFieldLabel": "Bibliothèque de la galerie médias",
   "EmployeeListFieldLabel": "Liste des employés du mois",

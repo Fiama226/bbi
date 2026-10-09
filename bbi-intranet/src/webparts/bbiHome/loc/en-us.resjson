@@ -7,6 +7,7 @@
   "SessionsListFieldLabel": "Sessions list",
   "TrainersListFieldLabel": "Trainers list (photo, email, phone, WhatsApp, location)",
   "FormationsListFieldLabel": "Courses list",
+  "OffersListFieldLabel": "Offers list (training, consulting, coaching)",
   "DocumentsLibraryFieldLabel": "Published documents library",
   "GalleryLibraryFieldLabel": "Media gallery library",
   "EmployeeListFieldLabel": "Employee of the month list",

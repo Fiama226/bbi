@@ -8,6 +8,7 @@ export interface IBbiHomeProps {
   sessionsListTitle: string;
   trainersListTitle: string;
   formationsListTitle: string;
+  offersListTitle: string;
   documentsLibraryTitle: string;
   galleryLibraryTitle: string;
   employeeListTitle: string;

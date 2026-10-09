@@ -70,9 +70,11 @@ import NewsBoard from "./NewsBoard";
 import NewsDetail from "./NewsDetail";
 import TrainerDirectory from "./TrainerDirectory";
 import TeamHighlights from "./TeamHighlights";
-import TrainingCatalog from "../../trainingCatalog/components/TrainingCatalog";
-import { ITrainingCatalogProps } from "../../trainingCatalog/components/ITrainingCatalogProps";
-import trainingStrings from "TrainingCatalogWebPartStrings";
+import OffersCatalog, {
+  IOffersCatalogProps,
+  PillarsStrip,
+} from "./OffersCatalog";
+import { OfferPole, poleFromHash } from "./offersData";
 import SecureDocuments from "../../secureDocuments/components/SecureDocuments";
 import { ISecureDocumentsProps } from "../../secureDocuments/components/ISecureDocumentsProps";
 import documentStrings from "SecureDocumentsWebPartStrings";
@@ -135,8 +137,8 @@ const DOCUMENTS_LIBRARY_PATH = "Documents%20partages/Forms/AllItems.aspx";
 
 const defaultNav = (siteUrl: string): INavLink[] => [
   { label: "Accueil", url: "#accueil" },
-  { label: "Formations", url: "#formations" },
-  { label: "Sessions", url: "#sessions" },
+  { label: "Nos offres", url: "#offres" },
+  { label: "Sessions & missions", url: "#sessions" },
   { label: "Actualités", url: "#actualites" },
   { label: "Ressources", url: "#ressources" },
   { label: "Communauté", url: "#communaute" },
@@ -151,12 +153,12 @@ const defaultHeroSlides = (props: IBbiHomeProps): IHeroSlide[] => [
   {
     imageUrl: props.heroImageUrl || "",
     eyebrow: props.heroEyebrow || "Business Builders International",
-    title: props.heroTitle || "L'expertise qui fait grandir les dirigeants.",
+    title: props.heroTitle || "Renforcer les capacités de vos équipes et de vos organisations.",
     subtitle:
       props.heroSubtitle ||
-      "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables.",
-    ctaLabel: props.primaryCtaLabel || "Explorer les formations",
-    ctaUrl: props.primaryCtaUrl || "#formations",
+      "Formation, conseil et coaching pour transformer vos ambitions en résultats durables.",
+    ctaLabel: props.primaryCtaLabel || "Découvrir nos offres",
+    ctaUrl: props.primaryCtaUrl || "#offres",
   },
   {
     imageUrl: "",
@@ -274,9 +276,9 @@ const QuickLinkIcon: React.FC<{ icon: string }> = ({ icon }) => {
 const DEFAULT_QUICK_LINKS: IQuickLink[] = [
   {
     icon: "▦",
-    title: "Catalogue des formations",
-    subtitle: "Parcours, modalités et durées",
-    url: "#formations",
+    title: "Nos offres",
+    subtitle: "Formation, conseil et coaching",
+    url: "#offres",
   },
   {
     icon: "▣",
@@ -408,6 +410,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const [newsId, setNewsId] = React.useState<number>(() =>
     newsIdFromHash(window.location.hash),
   );
+  const [pole, setPole] = React.useState<OfferPole | "">(() =>
+    poleFromHash(window.location.hash),
+  );
   const rootRef = React.useRef<HTMLDivElement>(null);
   const searchInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -484,6 +489,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       const hash = window.location.hash;
       setActiveView(viewFromHash(hash));
       setNewsId(newsIdFromHash(hash));
+      setPole(poleFromHash(hash));
       const anchor = anchorIdFromHash(hash);
       if (anchor) {
         window.setTimeout(() => {
@@ -729,19 +735,23 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
 
   const openView = (
     view: PortalView,
-    options?: { newsId?: number; silent?: boolean },
+    options?: { newsId?: number; silent?: boolean; pole?: OfferPole | "" },
   ): void => {
     const targetNewsId =
       options && options.newsId !== undefined ? options.newsId : 0;
+    const targetPole = (options && options.pole) || "";
     const hash =
       view === "actualite" && targetNewsId
         ? `actualite?id=${targetNewsId}`
-        : view;
+        : view === "formations" && targetPole
+          ? `offres?pole=${targetPole.toLowerCase()}`
+          : view;
     if (window.location.hash !== `#${hash}`) {
       window.history.pushState(null, "", `#${hash}`);
     }
     setActiveView(view);
     setNewsId(targetNewsId);
+    setPole(targetPole);
     setMenuOpen(false);
     if (!options || !options.silent) {
       if (view === "actualites" || view === "accueil") {
@@ -780,7 +790,10 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       event.preventDefault();
       const route = parsePortalRoute(href);
       const parsedId = parseInt(route.params.id || "", 10);
-      openView(view, { newsId: Number.isNaN(parsedId) ? 0 : parsedId });
+      openView(view, {
+        newsId: Number.isNaN(parsedId) ? 0 : parsedId,
+        pole: poleFromHash(href),
+      });
     }
   };
 
@@ -843,17 +856,14 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     ),
   ];
 
-  const catalogProps: ITrainingCatalogProps = {
+  const offersProps: IOffersCatalogProps = {
     siteUrl: props.siteUrl,
-    listTitle: props.formationsListTitle,
-    maxItems: 300,
-    initialQuery: searchQuery,
+    listTitle: props.offersListTitle,
     spHttpClient: props.spHttpClient,
     showDataNotices: props.showDataNotices,
-    isDarkTheme: false,
-    hasTeamsContext: false,
-    embedded: true,
-    strings: trainingStrings,
+    initialQuery: searchQuery,
+    pole,
+    onPoleChange: setPole,
   };
   const documentsProps: ISecureDocumentsProps = {
     siteUrl: props.siteUrl,
@@ -1217,7 +1227,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               openView("formations");
             }}
           >
-            Parcourir le catalogue des formations{" "}
+            Parcourir nos offres{" "}
             <span aria-hidden="true">→</span>
           </button>
         </section>
@@ -1226,15 +1236,15 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           slides={heroSlides}
           eyebrow={props.heroEyebrow || "Business Builders International"}
           title={
-            props.heroTitle || "L'expertise qui fait grandir les dirigeants."
+            props.heroTitle || "Renforcer les capacités de vos équipes et de vos organisations."
           }
           subtitle={
             props.heroSubtitle ||
-            "Formations, accompagnement et intelligence collective pour transformer vos ambitions en résultats durables."
+            "Formation, conseil et coaching pour transformer vos ambitions en résultats durables."
           }
           imageUrl={props.heroImageUrl || ""}
-          primaryLabel={props.primaryCtaLabel || "Explorer les formations"}
-          primaryUrl={props.primaryCtaUrl || "#formations"}
+          primaryLabel={props.primaryCtaLabel || "Découvrir nos offres"}
+          primaryUrl={props.primaryCtaUrl || "#offres"}
           secondaryLabel={
             props.secondaryCtaLabel || "Voir les prochaines sessions"
           }
@@ -1250,6 +1260,23 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           }}
           onInternalNavigate={followPortalLink}
         />
+
+        <section
+          className={styles.section}
+          id="poles"
+          data-bbi-view="accueil"
+          aria-labelledby="bbi-poles-title"
+        >
+          <div className={styles.sectionHeading}>
+            <div>
+              <p className={styles.eyebrow}>Notre métier</p>
+              <h2 id="bbi-poles-title">
+                Renforcer les capacités : former, conseiller, accompagner
+              </h2>
+            </div>
+          </div>
+          <PillarsStrip onNavigate={followPortalLink} />
+        </section>
 
         {(props.visionText || props.missionText || objectives.length > 0) && (
           <section
@@ -1346,16 +1373,16 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               <span>01</span>
               <h3>Choisir son parcours</h3>
               <p>
-                Repérez les compétences utiles à vos enjeux et trouvez la
-                formation adaptée.
+                Repérez l&apos;accompagnement utile à vos enjeux : formation,
+                conseil ou coaching.
               </p>
               <a
-                href="#formations"
+                href="#offres"
                 onClick={(event) => {
-                  followPortalLink(event, "#formations");
+                  followPortalLink(event, "#offres");
                 }}
               >
-                Explorer le catalogue →
+                Découvrir nos offres →
               </a>
             </article>
             <article className={styles.pathCard}>
@@ -1482,8 +1509,8 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             <div className={styles.homeRowCell} id="parcours">
               <div className={styles.sectionHeading}>
                 <div>
-                  <p className={styles.eyebrow}>Se former</p>
-                  <h2>Parcours pédagogiques</h2>
+                  <p className={styles.eyebrow}>Renforcement de capacités</p>
+                  <h2>Nos offres</h2>
                 </div>
                 <a
                   className={styles.textLink}
@@ -1492,21 +1519,21 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                     followPortalLink(event, "#sessions");
                   }}
                 >
-                  Nos plannings <span aria-hidden="true">→</span>
+                  Sessions &amp; missions <span aria-hidden="true">→</span>
                 </a>
               </div>
               <LazyMount active={activeView === "accueil"} minHeight={210}>
-                <TrainingCatalog {...catalogProps} maxItems={6} compact />
+                <OffersCatalog {...offersProps} compact perPole={2} />
               </LazyMount>
               <p>
                 <a
                   className={styles.textLink}
-                  href="#formations"
+                  href="#offres"
                   onClick={(event) => {
-                    followPortalLink(event, "#formations");
+                    followPortalLink(event, "#offres");
                   }}
                 >
-                  Voir tout le catalogue <span aria-hidden="true">→</span>
+                  Voir toutes nos offres <span aria-hidden="true">→</span>
                 </a>
               </p>
             </div>
@@ -1664,7 +1691,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             <div className={styles.sectionHeading}>
               <div>
                 <p className={styles.eyebrow}>À venir</p>
-                <h2>Prochaines sessions</h2>
+                <h2>Prochaines sessions et missions</h2>
               </div>
               <a
                 className={styles.textLink}
@@ -1755,16 +1782,16 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           className={styles.section}
           id="formations"
           data-bbi-view="formations"
-          aria-label="Catalogue des formations"
+          aria-label="Nos offres : formation, conseil et coaching"
         >
           <div className={styles.sectionHeading}>
             <div>
-              <p className={styles.eyebrow}>Se former</p>
-              <h2>Catalogue des formations</h2>
+              <p className={styles.eyebrow}>Renforcement de capacités</p>
+              <h2>Nos offres</h2>
             </div>
           </div>
           <LazyMount active={activeView === "formations"} minHeight={210}>
-            <TrainingCatalog {...catalogProps} />
+            <OffersCatalog {...offersProps} />
           </LazyMount>
           <div className={styles.sectionHeading} id="references-pedagogiques">
             <div>
