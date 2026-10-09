@@ -81,7 +81,19 @@ param(
     [switch]$ProvisionFiliales,
 
     # Limite -ProvisionFiliales aux lignes dont Ville correspond (comparaison via ConvertTo-BbiSlug : accents et casse ignorés)
-    [string[]]$Filiale
+    [string[]]$Filiale,
+
+    # N'ajoute pas le lien « BBI Intranet » au menu du site. Utilisé par la première passe de
+    # New-BbiOrganization.ps1 : la seconde passe (-ProvisionFiliales) crée le lien du siège.
+    [switch]$SkipNavigation,
+
+    # Fichier d'environnement (tenant, site). Par défaut : bbi-environnement.json à la racine du dépôt.
+    # New-BbiOrganization.ps1 le renseigne pour viser un autre tenant.
+    [string]$EnvironmentFile = '',
+
+    # Identifiant de l'application Entra ID pour la connexion interactive (PnP.PowerShell 2.x l'exige).
+    # Par défaut : variable d'environnement BBI_CLIENT_ID.
+    [string]$ClientId = $env:BBI_CLIENT_ID
 )
 
 $ErrorActionPreference = 'Stop'
@@ -90,7 +102,7 @@ $ErrorActionPreference = 'Stop'
 # Environnement (tenant + site) — source unique : bbi-environnement.json
 # ------------------------------------------------------------------
 $scriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$EnvironmentFile = Join-Path (Split-Path -Parent $scriptRoot) 'bbi-environnement.json'
+if (-not $EnvironmentFile) { $EnvironmentFile = Join-Path (Split-Path -Parent $scriptRoot) 'bbi-environnement.json' }
 
 if (Test-Path $EnvironmentFile) {
     $BbiEnv = Get-Content $EnvironmentFile -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -133,6 +145,16 @@ $WP_FICHE     = 'a9c99e25-db18-4419-894b-08bc9c5b9081'   # BBI Fiche formation (
 $WP_SESSIONS  = '96216ee2-85b1-473b-aaec-e5b646a151ee'   # BBI Sessions & inscriptions
 $WP_ARTICLE   = 'f769f3df-2c27-4a30-bce2-d4ae5793557b'   # BBI Article d'actualité (modèle)
 $EXT_FULLSCREEN = 'ae430672-9740-4b5a-ace1-fd5d5ab6e9bf' # BBI Plein écran (Application Customizer)
+
+# ------------------------------------------------------------------
+# Connexion (avec -ClientId quand il est fourni)
+# ------------------------------------------------------------------
+function Connect-BbiSite {
+    param([Parameter(Mandatory)][string]$Url)
+    $connect = @{ Url = $Url; Interactive = $true }
+    if ($ClientId) { $connect.ClientId = $ClientId }
+    Connect-PnPOnline @connect
+}
 
 # ------------------------------------------------------------------
 # Journalisation
@@ -363,7 +385,7 @@ function Ensure-BbiWebPart {
     } catch { }
 
     Invoke-Bbi "  ajout du web part $Name sur « $Page »" {
-        Add-PnPPageWebPart -Page $Page -ComponentId $ComponentId -WebPartProperties $PropertiesJson `
+        Add-PnPPageWebPart -Page $Page -Component $ComponentId -WebPartProperties $PropertiesJson `
             -Section $Section -Column $Column -Order $Order | Out-Null
     } | Out-Null
     Add-Report "Web part $Name → $Page" 'CRÉÉ'
@@ -422,7 +444,7 @@ function Invoke-BbiSiteProvisioning {
     )
     # $SeedDemo : accepté pour compatibilité d'interface ; le jeu de démo reste en section 9/10 (siège uniquement).
     if ((Get-PnPConnection).Url.TrimEnd('/') -ne $TargetUrl.TrimEnd('/')) {
-        Connect-PnPOnline -Url $TargetUrl -Interactive
+        Connect-BbiSite -Url $TargetUrl
         Write-Ok "Connecté à $TargetUrl"
     }
     $previousDataSite = $script:DataSiteUrl
@@ -679,11 +701,11 @@ function Invoke-BbiSiteProvisioning {
                 Set-PnPList -Identity 'Supports publiés' -BreakRoleInheritance -CopyRoleAssignments | Out-Null
                 Write-Ok "Héritage rompu : les apprenants conservent la Lecture."
                 try {
-                    Set-PnPListPermission -List 'Supports publiés' -Identity 'Membres du site' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
-                    Set-PnPListPermission -List 'Supports publiés' -Identity 'Visiteurs' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
+                    Set-PnPListPermission -Identity 'Supports publiés' -Group 'Membres du site' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
+                    Set-PnPListPermission -Identity 'Supports publiés' -Group 'Visiteurs' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
                 } catch { Write-Warn2 "Ajustement des rôles par défaut ignoré : $($_.Exception.Message)" }
                 try {
-                    Set-PnPListPermission -List 'Supports publiés' -Identity $EditorsGroup -AddRole 'Contribute'
+                    Set-PnPListPermission -Identity 'Supports publiés' -Group $EditorsGroup -AddRole 'Contribute'
                     Write-Ok "Contribution limitée au groupe « $EditorsGroup »."
                 } catch {
                     Write-Warn2 "Groupe « $EditorsGroup » introuvable : accordez la contribution manuellement (Paramètres de la bibliothèque > Autorisations)."
@@ -788,11 +810,11 @@ function Invoke-BbiSiteProvisioning {
 # ==================================================================
 Write-Title "1/10 · Connexion à SharePoint"
 if (-not $DryRun -and -not $VerifyOnly) {
-    Connect-PnPOnline -Url $SiteUrl -Interactive
+    Connect-BbiSite -Url $SiteUrl
     Write-Ok "Connecté à $SiteUrl"
 } else {
     Write-Step "Mode simulation/audit : connexion requise pour l'analyse, aucune écriture."
-    Connect-PnPOnline -Url $SiteUrl -Interactive
+    Connect-BbiSite -Url $SiteUrl
 }
 if ($script:DataSiteUrl -ne $SiteUrl) {
     Write-Step "Les listes métier seront créées sur : $($script:DataSiteUrl)"
@@ -809,7 +831,7 @@ if ($ProvisionFiliales) {
         Write-Warn2 "hubEnabled = false dans bbi-environnement.json : section ignorée."
     } else {
         $hubUrl = $SiteUrl.TrimEnd('/')
-        if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-PnPOnline -Url $hubUrl -Interactive }
+        if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-BbiSite -Url $hubUrl }
 
         # 6.1 Hub
         $hub = try { Get-PnPHubSite -Identity $hubUrl -ErrorAction Stop } catch { $null }
@@ -948,7 +970,7 @@ if ($ProvisionFiliales) {
         }
 
         # 6.4 Navigation hub (= navigation supérieure du site hub) : siège puis filiales par Ordre
-        if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-PnPOnline -Url $hubUrl -Interactive }
+        if ((Get-PnPConnection).Url.TrimEnd('/') -ne $hubUrl) { Connect-BbiSite -Url $hubUrl }
         $hubNavTitle = 'Siège'
         if ($hubRow -and "$($hubRow['Title'])".Trim()) { $hubNavTitle = "$($hubRow['Title'])".Trim() }
         Ensure-BbiNavNode -Title $hubNavTitle -Url "$hubUrl/SitePages/accueil.aspx"
@@ -991,7 +1013,7 @@ $palette = @{
 if ($DryRun -or $VerifyOnly) {
     Write-Step "[SIMULATION] thème « BBI Bleu nuit » + en-tête + logo"
 } else {
-    if (-not (Get-PnPTenantTheme -Identity 'BBI Bleu nuit' -ErrorAction SilentlyContinue)) {
+    if (-not (Get-PnPTenantTheme -Name 'BBI Bleu nuit' -ErrorAction SilentlyContinue)) {
         Invoke-Bbi "Publication du thème « BBI Bleu nuit »" {
             Add-PnPTenantTheme -Identity 'BBI Bleu nuit' -Palette $palette -IsInverted $false
         } | Out-Null
@@ -1026,7 +1048,7 @@ if (-not $DryRun -and -not $VerifyOnly) {
     }
 }
 # Avec -ProvisionFiliales, le nœud du siège (6.4) pointe déjà vers cette page : pas de doublon.
-if (-not $ProvisionFiliales) {
+if (-not $ProvisionFiliales -and -not $SkipNavigation) {
     Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
 }
 # Le portail est mono-page : les autres vues sont des ancres/routes internes.

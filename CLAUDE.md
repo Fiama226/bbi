@@ -104,4 +104,14 @@ cd deploy
 .\provision-bbi-intranet.ps1 -ProvisionFiliales  # hub + one team site per filiale (needs SharePoint admin role)
 .\provision-bbi-intranet.ps1 -VerifyOnly    # audit existing provisioning
 .\provision-bbi-intranet.ps1 -ProvisionFiliales -Filiale Abidjan   # une seule filiale
+
+# Kit « organisation » : recrée siège, filiales, application, groupes, identité, audit depuis deploy/organisation.json
+copy organisation.example.json organisation.json            # puis adapter (tenant, siège, filiales)
+pwsh -File .\verify-organisation.ps1                         # tests hors ligne : configuration et plan (34 contrôles)
+pwsh -File .\verify-organisation-flow.ps1                    # tests hors ligne : déroulé complet contre un SharePoint simulé (49 contrôles)
+pwsh -File .\verify-pnp-parameters.ps1                      # paramètres PnP de tous les scripts contre le module installé (lecture seule)
+pwsh -File .\New-BbiOrganization.ps1 -PlanOnly              # le plan, sans connexion
+pwsh -File .\New-BbiOrganization.ps1 -DryRun -ClientId <id>  # lecture seule
+pwsh -File .\New-BbiOrganization.ps1 -ClientId <id>          # tout créer (idempotent) ; -Filiale Abidjan pour un premier essai
+pwsh -File .\Test-BbiOrganization.ps1 -ClientId <id>         # audit en lecture seule
 ```

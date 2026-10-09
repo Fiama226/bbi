@@ -1,0 +1,104 @@
+{
+  "_lisezMoi": "Description de l'organisation à recréer (siège, filiales, groupes, options). Copiez ce fichier en organisation.json, adaptez-le, puis lancez New-BbiOrganization.ps1 -PlanOnly pour voir ce qui sera créé sans rien toucher. Les clés qui commencent par _ sont des commentaires.",
+
+  "tenant": {
+    "_nom": "Partie avant .sharepoint.com du tenant cible (par exemple businessbuilderinter pour businessbuilderinter.sharepoint.com).",
+    "nom": "businessbuilderinter",
+    "_clientId": "Identifiant de l'application Entra ID utilisée pour la connexion interactive de PnP.PowerShell (voir deploy/README.md, étape 2). Peut aussi être donné par -ClientId ou la variable BBI_CLIENT_ID.",
+    "clientId": ""
+  },
+
+  "organisation": {
+    "nom": "Business Builders International",
+    "_langue": "Code de langue des sites créés (1036 = français, 1033 = anglais).",
+    "langue": 1036
+  },
+
+  "siege": {
+    "_alias": "Fin de l'URL du site du siège : https://<tenant>.sharepoint.com/sites/<alias>. Le siège devient le hub.",
+    "titre": "Siège — Paris",
+    "alias": "intranet",
+    "ville": "Paris",
+    "pays": "France",
+    "couleur": "#0E265C",
+    "initiales": "SP",
+    "responsable": "",
+    "email": "",
+    "telephone": "",
+    "adresse": "",
+    "_personnes": "Adresses e-mail Microsoft 365. Laisser les listes vides pour ne rien ajouter.",
+    "proprietaires": [],
+    "membres": [],
+    "visiteurs": []
+  },
+
+  "filiales": [
+    {
+      "_ville": "La ville fournit l'URL du site : /sites/<prefixeFiliale><ville sans accents>. Exemple : Abidjan donne /sites/intranet-abidjan.",
+      "titre": "Filiale Abidjan",
+      "ville": "Abidjan",
+      "pays": "Côte d'Ivoire",
+      "couleur": "#C8102E",
+      "initiales": "AB",
+      "responsable": "",
+      "email": "",
+      "telephone": "",
+      "adresse": "",
+      "proprietaires": [],
+      "membres": [],
+      "visiteurs": []
+    },
+    {
+      "titre": "Antenne Bamako",
+      "ville": "Bamako",
+      "pays": "Mali",
+      "couleur": "#6B2D8B",
+      "initiales": "BK",
+      "proprietaires": [],
+      "membres": [],
+      "visiteurs": []
+    },
+    {
+      "titre": "Antenne Dakar",
+      "ville": "Dakar",
+      "pays": "Sénégal",
+      "couleur": "#B5651D",
+      "initiales": "DK",
+      "proprietaires": [],
+      "membres": [],
+      "visiteurs": []
+    }
+  ],
+
+  "groupes": {
+    "editeurs": {
+      "_nom": "Groupe SharePoint (sur le siège) autorisé à publier les supports. Il est créé s'il n'existe pas.",
+      "nom": "BBI-Concepteurs",
+      "membres": []
+    },
+    "_lectureTous": "true : ajoute « Tout le monde sauf les utilisateurs externes » aux visiteurs de chaque site (portail visible de tout le personnel).",
+    "lectureTous": false
+  },
+
+  "identite": {
+    "_nomTheme": "Nom du thème appliqué à chaque site. Le thème « BBI Bleu nuit » est publié par provision-bbi-intranet.ps1.",
+    "nomTheme": "BBI Bleu nuit",
+    "_logo": "Chemin d'un fichier image (relatif à ce fichier) téléversé dans SiteAssets de chaque site et utilisé comme logo. Laisser vide pour ne pas changer le logo.",
+    "logo": "",
+    "titrePiedDePage": "Business Builders International",
+    "_piedDePage": "Liens du pied de page de chaque site : titre et url.",
+    "piedDePage": []
+  },
+
+  "options": {
+    "_prefixeFiliale": "Préfixe de l'URL des sites de filiale.",
+    "prefixeFiliale": "intranet-",
+    "_hub": "true : le siège est enregistré comme hub et les filiales y sont rattachées.",
+    "hub": true,
+    "_donneesDemo": "true : ajoute des données d'exemple (offres, actualités, sessions, annonces...) pour que le portail soit présentable tout de suite.",
+    "donneesDemo": true,
+    "_deployerApplication": "true : téléverse et déploie le paquet SPFx dans le catalogue d'applications du tenant. Le catalogue doit déjà exister.",
+    "deployerApplication": true,
+    "cheminPaquet": "../deliverables/spfx/bbi-portail.sppkg"
+  }
+}

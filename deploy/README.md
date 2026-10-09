@@ -8,7 +8,8 @@ communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
 > Expérience **sans aucun chrome SharePoint** (Teams / Viva Connections) : [`../teams/README.md`](../teams/README.md)
 > Fichier principal : [`provision-bbi-intranet.ps1`](./provision-bbi-intranet.ps1)
-> Package SPFx à installer avant : [`../deliverables/spfx/bbi-portail.sppkg`](../deliverables/spfx/bbi-portail.sppkg) (v1.6.0.0)
+> **Recréer toute l'organisation (siège, filiales, groupes, identité) sur un autre tenant ou sur celui-ci : voir le [§ 9](#9-recréer-toute-lorganisation-sur-un-autre-tenant-ou-sur-celui-ci--kit--organisation-)**
+> Package SPFx à installer avant : [`../deliverables/spfx/bbi-portail.sppkg`](../deliverables/spfx/bbi-portail.sppkg) (v1.9.0.0)
 
 ---
 
@@ -421,3 +422,175 @@ npm run build                       # → sharepoint/solution/bbi-portail.sppkg
 1. Re-téléverser le `.sppkg` dans le catalogue → **Upgrade**.
 2. `.\provision-bbi-intranet.ps1 -VerifyOnly` pour contrôler l'intégrité.
 3. Noter la version déployée dans le journal de recette (voir `deliverables/` index §11.2).
+
+---
+
+## 9. Recréer toute l'organisation sur un autre tenant (ou sur celui-ci) — kit « organisation »
+
+Le croquis du client montre un **siège** et des **filiales** (bandeau « Siège · Filiale 1 · Filiale… »), chacun avec le même tableau de bord. Ce kit recrée cette organisation de bout en bout, depuis **un seul fichier de configuration** : il fonctionne sur le tenant actuel comme sur un nouveau tenant client.
+
+**Ce que le kit crée, sans rien refaire à la main :**
+
+| Élément | Détail |
+|---|---|
+| **Site du siège** | Site d'équipe privé, devenu **hub** |
+| **Sites de filiale** | Un site d'équipe par filiale, rattaché au hub (`/sites/intranet-<ville>`) : ce sont des sites frères reliés au siège, pas des sous-sites classiques |
+| **Tableau de bord** | La page d'accueil du portail (`accueil.aspx`, web part *BBI Accueil*) sur le siège **et** sur chaque filiale |
+| **Listes et bibliothèques** | Les 16 listes et bibliothèques du portail sur chaque site, dont `Offres` |
+| **Application SPFx** | Téléversée et déployée dans le catalogue d'applications du tenant |
+| **Bandeau Siège et filiales** | La liste `Implantations` est remplie depuis la configuration, puis recopiée sur chaque site, avec le lien, la couleur et les initiales de chaque filiale |
+| **Groupes et permissions** | Groupe des éditeurs de contenu ; propriétaires, membres et visiteurs de chaque site ; option « tout le personnel en lecture » |
+| **Identité visuelle** | Thème, en-tête compact, logo, pied de page et ses liens, sur chaque site |
+| **Contenu de démonstration** | Offres, actualités, sessions, annonces… (option), pour que chaque site soit présentable le premier jour |
+| **Audit** | Un bilan final site par site |
+
+### Les fichiers du kit
+
+| Fichier | Rôle |
+|---|---|
+| [`organisation.example.json`](./organisation.example.json) | Modèle de configuration à copier en `organisation.json` (ce dernier n'est pas versionné) |
+| [`New-BbiOrganization.ps1`](./New-BbiOrganization.ps1) | **Le script à lancer** : enchaîne les neuf étapes ci-dessous |
+| [`Test-BbiOrganization.ps1`](./Test-BbiOrganization.ps1) | Audit en lecture seule (appelé à la fin, utilisable seul) |
+| [`BbiOrganization.ps1`](./BbiOrganization.ps1) | Fonctions communes (lecture et contrôle de la configuration, plan) |
+| [`verify-organisation.ps1`](./verify-organisation.ps1) | Test hors ligne de la configuration et du plan (34 contrôles) |
+| [`verify-organisation-flow.ps1`](./verify-organisation-flow.ps1) | Test hors ligne du déroulé complet contre un SharePoint simulé (49 contrôles) |
+| [`verify-pnp-parameters.ps1`](./verify-pnp-parameters.ps1) | Vérifie que chaque appel PnP des scripts utilise des paramètres qui existent dans le module installé (à relancer après une mise à jour de PnP.PowerShell) |
+| [`provision-bbi-intranet.ps1`](./provision-bbi-intranet.ps1) | Le script existant, réutilisé par le kit pour chaque site |
+
+### Comment l'utiliser, pas à pas
+
+**1. Prérequis (une seule fois)**
+
+- PowerShell 7 et le module : `Install-Module PnP.PowerShell -Scope CurrentUser`.
+- Un compte avec le rôle **administrateur SharePoint** et le droit de créer des groupes Microsoft 365.
+- Un **catalogue d'applications** sur le tenant (centre d'administration SharePoint → *Plus de fonctionnalités* → *Applications* → *Catalogue d'applications*). Le script ne peut pas le créer.
+- Le paquet `deliverables/spfx/bbi-portail.sppkg` (déjà dans le dépôt).
+
+**2. Enregistrer l'application de connexion (une seule fois par tenant)**
+
+PnP.PowerShell 2.x refuse la connexion interactive sans application Entra ID. Créez-la, puis notez l'identifiant :
+
+```powershell
+Register-PnPEntraIDAppForInteractiveLogin -ApplicationName "BBI Provisionnement" `
+    -Tenant votretenant.onmicrosoft.com `
+    -GraphDelegatePermissions "Group.ReadWrite.All","User.Read.All"
+```
+
+Les permissions Graph servent à ajouter propriétaires et membres aux groupes Microsoft 365 des sites. Selon la version du module, les noms de paramètres peuvent différer : voir la documentation de PnP.PowerShell. Donnez ensuite l'identifiant au script, par `-ClientId`, par `tenant.clientId` dans la configuration, ou ainsi :
+
+```powershell
+$env:BBI_CLIENT_ID = '<identifiant de l application>'
+```
+
+**3. Écrire la configuration**
+
+```powershell
+cd deploy
+Copy-Item organisation.example.json organisation.json
+```
+
+Ouvrez `organisation.json` et adaptez-le. Les clés qui commencent par `_` sont des commentaires.
+
+| Section | À renseigner |
+|---|---|
+| `tenant.nom` | La partie avant `.sharepoint.com` (ex. `businessbuilderinter`) |
+| `siege` | `titre`, `alias` (fin de l'URL : `/sites/<alias>`), ville, pays, couleur, initiales, contacts |
+| `filiales[]` | Une entrée par filiale : `titre`, **`ville`** (elle fournit l'URL du site), pays, couleur `#RRGGBB`, initiales |
+| `siege` et `filiales[]` | `proprietaires`, `membres`, `visiteurs` : adresses e-mail Microsoft 365 (listes vides = rien ajouté) |
+| `groupes` | `editeurs.nom` et `editeurs.membres` ; `lectureTous` pour donner la lecture à tout le personnel |
+| `identite` | `nomTheme`, `logo` (fichier image, chemin relatif), `titrePiedDePage`, `piedDePage` (liens) |
+| `options` | `prefixeFiliale`, `hub`, `donneesDemo`, `deployerApplication`, `cheminPaquet` |
+
+**4. Contrôler, sans toucher à rien**
+
+```powershell
+# Tests hors ligne : aucune connexion, aucun tenant
+pwsh -File .\verify-organisation.ps1
+pwsh -File .\verify-organisation-flow.ps1
+pwsh -File .\verify-pnp-parameters.ps1      # noms de paramètres PnP contre le module installé
+
+# Le plan : sites, URL, nombre de personnes par site
+pwsh -File .\New-BbiOrganization.ps1 -PlanOnly
+```
+
+`-PlanOnly` affiche exactement ce qui serait créé et refuse une configuration invalide (ville en double, adresse e-mail incorrecte, couleur mal écrite…) avant toute connexion.
+
+**5. Simuler avec connexion en lecture seule**
+
+```powershell
+pwsh -File .\New-BbiOrganization.ps1 -DryRun -ClientId <identifiant>
+```
+
+Le script lit le tenant, dit ce qu'il créerait et ne modifie rien. Si le siège n'existe pas encore, la simulation s'arrête à ce point.
+
+**6. Premier essai avec une seule filiale, puis tout créer**
+
+```powershell
+pwsh -File .\New-BbiOrganization.ps1 -ClientId <identifiant> -Filiale Abidjan   # siège + une filiale
+pwsh -File .\New-BbiOrganization.ps1 -ClientId <identifiant>                    # toutes les filiales
+```
+
+La création des sites attend la fin du provisionnement : comptez plusieurs minutes. Le script est **idempotent** : relancez-le autant de fois que nécessaire, il ne recrée pas l'existant. En fin d'exécution, il affiche un rapport et lance l'audit.
+
+**7. Auditer à tout moment**
+
+```powershell
+pwsh -File .\Test-BbiOrganization.ps1 -ClientId <identifiant>
+# ou : pwsh -File .\New-BbiOrganization.ps1 -VerifyOnly -ClientId <identifiant>
+```
+
+Pour chaque site : existence, rattachement au hub, listes et bibliothèques, page `accueil.aspx`, web part, implantations, personnes de la configuration présentes dans les groupes. Sortie 0 si tout est conforme, 1 sinon.
+
+### Les options utiles
+
+| Option | Effet |
+|---|---|
+| `-PlanOnly` | Affiche le plan, aucune connexion |
+| `-DryRun` | Connexion en lecture seule, simulation |
+| `-VerifyOnly` | Audit uniquement |
+| `-Filiale Abidjan` | Limite le travail à une ou plusieurs filiales (ville, accents et casse ignorés) |
+| `-SkipAppDeploy` | N'envoie pas l'application (déjà déployée) |
+| `-SkipDemoData` | Pas de données de démonstration (tenant de production) |
+| `-SkipPermissions` | Ne touche ni aux propriétaires ni aux membres |
+| `-SkipBranding` | Ne touche ni au thème, ni au logo, ni au pied de page |
+| `-Config <fichier>` | Autre fichier de configuration (un fichier par client) |
+
+### Les neuf étapes du script
+
+| # | Étape | Détail |
+|---|---|---|
+| 1 | Connexion et siège | Crée le site d'équipe du siège s'il n'existe pas |
+| 2 | Application | Envoie le `.sppkg` dans le catalogue et le déploie ; s'arrête avec un message clair si le catalogue n'existe pas |
+| 3 | Groupe des éditeurs | Crée le groupe `BBI-Concepteurs` (ou le nom choisi) et y ajoute ses membres |
+| 4 | Siège, première passe | `provision-bbi-intranet.ps1 -SkipNavigation` : listes, bibliothèques, page d'accueil (sans lien de menu : il est créé à l'étape 6) |
+| 5 | Implantations | Remplit la liste `Implantations` du siège depuis la configuration (siège et filiales) |
+| 6 | Hub et filiales | `provision-bbi-intranet.ps1 -ProvisionFiliales` : hub, un site par filiale, portail sur chacun, menu du hub, données de démonstration |
+| 7 | Bandeau sur les filiales | Recopie `Implantations` sur chaque filiale, pour que le bandeau Siège et filiales y soit réel |
+| 8 | Groupes et permissions | Propriétaires et membres dans le groupe Microsoft 365 du site, visiteurs dans le groupe SharePoint, option « tout le personnel » |
+| 9 | Identité et audit | Thème, en-tête compact, logo, pied de page, puis `Test-BbiOrganization.ps1` |
+
+### Pour un autre client ou un autre tenant
+
+Copiez `organisation.json` vers un autre fichier (par exemple `client-b.json`), changez `tenant.nom`, le siège, les filiales et les groupes, puis lancez le script avec `-Config .\client-b.json`. Le fichier d'environnement que lisent les scripts existants est généré automatiquement : `bbi-environnement.json` n'est pas modifié. Le thème « BBI Bleu nuit » est publié sur le tenant par `provision-bbi-intranet.ps1`.
+
+### Dépannage
+
+| Symptôme | Cause probable | Solution |
+|---|---|---|
+| « Configuration invalide » | Une valeur ne respecte pas le format | Lire la liste : elle nomme chaque champ ; `-PlanOnly` pour revalider |
+| Message sur `-ClientId` ou échec de connexion | Application Entra ID absente ou mal identifiée | Refaire l'étape 2 et vérifier l'identifiant |
+| « Aucun catalogue d'applications » | Le tenant n'en a pas | Le créer dans le centre d'administration SharePoint, puis relancer |
+| La création du siège ou d'une filiale échoue | Une adresse de site portant ce nom est dans la corbeille de la collection de sites | Supprimer définitivement l'ancien site (centre d'administration, *Sites supprimés*) ou changer `alias` ou `ville` |
+| Propriétaires ou membres non ajoutés | Permissions Graph manquantes sur l'application | Ajouter `Group.ReadWrite.All` et `User.Read.All` (délégué) avec consentement administrateur |
+| Le bilan signale « À VÉRIFIER » sur l'application | Elle est téléversée mais pas encore marquée Déployée | Attendre quelques minutes, ou la déployer à la main dans le catalogue |
+| Un site de filiale reste en `ÉCHEC` dans le rapport | Les autres filiales ne sont pas bloquées | Relire le message, corriger, relancer (`-Filiale <ville>` pour cibler) |
+| Les anciennes pages gardent « Formations » dans le menu | Les propriétés enregistrées de la web part priment sur les valeurs par défaut | Relancer sans `-PreserveWebPart` ou modifier le menu dans le volet Propriétés |
+
+### Ce que le kit ne fait pas
+
+- Il ne crée pas de **sous-sites classiques** : les filiales sont des sites d'équipe rattachés au hub, l'approche conseillée pour SharePoint moderne.
+- Il ne crée pas de tableau de bord **Power BI**. Le « dashboard » est la page d'accueil du portail.
+- Il ne migre aucun contenu existant d'un tenant vers un autre.
+- Il ne fait pas les réglages de conformité du §4 (étiquettes de confidentialité, IRM, partage externe).
+
+> **À savoir avant le premier vrai lancement.** Les tests hors ligne (`verify-organisation.ps1` et `verify-organisation-flow.ps1`) valident la configuration, le plan et l'enchaînement des étapes, y compris l'idempotence. `verify-pnp-parameters.ps1` contrôle en plus que chaque appel PnP existe dans le module installé (dernier contrôle : PnP.PowerShell 3.3.0, 137 appels reconnus). Aucun de ces tests ne valide les droits de votre tenant ni le comportement réel de SharePoint : le kit n'a pas encore été lancé sur un tenant réel. Commencez par `-PlanOnly`, puis `-DryRun`, puis une seule filiale (`-Filiale`), et gardez l'audit pour conclure.
