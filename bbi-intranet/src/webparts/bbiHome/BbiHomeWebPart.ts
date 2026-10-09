@@ -76,7 +76,21 @@ const DOCUMENTS_LIBRARY_PATH = 'Documents%20partages/Forms/AllItems.aspx';
 const documentsNavLine = (siteUrl: string): string =>
   `# Documents | ${siteUrl.replace(/\/+$/, '')}/${DOCUMENTS_LIBRARY_PATH}`;
 
+/** Menu par défaut actuel (offres formation, conseil et coaching). */
+const DEFAULT_NAV_LINKS: string = [
+  '# Accueil | #accueil',
+  '# Nos offres | #offres',
+  '# Sessions & missions | #sessions',
+  '# Actualités | #actualites',
+  '# Ressources | #ressources',
+  '# Communauté | #communaute'
+].join('\n');
+
 const defaultNavLinks = (siteUrl: string): string =>
+  `${DEFAULT_NAV_LINKS}\n${documentsNavLine(siteUrl)}`;
+
+/** Ancien menu par défaut complet (lignes d'origine + ligne Documents). */
+const previousDefaultNavLinks = (siteUrl: string): string =>
   `${LEGACY_NAV_LINKS}\n${documentsNavLine(siteUrl)}`;
 
 /**
@@ -227,9 +241,12 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
     }
     if (!this.properties.navLinks) {
       this.properties.navLinks = defaultNavLinks(this.properties.siteUrl);
-    } else if (this.properties.navLinks.trim() === LEGACY_NAV_LINKS) {
-      // Migration : les instances créées avant l'ajout du bouton « Documents »
-      // gardaient l'ancien menu par défaut → on y ajoute le lien.
+    } else if (
+      this.properties.navLinks.trim() === LEGACY_NAV_LINKS ||
+      this.properties.navLinks.trim() === previousDefaultNavLinks(this.properties.siteUrl)
+    ) {
+      // Migration : menu jamais personnalisé (avant « Documents », ou ancien
+      // défaut « Formations / Sessions ») → nouveau menu par défaut.
       this.properties.navLinks = defaultNavLinks(this.properties.siteUrl);
     }
     if (!this.properties.quickLinks) {

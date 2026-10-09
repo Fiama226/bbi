@@ -16,7 +16,7 @@ communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
 | Page | Type | Contenu |
 |---|---|---|
-| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil (identité, annonces, vie de l'équipe, implantations, références), Formations (catalogue + références pédagogiques), Sessions (liste + calendrier), Actualités, Ressources (supports pédagogiques + documents administratifs + galerie), Communauté (**Trombinoscope**). Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
+| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil (identité, annonces, vie de l'équipe, implantations, références), Nos offres (catalogue des offres formation, conseil et coaching + références pédagogiques), Sessions (liste + calendrier), Actualités, Ressources (supports pédagogiques + documents administratifs + galerie), Communauté (**Trombinoscope**). Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
 
 Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Certifications`, `Annonces`,
 `Pensées du jour`, `Anniversaires`, `Implantations`, `Nos références`, `Références pédagogiques`,

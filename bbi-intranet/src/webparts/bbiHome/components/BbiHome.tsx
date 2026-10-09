@@ -163,10 +163,10 @@ const defaultHeroSlides = (props: IBbiHomeProps): IHeroSlide[] => [
   {
     imageUrl: "",
     eyebrow: "Notre méthode",
-    title: "Des parcours conçus pour le terrain.",
+    title: "Des accompagnements conçus pour le terrain.",
     subtitle:
-      "Des mises en situation concrètes, des formateurs certifiés et un ancrage à 30 jours pour transformer les acquis en résultats.",
-    ctaLabel: "Voir les prochaines sessions",
+      "Des mises en situation concrètes, des experts certifiés et un suivi à 30 jours.",
+    ctaLabel: "Voir les sessions et missions",
     ctaUrl: "#sessions",
   },
   {
@@ -1248,7 +1248,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           primaryLabel={props.primaryCtaLabel || "Découvrir nos offres"}
           primaryUrl={props.primaryCtaUrl || "#offres"}
           secondaryLabel={
-            props.secondaryCtaLabel || "Voir les prochaines sessions"
+            props.secondaryCtaLabel || "Voir les sessions et missions"
           }
           secondaryUrl={props.secondaryCtaUrl || "#sessions"}
           kpis={kpis}
