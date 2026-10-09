@@ -34,10 +34,16 @@ const POLE_CLASS: { [pole: string]: string } = {
   Coaching: styles.poleCoaching
 };
 
+const PILLAR_CLASS: { [pole: string]: string } = {
+  Formation: styles.pillarFormation,
+  Conseil: styles.pillarConseil,
+  Coaching: styles.pillarCoaching
+};
+
 const OfferCard: React.FC<{ offer: IOffer }> = ({ offer }) => (
   <article className={styles.card}>
     <div className={styles.cardTop}>
-      <span className={`${styles.badge} ${POLE_CLASS[offer.Pole]}`}>{offer.Pole}</span>
+      <span className={`${styles.badge} ${POLE_CLASS[offer.Pole] || styles.poleFormation}`}>{offer.Pole}</span>
       {offer.CodeOffre ? <span className={styles.code}>{offer.CodeOffre}</span> : null}
     </div>
     <h3 className={styles.cardTitle}>{offer.Title}</h3>
@@ -113,14 +119,17 @@ export const OffersCatalog: React.FC<IOffersCatalogProps> = (props) => {
     return (
       <div className={styles.offers}>
         {banner}
-        <div className={styles.grid}>
-          {preview.map((offer) => <OfferCard key={offer.Id} offer={offer} />)}
-        </div>
+        {preview.length > 0 && (
+          <div className={styles.grid}>
+            {preview.map((offer) => <OfferCard key={offer.Id} offer={offer} />)}
+          </div>
+        )}
       </div>
     );
   }
 
   const poleIsEmpty = !!pole && counts[pole] === 0;
+  const nothingPublished = active.length === 0 && !pole && !query && !filiere;
 
   return (
     <div className={styles.offers}>
@@ -183,18 +192,24 @@ export const OffersCatalog: React.FC<IOffersCatalogProps> = (props) => {
       {filtered.length === 0 ? (
         <div className={styles.empty}>
           <div className={styles.emptyTitle}>
-            {poleIsEmpty && !query && !filiere
-              ? `Aucune offre publiée pour le pôle ${pole} pour le moment.`
-              : 'Aucune offre ne correspond à votre recherche.'}
+            {nothingPublished
+              ? 'Aucune offre publiée pour le moment.'
+              : poleIsEmpty && !query && !filiere
+                ? `Aucune offre publiée pour le pôle ${pole} pour le moment.`
+                : 'Aucune offre ne correspond à votre recherche.'}
           </div>
-          <div className={styles.emptyHint}>Essayez un autre pôle ou une autre filière.</div>
-          <button
-            type="button"
-            className={styles.reset}
-            onClick={() => { setQuery(''); setFiliere(''); onPoleChange(''); }}
-          >
-            Réinitialiser les filtres
-          </button>
+          {!nothingPublished && (
+            <div className={styles.emptyHint}>Essayez un autre pôle ou une autre filière.</div>
+          )}
+          {!nothingPublished && (
+            <button
+              type="button"
+              className={styles.reset}
+              onClick={() => { setQuery(''); setFiliere(''); onPoleChange(''); }}
+            >
+              Réinitialiser les filtres
+            </button>
+          )}
         </div>
       ) : (
         <div className={styles.grid}>
@@ -216,7 +231,7 @@ export const PillarsStrip: React.FC<IPillarsStripProps> = ({ onNavigate }) => (
       return (
         <a
           key={pillar.pole}
-          className={styles.pillarCard}
+          className={`${styles.pillarCard} ${PILLAR_CLASS[pillar.pole] || styles.pillarFormation}`}
           href={href}
           onClick={(event) => { onNavigate(event, href); }}
         >

@@ -172,6 +172,14 @@
 
 /* Bandeau des trois pôles (accueil) */
 .pillars {
+  --bbi-navy: var(--themePrimary, #0E265C);
+  --bbi-red: #D21419;
+  --bbi-line: var(--neutralLight, #E1E4EA);
+  --bbi-text: var(--neutralPrimary, #21252B);
+  --bbi-muted: var(--neutralSecondary, #5A6270);
+  --bbi-pole-formation: #0E265C;
+  --bbi-pole-conseil: #D21419;
+  --bbi-pole-coaching: #1F7A6D;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
@@ -184,19 +192,23 @@
   padding: 18px 20px;
   background: #fff;
   border: 1px solid var(--bbi-line);
-  border-top: 4px solid var(--bbi-navy);
   border-radius: 10px;
+  box-shadow: inset 0 4px 0 var(--pole-colour, var(--bbi-navy));
   color: var(--bbi-text);
   text-decoration: none;
 
   &:hover {
-    box-shadow: 0 4px 14px rgba(14, 38, 92, 0.12);
+    box-shadow: inset 0 4px 0 var(--pole-colour, var(--bbi-navy)), 0 4px 14px rgba(14, 38, 92, 0.12);
   }
 }
 
+.pillarFormation { --pole-colour: var(--bbi-pole-formation); }
+.pillarConseil { --pole-colour: var(--bbi-pole-conseil); }
+.pillarCoaching { --pole-colour: var(--bbi-pole-coaching); }
+
 .pillarIcon {
   font-size: 22px;
-  color: var(--bbi-navy);
+  color: var(--pole-colour, var(--bbi-navy));
 }
 
 .pillarTitle {
