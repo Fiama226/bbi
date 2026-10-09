@@ -863,7 +863,9 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
     showDataNotices: props.showDataNotices,
     initialQuery: searchQuery,
     pole,
-    onPoleChange: setPole,
+    onPoleChange: (next) => {
+      openView("formations", { pole: next, silent: true });
+    },
   };
   const documentsProps: ISecureDocumentsProps = {
     siteUrl: props.siteUrl,
@@ -1915,12 +1917,12 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               Accueil
             </a>
             <a
-              href="#formations"
+              href="#offres"
               onClick={(event) => {
-                followPortalLink(event, "#formations");
+                followPortalLink(event, "#offres");
               }}
             >
-              Formations
+              Nos offres
             </a>
             <a
               href="#sessions"
@@ -1928,7 +1930,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 followPortalLink(event, "#sessions");
               }}
             >
-              Sessions
+              Sessions &amp; missions
             </a>
             <a
               href="#actualites"
