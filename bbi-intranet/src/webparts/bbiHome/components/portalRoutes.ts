@@ -23,7 +23,7 @@ export type PortalView =
 export const VIEW_FROM_HASH: { [key: string]: PortalView } = {
   accueil: "accueil", home: "accueil", acces: "accueil",
   "vie-equipe": "accueil",
-  formations: "formations", catalogue: "formations",
+  formations: "formations", catalogue: "formations", offres: "formations",
   sessions: "sessions", agenda: "sessions",
   actualites: "actualites", news: "actualites", "vie-bbi": "actualites",
   actualite: "actualite", article: "actualite", newsitem: "actualite",

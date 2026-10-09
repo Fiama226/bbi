@@ -1206,6 +1206,102 @@ async function testLinkDirectory() {
 }
 
 /* ------------------------------------------------------------------ */
+/* ------------------------------------------------------------------ */
+/* 17. Offres : formation, conseil, coaching                           */
+/* ------------------------------------------------------------------ */
+async function testOffers() {
+  console.log('\nOffres : trois pôles (Formation, Conseil, Coaching)');
+  const {
+    loadOffers, normalizePole, poleFromParam, poleFromHash, activeOffers,
+    countByPole, filterOffers, filieresOf, previewOffers, OFFER_POLES
+  } = loadTsModule('src/webparts/bbiHome/components/offersData.ts');
+  const { viewFromHref } = loadTsModule('src/webparts/bbiHome/components/portalRoutes.ts');
+
+  // (a) liste absente → 404 sur /fields
+  const missing = await loadOffers(fakeClient([{ match: /fields/, ok: false, status: 404 }]), SITE, 'Offres');
+  check('liste absente → offres de repli', missing.isDemo === true && missing.items.length >= 12, `${missing.items.length} offres`);
+  check('repli → les trois pôles sont représentés', OFFER_POLES.every((p) => missing.items.some((o) => o.Pole === p)));
+  const demoCounts = countByPole(activeOffers(missing.items));
+  check('repli → 5 formations, 4 conseils, 3 coachings', demoCounts.Formation === 5 && demoCounts.Conseil === 4 && demoCounts.Coaching === 3, JSON.stringify(demoCounts));
+
+  // (b) liste créée mais vide
+  const empty = await loadOffers(fakeClient([
+    { match: /fields/, json: { value: [{ InternalName: 'Title' }, { InternalName: 'Pole' }] } },
+    { match: /items/, json: { value: [] } }
+  ]), SITE, 'Offres');
+  check('liste vide → offres de repli', empty.isDemo === true && empty.items.length >= 12);
+
+  // (c) liste alimentée
+  const allCols = ['Title', 'Pole', 'CodeOffre', 'Filiere', 'Format', 'Duree', 'PublicCible', 'Niveau', 'StatutCatalogue'].map((n) => ({ InternalName: n }));
+  const rows = [
+    { Id: 1, Title: 'Audit RH', Pole: 'Conseil', Filiere: 'RH', StatutCatalogue: 'Actif' },
+    { Id: 2, Title: 'Sans pôle' },
+    { Id: 3, Title: 'Ancienne offre', Pole: 'Coaching', StatutCatalogue: 'Archivé' },
+    { Id: 4, Title: '   ', Pole: 'Conseil' },
+    { Id: 5, Title: 'Casse', Pole: ' coaching ' },
+    { Id: 6, Title: 'Pôle inconnu', Pole: 'Accompagnement' }
+  ];
+  const live = await loadOffers(fakeClient([
+    { match: /fields/, json: { value: allCols } },
+    { match: /items/, json: { value: rows } }
+  ]), SITE, 'Offres');
+  check('liste alimentée → données réelles, pas de repli', live.isDemo === false && live.items.length === 5, `${live.items.length} lignes`);
+  check('ligne sans pôle → Formation', live.items.filter((o) => o.Id === 2)[0].Pole === 'Formation');
+  check('pôle saisi « " coaching " » → Coaching', live.items.filter((o) => o.Id === 5)[0].Pole === 'Coaching');
+  check('pôle inconnu → Formation', live.items.filter((o) => o.Id === 6)[0].Pole === 'Formation');
+  check('titre vide → ligne ignorée', live.items.every((o) => o.Id !== 4));
+  check('archivées exclues du catalogue', activeOffers(live.items).every((o) => o.Id !== 3) && activeOffers(live.items).length === 4);
+  check('filtre par pôle', filterOffers(live.items, { pole: 'Conseil' }).length === 1);
+  check('filtre par filière', filterOffers(live.items, { filiere: 'RH' }).length === 1);
+  check('recherche texte insensible à la casse', filterOffers(live.items, { query: 'AUDIT' }).length === 1);
+  check('filières listées', filieresOf(live.items).join(',') === 'RH');
+
+  // (d) colonne « Pole » jamais créée : aucune erreur HTTP, tout est Formation
+  const seen = [];
+  const noPole = await loadOffers({
+    get: async (url) => {
+      seen.push(url);
+      if (/\/fields/.test(url)) {
+        return { ok: true, status: 200, json: async () => ({ value: [{ InternalName: 'Title' }, { InternalName: 'Filiere' }] }) };
+      }
+      return { ok: true, status: 200, json: async () => ({ value: [{ Id: 1, Title: 'Audit RH', Filiere: 'RH' }] }) };
+    }
+  }, SITE, 'Offres');
+  const itemsUrl = seen.filter((u) => /\/items/.test(u))[0] || '';
+  check('colonne Pole absente → non demandée dans $select', itemsUrl.indexOf('Pole') === -1, itemsUrl);
+  check('colonne Pole absente → offre traitée comme Formation', noPole.isDemo === false && noPole.items[0].Pole === 'Formation');
+
+  // (e) liste alimentée mais entièrement archivée : pas de repli, catalogue vide
+  const archived = await loadOffers(fakeClient([
+    { match: /fields/, json: { value: allCols } },
+    { match: /items/, json: { value: [{ Id: 1, Title: 'Ancienne', Pole: 'Conseil', StatutCatalogue: 'Archivé' }] } }
+  ]), SITE, 'Offres');
+  check('tout archivé → pas de repli, catalogue vide', archived.isDemo === false && activeOffers(archived.items).length === 0);
+
+  // (f) un seul pôle alimenté
+  const onlyConseil = [{ Id: 1, Title: 'A', Pole: 'Conseil' }, { Id: 2, Title: 'B', Pole: 'Conseil' }, { Id: 3, Title: 'C', Pole: 'Conseil' }];
+  const normalized = (await loadOffers(fakeClient([
+    { match: /fields/, json: { value: allCols } },
+    { match: /items/, json: { value: onlyConseil } }
+  ]), SITE, 'Offres')).items;
+  const oneCounts = countByPole(normalized);
+  check('un seul pôle → compteurs à zéro pour les autres', oneCounts.Conseil === 3 && oneCounts.Formation === 0 && oneCounts.Coaching === 0);
+  check('aperçu : 2 par pôle, sans pôle vide', previewOffers(normalized, 2).length === 2);
+  check('aperçu du repli : 2 par pôle = 6 offres', previewOffers(missing.items, 2).length === 6);
+
+  // (g) normalisation et paramètre d'URL
+  check('normalizePole insensible à la casse et aux espaces', normalizePole('  CONSEIL ') === 'Conseil' && normalizePole(undefined) === 'Formation');
+  check('poleFromParam valide', poleFromParam('conseil') === 'Conseil' && poleFromParam('Coaching') === 'Coaching');
+  check('poleFromParam invalide ou vide → aucun filtre', poleFromParam('xyz') === '' && poleFromParam('') === '' && poleFromParam(undefined) === '');
+  check('#offres?pole=conseil → Conseil', poleFromHash('#offres?pole=conseil') === 'Conseil');
+  check('#offres?pole=xyz et #offres → aucun filtre', poleFromHash('#offres?pole=xyz') === '' && poleFromHash('#offres') === '');
+  check('#formations → aucun filtre', poleFromHash('#formations') === '');
+
+  // (h) routage
+  check('#offres et #offres?pole=… ouvrent la vue catalogue', viewFromHref('#offres') === 'formations' && viewFromHref('#offres?pole=coaching') === 'formations');
+  check('alias historiques #formations et #catalogue conservés', viewFromHref('#formations') === 'formations' && viewFromHref('#catalogue') === 'formations');
+}
+
 (async () => {
   console.log('BBI — vérification des contenus de repli (production ready)');
   console.log('Aucune source SharePoint disponible : les pages doivent rester complètes.');
@@ -1224,6 +1320,7 @@ async function testLinkDirectory() {
   await testPortalSearch();
   await testLinkDirectory();
   await testCountryFlags();
+  await testOffers();
   console.log(`\nRésultat : ${passed} vérifications réussies, ${failed} échec(s).`);
   process.exit(failed === 0 ? 0 : 1);
 })();
