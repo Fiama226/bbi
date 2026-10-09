@@ -52,6 +52,8 @@ const _setwebpackpublicpathplugin = require("@rushstack/set-webpack-public-path-
 const glob = require('glob');
 const path = require('node:path');
 const { ManifestPlugin, CumulativeManifestProcessor, DependencyDiscoveryMode } = require('@microsoft/spfx-heft-plugins');
+// Plugin interne du pipeline non éjecté (exposé via l'alias « ./lib/* » du package).
+const { CopyReleaseAssetsPlugin } = require('@microsoft/spfx-heft-plugins/lib/plugins/webpackConfigurationPlugin/webpackPlugins/CopyReleaseAssetsPlugin');
 const { JsonFile } = require('@rushstack/node-core-library');
 const { Terminal, ConsoleTerminalProvider } = require('@rushstack/terminal');
 const { LocalizationPlugin } = require('@rushstack/webpack5-localization-plugin');
@@ -59,7 +61,6 @@ const { LocalizationPlugin } = require('@rushstack/webpack5-localization-plugin'
 const DEFAULT_LOCALE = 'en-us';
 const TEMP_FOLDER_NAME = 'temp';
 const DIST_FOLDER_NAME = 'dist';
-const RELEASE_MANIFESTS_FOLDER = `release/manifests`;
 const INTERNAL_MODULE_BASE_URL = 'http://these-webparts-dont-get-deployed';
 const bundles = [
   {
@@ -309,17 +310,30 @@ function getSPFxWebpackConfig({ production }) {
 }
 function generateConfig(env) {
     const { entry, alias, externals, plugins } = getSPFxWebpackConfig(env);
-    // Use different output folders for production vs development to maintain compatibility with non-ejected mode
-    // Production: Manifests in release/manifests (webpack output.path), JS bundles in ../assets via filename path
-    // Development: Both manifests and JS in dist
-    const outputFolder = env.production ? RELEASE_MANIFESTS_FOLDER : DIST_FOLDER_NAME;
-    const jsFilenamePrefix = env.production ? '../assets/' : '';
+    // Même disposition que le pipeline SPFx non éjecté : webpack écrit TOUJOURS
+    // dans dist/ avec des noms de fichiers nus, puis CopyReleaseAssetsPlugin
+    // recopie en production les bundles vers release/assets et les manifestes
+    // (variante « release ») vers release/manifests.
+    //
+    // Le modèle « eject-webpack » de Microsoft utilise à la place un préfixe de
+    // nom de fichier « ../assets/ » avec output.path = release/manifests. Ce
+    // préfixe est recopié tel quel dans loaderConfig.scriptResources des
+    // manifestes ; SharePoint le résout relativement à ClientSideAssets/<ProductID>/
+    // et demande .../ClientSideAssets/assets/<bundle>.js → 404 + « Script error »
+    // sur toutes les pages, alors que le .sppkg lui-même est valide.
+    if (env.production) {
+        plugins.push(new CopyReleaseAssetsPlugin({
+            releasePath: `${__dirname}/release`,
+            isDebug: false,
+            releaseMapFiles: false
+        }));
+    }
     const config = {
         mode: env.production ? 'production' : 'development',
         entry,
         output: {
-            filename: `${jsFilenamePrefix}[name]_[locale]_[contenthash].js`,
-            path: `${__dirname}/${outputFolder}`,
+            filename: `[name]_[locale]_[contenthash].js`,
+            path: `${__dirname}/${DIST_FOLDER_NAME}`,
             // SPFx requires AMD module format for SharePoint's module loader
             libraryTarget: 'amd'
         },
@@ -367,9 +381,8 @@ function generateConfig(env) {
                     test: /\.(png|mp4|mp3|svg|jpg|aac|woff2|woff)$/i,
                     type: 'asset/resource',
                     generator: {
-                        filename: env.production
-                            ? '../assets/[name]_[contenthash][ext][query]'
-                            : '[name]_[contenthash][ext][query]'
+                        // Nom nu : CopyReleaseAssetsPlugin recopie dist/ → release/assets en production.
+                        filename: '[name]_[contenthash][ext][query]'
                     }
                 },
                 // Styles (CSS/SCSS)

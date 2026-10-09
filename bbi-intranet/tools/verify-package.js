@@ -240,6 +240,38 @@ function verifyPackage(packagePath, report) {
     }
   }
 
+  // --- AppManifest.xml : limites des colonnes du catalogue ----------------
+  // Le catalogue d'applications copie ShortDescription dans une colonne texte
+  // sur une ligne (255 caractères max). Au-delà, le récepteur d'événement
+  // côté serveur échoue silencieusement : l'élément reste « 1.0.0.0 »,
+  // sans titre, sans ProductID, état Disabled, et aucune invite d'activation.
+  const APP_SHORT_DESCRIPTION_MAX = 255;
+  const appManifest = entries.get('AppManifest.xml');
+  if (!appManifest) {
+    fail(report, 'AppManifest.xml absent du package');
+  } else {
+    const xml = appManifest.toString('utf8');
+    const short = /<ShortDescription>[\s\S]*?<LocalizedString[^>]*>([\s\S]*?)<\/LocalizedString>/.exec(xml);
+    const shortText = short ? decodeEntities(short[1]) : '';
+    if (shortText.length > APP_SHORT_DESCRIPTION_MAX) {
+      fail(
+        report,
+        `AppManifest.xml : ShortDescription fait ${shortText.length} caractères (max ${APP_SHORT_DESCRIPTION_MAX}) — ` +
+          'le catalogue ne pourra pas enregistrer le paquet (reste en 1.0.0.0 / Disabled). ' +
+          'Raccourcir solution.metadata.shortDescription dans config/package-solution.json',
+      );
+    } else {
+      pass(report, `AppManifest.xml : ShortDescription ${shortText.length}/${APP_SHORT_DESCRIPTION_MAX} caractères`);
+    }
+    const name = /<App\s[^>]*\bName="([^"]*)"/.exec(xml);
+    const version = /<App\s[^>]*\bVersion="([^"]*)"/.exec(xml);
+    if (name && version) {
+      pass(report, `AppManifest.xml : solution « ${name[1]} » v${version[1]}`);
+    } else {
+      fail(report, 'AppManifest.xml : attributs Name/Version introuvables');
+    }
+  }
+
   // --- Manifestes -----------------------------------------------------------
   const manifests = extractManifestsFromSppkg(entries);
   if (manifests.length === 0) {
@@ -281,6 +313,19 @@ function verifyPackage(packagePath, report) {
 
     const resources = scriptResourcePaths(m);
     let missing = [];
+    // Les chemins du manifeste sont résolus par SharePoint relativement à
+    // ClientSideAssets/<ProductID>/. Un préfixe de dossier (ex. « ../assets/ »,
+    // hérité du modèle « eject-webpack ») donne .../ClientSideAssets/assets/x.js
+    // → 404 + « Script error » sur toutes les pages, alors que le .sppkg est sain.
+    const withFolder = resources.filter((r) => /[\\/]/.test(String(r.path)));
+    if (withFolder.length) {
+      fail(
+        report,
+        `${id} (${item.title}) v${version} : ${withFolder.length} chemin(s) de script avec dossier ` +
+          `(ex. « ${withFolder[0].path} ») — SharePoint attend un nom de fichier nu`,
+      );
+      bad += 1;
+    }
     for (const r of resources) {
       const base = resourceBasename(r.path);
       referenced.add(base);
