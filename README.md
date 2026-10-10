@@ -30,6 +30,16 @@ Livrables produits à partir du logo, des captures d'inspiration et des besoins 
 | `deliverables/audit-2026/audit-minutieux.html` | **Audit minutieux de l'itération 2** : 8 demandes livrées et vérifiées, 18 écarts résiduels (accessibilité, performance, gouvernance, RGPD, Qualiopi), benchmark des bonnes pratiques 2026, **22 propositions priorisées**, feuille de route 90 jours, **cahier de recette en 22 contrôles**, risques et décisions à arbitrer. |
 | `deliverables/audit-2026/apercu-portail.html` | **Aperçu cliquable du portail** : diaporama du héros, chiffres clés, actualités paginées + page dédiée, fiche formateur (WhatsApp, Teams), employé du mois, certifications, organigramme interactif. Styles compilés depuis les composants livrés (`bbi-intranet/tools/build-preview-css.js`) et vérifiés par `tools/preview-smoke.js`. |
 
+### Version 1.9.0.0 — trois pôles et kit « organisation »
+
+- **Nos offres : Formation · Conseil · Coaching.** Nouvelle liste `Offres` et vue « Nos offres » (`#offres?pole=conseil|formation|coaching`) avec filtre par pôle ; menu par défaut « Nos offres » et « Sessions & missions ».
+- **Paquet corrigé.** Description courte ≤ 255 caractères (sinon le catalogue affiche le fichier en 1.0.0.0 désactivé) et scripts du manifeste sans dossier (sinon 404 sur la page) ; contrôlé par `node tools/verify-package.js`.
+- **Kit « organisation »** (`deploy/New-BbiOrganization.ps1`, guide : `deploy/README.md` § 9) : recrée en 10 étapes, de façon idempotente, le siège (hub), les filiales, les listes, la page d'accueil, les groupes et permissions, la navigation, le thème, le logo et les données de démonstration, depuis `deploy/organisation.json`. Essai à blanc : `-PlanOnly`, puis `-DryRun`. Audit : `Test-BbiOrganization.ps1`.
+- **Avis clients.** Liste `Avis clients` et questionnaire de satisfaction à envoyer après chaque séance (`deliverables/satisfaction/questionnaire-satisfaction.md`).
+- **Démonstration des droits.** `deploy/New-BbiRightsDemo.ps1` dépose dix documents aux droits différents (consultation seule sans téléchargement, lecture, modification, confidentiel…) pour la démonstration ; à désactiver en production (`options.demonstrationDroits`).
+- **Agenda client** d'un mois : `deliverables/planning/BBI-Agenda-projet-portail.docx`.
+- **Tests hors ligne du kit** : `verify-organisation.ps1` (81 contrôles), `verify-organisation-flow.ps1` (65), `verify-pnp-parameters.ps1` (paramètres PnP contre le module installé). Le kit n'a pas encore été exécuté sur un tenant réel.
+
 ### Ce que fait la version 1.6.0.0
 
 - **Héros en diaporama (images *et* textes).** Défilement automatique de 8 s, flèches, pastilles, barre de progression, pause au survol et à l'onglet inactif, arrêt si l'utilisateur a demandé « animations réduites ». Une diapositive peut n'avoir **que du texte** : `image | sur-titre | titre | accroche | bouton | lien` (le premier champ vide = diapositive sans visuel).
