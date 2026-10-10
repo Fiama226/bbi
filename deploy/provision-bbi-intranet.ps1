@@ -226,7 +226,9 @@ function Ensure-BbiField {
         [switch]$Required,
         [switch]$AddToDefaultView
     )
-    $field = Get-PnPField -List $List -Identity $InternalName -ErrorAction SilentlyContinue
+    # On cherche le nom interne parmi les colonnes de la liste elle-même : Get-PnPField -Identity
+    # peut renvoyer une colonne de site homonyme (ex. « Niveau ») alors que la liste ne l'a pas.
+    $field = @(Get-PnPField -List $List -ErrorAction SilentlyContinue) | Where-Object { $_.InternalName -eq $InternalName } | Select-Object -First 1
     if ($field) { Write-Skip "  colonne $DisplayName"; return }
 
     if ($DryRun -or $VerifyOnly) {
@@ -239,7 +241,8 @@ function Ensure-BbiField {
             List          = $List
             DisplayName   = $DisplayName
             InternalName  = $InternalName
-            Type          = $Type
+            # « Hyperlink » est le nom affiché dans SharePoint ; l'énumération FieldType attend « URL ».
+            Type          = $(if ($Type -eq 'Hyperlink') { 'URL' } else { $Type })
             AddToDefaultView = $true
         }
         if ($Choices)  { $params.Choices = $Choices }
@@ -387,6 +390,11 @@ function Ensure-BbiWebPart {
     } catch { }
 
     Invoke-Bbi "  ajout du web part $Name sur « $Page »" {
+        # Une page tout juste créée n'a aucune section : Add-PnPPageWebPart échouerait (index hors limites).
+        $target = Get-PnPPage -Identity $Page
+        if (@($target.Sections).Count -lt $Section) {
+            Add-PnPPageSection -Page $Page -SectionTemplate OneColumn | Out-Null
+        }
         Add-PnPPageWebPart -Page $Page -Component $ComponentId -WebPartProperties $PropertiesJson `
             -Section $Section -Column $Column -Order $Order | Out-Null
     } | Out-Null
@@ -728,15 +736,24 @@ function Invoke-BbiSiteProvisioning {
             try {
                 Set-PnPList -Identity 'Supports publiés' -BreakRoleInheritance -CopyRoleAssignments | Out-Null
                 Write-Ok "Héritage rompu : les apprenants conservent la Lecture."
+                # Noms des niveaux d'autorisation lus par type : ils changent avec la langue du site
+                # (Contribute/Collaboration, Edit/Modification).
+                $roleDefs = @(Get-PnPRoleDefinition)
+                $contributeRole = ($roleDefs | Where-Object { "$($_.RoleTypeKind)" -eq 'Contributor' } | Select-Object -First 1).Name
+                $writeRoles = @($roleDefs | Where-Object { "$($_.RoleTypeKind)" -in @('Contributor', 'Editor', 'WebDesigner') } | ForEach-Object { $_.Name })
                 try {
-                    Set-PnPListPermission -Identity 'Supports publiés' -Group 'Membres du site' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
-                    Set-PnPListPermission -Identity 'Supports publiés' -Group 'Visiteurs' -RemoveRole 'Contribute','Edit' -ErrorAction SilentlyContinue
+                    foreach ($siteGroup in @((Get-PnPGroup -AssociatedMemberGroup), (Get-PnPGroup -AssociatedVisitorGroup))) {
+                        if (-not $siteGroup) { continue }
+                        foreach ($role in $writeRoles) {
+                            Set-PnPListPermission -Identity 'Supports publiés' -Group $siteGroup.Title -RemoveRole $role -ErrorAction SilentlyContinue
+                        }
+                    }
                 } catch { Write-Warn2 "Ajustement des rôles par défaut ignoré : $($_.Exception.Message)" }
                 try {
-                    Set-PnPListPermission -Identity 'Supports publiés' -Group $EditorsGroup -AddRole 'Contribute'
+                    Set-PnPListPermission -Identity 'Supports publiés' -Group $EditorsGroup -AddRole $contributeRole -ErrorAction Stop
                     Write-Ok "Contribution limitée au groupe « $EditorsGroup »."
                 } catch {
-                    Write-Warn2 "Groupe « $EditorsGroup » introuvable : accordez la contribution manuellement (Paramètres de la bibliothèque > Autorisations)."
+                    Write-Warn2 "Contribution non accordée au groupe « $EditorsGroup » : $($_.Exception.Message). Accordez-la manuellement (Paramètres de la bibliothèque > Autorisations)."
                 }
                 Add-Report 'Sécurité « Supports publiés »' 'OK'
             } catch {
@@ -873,6 +890,8 @@ if ($ProvisionFiliales) {
 
         # 6.1 Hub
         $hub = try { Get-PnPHubSite -Identity $hubUrl -ErrorAction Stop } catch { $null }
+        # Get-PnPHubSite peut renvoyer un objet vide pour un site qui n'est pas hub : on exige un identifiant réel.
+        if ($hub -and -not (@("$($hub.ID)", "$($hub.SiteId)") | Where-Object { $_ -and $_ -ne [Guid]::Empty.ToString() })) { $hub = $null }
         if ($hub) {
             Write-Skip "Site hub $hubUrl"
             Add-Report 'Site hub' 'OK'
@@ -947,7 +966,19 @@ if ($ProvisionFiliales) {
                             Write-Skip "Rattachement au hub de $url"
                         } else {
                             Invoke-Bbi "Rattachement de $url au hub" {
-                                Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl
+                                try {
+                                    Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl -ErrorAction Stop
+                                } catch {
+                                    # Hub pas encore propagé ou non enregistré : on (ré)enregistre puis on réessaie.
+                                    Write-Warn2 "Rattachement refusé ($($_.Exception.Message)) : enregistrement du hub puis nouvel essai."
+                                    try { Register-PnPHubSite -Site $hubUrl -ErrorAction Stop | Out-Null } catch { }
+                                    $attached = $false
+                                    foreach ($wait in 5, 15, 30, 60) {
+                                        Start-Sleep -Seconds $wait
+                                        try { Add-PnPHubSiteAssociation -Site $url -HubSite $hubUrl -ErrorAction Stop; $attached = $true; break } catch { $lastError = $_ }
+                                    }
+                                    if (-not $attached) { throw $lastError }
+                                }
                             } | Out-Null
                         }
                         $current = "$($row['SiteUrl']?.Url)"

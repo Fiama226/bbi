@@ -177,7 +177,11 @@ try {
                 $path = New-BbiDemoFile -Doc $doc -RightsPlan $rights -Directory $workDir
                 $values = @{ Title = $doc.Title }
                 foreach ($k in $doc.Metadata.Keys) { $values[$k] = $doc.Metadata[$k] }
-                Invoke-Demo "Téléversement de $($doc.FileName) dans « $($doc.Library) »" { Add-PnPFile -Path $path -Folder $library.RootFolder.Name -Values $values | Out-Null } | Out-Null
+                # Dossier racine de la bibliothèque, relatif au site : RootFolder.Name peut rester vide (propriété non chargée).
+                $webRoot = "$((Get-PnPWeb).ServerRelativeUrl)".TrimEnd('/')
+                $targetFolder = "$root".Substring($webRoot.Length).Trim('/')
+                if (-not $targetFolder) { $targetFolder = "$($doc.Library)" }
+                Invoke-Demo "Téléversement de $($doc.FileName) dans « $($doc.Library) »" { Add-PnPFile -Path $path -Folder $targetFolder -Values $values | Out-Null } | Out-Null
                 if (-not $DryRun) { $item = Get-PnPFile -Url $fileUrl -AsListItem }
             }
             if ($DryRun) { Add-DemoReport $label 'SIMULÉ'; continue }

@@ -112,7 +112,12 @@ function global:Reset-M {
 }
 function global:Add-MockItem { param([string]$List, [string]$Title, $Url = $null, [string]$Field) $it = [pscustomobject]@{ Id = $global:M.Next++; FieldValues = @{ Title = $Title } }; if ($Url) { $it.FieldValues[$Field] = [pscustomobject]@{ Url = $Url; Description = 'editeur' } }; $global:M.Lists[$List].Add($it); $it }
 function global:Get-PnPList { [CmdletBinding()] param([string]$Identity, [string]$Includes) if (-not $global:M.Lists.ContainsKey($Identity)) { throw "liste absente : $Identity" }; [pscustomobject]@{ Title = $Identity; RootFolder = [pscustomobject]@{ ServerRelativeUrl = "/sites/intranet/$Identity" } } }
-function global:Get-PnPField { [CmdletBinding()] param([string]$List, [string]$Identity) if ($global:M.Fields.ContainsKey("$List|$Identity")) { [pscustomobject]@{ InternalName = $Identity } } else { throw 'champ absent' } }
+function global:Get-PnPField { [CmdletBinding()] param([string]$List, [string]$Identity)
+    if (-not $Identity) { return @($global:M.Fields.Keys | Where-Object { $_ -like "$List|*" } | ForEach-Object { [pscustomobject]@{ InternalName = ($_ -split '\|', 2)[1] } }) }
+    if ($global:M.Fields.ContainsKey("$List|$Identity")) { [pscustomobject]@{ InternalName = $Identity } } else { throw 'champ absent' } }
+# Contexte CSOM minimal : EnsureSiteAssetsLibrary / Load / ExecuteQuery (crée « Ressources du site »)
+function global:Get-PnPContext { $lists = [pscustomobject]@{}; $lists | Add-Member ScriptMethod EnsureSiteAssetsLibrary { [pscustomobject]@{} }   # idempotent : ne compte pas comme une modification
+    $ctx = [pscustomobject]@{ Web = [pscustomobject]@{ Lists = $lists } }; $ctx | Add-Member ScriptMethod Load { param($o) }; $ctx | Add-Member ScriptMethod ExecuteQuery { }; $ctx }
 function global:Get-PnPFile { [CmdletBinding()] param([string]$Url) if ($global:M.Files.ContainsKey($Url)) { [pscustomobject]@{ ServerRelativeUrl = $Url } } else { throw 'fichier absent' } }
 function global:Resolve-PnPFolder { [CmdletBinding()] param([string]$SiteRelativePath) $global:M.Folders.Add($SiteRelativePath); [pscustomobject]@{ Name = $SiteRelativePath } }
 function global:Add-PnPFile { [CmdletBinding()] param([string]$Path, [string]$Folder, [hashtable]$Values) $url = "/sites/intranet/$Folder/$([IO.Path]::GetFileName($Path))"; $global:M.Files[$url] = @{ Size = (Get-Item $Path).Length; Values = $Values }; $global:M.Calls.Add("add $url") }

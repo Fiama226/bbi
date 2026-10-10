@@ -210,6 +210,17 @@ function Invoke-BbiSeedAssets {
     $urls = @{}          # clé -> URL absolue du fichier
     $folderOf = @{}      # bibliothèque -> dossier relatif au site
 
+    # 0. Un site d'équipe neuf n'a pas encore de bibliothèque « Ressources du site » (SiteAssets) :
+    #    Resolve-PnPFolder échoue alors (« ServerRelativeUrl has not been initialized »). On la crée.
+    if (-not $DryRun -and @($Plan.Uploads | Where-Object { $_.Target -eq 'SiteAssets' }).Count -gt 0) {
+        try {
+            $ctx = Get-PnPContext
+            $assetsLib = $ctx.Web.Lists.EnsureSiteAssetsLibrary()
+            $ctx.Load($assetsLib)
+            $ctx.ExecuteQuery()
+        } catch { $result.Warnings += "Bibliothèque « Ressources du site » non créée : $($_.Exception.Message)" }
+    }
+
     # 1. Téléversements
     foreach ($up in $Plan.Uploads) {
         if (-not (Test-Path -LiteralPath $up.LocalPath)) { $result.Missing += $up.LocalPath; $result.Warnings += "Fichier source absent : $($up.LocalPath)"; continue }
@@ -254,7 +265,8 @@ function Invoke-BbiSeedAssets {
     # 2. Colonnes image des listes (uniquement si vides)
     foreach ($col in $Plan.Columns) {
         $field = $null
-        try { $field = Get-PnPField -List $col.List -Identity $col.Field -ErrorAction Stop } catch { $field = $null }
+        # Colonnes de la liste elle-même (Get-PnPField -Identity peut renvoyer une colonne de site homonyme).
+        try { $field = @(Get-PnPField -List $col.List -ErrorAction Stop) | Where-Object { $_.InternalName -eq $col.Field } | Select-Object -First 1 } catch { $field = $null }
         if (-not $field) { $result.Warnings += "Colonne absente : $($col.List)/$($col.Field) (à créer par le provisionnement)"; continue }
         $items = @()
         try { $items = @(Get-PnPListItem -List $col.List -PageSize 100 -ErrorAction Stop) } catch { $result.Warnings += "Liste absente : $($col.List)"; continue }

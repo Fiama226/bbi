@@ -194,6 +194,7 @@ function global:Set-PnPListItemPermission { [CmdletBinding()] param([string]$Lis
 
 function global:Set-PnPWebTheme { [CmdletBinding()] param([string]$Theme, [string]$WebUrl) Log "theme $Theme $WebUrl" }
 function global:Set-PnPWebHeader { [CmdletBinding()] param([string]$HeaderLayout, [string]$HeaderEmphasis, [string]$SiteLogoUrl) Log "header $($global:Mock.Current) $HeaderLayout/$HeaderEmphasis$(if ($SiteLogoUrl) { ' logo=' + $SiteLogoUrl })" }
+function global:Get-PnPWeb { [CmdletBinding()] param() [pscustomobject]@{ ServerRelativeUrl = '/sites/mock' } }
 function global:Add-PnPFile { [CmdletBinding()] param([string]$Path, [string]$Folder, [hashtable]$Values) $name = [IO.Path]::GetFileName($Path); Log "upload $name $Folder"; $key = if ($Folder.StartsWith('/')) { "$Folder/$name" } else { "/sites/mock/$Folder/$name" }; (Get-MockSite).Files[$key] = @{ Id = $global:Mock.NextId++; Values = $Values }; [pscustomobject]@{ ServerRelativeUrl = "/$Folder/$name" } }
 function global:Set-PnPFooter { [CmdletBinding()] param([switch]$Enabled, [string]$Layout, [string]$Title) Log "footer $($global:Mock.Current) $Title" }
 function global:Get-PnPNavigationNode { [CmdletBinding()] param([string]$Location) $k = "$($global:Mock.Current)|$Location"; if ($global:Mock.Nav.ContainsKey($k)) { @($global:Mock.Nav[$k] | ForEach-Object { [pscustomobject]@{ Title = $_ } }) } else { @() } }

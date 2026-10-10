@@ -95,7 +95,7 @@ foreach ($site in $sites) {
         if (-not $page) { Add-Result $t 'Page accueil.aspx' 'MANQUANT' }
         else {
             Add-Result $t 'Page accueil.aspx' 'OK'
-            $parts = @(Get-PnPPageComponent -Page 'accueil.aspx' -ErrorAction SilentlyContinue | Where-Object { "$($_.WebPartId)".Trim('{', '}') -eq $WP_HOME })
+            $parts = @(Get-PnPPageComponent -Page 'accueil.aspx' -ErrorAction SilentlyContinue | Where-Object { ("$($_.WebPartId)".Trim('{', '}') -eq $WP_HOME) -or ("$($_.ComponentId)".Trim('{', '}') -eq $WP_HOME) })
             Add-Result $t 'Web part Business Builders International Accueil' ($(if ($parts.Count -gt 0) { 'OK' } else { 'MANQUANT' }))
         }
 
