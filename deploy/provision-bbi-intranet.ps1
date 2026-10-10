@@ -393,10 +393,14 @@ function Ensure-BbiWebPart {
         # Une page tout juste créée n'a aucune section : Add-PnPPageWebPart échouerait (index hors limites).
         $target = Get-PnPPage -Identity $Page
         if (@($target.Sections).Count -lt $Section) {
-            Add-PnPPageSection -Page $Page -SectionTemplate OneColumn | Out-Null
+            # Une page applicative (SingleWebPartAppPage) n'affiche qu'une section pleine largeur.
+            $template = if ("$($target.LayoutType)" -eq 'SingleWebPartAppPage') { 'OneColumnFullWidth' } else { 'OneColumn' }
+            Add-PnPPageSection -Page $Page -SectionTemplate $template | Out-Null
         }
         Add-PnPPageWebPart -Page $Page -Component $ComponentId -WebPartProperties $PropertiesJson `
             -Section $Section -Column $Column -Order $Order | Out-Null
+        # Sans republication, les visiteurs voient encore l'ancienne version (vide) de la page.
+        Set-PnPPage -Identity $Page -Publish | Out-Null
     } | Out-Null
     Add-Report "Web part $Name → $Page" 'CRÉÉ'
 }
