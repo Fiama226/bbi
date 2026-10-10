@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-    BBI Intranet — génération des packages d'application Microsoft Teams (SPFx + Teams/Viva Connections).
+    Business Builders International Intranet — génération des packages d'application Microsoft Teams (SPFx + Teams/Viva Connections).
 
 .DESCRIPTION
     Depuis SPFx 1.20+, Teams est un « hôte de développement continu » : les web parts Teams ne sont
     plus embarquées dans le .sppkg, elles sont déployées via le catalogue d'applications Teams.
     Ce script génère les packages .zip à téléverser dans Teams :
 
-      · BBI Accueil       → onglet personnel « Accueil » (expérience zéro chrome SharePoint)
-      · BBI Galerie       → onglet personnel « Galerie médias »
-      · BBI Fiche formation → onglet personnel « Fiche formation » (piloté par ?code=)
+      · Business Builders International Accueil       → onglet personnel « Accueil » (expérience zéro chrome SharePoint)
+      · Business Builders International Galerie       → onglet personnel « Galerie médias »
+      · Business Builders International Fiche formation → onglet personnel « Fiche formation » (piloté par ?code=)
 
     Les manifestes référencent l'URL de la page SharePoint ; ils fonctionnent donc en
     « Viva Connections » comme en onglet personnel Teams, sans code supplémentaire.
@@ -98,26 +98,26 @@ $siteBase   = "https://$tenantHost$($SitePath.TrimEnd('/'))"
 $APPS = @{
     Home = @{
         Id          = '6a9b6e3b-44f1-4a70-8f0a-45c82b29126d'
-        Short       = 'BBI Accueil'
-        Full        = 'BBI Intranet — Accueil'
-        Description = "Page d'accueil BBI en plein écran : actualités, prochaines sessions, catalogue des formations, galerie médias et supports publiés."
+        Short       = 'Accueil'
+        Full        = 'Business Builders International Intranet — Accueil'
+        Description = "Page d'accueil Business Builders International en plein écran : actualités, prochaines sessions, catalogue des formations, galerie médias et supports publiés."
         Page        = 'SitePages/accueil.aspx'
         EntityId    = 'bbi-home'
         TabName     = 'Accueil'
     }
     Gallery = @{
         Id          = 'f0f19a37-2c11-4812-9006-8aa71a9254f1'
-        Short       = 'BBI Galerie'
-        Full        = 'BBI Intranet — Galerie médias'
-        Description = "Galerie photos et vidéos BBI : albums des sessions de formation, certifications et vie d'entreprise, avec visionneuse plein écran."
+        Short       = 'Galerie médias'
+        Full        = 'Business Builders International Intranet — Galerie médias'
+        Description = "Galerie photos et vidéos Business Builders International : albums des sessions de formation, certifications et vie d'entreprise, avec visionneuse plein écran."
         Page        = 'SitePages/galerie.aspx'
         EntityId    = 'bbi-gallery'
         TabName     = 'Galerie médias'
     }
     Fiche = @{
         Id          = 'a9c99e25-db18-4419-894b-08bc9c5b9081'
-        Short       = 'BBI Fiche formation'
-        Full        = 'BBI Intranet — Fiche formation'
+        Short       = 'Fiche formation'
+        Full        = 'Business Builders International Intranet — Fiche formation'
         Description = "Fiche détaillée d'une formation : objectifs, programme, prochaines sessions, supports et formateurs référents."
         Page        = 'SitePages/formation.aspx'
         EntityId    = 'bbi-fiche-formation'
@@ -134,7 +134,7 @@ if (-not (Test-Path $OutputPath)) { New-Item -ItemType Directory -Path $OutputPa
 
 $selected = if ($App -contains 'All') { @('Home', 'Gallery', 'Fiche') } else { $App }
 
-Write-Title "BBI — Packages Teams / Viva Connections"
+Write-Title "Business Builders International — Packages Teams / Viva Connections"
 Write-Host "  Tenant      : $tenantHost"
 Write-Host "  Site        : $siteBase"
 Write-Host "  Applications: $($selected -join ', ')"
@@ -164,7 +164,7 @@ foreach ($key in $selected) {
             termsOfUseUrl = $PrivacyUrl
         }
         name             = [ordered]@{ short = $app.Short; full = $app.Full }
-        description      = [ordered]@{ short = $app.Description; full = $app.Description }
+        description      = [ordered]@{ short = 'Intranet Business Builders International dans Teams, sans chrome SharePoint.'; full = $app.Description }
         icons            = [ordered]@{
             outline = "$($app.Id)_outline.png"
             color   = "$($app.Id)_color.png"
@@ -212,7 +212,7 @@ if (-not $DryRun) {
     Write-Host "  1. Teams admin center → Équipes → Applications → Gérer les applications → Téléverser une application personnalisée." -ForegroundColor Gray
     Write-Host "  2. Téléverser chaque .zip, puis autoriser pour l'organisation." -ForegroundColor Gray
     Write-Host "  3. Épingler l'application pour les formateurs (politique de configuration d'application) :" -ForegroundColor Gray
-    Write-Host "     « BBI Intranet — Accueil » épinglée dans la barre latérale = expérience zéro chrome SharePoint." -ForegroundColor Gray
+    Write-Host "     « Business Builders International Intranet — Accueil » épinglée dans la barre latérale = expérience zéro chrome SharePoint." -ForegroundColor Gray
     Write-Host "  4. Viva Connections : si vous utilisez l'application Viva Connections, la même page sert d'expérience d'accueil." -ForegroundColor Gray
     Write-Host ""
     Write-Host "Détail : voir teams/README.md" -ForegroundColor Gray

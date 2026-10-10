@@ -109,12 +109,21 @@ const DEFAULT_HERO_SLIDES: string = [
   ' | Qualité certifiée | Qualiopi, un gage de confiance. | Des process audités et une amélioration continue au service de vos financeurs. | Voir les certifications | #vie-equipe'
 ].join('\n');
 
-const DEFAULT_QUICK_LINKS: string = [
+/** Anciens raccourcis par défaut (sert à la migration des instances non personnalisées). */
+const LEGACY_QUICK_LINKS: string = [
   '▦ | Nos offres | Formation, conseil et coaching | #offres',
   '▣ | Prochaines sessions | Planning et inscriptions | #sessions',
   '▤ | Supports & médias | Documents, photos et vidéos | #ressources',
   '◎ | Communauté BBI | Formateurs et experts | #communaute',
   '✦ | Actualités BBI | Les nouvelles du réseau | #actualites'
+].join('\n');
+
+const DEFAULT_QUICK_LINKS: string = [
+  '▦ | Nos offres | Formation, conseil et coaching | #offres',
+  '▣ | Prochaines sessions | Planning et inscriptions | #sessions',
+  '▤ | Supports & médias | Documents, photos et vidéos | #ressources',
+  '◎ | Communauté Business Builders International | Formateurs et experts | #communaute',
+  '✦ | Actualités Business Builders International | Les nouvelles du réseau | #actualites'
 ].join('\n');
 
 const DEFAULT_KPIS: string = [
@@ -249,7 +258,11 @@ export default class BbiHomeWebPart extends BaseClientSideWebPart<IBbiHomeWebPar
       // défaut « Formations / Sessions ») → nouveau menu par défaut.
       this.properties.navLinks = defaultNavLinks(this.properties.siteUrl);
     }
-    if (!this.properties.quickLinks) {
+    if (
+      !this.properties.quickLinks ||
+      this.properties.quickLinks.trim() === LEGACY_QUICK_LINKS
+    ) {
+      // Migration : anciens raccourcis par défaut (avec l'abréviation) → libellés complets.
       this.properties.quickLinks = DEFAULT_QUICK_LINKS;
     }
     // Migration : les anciennes instances n'avaient que des lignes de

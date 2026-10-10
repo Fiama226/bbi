@@ -1,8 +1,8 @@
-# BBI Intranet — Guide de mise en place (portail unifié)
+# Business Builders International Intranet — Guide de mise en place (portail unifié)
 
-Ce dossier contient **le script d'installation complet** de l'intranet BBI : il crée les listes,
+Ce dossier contient **le script d'installation complet** de l'intranet Business Builders International : il crée les listes,
 les bibliothèques, les colonnes, les vues, une seule page d'accueil applicative, le thème et l'identité
-visuelle. Sur cette page, **une seule web part BBI Accueil** fournit plusieurs vues internes (accueil,
+visuelle. Sur cette page, **une seule web part Business Builders International Accueil** fournit plusieurs vues internes (accueil,
 formations, sessions — liste et calendrier —, actualités avec page dédiée par actualité, ressources et
 communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
@@ -17,7 +17,7 @@ communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
 | Page | Type | Contenu |
 |---|---|---|
-| `accueil.aspx` | **Unique page applicative** | Une seule web part `BBI Accueil`, avec navigation intégrée : Accueil (identité, annonces, vie de l'équipe, implantations, références), Nos offres (catalogue des offres formation, conseil et coaching + références pédagogiques), Sessions (liste + calendrier), Actualités, Ressources (supports pédagogiques + documents administratifs + galerie), Communauté (**Trombinoscope**). Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
+| `accueil.aspx` | **Unique page applicative** | Une seule web part `Business Builders International Accueil`, avec navigation intégrée : Accueil (identité, annonces, vie de l'équipe, implantations, références), Nos offres (catalogue des offres formation, conseil et coaching + références pédagogiques), Sessions (liste + calendrier), Actualités, Ressources (supports pédagogiques + documents administratifs + galerie), Communauté (**Trombinoscope**). Chaque vue partage le même en-tête, la même identité visuelle et la même page. |
 
 Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Certifications`, `Annonces`,
 `Pensées du jour`, `Anniversaires`, `Implantations`, `Nos références`, `Références pédagogiques`,
@@ -97,7 +97,7 @@ Droits nécessaires : **administrateur SharePoint** (ou propriétaire du site + 
 
 1. Téléverser `bbi-portail.sppkg` dans le **catalogue d'applications** (Centre d'administration SharePoint → *Autres fonctionnalités* → *Catalogue d'applications* → *Distribuer des applications*).
 2. Cocher **« Rendre cette solution disponible pour tous les sites »** puis **Déployer**.
-3. Dans le site BBI : ⚙️ → *Ajouter une application* → **BBI Intranet** (ou attendez la propagation automatique, `skipFeatureDeployment` est activé).
+3. Dans le site Business Builders International : ⚙️ → *Ajouter une application* → **Business Builders International Intranet** (ou attendez la propagation automatique, `skipFeatureDeployment` est activé).
 
 > Mise à jour ultérieure : re-téléverser le `.sppkg` → SharePoint propose **Upgrade**. Les instances
 > déjà posées des web parts se mettent à jour seules.
@@ -167,23 +167,23 @@ dans les interfaces d'administration (et doivent être tracés pour Qualiopi).
 
 | # | Réglage | Où | Valeur recommandée |
 |---|---|---|---|
-| 1 | **Étiquette de confidentialité** « BBI — Supports internes » | Purview → Protection des informations → Étiquettes | Chiffrement : *Afficher uniquement* (pas de copie, pas d'impression) |
+| 1 | **Étiquette de confidentialité** « Business Builders International — Supports internes » | Purview → Protection des informations → Étiquettes | Chiffrement : *Afficher uniquement* (pas de copie, pas d'impression) |
 | 2 | **Ouverture navigateur uniquement** | Bibliothèque *Supports publiés* → Paramètres → Paramètres avancés → *Ouvrir les documents dans le navigateur par défaut* | Activé |
 | 3 | **Restreindre la synchronisation** | Admin SharePoint → Accès des appareils non gérés | « Accès limité, navigateur uniquement » (à tester d'abord sur un groupe) |
-| 4 | **IRM / sensibilité par défaut** | Paramètres de la bibliothèque → *Étiquettes* | Étiquette BBI appliquée par défaut aux nouveaux fichiers |
+| 4 | **IRM / sensibilité par défaut** | Paramètres de la bibliothèque → *Étiquettes* | Étiquette Business Builders International appliquée par défaut aux nouveaux fichiers |
 | 5 | **Expiration des liens de partage** | Admin SharePoint → Partage externe | « Personnes existantes », expiration 30 jours |
-| 6 | **Fonts de marque (optionnel)** | Brand center → *Brand fonts* | Téléverser la police institutionnelle (woff2) + jeu de polices BBI |
+| 6 | **Fonts de marque (optionnel)** | Brand center → *Brand fonts* | Téléverser la police institutionnelle (woff2) + jeu de polices Business Builders International |
 | 7 | **Footer du site** | ⚙️ → *Modifier l'apparence* → Pied de page | Mentions légales · RGPD · Accessibilité · Contact |
 
-La web part **BBI Accueil** applique elle-même un mode immersif lorsqu'elle est chargée : elle masque la barre Microsoft 365, l'en-tête et la navigation SharePoint, la navigation latérale, le titre et (en lecture seule) la barre de commandes. Le comportement est embarqué dans le bundle de la web part : il fonctionne sur la page publiée depuis le `.sppkg` et dans le workbench hébergé avec les manifests de debug. En mode édition, les commandes sont conservées pour pouvoir modifier la page.
+La web part **Business Builders International Accueil** applique elle-même un mode immersif lorsqu'elle est chargée : elle masque la barre Microsoft 365, l'en-tête et la navigation SharePoint, la navigation latérale, le titre et (en lecture seule) la barre de commandes. Le comportement est embarqué dans le bundle de la web part : il fonctionne sur la page publiée depuis le `.sppkg` et dans le workbench hébergé avec les manifests de debug. En mode édition, les commandes sont conservées pour pouvoir modifier la page.
 
-> Les sélecteurs s'appuient sur les identifiants/accessibility hooks actuels de SharePoint. Microsoft peut les faire évoluer ; vérifier le rendu après les mises à jour SharePoint. La page `SingleWebPartAppPage` et l'extension BBI Plein écran restent recommandées pour obtenir le canevas bord à bord le plus fiable.
+> Les sélecteurs s'appuient sur les identifiants/accessibility hooks actuels de SharePoint. Microsoft peut les faire évoluer ; vérifier le rendu après les mises à jour SharePoint. La page `SingleWebPartAppPage` et l'extension Business Builders International Plein écran restent recommandées pour obtenir le canevas bord à bord le plus fiable.
 
 ---
 
 ## 5. Le portail tient sur une page
 
-`accueil.aspx` est une **SingleWebPartAppPage** qui reçoit une seule web part : `BBI Accueil`. Son menu
+`accueil.aspx` est une **SingleWebPartAppPage** qui reçoit une seule web part : `Business Builders International Accueil`. Son menu
 change de vue dans la même application — les destinations se reflètent dans le fragment de l'URL
 (`#formations`, `#sessions`, `#actualites`, `#ressources`, `#communaute`) pour permettre les favoris
 et les liens directs, sans créer de pages SharePoint additionnelles.
@@ -195,7 +195,7 @@ et les liens directs, sans créer de pages SharePoint additionnelles.
 - **Ressources** : supports publiés et galerie médias.
 - **Communauté** : annuaire des formateurs référents et liens d'entraide.
 
-Ajoutez uniquement **BBI Accueil** à `accueil.aspx`. Les autres composants du package servent de briques
+Ajoutez uniquement **Business Builders International Accueil** à `accueil.aspx`. Les autres composants du package servent de briques
 internes à cette web part ; il n'est pas nécessaire d'ajouter séparément catalogue, documents ou galerie.
 
 ### Vérifier / modifier l'extension
@@ -330,7 +330,7 @@ antennes triées par `Ordre`. `SiteUrl` est renseigné automatiquement par `-Pro
 ### Hub et filiales — `-ProvisionFiliales`
 Le site intranet devient **hub**. Chaque ligne d'`Implantations` dont `Siège` est décoché reçoit un
 **site d'équipe** (groupe Microsoft 365) à l'adresse `/sites/<filialeSitePrefix><ville>` (ex.
-`/sites/intranet-abidjan`), rattaché au hub, avec le même portail BBI et ses propres listes (vides au
+`/sites/intranet-abidjan`), rattaché au hub, avec le même portail Business Builders International et ses propres listes (vides au
 départ : le portail y affiche le contenu de repli). `SiteUrl` est réécrit dans la ligne ; la navigation
 hub liste le siège puis les filiales par `Ordre`.
 
@@ -358,7 +358,7 @@ Pour ajouter une filiale : ajouter une ligne (Titre, Ville, Pays, Couleur, Initi
   création est utilisée et écrite dans `SiteUrl`.
 - **Membres** : les membres de `BBI-Concepteurs` (groupe `editorsGroup`) sont copiés une fois par
   exécution (instantané) dans le groupe Membres de chaque filiale ; relancer pour propager les nouveaux.
-- **Relances** : les sites existants sont conservés, ainsi que les réglages de leur web part BBI Accueil
+- **Relances** : les sites existants sont conservés, ainsi que les réglages de leur web part Business Builders International Accueil
   (elle n'est plus remplacée). Une ligne sans `Ville` est ignorée (le nom du site vient de `Ville`) ;
   deux lignes avec la même `Ville` : la seconde est ignorée avec un avertissement. Une filiale en échec
   n'interrompt pas les autres (statut `ÉCHEC` dans le rapport).
@@ -404,10 +404,10 @@ Distincte des supports pédagogiques ci-dessus : RH, juridique, finance, qualit�
 | Un bandeau « données de démonstration » apparaît | Vous avez activé `Afficher les indicateurs de données de démonstration` et la source est vide | Normal : publier un élément, ou désactiver l'option pour masquer le bandeau |
 | Une web part affiche des contenus d'exemple alors que votre liste est remplie | Liste non publiée, ou mauvais nom de liste | Vérifier le titre exact (ou le renseigner dans le volet Propriétés) et que les éléments sont bien approuvés/publiés |
 | Le héros ne prend pas toute la hauteur | Web part placée dans une page article (pas une page applicative) | Utiliser `accueil.aspx` ou passer la page en *SingleWebPartAppPage* |
-| Il reste des marges blanches | Extension « BBI Plein écran » absente | Relancer le script (§4 custom action) ou vérifier `Get-PnPCustomAction` |
+| Il reste des marges blanches | Extension « Business Builders International Plein écran » absente | Relancer le script (§4 custom action) ou vérifier `Get-PnPCustomAction` |
 | Album vide dans la galerie | Colonne `Album` non renseignée | Renseigner la colonne, sinon tout est regroupé sous « Tous les albums » |
 | La barre de commandes a disparu | `hideCommandBar: true` | Repasser la propriété à `false` (§5) |
-| Le thème ne s'applique pas | Thème publié mais non appliqué au site | `Set-PnPWebTheme -Theme 'BBI Bleu nuit' -WebUrl https://businessbuilderinter.sharepoint.com/sites/intranet` |
+| Le thème ne s'applique pas | Thème publié mais non appliqué au site | `Set-PnPWebTheme -Theme 'Business Builders International Bleu nuit' -WebUrl https://businessbuilderinter.sharepoint.com/sites/intranet` |
 
 ---
 
@@ -435,7 +435,7 @@ Le croquis du client montre un **siège** et des **filiales** (bandeau « Siège
 |---|---|
 | **Site du siège** | Site d'équipe privé, devenu **hub** |
 | **Sites de filiale** | Un site d'équipe par filiale, rattaché au hub (`/sites/intranet-<ville>`) : ce sont des sites frères reliés au siège, pas des sous-sites classiques |
-| **Tableau de bord** | La page d'accueil du portail (`accueil.aspx`, web part *BBI Accueil*) sur le siège **et** sur chaque filiale |
+| **Tableau de bord** | La page d'accueil du portail (`accueil.aspx`, web part *Business Builders International Accueil*) sur le siège **et** sur chaque filiale |
 | **Listes et bibliothèques** | Les 17 listes et bibliothèques du portail sur chaque site, dont `Offres` et `Avis clients` |
 | **Application SPFx** | Téléversée et déployée dans le catalogue d'applications du tenant |
 | **Bandeau Siège et filiales** | La liste `Implantations` est remplie depuis la configuration, puis recopiée sur chaque site, avec le lien, la couleur et les initiales de chaque filiale |
@@ -669,7 +669,7 @@ Le kit donne aussi à chacun de ces cinq groupes la **lecture du site** : sans e
 
 ### Pour un autre client ou un autre tenant
 
-Copiez `organisation.json` vers un autre fichier (par exemple `client-b.json`), changez `tenant.nom`, le siège, les filiales et les groupes, puis lancez le script avec `-Config .\client-b.json`. Le fichier d'environnement que lisent les scripts existants est généré automatiquement : `bbi-environnement.json` n'est pas modifié. Le thème « BBI Bleu nuit » est publié sur le tenant par `provision-bbi-intranet.ps1`.
+Copiez `organisation.json` vers un autre fichier (par exemple `client-b.json`), changez `tenant.nom`, le siège, les filiales et les groupes, puis lancez le script avec `-Config .\client-b.json`. Le fichier d'environnement que lisent les scripts existants est généré automatiquement : `bbi-environnement.json` n'est pas modifié. Le thème « Business Builders International Bleu nuit » est publié sur le tenant par `provision-bbi-intranet.ps1`.
 
 ### Dépannage
 
@@ -694,3 +694,20 @@ Copiez `organisation.json` vers un autre fichier (par exemple `client-b.json`), 
 - Il ne fait pas les réglages de conformité du §4 (étiquettes de confidentialité, IRM, partage externe).
 
 > **À savoir avant le premier vrai lancement.** Les tests hors ligne (`verify-organisation.ps1` et `verify-organisation-flow.ps1`) valident la configuration, le plan et l'enchaînement des étapes, y compris l'idempotence. `verify-pnp-parameters.ps1` contrôle en plus que chaque appel PnP existe dans le module installé (dernier contrôle : PnP.PowerShell 3.3.0, tous les appels reconnus). Aucun de ces tests ne valide les droits de votre tenant ni le comportement réel de SharePoint : le kit n'a pas encore été lancé sur un tenant réel. Commencez par `-PlanOnly`, puis `-DryRun`, puis une seule filiale (`-Filiale`), et gardez l'audit pour conclure.
+
+## 11. Images et documents d'exemple (données réelles au lieu des maquettes)
+
+Avec `-SeedDemoData` (ou `options.donneesDemo: true` dans le kit), le script ne crée plus seulement des lignes de texte : `BbiSeedAssets.ps1` téléverse les fichiers de `deploy/assets-demo/` puis les relie aux lignes des listes, de sorte que le portail lit les listes SharePoint et non plus ses visuels intégrés.
+
+| Contenu | Où |
+|---|---|
+| 8 images d'actualités | `SiteAssets/demo/news`, colonne `ImageUrl` de `Actualites` |
+| 8 portraits de formateurs | `SiteAssets/demo/formateurs`, colonne `PhotoUrl` de `Formateurs` |
+| Employé du mois | colonne `PhotoUrl` de `Employés du mois` |
+| 3 logos de références | colonne `LogoUrl` de `Nos références` |
+| 12 photos | bibliothèque `Galerie médias` (Album, Lieu, Crédit) |
+| 3 supports + 3 documents administratifs | `Supports publiés` et `Documents administratifs` |
+
+Toutes les images sont originales, aux couleurs et avec le logo de Business Builders International (générées par `assets-demo/New-DemoImages.ps1`). Une image déjà saisie par un éditeur n'est jamais remplacée et le script peut être relancé sans doublon. Test hors ligne : `pwsh -File .\verify-seed-assets.ps1` (126 contrôles). Pour remplacer les visuels, déposez vos propres fichiers sous les mêmes noms dans `assets-demo/` ou changez-les directement dans SharePoint.
+
+Dans tout le portail, le nom de l'entreprise s'écrit **Business Builders International** en toutes lettres (jamais « BBI »). Seuls les identifiants techniques gardent le préfixe `BBI` (noms de fichiers et de fonctions, codes d'offre `BBI-FOR-101`, groupes `BBI-Concepteurs`).

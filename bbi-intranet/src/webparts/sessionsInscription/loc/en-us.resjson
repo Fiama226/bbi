@@ -33,7 +33,7 @@
   "SheetCta": "View course page",
   "CalendarLink": "Add to my calendar",
   "RegistrationNote": "Registrations are handled by the training team. A question? Write to {url}.",
-  "SupportLink": "BBI support",
+  "SupportLink": "Business Builders International support",
   "DemoBanner": "Sample data shown: the sessions list is not created yet, or still empty. Your sessions will replace this schedule automatically as soon as you publish them.",
   "LoadingMessage": "Loading the schedule…"
 }

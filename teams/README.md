@@ -1,8 +1,8 @@
-# BBI Intranet dans Teams & Viva Connections — zéro chrome SharePoint
+# Business Builders International Intranet dans Teams & Viva Connections — zéro chrome SharePoint
 
 Cette partie répond à la limite honnête du navigateur : **dans un navigateur, la barre de suite Microsoft
 (waffle, recherche, avatar) ne peut pas être retirée** (personnalisation interdite et non supportée par Microsoft).
-Dans **Teams**, il n'y a aucun chrome SharePoint : la page BBI s'affiche en plein écran, intégralement.
+Dans **Teams**, il n'y a aucun chrome SharePoint : la page Business Builders International s'affiche en plein écran, intégralement.
 
 > Ce n'est pas une application « différente » : ce sont **les mêmes web parts SPFx**, déclarées dans
 > leurs manifestes avec les hôtes `TeamsTab` et `TeamsPersonalApp`. Une seule base de code, deux expériences.
@@ -55,7 +55,7 @@ Sortie : `deliverables/teams/bbi-teams-home.zip`, `bbi-teams-gallery.zip`, `bbi-
 1. **Teams admin center** → *Équipes* → *Applications* → **Gérer les applications** → **Téléverser une application personnalisée**.
 2. Téléverser chaque `.zip` → **Autoriser pour l'organisation**.
 3. **Épingler** l'application pour les équipes concernées (formateurs, direction) :
-   *Applications* → *Politiques de configuration* → épingler « BBI Intranet — Accueil » dans la barre latérale.
+   *Applications* → *Politiques de configuration* → épingler « Business Builders International Intranet — Accueil » dans la barre latérale.
 4. Pour **Viva Connections** : utiliser la même page comme expérience d'accueil dans *Viva Connections* →
    tableau de bord et flux de la page d'accueil.
 
@@ -71,7 +71,7 @@ sélectionner le `.zip`. L'onglet apparaît immédiatement dans la barre latéra
 | Point | Recommandation |
 |---|---|
 | **Nom & description** | Déjà rédigés (français, orientés usage). Modifiez-les dans le script, pas dans le `.zip`. |
-| **Icônes** | `bbi-intranet/teams/<id>_color.png` (192×192) et `<id>_outline.png` (32×32) — fournies aux couleurs BBI (#0E265C / #D21419). |
+| **Icônes** | `bbi-intranet/teams/<id>_color.png` (192×192) et `<id>_outline.png` (32×32) — fournies aux couleurs Business Builders International (#0E265C / #D21419). |
 | **Domaine déclaré** | `validDomains` contient uniquement votre domaine SharePoint : obligatoire, sinon l'onglet reste blanc. |
 | **Version** | Incrémentez `-Version` à chaque republication, sinon Teams refuse la mise à jour. |
 | **Authentification** | Le contexte utilisateur est celui de Teams (SSO Microsoft 365) : aucune configuration supplémentaire. |
@@ -89,7 +89,7 @@ Invoke-WebRequest "https://businessbuilderinter.sharepoint.com/sites/intranet/Si
 
 Puis dans Teams :
 
-1. Ouvrir l'application **BBI Intranet — Accueil** depuis la barre latérale.
+1. Ouvrir l'application **Business Builders International Intranet — Accueil** depuis la barre latérale.
 2. Contrôler : aucun en-tête SharePoint, héros plein écran, navigation interne fonctionnelle.
 3. Cliquer un élément de la galerie → la visionneuse s'ouvre en plein écran.
 4. Ouvrir une fiche formation depuis le catalogue → l'URL contient `?code=BBI-…`.

@@ -67,7 +67,7 @@ export const searchPortal = async (
         return undefined;
       }
       const description = cellValue(cells, 'Description').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      const category = cellValue(cells, 'ContentType') || cellValue(cells, 'FileExtension') || 'Contenu BBI';
+      const category = cellValue(cells, 'ContentType') || cellValue(cells, 'FileExtension') || 'Contenu Business Builders International';
       return { title, description, category, href };
     })
     .filter((result): result is IHomeSearchResult => !!result);

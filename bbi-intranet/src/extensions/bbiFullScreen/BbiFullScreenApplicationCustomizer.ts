@@ -157,7 +157,7 @@ export default class BbiFullScreenApplicationCustomizer extends BaseApplicationC
       if (this._topPlaceholder && this._topPlaceholder.domElement) {
         const banner = document.createElement('div');
         banner.setAttribute('role', 'region');
-        banner.setAttribute('aria-label', 'Bandeau d’information BBI');
+        banner.setAttribute('aria-label', 'Bandeau d’information Business Builders International');
         banner.style.cssText = [
           'background:#0E265C',
           'color:#fff',

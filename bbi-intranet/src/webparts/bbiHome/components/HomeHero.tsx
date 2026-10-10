@@ -368,7 +368,7 @@ const HomeHero: React.FC<IHomeHeroProps> = (props) => {
         <ul
           className={styles.kpiBand}
           data-bbi-kpi-band="true"
-          aria-label="Chiffres clés BBI"
+          aria-label="Chiffres clés Business Builders International"
         >
           {kpis.map((kpi) => (
             <li key={`${kpi.value}-${kpi.label}`} className={styles.kpi}>

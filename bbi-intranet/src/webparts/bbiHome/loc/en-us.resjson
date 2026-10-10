@@ -1,5 +1,5 @@
 {
-  "PropertyPaneDescription": "BBI home page: data sources, hero, navigation and content blocks.",
+  "PropertyPaneDescription": "Business Builders International home page: data sources, hero, navigation and content blocks.",
   "SourceGroupName": "Data sources",
   "SiteUrlFieldLabel": "Site URL (empty = current site)",
   "SiteUrlFieldDescription": "Site hosting the lists and libraries. Missing sources fall back to sample data.",
@@ -27,7 +27,7 @@
   "HeroTitleFieldDescription": "Displayed very large over the image. Two lines maximum looks best.",
   "HeroSubtitleFieldLabel": "Subtitle / pitch",
   "HeroImageFieldLabel": "Background image (URL)",
-  "HeroImageFieldDescription": "Absolute URL of an image. Empty = bundled BBI visual.",
+  "HeroImageFieldDescription": "Absolute URL of an image. Empty = bundled Business Builders International visual.",
   "HeroSlidesFieldLabel": "Hero slideshow (images and text)",
   "HeroSlidesFieldDescription": "One line per slide: image | eyebrow | title | pitch | button label | link. Leave the first field empty (line starting with \"|\") for a text-only slide. Shortcut: title | pitch | button label | link. Slides rotate every 8 seconds (paused on hover, disabled with reduced-motion).",
   "CtaGroupName": "Call-to-action buttons",
@@ -57,6 +57,6 @@
   "ShowDataNoticesFieldLabel": "Show sample-data indicators",
   "LayoutCompactFieldLabel": "Compact hero (not full screen)",
   "FooterNoteFieldLabel": "Footer note",
-  "PageTitle": "BBI Intranet",
+  "PageTitle": "Intranet Business Builders International",
   "LoadingMessage": "Loading your workspace…"
 }

@@ -205,7 +205,7 @@ function Get-BbiOrganizationPlan {
         GroupeEditeurs  = "$(Get-BbiOptional $Config.groupes.editeurs 'nom' 'BBI-Concepteurs')"
         EditeursMembres = @(Get-BbiOptional $Config.groupes.editeurs 'membres' @())
         LectureTous     = [bool](Get-BbiOptional $Config.groupes 'lectureTous' $false)
-        NomTheme        = "$(Get-BbiOptional $Config.identite 'nomTheme' 'BBI Bleu nuit')"
+        NomTheme        = "$(Get-BbiOptional $Config.identite 'nomTheme' 'Business Builders International Bleu nuit')"
         Logo            = $logo
         PiedDePage      = @(Get-BbiOptional $Config.identite 'piedDePage' @())
         TitrePiedDePage = "$(Get-BbiOptional $Config.identite 'titrePiedDePage' (Get-BbiOptional $Config.organisation 'nom' $Config.siege.titre))"
@@ -230,7 +230,7 @@ function Write-BbiOrganizationPlan {
         $rows += [pscustomobject]@{ Site = $f.Titre; Role = "Filiale $($f.Ordre)"; Url = $f.Url; Proprio = $f.Proprietaires.Count; Membres = $f.Membres.Count; Visiteurs = $f.Visiteurs.Count; Inclus = $(if ($f.Selectionnee) { 'oui' } else { 'non (filtre -Filiale)' }) }
     }
     $rows | Format-Table -AutoSize | Out-String -Width 200 | Write-Host
-    Write-Host "Chaque site reçoit : listes et bibliothèques du portail, page accueil.aspx avec la web part BBI Accueil, thème, en-tête, pied de page." -ForegroundColor Gray
+    Write-Host "Chaque site reçoit : listes et bibliothèques du portail, page accueil.aspx avec la web part Business Builders International Accueil, thème, en-tête, pied de page." -ForegroundColor Gray
 }
 
 # Fichier d'environnement lu par provision-bbi-intranet.ps1 (-EnvironmentFile)

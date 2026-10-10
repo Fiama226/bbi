@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository overview
 
-This repo delivers a SharePoint Online intranet for **Business Builders International (BBI)**, a professional training organization. There are two layers:
+This repo delivers a SharePoint Online intranet for **Business Builders International**, a professional training organization. There are two layers:
 
 - `bbi-intranet/` — the actual SPFx (SharePoint Framework) source project, 1.22.2, TypeScript 5.8, React 17. This is where almost all code work happens.
 - `deliverables/` — static HTML design deliverables (audit, mockups, theme JSON) and the installable package `deliverables/spfx/bbi-portail.sppkg`. These are generated/handwritten design artifacts, not build output — don't regenerate them casually.
@@ -14,7 +14,7 @@ All substantive commands below are run from `bbi-intranet/` unless noted.
 
 ## Key architectural fact: one web part does almost everything
 
-Although the solution manifest declares 7 web parts + 1 extension, **production only needs one**: `BBI Accueil — portail unifié` (`src/webparts/bbiHome`). It's a single-page-app-style web part with internal view routing (Accueil, Formations, Sessions, Actualités, Ressources, Communauté) that switches views without leaving the SharePoint page or reloading. The other web parts (`trainingCatalog`, `bbiGallery`, `secureDocuments`, `ficheFormation`, `sessionsInscription`, `articleActualite`) are legacy/standalone bricks kept in the package for backward compatibility; their functionality has been folded into `bbiHome`'s views. When making feature changes, check whether the real target is `bbiHome` before touching the standalone web parts.
+Although the solution manifest declares 7 web parts + 1 extension, **production only needs one**: `Business Builders International Accueil — portail unifié` (`src/webparts/bbiHome`). It's a single-page-app-style web part with internal view routing (Accueil, Formations, Sessions, Actualités, Ressources, Communauté) that switches views without leaving the SharePoint page or reloading. The other web parts (`trainingCatalog`, `bbiGallery`, `secureDocuments`, `ficheFormation`, `sessionsInscription`, `articleActualite`) are legacy/standalone bricks kept in the package for backward compatibility; their functionality has been folded into `bbiHome`'s views. When making feature changes, check whether the real target is `bbiHome` before touching the standalone web parts.
 
 The Accueil view now also carries several client-requested blocks beyond the original hero/news/sessions layout: Vision/Mission/Objectifs (identity), a rotating Annonces banner, Pensée du jour + Anniversaires (inside "vie de l'équipe"), Implantations (siège/filiales), Nos références (client logos), and Références pédagogiques (under Formations). Communauté is its own dedicated section — a staff Trombinoscope with category filter chips — not an alias of Ressources. Sessions carries a calendar-grid view (`SessionsCalendar.tsx` / `sessionsCalendarGrid.ts`) alongside the original text list, both reading the same `Sessions` data.
 

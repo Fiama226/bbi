@@ -1,5 +1,5 @@
 {
-  "PropertyPaneDescription": "Paramètres de la web part Catalogue des formations BBI.",
+  "PropertyPaneDescription": "Paramètres de la web part Catalogue des formations Business Builders International.",
   "BasicGroupName": "Source de données",
   "SiteUrlFieldLabel": "URL du site (vide = site courant)",
   "SiteUrlFieldDescription": "Site contenant la liste « Formations ». Laisser vide pour utiliser le site courant.",

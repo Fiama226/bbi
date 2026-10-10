@@ -185,7 +185,7 @@ const NewsDetail: React.FC<INewsDetailProps> = (props) => {
             ) : (
               <p className={styles.richFallback}>
                 {article.Summary ||
-                  "Le détail de cette actualité sera publié prochainement. Contactez la communication BBI pour en savoir plus."}
+                  "Le détail de cette actualité sera publié prochainement. Contactez la communication Business Builders International pour en savoir plus."}
               </p>
             )}
 

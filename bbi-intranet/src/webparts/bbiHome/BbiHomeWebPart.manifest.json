@@ -21,10 +21,10 @@
         "default": "Advanced"
       },
       "title": {
-        "default": "BBI Accueil (plein écran)"
+        "default": "Business Builders International — Accueil (plein écran)"
       },
       "description": {
-        "default": "Page d'accueil BBI immersive : héros en diaporama (images + textes), chiffres clés, actualités paginées avec page dédiée, sessions, employé du mois, certifications, catalogue, supports, galerie et formateurs (photo et contact)."
+        "default": "Page d'accueil Business Builders International immersive : héros en diaporama (images + textes), chiffres clés, actualités paginées avec page dédiée, sessions, employé du mois, certifications, catalogue, supports, galerie et formateurs (photo et contact)."
       },
       "officeFabricIconFontName": "Home",
       "properties": {

@@ -27,7 +27,7 @@
   "ExternalLink": "Related link",
   "NoContent": "The full article will be published soon.",
   "EmptyStateTitle": "Article not found",
-  "EmptyStateHint": "This article is no longer available or not published yet. Browse the news feed for the latest BBI stories.",
+  "EmptyStateHint": "This article is no longer available or not published yet. Browse the news feed for the latest Business Builders International stories.",
   "DemoBanner": "Sample data shown: the news list is not created yet, or still empty. Your articles will replace this sample automatically as soon as you publish them.",
   "LoadingMessage": "Loading the article…"
 }

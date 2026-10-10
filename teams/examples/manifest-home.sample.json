@@ -11,12 +11,12 @@
     "termsOfUseUrl": "https://businessbuildersinternational.com/confidentialite"
   },
   "name": {
-    "short": "BBI Accueil",
-    "full": "BBI Intranet — Accueil"
+    "short": "Accueil",
+    "full": "Business Builders International Intranet — Accueil"
   },
   "description": {
-    "short": "BBI Intranet — Accueil — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint.",
-    "full": "BBI Intranet — Accueil — page SharePoint BBI accessible dans Teams, sans aucun chrome SharePoint."
+    "short": "Intranet Business Builders International dans Teams, sans chrome SharePoint.",
+    "full": "Business Builders International Intranet — Accueil — page SharePoint Business Builders International accessible dans Teams, sans aucun chrome SharePoint."
   },
   "icons": {
     "outline": "6a9b6e3b-44f1-4a70-8f0a-45c82b29126d_outline.png",

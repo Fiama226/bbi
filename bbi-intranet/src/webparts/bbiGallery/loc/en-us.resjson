@@ -1,5 +1,5 @@
 {
-  "PropertyPaneDescription": "Configure the BBI media gallery (photos and videos in a SharePoint picture library).",
+  "PropertyPaneDescription": "Configure the Business Builders International media gallery (photos and videos in a SharePoint picture library).",
   "SourceGroupName": "Data source",
   "DisplayGroupName": "Display",
   "SiteUrlFieldLabel": "Site URL (empty = current site)",

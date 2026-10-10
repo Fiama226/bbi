@@ -13,7 +13,7 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
-    "title": { "default": "BBI Fiche formation" },
+    "title": { "default": "Business Builders International — Fiche formation" },
     "description": { "default": "Modèle de fiche formation : la page reçoit le code formation dans l'adresse (?code=BBI-MGT-101) et affiche présentation, objectifs, programme, sessions, supports et formateurs référents." },
     "officeFabricIconFontName": "ReadingMode",
     "properties": {

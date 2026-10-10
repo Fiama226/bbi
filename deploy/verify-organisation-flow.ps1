@@ -260,7 +260,7 @@ try {
     Check "siège : visiteur ajouté au groupe SharePoint des visiteurs" ((Count-Calls $r.Calls 'group-add Visitors .*lecteur@exemple.com') -eq 1)
     Check "Abidjan : propriétaire et membre dans le groupe Microsoft 365" ($m.M365[$m.Sites[$abjUrl].GroupId].Owners -contains 'abidjan.resp@exemple.com' -and $m.M365[$m.Sites[$abjUrl].GroupId].Members -contains 'abidjan.membre@exemple.com')
     Check "« Tout le monde sauf externes » ajouté aux visiteurs de chacun des 4 sites" ((Count-Calls $r.Calls "group-add Visitors c:0-\.f\|rolemanager\|spo-grid-all-users/$($m.TenantId)") -eq 4)
-    Check "thème appliqué à chacun des 4 sites" ((Count-Calls $r.Calls '^theme BBI Bleu nuit ') -eq 4)
+    Check "thème appliqué à chacun des 4 sites" ((Count-Calls $r.Calls '^theme Business Builders International Bleu nuit ') -eq 4)
     Check "logo téléversé et utilisé dans l'en-tête de chaque site" ((Count-Calls $r.Calls '^upload logo.png SiteAssets$') -eq 4 -and (Count-Calls $r.Calls '^header .* Compact/Strong logo=/SiteAssets/logo.png$') -eq 4)
     Check "pied de page et lien « Mentions légales » sur chacun des 4 sites" ((Count-Calls $r.Calls '^footer ') -eq 4 -and (Count-Calls $r.Calls '^nav-add Footer Mentions légales$') -eq 4)
     Check "audit final : organisation conforme" ($r.Out -match 'Organisation conforme') (($r.Out -split "`n" | Select-String 'contrôle' | Select-Object -First 3 | ForEach-Object { $_.Line.Trim() }) -join ' | ')

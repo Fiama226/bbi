@@ -59,7 +59,7 @@ const SiteNetwork: React.FC<ISiteNetworkProps> = (props) => {
                   />
                 ) : (
                   <span className={styles.logo} style={{ color: accent }} aria-hidden="true">
-                    {office.Initiales || "BBI"}
+                    {office.Initiales || "BB"}
                   </span>
                 )}
                 <span className={styles.kind}>{kindOf(office)}</span>

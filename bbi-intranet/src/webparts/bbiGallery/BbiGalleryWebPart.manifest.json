@@ -13,8 +13,8 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
-    "title": { "default": "BBI Galerie médias" },
-    "description": { "default": "Galerie photos et vidéos BBI : albums filtrables, vignettes optimisées et visionneuse plein écran accessible. Affiche un jeu de visuels BBI tant que la bibliothèque d'images est vide ou non créée." },
+    "title": { "default": "Business Builders International — Galerie médias" },
+    "description": { "default": "Galerie photos et vidéos Business Builders International : albums filtrables, vignettes optimisées et visionneuse plein écran accessible. Affiche un jeu de visuels Business Builders International tant que la bibliothèque d'images est vide ou non créée." },
     "officeFabricIconFontName": "PhotoCollection",
     "properties": {
       "siteUrl": "",

@@ -1,19 +1,19 @@
-# BBI Intranet — Solution SPFx (SharePoint Online)
+# Business Builders International Intranet — Solution SPFx (SharePoint Online)
 
-Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le package embarque aussi des briques autonomes historiques, mais **le portail demandé ne nécessite qu'une seule web part sur une seule page** : `BBI Accueil — portail unifié`.
+Solution **SPFx 1.22.2** pour l'intranet Business Builders International. Le package embarque aussi des briques autonomes historiques, mais **le portail demandé ne nécessite qu'une seule web part sur une seule page** : `Business Builders International Accueil — portail unifié`.
 
 | Web part | ID | Rôle |
 |---|---|---|
-| **BBI Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil (héros en diaporama images + textes, chiffres clés, identité Vision/Mission/Objectifs, annonces, employé du mois, certifications, pensée du jour, anniversaires, implantations, références clients), Formations (catalogue + références pédagogiques), Sessions (liste + vue calendrier), Actualités (flux paginé + **page dédiée par actualité**), Ressources (documents pédagogiques + administratifs + galerie), Communauté (Trombinoscope : annuaire du personnel avec **photo, fiche contact WhatsApp/Teams et filtre par catégorie**). La navigation change de vue sans recharger ni quitter cette page ; sa barre garde un fond bleu nuit en permanence (elle ne devient jamais transparente ni blanche, quel que soit le défilement ou la largeur d'écran). Le chrome SharePoint (en-tête, navigation, titre) est masqué en lecture par l'extension « BBI Plein écran » sur la page applicative ; la barre de suite Microsoft 365 reste toujours visible. Fonctionne dans le package publié comme dans le workbench hébergé. |
-| **BBI Catalogue des formations** | `d37a426e-48db-484f-bf10-c38675bb7b43` | Cartes filtrables (filière) + recherche, alimentées par la liste `Formations`. Affiche des données d'exemple si la liste n'existe pas encore. |
-| **BBI Galerie médias** | `f0f19a37-2c11-4812-9006-8aa71a9254f1` | Galerie photos/vidéos alimentée par la bibliothèque d'images « Galerie médias » : albums filtrables, mosaïque, visionneuse plein écran accessible (clavier, focus, `aria-modal`), vidéos mp4, vignettes générées par SharePoint. |
-| **BBI Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
-| **BBI Fiche formation** *(modèle)* | `a9c99e25-db18-4419-894b-08bc9c5b9081` | Modèle de page : la page lit `?code=BBI-MGT-101` et affiche présentation, objectifs, programme, prérequis, public visé, prochaines sessions (Événements de la liste Sessions, filtrées par code), supports publiés et formateurs référents. |
-| **BBI Sessions & inscriptions** | `96216ee2-85b1-473b-aaec-e5b646a151ee` | Planning groupé par mois : recherche, filtres filière/modalité, statut d'inscription, lien « Ajouter à mon agenda » (Outlook) et lien vers la fiche formation (code extrait du titre). |
-| **BBI Article d'actualité** *(modèle)* | `f769f3df-2c27-4a30-bce2-d4ae5793557b` | Modèle de page : lit `?itemid=12`, affiche visuel, chapô, auteur, temps de lecture, partage (e-mail/Teams/copie du lien) et actualités liées. Le HTML éditorial est nettoyé (scripts et événements retirés). |
-| **BBI Documents sécurisés** | `c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41` | Brique autonome conservée dans le package ; ses contenus sont intégrés dans la vue Ressources du portail. |
+| **Business Builders International Accueil — portail unifié** | `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d` | **La seule web part à ajouter à la page SharePoint** : une application interne avec Accueil (héros en diaporama images + textes, chiffres clés, identité Vision/Mission/Objectifs, annonces, employé du mois, certifications, pensée du jour, anniversaires, implantations, références clients), Formations (catalogue + références pédagogiques), Sessions (liste + vue calendrier), Actualités (flux paginé + **page dédiée par actualité**), Ressources (documents pédagogiques + administratifs + galerie), Communauté (Trombinoscope : annuaire du personnel avec **photo, fiche contact WhatsApp/Teams et filtre par catégorie**). La navigation change de vue sans recharger ni quitter cette page ; sa barre garde un fond bleu nuit en permanence (elle ne devient jamais transparente ni blanche, quel que soit le défilement ou la largeur d'écran). Le chrome SharePoint (en-tête, navigation, titre) est masqué en lecture par l'extension « Business Builders International Plein écran » sur la page applicative ; la barre de suite Microsoft 365 reste toujours visible. Fonctionne dans le package publié comme dans le workbench hébergé. |
+| **Business Builders International Catalogue des formations** | `d37a426e-48db-484f-bf10-c38675bb7b43` | Cartes filtrables (filière) + recherche, alimentées par la liste `Formations`. Affiche des données d'exemple si la liste n'existe pas encore. |
+| **Business Builders International Galerie médias** | `f0f19a37-2c11-4812-9006-8aa71a9254f1` | Galerie photos/vidéos alimentée par la bibliothèque d'images « Galerie médias » : albums filtrables, mosaïque, visionneuse plein écran accessible (clavier, focus, `aria-modal`), vidéos mp4, vignettes générées par SharePoint. |
+| **Business Builders International Plein écran** *(extension)* | `ae430672-9740-4b5a-ace1-fd5d5ab6e9bf` | Application Customizer : supprime les marges du canevas **uniquement sur les pages applicatives** (`SingleWebPartAppPage`) pour un rendu bord à bord réel. Propriétés : `mode`, `edgeToEdge`, `hidePageTitle`, `hideCommandBar`, `topBannerText`, `customCss`. |
+| **Business Builders International Fiche formation** *(modèle)* | `a9c99e25-db18-4419-894b-08bc9c5b9081` | Modèle de page : la page lit `?code=BBI-MGT-101` et affiche présentation, objectifs, programme, prérequis, public visé, prochaines sessions (Événements de la liste Sessions, filtrées par code), supports publiés et formateurs référents. |
+| **Business Builders International Sessions & inscriptions** | `96216ee2-85b1-473b-aaec-e5b646a151ee` | Planning groupé par mois : recherche, filtres filière/modalité, statut d'inscription, lien « Ajouter à mon agenda » (Outlook) et lien vers la fiche formation (code extrait du titre). |
+| **Business Builders International Article d'actualité** *(modèle)* | `f769f3df-2c27-4a30-bce2-d4ae5793557b` | Modèle de page : lit `?itemid=12`, affiche visuel, chapô, auteur, temps de lecture, partage (e-mail/Teams/copie du lien) et actualités liées. Le HTML éditorial est nettoyé (scripts et événements retirés). |
+| **Business Builders International Documents sécurisés** | `c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41` | Brique autonome conservée dans le package ; ses contenus sont intégrés dans la vue Ressources du portail. |
 
-> Pour le déploiement standard : téléversez le package, puis ajoutez **uniquement `BBI Accueil — portail unifié`** à `accueil.aspx`. N'ajoutez pas les briques Catalogue, Galerie ou Documents séparément.
+> Pour le déploiement standard : téléversez le package, puis ajoutez **uniquement `Business Builders International Accueil — portail unifié`** à `accueil.aspx`. N'ajoutez pas les briques Catalogue, Galerie ou Documents séparément.
 
 Package prêt à installer : **`../deliverables/spfx/bbi-portail.sppkg`** — version **1.6.0.0** (7 web parts + 1 extension, assets embarqués, déploiement tenant autorisé).
 
@@ -25,20 +25,20 @@ Toutes les sources sont tolérantes : liste absente (404), liste non créée, **
 
 | Composant | Source | Si absente / vide |
 |---|---|---|
-| BBI Accueil | `Actualites`, `Sessions`, `Formateurs` | Actualités (12), sessions à venir (8) et formateurs d'exemple (10, coordonnées complètes) |
-| BBI Accueil — vie de l'équipe | `Employés du mois`, `Certifications`, `Pensées du jour`, `Anniversaires` | 1 portrait (Léa Marchand) + 4 certifications (Qualiopi, Datadock, BBI, TOSA/ICDL) + citation du jour + anniversaires du mois |
-| BBI Accueil — annonces | `Annonces` | Bandeau rotatif de 3 annonces d'exemple (fenêtre de dates respectée) |
-| BBI Accueil — implantations | `Implantations` | Siège + 3 filiales/antennes d'exemple |
-| BBI Accueil — références | `Nos références` | 5 références clients d'exemple |
-| BBI Trombinoscope (Communauté) | `Formateurs` | Annuaire complet avec filtre par catégorie (Formateur/Permanent/Direction/Appui) |
-| BBI Catalogue | `Formations` | 5 formations BBI représentatives |
-| BBI Formations — références pédagogiques | `Références pédagogiques` | 5 références d'exemple réparties sur les 5 catégories |
-| BBI Fiche formation | `Formations`, `Sessions`, `Supports publiés`, `Formateurs` | Fiche complète (objectifs, programme, prérequis, sessions, supports, référent) — y compris pour un code inconnu |
-| BBI Sessions | `Sessions`, `Formations` | Planning de 6 sessions réparties sur les mois à venir ; vue calendrier dérivée de la même liste |
-| BBI Article | `Actualites` | Article rédigé (corps > 300 caractères) + 3 actualités liées + visuel embarqué |
-| BBI Galerie | `Galerie médias` | 8 photos réparties dans 4 albums (4 visuels embarqués) |
-| BBI Documents | `Supports publiés` | 4 supports ; le bouton d'ouverture est neutralisé (aucun fichier inexistant n'est appelé) |
-| BBI Ressources — documents administratifs | `Documents administratifs` | 5 documents d'exemple (RH, qualité, finance, juridique, modèles) |
+| Business Builders International Accueil | `Actualites`, `Sessions`, `Formateurs` | Actualités (12), sessions à venir (8) et formateurs d'exemple (10, coordonnées complètes) |
+| Business Builders International Accueil — vie de l'équipe | `Employés du mois`, `Certifications`, `Pensées du jour`, `Anniversaires` | 1 portrait (Léa Marchand) + 4 certifications (Qualiopi, Datadock, Business Builders International, TOSA/ICDL) + citation du jour + anniversaires du mois |
+| Business Builders International Accueil — annonces | `Annonces` | Bandeau rotatif de 3 annonces d'exemple (fenêtre de dates respectée) |
+| Business Builders International Accueil — implantations | `Implantations` | Siège + 3 filiales/antennes d'exemple |
+| Business Builders International Accueil — références | `Nos références` | 5 références clients d'exemple |
+| Business Builders International Trombinoscope (Communauté) | `Formateurs` | Annuaire complet avec filtre par catégorie (Formateur/Permanent/Direction/Appui) |
+| Business Builders International Catalogue | `Formations` | 5 formations Business Builders International représentatives |
+| Business Builders International Formations — références pédagogiques | `Références pédagogiques` | 5 références d'exemple réparties sur les 5 catégories |
+| Business Builders International Fiche formation | `Formations`, `Sessions`, `Supports publiés`, `Formateurs` | Fiche complète (objectifs, programme, prérequis, sessions, supports, référent) — y compris pour un code inconnu |
+| Business Builders International Sessions | `Sessions`, `Formations` | Planning de 6 sessions réparties sur les mois à venir ; vue calendrier dérivée de la même liste |
+| Business Builders International Article | `Actualites` | Article rédigé (corps > 300 caractères) + 3 actualités liées + visuel embarqué |
+| Business Builders International Galerie | `Galerie médias` | 8 photos réparties dans 4 albums (4 visuels embarqués) |
+| Business Builders International Documents | `Supports publiés` | 4 supports ; le bouton d'ouverture est neutralisé (aucun fichier inexistant n'est appelé) |
+| Business Builders International Ressources — documents administratifs | `Documents administratifs` | 5 documents d'exemple (RH, qualité, finance, juridique, modèles) |
 
 Les bandeaux « données de démonstration » sont masqués par défaut : option `showDataNotices` dans le volet de propriétés (manifeste : `false`).
 
@@ -53,7 +53,7 @@ Les bandeaux « données de démonstration » sont masqués par défaut : option
 1. Télécharger `deliverables/spfx/bbi-portail.sppkg`.
 2. SharePoint admin center → **More features** → **App catalog** (ou la page du catalogue) → *Distribute apps for SharePoint*.
 3. **Upload** du `.sppkg` → cocher *Make this solution available to all sites* → **Deploy**.
-4. Ouvrir une page moderne → **Éditer** → **+** → catégorie *Advanced* (ou recherche « BBI ») → ajouter **BBI Accueil**. Il peut être placé seul sur une page pleine largeur.
+4. Ouvrir une page moderne → **Éditer** → **+** → catégorie *Advanced* (ou recherche « Business Builders International ») → ajouter **Business Builders International Accueil**. Il peut être placé seul sur une page pleine largeur.
 5. Republisher la page. Les web parts affichent des exemples tant que les listes n'existent pas (§5).
 
 > Vous pouvez aussi tester dans le **workbench hébergé** : `https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx` → ajouter les web parts.
@@ -62,7 +62,7 @@ Les bandeaux « données de démonstration » sont masqués par défaut : option
 
 ## 2. Développement avec Docker (workbench)
 
-⚠️ **À savoir** : depuis SPFx 1.20+ (pipeline Heft), le *workbench local* (`localhost:4321/temp/workbench.html`) **n'existe plus**. Le conteneur Docker héberge le **serveur de debug** (code compilé en continu sur `https://localhost:4321`), et la page de test est le **workbench hébergé de votre tenant** — pour BBI : `https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx`
+⚠️ **À savoir** : depuis SPFx 1.20+ (pipeline Heft), le *workbench local* (`localhost:4321/temp/workbench.html`) **n'existe plus**. Le conteneur Docker héberge le **serveur de debug** (code compilé en continu sur `https://localhost:4321`), et la page de test est le **workbench hébergé de votre tenant** — pour Business Builders International : `https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx`
 (également renseigné dans `webpack.dev.config.js` et `.vscode/launch.json` — ce projet est *éjecté*, donc `webpack.dev.config.js` fait autorité et non `config/serve.json`). Il vous faut donc un tenant M365 (le tenant développeur gratuit du *Microsoft 365 Developer Program* convient parfaitement).
 
 ### Démarrage
@@ -84,7 +84,7 @@ docker compose logs -f          # attendre « Started Webpack Dev Server » puis
 https://businessbuilderinter.sharepoint.com/_layouts/15/workbench.aspx?debug=true&noredir=true&debugManifestsFile=https://localhost:4321/temp/manifests.js
 ```
 
-3. **+** → *Advanced* → ajouter **BBI Accueil** (ou les web parts individuelles) → les versions de *debug* (hot-reload) s'affichent.
+3. **+** → *Advanced* → ajouter **Business Builders International Accueil** (ou les web parts individuelles) → les versions de *debug* (hot-reload) s'affichent.
 
 ### Boucle de développement
 
@@ -168,7 +168,7 @@ déclarée dans `[Content_Types].xml`, ou si le package contient des bundles orp
 2. **Copier** le résultat dans `../deliverables/spfx/` puis **Upgrade** dans le catalogue d'applications.
 3. **Vérifier le déploiement** : catalogue d'applications → la solution doit afficher *Deployed*
    (et non seulement *Validated* / *Installed*).
-4. La web part à poser est **`BBI Accueil (plein écran)`** (id `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d`).
+4. La web part à poser est **`Business Builders International Accueil (plein écran)`** (id `6a9b6e3b-44f1-4a70-8f0a-45c82b29126d`).
 
 ---
 
@@ -196,7 +196,7 @@ Dans le site SharePoint cible, ouvrir **Contenu du site → Nouveau → Liste �
 
 Pour les documents, ouvrir **Contenu du site → Nouveau → Bibliothèque de documents** et nommer la bibliothèque `Supports publiés`. La web part utilise les colonnes natives `Title`, `FileRef`, `FileLeafRef` et `Modified`.
 
-Après création, ajouter **BBI Accueil** sur la page d'accueil en mode édition. Dans ses propriétés, vérifier les titres des listes et de la bibliothèque; laisser l'URL du site vide pour utiliser le site courant. Publier la page puis choisir **Définir comme page d'accueil** depuis la bibliothèque **Pages du site** si elle doit remplacer l'accueil du site.
+Après création, ajouter **Business Builders International Accueil** sur la page d'accueil en mode édition. Dans ses propriétés, vérifier les titres des listes et de la bibliothèque; laisser l'URL du site vide pour utiliser le site courant. Publier la page puis choisir **Définir comme page d'accueil** depuis la bibliothèque **Pages du site** si elle doit remplacer l'accueil du site.
 
 Si une liste ou la bibliothèque n'existe pas, ou si son schéma n'est pas encore prêt, la section concernée affiche son jeu d'exemples et un bandeau explicatif. Une liste présente mais vide affiche un état vide, sans inventer de données.
 

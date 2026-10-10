@@ -16,10 +16,10 @@
     },
     "metadata": {
       "shortDescription": {
-        "default": "Intranet BBI : accueil unifié (diaporama, chiffres clés, actualités, sessions, catalogue, supports, galerie, annuaire des formateurs et communauté)."
+        "default": "Intranet Business Builders International : accueil unifié (diaporama, chiffres clés, actualités, sessions, catalogue, supports, galerie, annuaire des formateurs et communauté)."
       },
       "longDescription": {
-        "default": "Solution SPFx de l'intranet Business Builders International (7 web parts + 1 extension). Toutes les sources sont tolérantes : si une liste, une bibliothèque ou la galerie est absente, non créée ou encore vide, la page affiche un contenu de repli professionnel (visuels et données BBI embarqués) au lieu d'un état vide. 1) BBI Accueil plein écran — héros en diaporama (images et textes qui défilent, pause au survol, respect de « animations réduites »), bande de chiffres clés toujours visible, actualités à la une puis paginées avec page dédiée (actualité suivante, précédente et autres actualités), prochaines sessions, employé du mois, certifications et agréments, catalogue, supports publiés, galerie, annuaire des formateurs (photo, fiche contact : téléphone, e-mail, WhatsApp, Teams, localisation, bio, spécialités, sessions animées) et organigramme interactif (arbre, zoom, pôles, fiche contact). 2) BBI Catalogue des formations — cartes filtrables. 3) BBI Fiche formation — page pilotée par ?code=BBI-XXX. 4) BBI Sessions & inscriptions — planning groupé par mois, filtres, agenda. 5) BBI Article d'actualité — page pilotée par ?itemid=12. 6) BBI Galerie médias — albums et visionneuse plein écran. 7) BBI Documents sécurisés — visionneuse lecture seule. 8) Extension BBI Plein écran — mise en page bord à bord des pages applicatives."
+        "default": "Solution SPFx de l'intranet Business Builders International (7 web parts + 1 extension). Toutes les sources sont tolérantes : si une liste, une bibliothèque ou la galerie est absente, non créée ou encore vide, la page affiche un contenu de repli professionnel (visuels et données Business Builders International embarqués) au lieu d'un état vide. 1) Business Builders International Accueil plein écran — héros en diaporama (images et textes qui défilent, pause au survol, respect de « animations réduites »), bande de chiffres clés toujours visible, actualités à la une puis paginées avec page dédiée (actualité suivante, précédente et autres actualités), prochaines sessions, employé du mois, certifications et agréments, catalogue, supports publiés, galerie, annuaire des formateurs (photo, fiche contact : téléphone, e-mail, WhatsApp, Teams, localisation, bio, spécialités, sessions animées) et organigramme interactif (arbre, zoom, pôles, fiche contact). 2) Business Builders International Catalogue des formations — cartes filtrables. 3) Business Builders International Fiche formation — page pilotée par ?code=Business Builders International-XXX. 4) Business Builders International Sessions & inscriptions — planning groupé par mois, filtres, agenda. 5) Business Builders International Article d'actualité — page pilotée par ?itemid=12. 6) Business Builders International Galerie médias — albums et visionneuse plein écran. 7) Business Builders International Documents sécurisés — visionneuse lecture seule. 8) Extension Business Builders International Plein écran — mise en page bord à bord des pages applicatives."
       },
       "screenshotPaths": [],
       "videoUrl": "",
@@ -28,7 +28,7 @@
     "features": [
       {
         "title": "bbi-intranet Feature",
-        "description": "Déploie les composants web BBI (Accueil plein écran, Catalogue des formations, Documents sécurisés, Galerie médias) et l'extension de mise en page plein écran.",
+        "description": "Déploie les composants web Business Builders International (Accueil plein écran, Catalogue des formations, Documents sécurisés, Galerie médias) et l'extension de mise en page plein écran.",
         "id": "ebc798de-cab3-4872-9f1d-5f95d19f2052",
         "version": "1.9.0.0"
       }

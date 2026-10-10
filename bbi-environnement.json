@@ -1,10 +1,10 @@
 {
-  "_lisezMoi": "Environnement BBI — source unique de vérité. Modifiez ce fichier si le tenant ou le site change : les scripts deploy/ et teams/ le lisent automatiquement, plus rien n'est à ressaisir en ligne de commande.",
+  "_lisezMoi": "Environnement Business Builders International — source unique de vérité. Modifiez ce fichier si le tenant ou le site change : les scripts deploy/ et teams/ le lisent automatiquement, plus rien n'est à ressaisir en ligne de commande.",
   "_tenant": "Domaine SharePoint Online du client.",
   "tenantHost": "businessbuilderinter.sharepoint.com",
   "tenantUrl": "https://businessbuilderinter.sharepoint.com",
 
-  "_site": "Site d'équipe qui héberge l'intranet BBI (listes, bibliothèques, pages).",
+  "_site": "Site d'équipe qui héberge l'intranet Business Builders International (listes, bibliothèques, pages).",
   "sitePath": "/sites/intranet",
   "siteUrl": "https://businessbuilderinter.sharepoint.com/sites/intranet",
 

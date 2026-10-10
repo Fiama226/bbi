@@ -86,8 +86,8 @@
   },
 
   "identite": {
-    "_nomTheme": "Nom du thème appliqué à chaque site. Le thème « BBI Bleu nuit » est publié par provision-bbi-intranet.ps1.",
-    "nomTheme": "BBI Bleu nuit",
+    "_nomTheme": "Nom du thème appliqué à chaque site. Le thème « Business Builders International Bleu nuit » est publié par provision-bbi-intranet.ps1.",
+    "nomTheme": "Business Builders International Bleu nuit",
     "_logo": "Chemin d'un fichier image (relatif à ce fichier) téléversé dans SiteAssets de chaque site et utilisé comme logo. Laisser vide pour ne pas changer le logo.",
     "logo": "",
     "titrePiedDePage": "Business Builders International",

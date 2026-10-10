@@ -294,7 +294,7 @@ const DEFAULT_QUICK_LINKS: IQuickLink[] = [
   },
   {
     icon: "◎",
-    title: "Communauté BBI",
+    title: "Communauté Business Builders International",
     subtitle: "Formateurs et experts",
     url: "#communaute",
   },
@@ -818,7 +818,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
   const localSearchResults: IPortalSearchResult[] = [
     ...newsPage.items.map((item) => ({
       title: item.Title,
-      description: item.Summary || item.Category || "Actualité BBI",
+      description: item.Summary || item.Category || "Actualité Business Builders International",
       category: "Actualité",
       view: "actualite" as PortalView,
       newsId: item.Id,
@@ -836,7 +836,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       title: item.Title,
       description:
         [item.Role, item.Filiere].filter(Boolean).join(" · ") ||
-        "Communauté BBI",
+        "Communauté Business Builders International",
       category: "Communauté",
       view: "communaute" as PortalView,
       newsId: 0,
@@ -1022,13 +1022,13 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           <a
             className={styles.brand}
             href="#accueil"
-            aria-label="BBI Intranet, accueil"
+            aria-label="Business Builders International, accueil"
             onClick={(event) => {
               event.preventDefault();
               openView("accueil");
             }}
           >
-            <span className={styles.logoImage} role="img" aria-label="BBI" />
+            <span className={styles.logoImage} role="img" aria-label="Business Builders International" />
             <span className={styles.brandText}>
               <strong>Business Builders International</strong>
               <small>Propulseur de croissance · Créateur d&apos;impacts</small>
@@ -1090,7 +1090,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             role="search"
           >
             <label className={styles.visuallyHidden} htmlFor="bbi-home-search">
-              Rechercher dans BBI Intranet
+              Rechercher dans l’intranet Business Builders International
             </label>
             <input
               id="bbi-home-search"
@@ -1100,7 +1100,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
               onChange={(event) => {
                 setSearch(event.target.value);
               }}
-              placeholder="Rechercher dans BBI"
+              placeholder="Rechercher dans Business Builders International"
             />
             <button type="submit" aria-label="Rechercher">
               ⌕
@@ -1129,7 +1129,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           <div className={styles.sectionHeading}>
             <div>
               <p className={styles.eyebrow}>
-                {searchQuery ? "Recherche dans le portail" : "Portail BBI"}
+                {searchQuery ? "Recherche dans le portail" : "Portail Business Builders International"}
               </p>
               <h2 id="search-results-title">
                 {searchQuery
@@ -1196,7 +1196,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             <div>
               <p className={styles.searchIntro}>
                 Recherchez une formation, une session, une actualité ou un
-                formateur dans le portail BBI. Utilisez la barre de recherche
+                formateur dans le portail Business Builders International. Utilisez la barre de recherche
                 ci-dessus, ou partez de l&apos;un des thèmes fréquents.
               </p>
               <p className={styles.searchSuggestionsLabel}>
@@ -1361,7 +1361,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           aria-labelledby="bbi-path-title"
         >
           <div className={styles.learningPathIntro}>
-            <p className={styles.eyebrow}>La méthode BBI</p>
+            <p className={styles.eyebrow}>La méthode Business Builders International</p>
             <h2 id="bbi-path-title">
               De l&apos;apprentissage à l&apos;impact.
             </h2>
@@ -1426,7 +1426,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
           className={styles.resourcesPeople}
           id="communaute"
           data-bbi-view="communaute"
-          aria-label="Trombinoscope et communauté BBI"
+          aria-label="Trombinoscope et communauté Business Builders International"
         >
           <div className={styles.people}>
             <div className={styles.sectionHeading}>
@@ -1449,7 +1449,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
                 <h3>Réseau des formateurs</h3>
                 <p>
                   Échanges de pratiques, entraide pédagogique et veille :
-                  rejoignez la communauté BBI sur Teams et Viva Engage.
+                  rejoignez la communauté Business Builders International sur Teams et Viva Engage.
                 </p>
               </div>
             </div>
@@ -1656,7 +1656,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
             <div className={styles.sectionHeading}>
               <div>
                 <p className={styles.eyebrow}>À la une</p>
-                <h2>Actualités BBI</h2>
+                <h2>Actualités Business Builders International</h2>
               </div>
               {activeView !== "actualites" && (
                 <a
@@ -1901,7 +1901,7 @@ const BbiHome: React.FC<IBbiHomeProps> = (props) => {
       <footer className={styles.footer}>
         <div className={styles.footerInner}>
           <span className={styles.footerBrand}>
-            <span className={styles.footerLogo} role="img" aria-label="BBI" />
+            <span className={styles.footerLogo} role="img" aria-label="Business Builders International" />
             <span>
               {props.footerNote ||
                 "Business Builders International — Intranet collaboratif"}

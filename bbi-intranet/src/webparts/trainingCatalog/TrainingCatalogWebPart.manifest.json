@@ -12,7 +12,7 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
-    "title": { "default": "BBI Catalogue des formations" },
+    "title": { "default": "Business Builders International — Catalogue des formations" },
     "description": { "default": "Cartes filtrables et recherchables alimentées par la liste « Formations » (code, filière, modalité, durée)." },
     "officeFabricIconFontName": "Tiles",
     "properties": {

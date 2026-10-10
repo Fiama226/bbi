@@ -1,4 +1,4 @@
-# Formulaire de satisfaction BBI
+# Formulaire de satisfaction Business Builders International
 
 Après chaque séance (formation, conseil, coaching), le formateur ou le coach envoie ce formulaire au client. Les réponses arrivent dans la liste SharePoint **Avis clients** du portail, où l'équipe les lit, les trie par pôle et suit la recommandation.
 
@@ -19,7 +19,7 @@ Les questions sont courtes : un client y répond en moins de deux minutes, y com
 | 7 | Qualité du contenu | Évaluation, 5 étoiles | Oui | `NoteContenu` |
 | 8 | Qualité de l'animation ou de l'accompagnement | Évaluation, 5 étoiles | Oui | `NoteAnimation` |
 | 9 | Organisation (lieu, horaires, supports) | Évaluation, 5 étoiles | Oui | `NoteOrganisation` |
-| 10 | Quelle est la probabilité que vous recommandiez BBI à un collègue ou à un partenaire ? (0 = pas du tout, 10 = certainement) | Net Promoter Score, de 0 à 10 | Oui | `Recommandation` |
+| 10 | Quelle est la probabilité que vous recommandiez Business Builders International à un collègue ou à un partenaire ? (0 = pas du tout, 10 = certainement) | Net Promoter Score, de 0 à 10 | Oui | `Recommandation` |
 | 11 | Ce qui vous a le plus plu | Texte long | Non | `PointsForts` |
 | 12 | Ce que nous pourrions améliorer | Texte long | Non | `Ameliorations` |
 | 13 | Un commentaire libre | Texte long | Non | `Commentaire` |

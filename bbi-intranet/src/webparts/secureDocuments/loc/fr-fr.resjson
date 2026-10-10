@@ -1,5 +1,5 @@
 {
-  "PropertyPaneDescription": "Paramètres de la web part BBI Documents sécurisés (supports publiés en lecture seule).",
+  "PropertyPaneDescription": "Paramètres de la web part Business Builders International Documents sécurisés (supports publiés en lecture seule).",
   "BasicGroupName": "Source de données",
   "SiteUrlFieldLabel": "URL du site (vide = site courant)",
   "SiteUrlFieldDescription": "Site contenant la bibliothèque « Supports publiés ». Laisser vide pour utiliser le site courant.",

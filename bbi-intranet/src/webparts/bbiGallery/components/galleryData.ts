@@ -160,18 +160,18 @@ interface IDemoSeed {
 }
 
 const DEMO_SEED: IDemoSeed[] = [
-  { Title: 'Atelier « Prise de parole en public » — Paris', Album: 'Sessions de formation', Lieu: 'Paris', Credit: 'Communication BBI', Days: 6 },
-  { Title: 'Séminaire annuel des formateurs — Dakar', Album: 'Vie BBI', Lieu: 'Dakar', Credit: 'Équipe BBI', Days: 14 },
+  { Title: 'Atelier « Prise de parole en public » — Paris', Album: 'Sessions de formation', Lieu: 'Paris', Credit: 'Communication Business Builders International', Days: 6 },
+  { Title: 'Séminaire annuel des formateurs — Dakar', Album: 'Vie de Business Builders International', Lieu: 'Dakar', Credit: 'Équipe Business Builders International', Days: 14 },
   { Title: 'Remise des attestations — promotion de septembre', Album: 'Certifications', Lieu: 'Paris', Credit: 'Direction pédagogique', Days: 22 },
-  { Title: 'Tournage du module e-learning — plateau BBI', Album: 'Coulisses', Lieu: 'Studio', Credit: 'Communication BBI', Days: 31 },
-  { Title: "Coaching d'entrepreneurs — promotion 12", Album: 'Sessions de formation', Lieu: 'Lyon', Credit: 'Équipe BBI', Days: 44 },
-  { Title: "Atelier d'idéation : refonte du catalogue", Album: 'Vie BBI', Lieu: 'Abidjan', Credit: 'Direction pédagogique', Days: 58 },
-  { Title: 'Qualiopi : audit blanc réussi', Album: 'Certifications', Lieu: 'Paris', Credit: 'Qualité BBI', Days: 72 },
-  { Title: 'Coulisses du module « Traiter les objections »', Album: 'Coulisses', Lieu: 'Studio', Credit: 'Communication BBI', Days: 88 },
-  { Title: 'Table ronde « Recruter et fidéliser ses talents »', Album: 'Vie BBI', Lieu: 'Paris', Credit: 'Communication BBI', Days: 96 },
-  { Title: 'Management d’équipe — cohorte 7, module 2', Album: 'Sessions de formation', Lieu: 'Paris', Credit: 'Équipe BBI', Days: 104 },
+  { Title: 'Tournage du module e-learning — plateau Business Builders International', Album: 'Coulisses', Lieu: 'Studio', Credit: 'Communication Business Builders International', Days: 31 },
+  { Title: "Coaching d'entrepreneurs — promotion 12", Album: 'Sessions de formation', Lieu: 'Lyon', Credit: 'Équipe Business Builders International', Days: 44 },
+  { Title: "Atelier d'idéation : refonte du catalogue", Album: 'Vie de Business Builders International', Lieu: 'Abidjan', Credit: 'Direction pédagogique', Days: 58 },
+  { Title: 'Qualiopi : audit blanc réussi', Album: 'Certifications', Lieu: 'Paris', Credit: 'Qualité Business Builders International', Days: 72 },
+  { Title: 'Coulisses du module « Traiter les objections »', Album: 'Coulisses', Lieu: 'Studio', Credit: 'Communication Business Builders International', Days: 88 },
+  { Title: 'Table ronde « Recruter et fidéliser ses talents »', Album: 'Vie de Business Builders International', Lieu: 'Paris', Credit: 'Communication Business Builders International', Days: 96 },
+  { Title: 'Management d’équipe — cohorte 7, module 2', Album: 'Sessions de formation', Lieu: 'Paris', Credit: 'Équipe Business Builders International', Days: 104 },
   { Title: 'Formation des formateurs — immersion terrain', Album: 'Certifications', Lieu: 'Lyon', Credit: 'Direction pédagogique', Days: 118 },
-  { Title: 'Afterwork réseau BBI — antenne Abidjan', Album: 'Vie BBI', Lieu: 'Abidjan', Credit: 'Équipe BBI', Days: 132 }
+  { Title: 'Afterwork réseau Business Builders International — antenne Abidjan', Album: 'Vie de Business Builders International', Lieu: 'Abidjan', Credit: 'Équipe Business Builders International', Days: 132 }
 ];
 
 const demoItems = (): IGalleryItem[] =>

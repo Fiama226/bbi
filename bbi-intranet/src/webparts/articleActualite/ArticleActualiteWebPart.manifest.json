@@ -13,7 +13,7 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
-    "title": { "default": "BBI Article d'actualité" },
+    "title": { "default": "Business Builders International — Article d'actualité" },
     "description": { "default": "Modèle de page d'article : l'adresse porte l'actualité (?itemid=12) et la page affiche visuel, chapô, auteur, temps de lecture, partage et actualités liées." },
     "officeFabricIconFontName": "News",
     "properties": {

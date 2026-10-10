@@ -1,7 +1,7 @@
 #Requires -Version 7.0
 <#
 .SYNOPSIS
-    Recrée l'organisation du portail BBI sur un tenant : site du siège (hub), sites de
+    Recrée l'organisation du portail Business Builders International sur un tenant : site du siège (hub), sites de
     filiale, application SPFx, listes, page d'accueil (dashboard), groupes et permissions,
     thème, pied de page et données de démonstration.
 

@@ -23,7 +23,7 @@ param(
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'BbiOrganization.ps1')
 
-$WP_HOME = '6a9b6e3b-44f1-4a70-8f0a-45c82b29126d'   # BBI Accueil (plein écran)
+$WP_HOME = '6a9b6e3b-44f1-4a70-8f0a-45c82b29126d'   # Business Builders International Accueil (plein écran)
 
 # Listes et bibliothèques que le portail attend sur chaque site
 $RequiredLists = @(
@@ -96,7 +96,7 @@ foreach ($site in $sites) {
         else {
             Add-Result $t 'Page accueil.aspx' 'OK'
             $parts = @(Get-PnPPageComponent -Page 'accueil.aspx' -ErrorAction SilentlyContinue | Where-Object { "$($_.WebPartId)".Trim('{', '}') -eq $WP_HOME })
-            Add-Result $t 'Web part BBI Accueil' ($(if ($parts.Count -gt 0) { 'OK' } else { 'MANQUANT' }))
+            Add-Result $t 'Web part Business Builders International Accueil' ($(if ($parts.Count -gt 0) { 'OK' } else { 'MANQUANT' }))
         }
 
         if (Get-PnPList -Identity 'Implantations' -ErrorAction SilentlyContinue) {

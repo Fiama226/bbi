@@ -230,7 +230,7 @@ const NewsBoard: React.FC<INewsBoardProps> = (props) => {
                   aria-label=""
                 />
                 <span className={styles.featuredBody}>
-                  <span className={styles.category}>{featured.Category || "Vie BBI"}</span>
+                  <span className={styles.category}>{featured.Category || "Vie de Business Builders International"}</span>
                   <strong className={styles.featuredTitle}>{featured.Title}</strong>
                   <span className={styles.featuredSummary}>{featured.Summary}</span>
                   <span className={styles.cardMeta}>

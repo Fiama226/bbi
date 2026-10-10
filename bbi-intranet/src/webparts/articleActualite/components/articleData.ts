@@ -51,14 +51,14 @@ const demoTemplate = (): IArticleResult => {
       AuthorName: 'Direction pédagogique',
       Published: published.toISOString(),
       Body:
-        "<p>Trois jours, douze formateurs, un seul objectif : garantir la même qualité d'animation sur l'ensemble du réseau BBI.</p>" +
-        "<h2>Un parcours exigeant</h2><p>La certification BBI repose sur trois piliers : la maîtrise du contenu pédagogique, la posture d'animation et l'évaluation continue des acquis. Chaque candidat a animé une séquence filmée en conditions réelles, puis reçu un retour structuré de ses pairs.</p>" +
+        "<p>Trois jours, douze formateurs, un seul objectif : garantir la même qualité d'animation sur l'ensemble du réseau Business Builders International.</p>" +
+        "<h2>Un parcours exigeant</h2><p>La certification Business Builders International repose sur trois piliers : la maîtrise du contenu pédagogique, la posture d'animation et l'évaluation continue des acquis. Chaque candidat a animé une séquence filmée en conditions réelles, puis reçu un retour structuré de ses pairs.</p>" +
         "<p>Cette promotion affiche 100 % de réussite au premier passage — un niveau jamais atteint depuis la création du parcours. Les évaluations à chaud attribuent une note de <strong>4,8 sur 5</strong> à l'accompagnement des tuteurs.</p>" +
         "<h2>Et maintenant ?</h2><p>Douze nouvelles signatures de qualité pour les prochains trimestres, et une prochaine cohorte annoncée pour février. Les candidatures internes sont ouvertes dans l'espace formateurs.</p>"
     },
     related: [
       { Id: 2, Title: 'Le catalogue des formations évolue', Category: 'Formations', Published: new Date(Date.now() - 10 * 86400000).toISOString() },
-      { Id: 3, Title: "Retour sur les ateliers de rentrée", Category: 'Vie BBI', Published: new Date(Date.now() - 18 * 86400000).toISOString() },
+      { Id: 3, Title: "Retour sur les ateliers de rentrée", Category: 'Vie de Business Builders International', Published: new Date(Date.now() - 18 * 86400000).toISOString() },
       { Id: 4, Title: 'Qualiopi : notre audit blanc est une réussite', Category: 'Certification', Published: new Date(Date.now() - 26 * 86400000).toISOString() }
     ],
     isDemo: true

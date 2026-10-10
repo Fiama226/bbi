@@ -1,20 +1,20 @@
 <#
 .SYNOPSIS
-    BBI Intranet — provisionnement du site SharePoint Online (listes, bibliothèques,
-    page d'accueil unique avec le portail BBI Accueil, thème et navigation).
+    Business Builders International Intranet — provisionnement du site SharePoint Online (listes, bibliothèques,
+    page d'accueil unique avec le portail Business Builders International Accueil, thème et navigation).
 
 .DESCRIPTION
-    Ce script rend le site BBI fonctionnel avec la solution SPFx « bbi-intranet » :
+    Ce script rend le site Business Builders International fonctionnel avec la solution SPFx « bbi-intranet » :
       1. listes et bibliothèques métier avec les colonnes EXACTES attendues par le code SPFx ;
       2. vues utiles (catalogue actif, prochaines sessions, récemment publiés, albums) ;
       3. bibliothèque d'images « Galerie médias » + colonnes Album / Lieu / Crédit / Date ;
-      4. une page d'accueil applicative (SingleWebPartAppPage) avec une seule web part BBI Accueil ;
+      4. une page d'accueil applicative (SingleWebPartAppPage) avec une seule web part Business Builders International Accueil ;
       5. vues internes Catalogue, Sessions, Actualités, Ressources et Communauté ;
-      6. extension « BBI Plein écran » (bord à bord) via une Custom Action ;
-      7. thème « BBI Bleu nuit », logo, en-tête, navigation et pied de page ;
+      6. extension « Business Builders International Plein écran » (bord à bord) via une Custom Action ;
+      7. thème « Business Builders International Bleu nuit », logo, en-tête, navigation et pied de page ;
       8. jeu de données d'exemple (optionnel) pour valider immédiatement ;
       9. hub et filiales (optionnel, -ProvisionFiliales) : site hub, un site d'équipe par
-         filiale de la liste « Implantations », portail BBI sur chacun et navigation hub.
+         filiale de la liste « Implantations », portail Business Builders International sur chacun et navigation hub.
 
     Le script est IDEMPOTENT : relancez-le autant de fois que nécessaire, il ne recrée
     pas ce qui existe déjà. Utilisez -DryRun pour simuler sans rien modifier.
@@ -137,14 +137,14 @@ $script:Report = New-Object System.Collections.Generic.List[object]
 # ------------------------------------------------------------------
 # Identifiants des composants SPFx (à ne pas modifier)
 # ------------------------------------------------------------------
-$WP_HOME      = '6a9b6e3b-44f1-4a70-8f0a-45c82b29126d'   # BBI Accueil (plein écran)
-$WP_CATALOG   = 'd37a426e-48db-484f-bf10-c38675bb7b43'   # BBI Catalogue des formations
-$WP_DOCUMENTS = 'c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41'   # BBI Documents sécurisés
-$WP_GALLERY   = 'f0f19a37-2c11-4812-9006-8aa71a9254f1'   # BBI Galerie médias
-$WP_FICHE     = 'a9c99e25-db18-4419-894b-08bc9c5b9081'   # BBI Fiche formation (modèle)
-$WP_SESSIONS  = '96216ee2-85b1-473b-aaec-e5b646a151ee'   # BBI Sessions & inscriptions
-$WP_ARTICLE   = 'f769f3df-2c27-4a30-bce2-d4ae5793557b'   # BBI Article d'actualité (modèle)
-$EXT_FULLSCREEN = 'ae430672-9740-4b5a-ace1-fd5d5ab6e9bf' # BBI Plein écran (Application Customizer)
+$WP_HOME      = '6a9b6e3b-44f1-4a70-8f0a-45c82b29126d'   # Business Builders International Accueil (plein écran)
+$WP_CATALOG   = 'd37a426e-48db-484f-bf10-c38675bb7b43'   # Business Builders International Catalogue des formations
+$WP_DOCUMENTS = 'c9a1e6d4-3b27-4e1f-8f5a-6d0b9c2e7a41'   # Business Builders International Documents sécurisés
+$WP_GALLERY   = 'f0f19a37-2c11-4812-9006-8aa71a9254f1'   # Business Builders International Galerie médias
+$WP_FICHE     = 'a9c99e25-db18-4419-894b-08bc9c5b9081'   # Business Builders International Fiche formation (modèle)
+$WP_SESSIONS  = '96216ee2-85b1-473b-aaec-e5b646a151ee'   # Business Builders International Sessions & inscriptions
+$WP_ARTICLE   = 'f769f3df-2c27-4a30-bce2-d4ae5793557b'   # Business Builders International Article d'actualité (modèle)
+$EXT_FULLSCREEN = 'ae430672-9740-4b5a-ace1-fd5d5ab6e9bf' # Business Builders International Plein écran (Application Customizer)
 
 # ------------------------------------------------------------------
 # Connexion (avec -ClientId quand il est fourni)
@@ -462,7 +462,7 @@ function Invoke-BbiSiteProvisioning {
         Ensure-BbiField -List 'Actualites' -DisplayName 'Résumé'        -InternalName 'Summary'    -Type Note
         Ensure-BbiField -List 'Actualites' -DisplayName 'Corps de l''article' -InternalName 'Body' -Type Note
         Ensure-BbiField -List 'Actualites' -DisplayName 'Rubrique'      -InternalName 'Category'   -Type Choice `
-            -Choices @('Certification','Formations','Vie BBI','Événement','Communiqué')
+            -Choices @('Certification','Formations','Vie de Business Builders International','Événement','Communiqué')
         Ensure-BbiField -List 'Actualites' -DisplayName 'Date de publication' -InternalName 'Published' -Type DateTime
         Ensure-BbiField -List 'Actualites' -DisplayName 'Auteur'         -InternalName 'AuthorName' -Type Text
         Ensure-BbiField -List 'Actualites' -DisplayName 'Image (URL)'    -InternalName 'ImageUrl'   -Type Hyperlink
@@ -660,7 +660,7 @@ function Invoke-BbiSiteProvisioning {
         Ensure-BbiField -List 'Avis clients' -DisplayName 'Note du contenu (1 à 5)' -InternalName 'NoteContenu' -Type Number
         Ensure-BbiField -List 'Avis clients' -DisplayName 'Note de l''animation (1 à 5)' -InternalName 'NoteAnimation' -Type Number
         Ensure-BbiField -List 'Avis clients' -DisplayName 'Note de l''organisation (1 à 5)' -InternalName 'NoteOrganisation' -Type Number
-        Ensure-BbiField -List 'Avis clients' -DisplayName 'Recommanderiez-vous BBI ? (0 à 10)' -InternalName 'Recommandation' -Type Number
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Recommanderiez-vous Business Builders International ? (0 à 10)' -InternalName 'Recommandation' -Type Number
         Ensure-BbiField -List 'Avis clients' -DisplayName 'Points forts'         -InternalName 'PointsForts'  -Type Note
         Ensure-BbiField -List 'Avis clients' -DisplayName 'À améliorer'          -InternalName 'Ameliorations' -Type Note
         Ensure-BbiField -List 'Avis clients' -DisplayName 'Commentaire libre'    -InternalName 'Commentaire'  -Type Note
@@ -694,7 +694,7 @@ function Invoke-BbiSiteProvisioning {
         # --- Galerie médias (bibliothèque d'images alimentant la web part BBI Galerie médias)
         Ensure-BbiList -Title 'Galerie médias' -Template PictureLibrary | Out-Null
         Ensure-BbiField -List 'Galerie médias' -DisplayName 'Album'    -InternalName 'Album'     -Type Choice `
-            -Choices @('Sessions de formation','Vie BBI','Certifications','Coulisses','Événements')
+            -Choices @('Sessions de formation','Vie de Business Builders International','Certifications','Coulisses','Événements')
         Ensure-BbiField -List 'Galerie médias' -DisplayName 'Lieu'      -InternalName 'Lieu'      -Type Text
         Ensure-BbiField -List 'Galerie médias' -DisplayName 'Crédit photo' -InternalName 'Credit' -Type Text
         Ensure-BbiField -List 'Galerie médias' -DisplayName 'Date de la photo' -InternalName 'DatePhoto' -Type DateTime
@@ -782,7 +782,7 @@ function Invoke-BbiSiteProvisioning {
             secondaryCtaLabel     = 'Voir les sessions et missions'
             secondaryCtaUrl       = '#sessions'
             navLinks              = "# Accueil | #accueil`n# Nos offres | #offres`n# Sessions & missions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
-            quickLinks            = "▦ | Nos offres | Formation, conseil et coaching | #offres`n◆ | Références pédagogiques | Ouvrages, normes, méthodes et outils | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
+            quickLinks            = "▦ | Nos offres | Formation, conseil et coaching | #offres`n◆ | Références pédagogiques | Ouvrages, normes, méthodes et outils | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté Business Builders International | Formateurs et experts | #communaute`n✦ | Actualités Business Builders International | Les nouvelles du réseau | #actualites"
             kpis                  = "1 500+ | Professionnels accompagnés`n3 | Pôles : formation, conseil, coaching`n9 | Pays couverts par le réseau`n96 % | De satisfaction constatée"
             visionText            = "Être le partenaire de référence du renforcement de capacités des dirigeants, des équipes et des organisations en Afrique et au-delà."
             missionText           = "Accompagner nos clients par la formation, le conseil et le coaching, pour transformer leurs compétences en résultats durables."
@@ -812,10 +812,10 @@ function Invoke-BbiSiteProvisioning {
             }
         }
         if ($keepWebPart) {
-            Write-Host "  · ${StepPrefix}web part BBI Accueil déjà en place (propriétés conservées)" -ForegroundColor DarkGray
-            Add-Report "Web part BBI Accueil (plein écran) → accueil.aspx" 'OK' 'propriétés conservées'
+            Write-Host "  · ${StepPrefix}web part Business Builders International Accueil déjà en place (propriétés conservées)" -ForegroundColor DarkGray
+            Add-Report "Web part Business Builders International Accueil (plein écran) → accueil.aspx" 'OK' 'propriétés conservées'
         } else {
-            Ensure-BbiWebPart -Page 'accueil.aspx' -ComponentId $WP_HOME -PropertiesJson $homeProps -Name 'BBI Accueil (plein écran)'
+            Ensure-BbiWebPart -Page 'accueil.aspx' -ComponentId $WP_HOME -PropertiesJson $homeProps -Name 'Business Builders International Accueil (plein écran)'
         }
 
         # --- Le portail utilise une seule page SharePoint : les destinations du menu
@@ -831,7 +831,7 @@ function Invoke-BbiSiteProvisioning {
         }
 
         # --- Extension « BBI Plein écran » : rend la page applicative réellement bord à bord
-        Ensure-BbiCustomAction -Name 'BbiFullScreen' -Title 'BBI Plein écran' -ComponentId $EXT_FULLSCREEN `
+        Ensure-BbiCustomAction -Name 'BbiFullScreen' -Title 'Business Builders International Plein écran' -ComponentId $EXT_FULLSCREEN `
             -PropertiesJson (@{
                 mode            = 'appPage'
                 edgeToEdge      = $true
@@ -975,7 +975,7 @@ if ($ProvisionFiliales) {
         try { $editors = Get-PnPGroupMember -Group $EditorsGroup -ErrorAction Stop } catch { Write-Warn2 "Groupe « $EditorsGroup » introuvable sur le hub : membres non recopiés." }
         foreach ($site in $filialeSites) {
             if ($DryRun) {
-                Write-Step "[SIMULATION] portail BBI sur $($site.Url) (listes, bibliothèques, page accueil.aspx, web part)"
+                Write-Step "[SIMULATION] portail Business Builders International sur $($site.Url) (listes, bibliothèques, page accueil.aspx, web part)"
                 continue
             }
             if ($VerifyOnly) {
@@ -1049,20 +1049,20 @@ $palette = @{
 }
 
 if ($DryRun -or $VerifyOnly) {
-    Write-Step "[SIMULATION] thème « BBI Bleu nuit » + en-tête + logo"
+    Write-Step "[SIMULATION] thème « Business Builders International Bleu nuit » + en-tête + logo"
 } else {
-    if (-not (Get-PnPTenantTheme -Name 'BBI Bleu nuit' -ErrorAction SilentlyContinue)) {
-        Invoke-Bbi "Publication du thème « BBI Bleu nuit »" {
-            Add-PnPTenantTheme -Identity 'BBI Bleu nuit' -Palette $palette -IsInverted $false
+    if (-not (Get-PnPTenantTheme -Name 'Business Builders International Bleu nuit' -ErrorAction SilentlyContinue)) {
+        Invoke-Bbi "Publication du thème « Business Builders International Bleu nuit »" {
+            Add-PnPTenantTheme -Identity 'Business Builders International Bleu nuit' -Palette $palette -IsInverted $false
         } | Out-Null
         Add-Report 'Thème tenant' 'CRÉÉ'
-    } else { Write-Skip "Thème « BBI Bleu nuit »" }
+    } else { Write-Skip "Thème « Business Builders International Bleu nuit »" }
 
     Invoke-Bbi "Application du thème au site" {
-        Set-PnPWebTheme -Theme 'BBI Bleu nuit' -WebUrl $SiteUrl
+        Set-PnPWebTheme -Theme 'Business Builders International Bleu nuit' -WebUrl $SiteUrl
     } | Out-Null
 
-    Invoke-Bbi "En-tête de site (compact) + logo BBI" {
+    Invoke-Bbi "En-tête de site (compact) + logo Business Builders International" {
         $web = Get-PnPWeb -Includes HeaderLayout, HeaderEmphasis, SiteLogoUrl
         $web.HeaderLayout   = 'Compact'
         $web.HeaderEmphasis = 'Strong'
@@ -1087,7 +1087,7 @@ if (-not $DryRun -and -not $VerifyOnly) {
 }
 # Avec -ProvisionFiliales, le nœud du siège (6.4) pointe déjà vers cette page : pas de doublon.
 if (-not $ProvisionFiliales -and -not $SkipNavigation) {
-    Ensure-BbiNavNode -Title 'BBI Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
+    Ensure-BbiNavNode -Title 'Business Builders International Intranet' -Url "$SiteUrl/SitePages/accueil.aspx"
 }
 # Le portail est mono-page : les autres vues sont des ancres/routes internes.
 
@@ -1126,7 +1126,7 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
     if ((Get-PnPListItem -List 'Avis clients' -PageSize 1).Count -eq 0) {
         Invoke-Bbi "Insertion des avis clients d'exemple" {
             $avis = @(
-                @{ Title = 'Exemple : avis 1'; Client = 'Entreprise cliente A'; Pole = 'Formation'; Seance = "Management d'équipe"; DateSeance = $today.AddDays(-12); Formateur = 'Claire Fontaine'; NoteGlobale = 5; NoteContenu = 5; NoteAnimation = 5; NoteOrganisation = 4; Recommandation = 10; PointsForts = 'Cas pratiques très concrets, rythme adapté.'; Ameliorations = 'Prévoir une demi-journée de plus.'; Commentaire = 'Nous referons appel à BBI pour toute notre équipe.'; AutoriseTemoignage = $true; Source = 'Microsoft Forms' },
+                @{ Title = 'Exemple : avis 1'; Client = 'Entreprise cliente A'; Pole = 'Formation'; Seance = "Management d'équipe"; DateSeance = $today.AddDays(-12); Formateur = 'Claire Fontaine'; NoteGlobale = 5; NoteContenu = 5; NoteAnimation = 5; NoteOrganisation = 4; Recommandation = 10; PointsForts = 'Cas pratiques très concrets, rythme adapté.'; Ameliorations = 'Prévoir une demi-journée de plus.'; Commentaire = 'Nous referons appel à Business Builders International pour toute notre équipe.'; AutoriseTemoignage = $true; Source = 'Microsoft Forms' },
                 @{ Title = 'Exemple : avis 2'; Client = 'Entreprise cliente B'; Pole = 'Coaching'; Seance = 'Coaching de dirigeants'; DateSeance = $today.AddDays(-20); Formateur = 'Jean-Marc Okafor'; NoteGlobale = 5; NoteContenu = 5; NoteAnimation = 5; NoteOrganisation = 5; Recommandation = 10; PointsForts = 'Écoute, bienveillance et exigence.'; Ameliorations = ''; Commentaire = 'Un accompagnement qui change la façon de décider.'; AutoriseTemoignage = $true; Source = 'Microsoft Forms' },
                 @{ Title = 'Exemple : avis 3'; Client = 'Entreprise cliente C'; Pole = 'Conseil'; Seance = 'Diagnostic organisationnel'; DateSeance = $today.AddDays(-35); Formateur = 'Awa Traoré'; NoteGlobale = 4; NoteContenu = 4; NoteAnimation = 4; NoteOrganisation = 4; Recommandation = 9; PointsForts = 'Restitution claire et plan d''action réaliste.'; Ameliorations = 'Partager le calendrier plus tôt.'; Commentaire = ''; AutoriseTemoignage = $false; Source = 'Formulaire SharePoint' },
                 @{ Title = 'Exemple : avis 4'; Client = 'Entreprise cliente D'; Pole = 'Formation'; Seance = 'Fondamentaux Qualiopi'; DateSeance = $today.AddDays(-8); Formateur = 'Khadija Diallo'; NoteGlobale = 4; NoteContenu = 5; NoteAnimation = 4; NoteOrganisation = 3; Recommandation = 8; PointsForts = 'Contenu à jour.'; Ameliorations = 'Salle trop petite.'; Commentaire = 'Très utile, merci.'; AutoriseTemoignage = $false; Source = 'Papier' },
@@ -1151,14 +1151,14 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
                 Summary = 'Nouveaux parcours de management et de développement commercial.'
                 Category = 'Formations'
                 Published = $today.AddDays(-10)
-                AuthorName = 'Équipe BBI'
+                AuthorName = 'Équipe Business Builders International'
             } | Out-Null
             Add-PnPListItem -List 'Actualites' -Values @{
                 Title = 'Retour sur les ateliers de rentrée'
                 Summary = 'Nouvelles méthodes pédagogiques et partage de pratiques.'
-                Category = 'Vie BBI'
+                Category = 'Vie de Business Builders International'
                 Published = $today.AddDays(-18)
-                AuthorName = 'Communication BBI'
+                AuthorName = 'Communication Business Builders International'
             } | Out-Null
         } | Out-Null
     }
@@ -1190,7 +1190,7 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
     if ((Get-PnPListItem -List 'Formateurs' -PageSize 1).Count -eq 0) {
         Invoke-Bbi "Insertion des formateurs d'exemple" {
             $formateurs = @(
-                @{ Title = 'Amélie Martin';   Role = 'Responsable pédagogique'; Filiere = 'Management & Qualité';   Initials = 'AM'; Phone = '+33 6 12 45 78 90'; Email = 'amelie.martin@businessbuilders.fr'; WhatsApp = '+33612457890'; Location = 'Paris — Siège'; Bio = "Pilote l'ingénierie pédagogique du réseau et accompagne la montée en compétences des formateurs BBI."; Specialites = 'Management de proximité · Ingénierie pédagogique'; Certifications = 'Qualiopi · Coach professionnel (RNCP)'; Categorie = 'Formateur'; Ordre = 0 },
+                @{ Title = 'Amélie Martin';   Role = 'Responsable pédagogique'; Filiere = 'Management & Qualité';   Initials = 'AM'; Phone = '+33 6 12 45 78 90'; Email = 'amelie.martin@businessbuilders.fr'; WhatsApp = '+33612457890'; Location = 'Paris — Siège'; Bio = "Pilote l'ingénierie pédagogique du réseau et accompagne la montée en compétences des formateurs Business Builders International."; Specialites = 'Management de proximité · Ingénierie pédagogique'; Certifications = 'Qualiopi · Coach professionnel (RNCP)'; Categorie = 'Formateur'; Ordre = 0 },
                 @{ Title = 'Stéphane Laurent'; Role = 'Coach certifié';          Filiere = 'Coaching & leadership'; Initials = 'SL'; Phone = '+33 6 23 56 89 01'; Email = 'stephane.laurent@businessbuilders.fr'; WhatsApp = '+33623568901'; Location = 'Lyon'; Bio = "Coach certifié et ancien directeur commercial : posture, prise de parole et relation client."; Specialites = 'Coaching de dirigeants · Prise de parole'; Certifications = 'Coach certifié ICF · Process Communication'; Categorie = 'Formateur'; Ordre = 1 },
                 @{ Title = 'Khadija Diallo';   Role = 'Formatrice';              Filiere = 'Commerce & négociation'; Initials = 'KD'; Phone = '+221 77 456 78 90'; Email = 'khadija.diallo@businessbuilders.fr'; WhatsApp = '+221774567890'; Location = 'Dakar — Antenne'; Bio = "Spécialiste de la négociation complexe, elle anime les parcours commerciaux sur le terrain."; Specialites = 'Négociation · Prospection terrain'; Certifications = 'Méthode BBI Vente · TOSA'; Categorie = 'Formateur'; Ordre = 2 },
                 @{ Title = 'Thomas Bernard';   Role = 'Formateur';               Filiere = 'Digital & prospection'; Initials = 'TB'; Phone = '+33 6 34 67 90 12'; Email = 'thomas.bernard@businessbuilders.fr'; WhatsApp = '+33634679012'; Location = 'Paris — Siège'; Bio = "Ancien responsable growth : il outille les équipes commerciales et anime le module « Prospection digitale »."; Specialites = 'Prospection digitale · Outils CRM'; Certifications = 'Google Ads · HubSpot Academy'; Categorie = 'Formateur'; Ordre = 3 },
@@ -1252,7 +1252,7 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
         Invoke-Bbi "Insertion des références pédagogiques d'exemple" {
             Add-PnPListItem -List 'Références pédagogiques' -Values @{ Title = "Les 7 habitudes de ceux qui réalisent tout ce qu'ils entreprennent"; Categorie = 'Ouvrage'; Auteur = 'Stephen Covey'; Annee = 1989; Ordre = 0 } | Out-Null
             Add-PnPListItem -List 'Références pédagogiques' -Values @{ Title = "Norme ISO 21001 — Organismes d'éducation/formation"; Categorie = 'Norme'; Annee = 2018; Ordre = 1 } | Out-Null
-            Add-PnPListItem -List 'Références pédagogiques' -Values @{ Title = 'Méthode BBI Leadership'; Categorie = 'Méthode'; Ordre = 2 } | Out-Null
+            Add-PnPListItem -List 'Références pédagogiques' -Values @{ Title = 'Méthode Business Builders International Leadership'; Categorie = 'Méthode'; Ordre = 2 } | Out-Null
         } | Out-Null
     }
 
@@ -1276,7 +1276,7 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
         Invoke-Bbi "Insertion des certifications" {
             Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Qualiopi — Actions de formation'; Issuer = 'Cofrac / Marque Qualité'; Scope = 'Certification qualité des actions de formation, obligatoire pour les financeurs publics.'; ValidUntil = $today.AddDays(210); Status = 'Certifié' } | Out-Null
             Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Datadock'; Issuer = 'Uniformation'; Scope = 'Référencement des organismes de formation auprès des OPCO.'; ValidUntil = $today.AddDays(120); Status = 'Référencé' } | Out-Null
-            Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Certification BBI Formateur référent'; Issuer = 'Business Builders International'; Scope = 'Référentiel interne : ingénierie, animation, évaluation et posture.'; Status = '42 formateurs certifiés' } | Out-Null
+            Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Certification Business Builders International Formateur référent'; Issuer = 'Business Builders International'; Scope = 'Référentiel interne : ingénierie, animation, évaluation et posture.'; Status = '42 formateurs certifiés' } | Out-Null
             Add-PnPListItem -List 'Certifications' -Values @{ Title = 'Préparation TOSA / ICDL'; Issuer = 'Centre agréé'; Scope = 'Compétences numériques certifiées, éligibles au CPF.'; ValidUntil = $today.AddDays(300); Status = 'Centre agréé' } | Out-Null
         } | Out-Null
     }
@@ -1285,6 +1285,17 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
     # « Supports publiés ») -- Add-PnPListItem sans fichier n'est pas supporté sur une
     # bibliothèque. Tant qu'aucun document n'est publié, le portail affiche les
     # documents de démonstration intégrés à la web part.
+
+    # Images et documents d'exemple : téléversés puis reliés aux lignes ci-dessus, pour que
+    # le portail lise de vraies données au lieu des visuels intégrés. Ne remplace jamais une image saisie.
+    $assetsDirectory = Join-Path $PSScriptRoot 'assets-demo'
+    if (Test-Path -LiteralPath $assetsDirectory) {
+        Invoke-Bbi "Téléversement des images et documents d'exemple" {
+            . (Join-Path $PSScriptRoot 'BbiSeedAssets.ps1')
+            $seedAssets = Invoke-BbiSeedAssets -Plan (Get-BbiSeedAssetPlan -AssetsDirectory $assetsDirectory) -SiteUrl $SiteUrl
+            foreach ($w in @($seedAssets.Warnings)) { if ($w) { Write-Warn2 "$w" } }
+        } | Out-Null
+    }
 }
 
 # ==================================================================
@@ -1344,7 +1355,7 @@ if ($VerifyOnly -or $DryRun) {
 Write-Host ""
 Write-Host "Composants attendus sur le site (solution bbi-intranet 1.3.0.0) :" -ForegroundColor White
 Write-Host "  Accueil plein écran · Catalogue · Fiche formation (modèle) · Sessions & inscriptions ·" -ForegroundColor Gray
-Write-Host "  Article d'actualité (modèle) · Galerie médias · Supports publiés · extension BBI Plein écran" -ForegroundColor Gray
+Write-Host "  Article d'actualité (modèle) · Galerie médias · Supports publiés · extension Business Builders International Plein écran" -ForegroundColor Gray
 if ($ProvisionFiliales) {
     Write-Host "Hub et filiales : relancez avec -VerifyOnly -ProvisionFiliales pour auditer ; ajoutez une ligne dans « Implantations » puis relancez pour créer un nouveau site." -ForegroundColor Gray
 }
@@ -1353,7 +1364,7 @@ Write-Host "Étapes suivantes recommandées :" -ForegroundColor White
 Write-Host "  1. Activez les étiquettes de confidentialité + IRM « afficher uniquement » sur « Supports publiés »." -ForegroundColor Gray
 Write-Host "  2. Réglez « Ouvrir dans le navigateur » par défaut sur la bibliothèque des supports." -ForegroundColor Gray
 Write-Host "  3. Ajoutez vos photos dans « Galerie médias » et renseignez la colonne Album." -ForegroundColor Gray
-Write-Host "  4. Personnalisez le héros : volet Propriétés de la web part BBI Accueil (page accueil.aspx)." -ForegroundColor Gray
+Write-Host "  4. Personnalisez le héros : volet Propriétés de la web part Business Builders International Accueil (page accueil.aspx)." -ForegroundColor Gray
 Write-Host "  5. Testez la page d'accueil sur mobile et tablette, puis dans Teams (onglet Viva Connections)." -ForegroundColor Gray
 Write-Host "  6. Déployez les applications Teams : teams/New-BbiTeamsPackage.ps1 (voir teams/README.md)." -ForegroundColor Gray
 Write-Host ""

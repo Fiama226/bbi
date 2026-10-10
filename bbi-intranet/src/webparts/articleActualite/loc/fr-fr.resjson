@@ -27,7 +27,7 @@
   "ExternalLink": "Lien associé",
   "NoContent": "Le contenu détaillé de cet article sera publié prochainement.",
   "EmptyStateTitle": "Article introuvable",
-  "EmptyStateHint": "Cet article n'existe plus ou n'est pas encore publié. Retrouvez les dernières nouvelles BBI dans le fil d'actualités.",
+  "EmptyStateHint": "Cet article n'existe plus ou n'est pas encore publié. Retrouvez les dernières nouvelles Business Builders International dans le fil d'actualités.",
   "DemoBanner": "Données de démonstration affichées : la liste « Actualites » n'est pas encore créée, ou elle est vide. Vos articles remplaceront automatiquement cet exemple dès la première publication.",
   "LoadingMessage": "Chargement de l'article…"
 }

@@ -13,7 +13,7 @@
   "preconfiguredEntries": [{
     "groupId": "5c03119e-3074-46fd-976b-c60198311f70",
     "group": { "default": "Advanced" },
-    "title": { "default": "BBI Sessions & inscriptions" },
+    "title": { "default": "Business Builders International — Sessions & inscriptions" },
     "description": { "default": "Planning des sessions groupé par mois : recherche, filtres par filière et modalité, statut d'inscription, lien vers la fiche formation et ajout à l'agenda." },
     "officeFabricIconFontName": "Calendar",
     "properties": {

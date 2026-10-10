@@ -32,7 +32,7 @@ $common = [System.Management.Automation.PSCmdlet]::CommonParameters + [System.Ma
 # Paramètres dynamiques : ils n'existent qu'une fois -Type donné, Get-Command ne les voit pas.
 $dynamic = @{ 'New-PnPSite' = 'Title', 'Alias', 'IsPublic', 'Lcid', 'Description', 'Owner', 'Classification', 'SensitivityLabel', 'ShareByEmailEnabled', 'Url', 'SiteDesign', 'SiteDesignId', 'WebTemplate', 'Owners', 'Language', 'Wait', 'TimeZone', 'HubSiteId' }
 
-$files = Get-ChildItem -Path $PSScriptRoot -Filter *.ps1 | Where-Object { $_.Name -ne 'verify-organisation-flow.ps1' -and $_.Name -ne 'verify-pnp-parameters.ps1' }
+$files = Get-ChildItem -Path $PSScriptRoot -Filter *.ps1 | Where-Object { $_.Name -ne 'verify-organisation-flow.ps1' -and $_.Name -ne 'verify-seed-assets.ps1' -and $_.Name -ne 'verify-pnp-parameters.ps1' }
 $problems = New-Object System.Collections.Generic.List[string]
 $checked = 0
 foreach ($f in $files) {

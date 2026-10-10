@@ -342,8 +342,8 @@ export const DEMO_NEWS: IHomeNews[] = [
     AuthorName: 'Direction pédagogique',
     DemoIndex: 0,
     Body: body([
-      "Trois jours, douze formateurs, un seul objectif : garantir la même qualité d'animation sur l'ensemble du réseau BBI.",
-      "La certification BBI repose sur trois piliers : la maîtrise du contenu pédagogique, la posture d'animation et l'évaluation continue des acquis. Chaque candidat a animé une séquence filmée en conditions réelles, puis reçu un retour structuré de ses pairs.",
+      "Trois jours, douze formateurs, un seul objectif : garantir la même qualité d'animation sur l'ensemble du réseau Business Builders International.",
+      "La certification Business Builders International repose sur trois piliers : la maîtrise du contenu pédagogique, la posture d'animation et l'évaluation continue des acquis. Chaque candidat a animé une séquence filmée en conditions réelles, puis reçu un retour structuré de ses pairs.",
       "Cette promotion affiche 100 % de réussite au premier passage — un niveau jamais atteint depuis la création du parcours. Les évaluations à chaud attribuent une note de <strong>4,8 sur 5</strong> à l'accompagnement des tuteurs."
     ])
   },
@@ -353,7 +353,7 @@ export const DEMO_NEWS: IHomeNews[] = [
     Summary: 'Deux nouveaux parcours de management, un module e-learning de prospection digitale et une formation Qualiopi renforcée arrivent au catalogue.',
     Category: 'Formations',
     Published: daysAgo(11),
-    AuthorName: 'Équipe BBI',
+    AuthorName: 'Équipe Business Builders International',
     DemoIndex: 1,
     Body: body([
       "Le catalogue 2026 s'enrichit de six parcours, dont deux entièrement nouveaux, pensés à partir des besoins remontés par les clients et les formateurs du réseau.",
@@ -366,7 +366,7 @@ export const DEMO_NEWS: IHomeNews[] = [
     Summary: "Quatorze indicateurs sur quatorze validés. La direction qualité fait le point sur les dernières actions correctives engagées.",
     Category: 'Qualité',
     Published: daysAgo(18),
-    AuthorName: 'Qualité BBI',
+    AuthorName: 'Qualité Business Builders International',
     DemoIndex: 2,
     Body: body([
       "L'audit blanc a mobilisé l'ensemble des équipes pendant deux semaines : revue des preuves, entretiens avec les formateurs et observation de sessions en conditions réelles.",
@@ -375,14 +375,14 @@ export const DEMO_NEWS: IHomeNews[] = [
   },
   {
     Id: 4,
-    Title: 'Trois nouvelles antennes BBI en Afrique de l’Ouest',
+    Title: 'Trois nouvelles antennes Business Builders International en Afrique de l’Ouest',
     Summary: "Abidjan, Dakar et Bamako rejoignent le réseau. Les premières cohortes locales démarrent au premier trimestre.",
     Category: 'Réseau',
     Published: daysAgo(25),
     AuthorName: 'Direction générale',
     DemoIndex: 3,
     Body: body([
-      "Abidjan, Dakar et Bamako rejoignent officiellement le réseau BBI, portant à neuf le nombre de pays couverts par nos parcours.",
+      "Abidjan, Dakar et Bamako rejoignent officiellement le réseau Business Builders International, portant à neuf le nombre de pays couverts par nos parcours.",
       "Chaque antenne s'appuie sur un formateur référent local, certifié selon le même référentiel que le reste du réseau, et sur les supports pédagogiques harmonisés."
     ])
   },
@@ -390,9 +390,9 @@ export const DEMO_NEWS: IHomeNews[] = [
     Id: 5,
     Title: 'Retour sur les ateliers de rentrée',
     Summary: 'Les équipes se sont retrouvées autour de nouvelles méthodes pédagogiques et de la refonte de nos grilles d’évaluation.',
-    Category: 'Vie BBI',
+    Category: 'Vie de Business Builders International',
     Published: daysAgo(32),
-    AuthorName: 'Communication BBI',
+    AuthorName: 'Communication Business Builders International',
     DemoIndex: 1,
     Body: body([
       "Deux jours de travail collectif pour réinterroger nos pratiques : alternance des rythmes, évaluation par les pairs et place du digital dans les séquences présentelles.",
@@ -405,18 +405,18 @@ export const DEMO_NEWS: IHomeNews[] = [
     Summary: "Cinq micro-séquences, des cas réels et une mise en situation filmée : le nouveau parcours est disponible pour tous les adhérents.",
     Category: 'Formations',
     Published: daysAgo(40),
-    AuthorName: 'Digital BBI',
+    AuthorName: 'Digital Business Builders International',
     DemoIndex: 2,
     Body: body([
-      "Cinq micro-séquences de huit minutes, conçues pour être suivies entre deux rendez-vous clients : c'est le nouveau format e-learning BBI.",
+      "Cinq micro-séquences de huit minutes, conçues pour être suivies entre deux rendez-vous clients : c'est le nouveau format e-learning Business Builders International.",
       "Un cas réel filmé, des modèles de messages prêts à l'emploi et un quiz de validation complètent le parcours."
     ])
   },
   {
     Id: 7,
     Title: 'Séminaire annuel des formateurs : cap sur 2026',
-    Summary: "Deux jours à Dakar pour partager les pratiques, préparer la montée en charge du réseau et fêter les dix ans de BBI.",
-    Category: 'Vie BBI',
+    Summary: "Deux jours à Dakar pour partager les pratiques, préparer la montée en charge du réseau et fêter les dix ans de Business Builders International.",
+    Category: 'Vie de Business Builders International',
     Published: daysAgo(48),
     AuthorName: 'Direction pédagogique',
     DemoIndex: 3,
@@ -428,7 +428,7 @@ export const DEMO_NEWS: IHomeNews[] = [
   {
     Id: 8,
     Title: 'Nouveau partenariat avec la CCI pour l’alternance',
-    Summary: "BBI accompagne désormais les entreprises dans l'intégration de leurs apprentis : parcours tuteur et outils d'évaluation inclus.",
+    Summary: "Business Builders International accompagne désormais les entreprises dans l'intégration de leurs apprentis : parcours tuteur et outils d'évaluation inclus.",
     Category: 'Partenariats',
     Published: daysAgo(55),
     AuthorName: 'Direction générale',
@@ -441,10 +441,10 @@ export const DEMO_NEWS: IHomeNews[] = [
   {
     Id: 9,
     Title: 'Les évaluations à froid progressent de 9 points',
-    Summary: "Mesuré à 90 jours, l'impact des formations BBI progresse nettement sur les indicateurs de mise en pratique.",
+    Summary: "Mesuré à 90 jours, l'impact des formations Business Builders International progresse nettement sur les indicateurs de mise en pratique.",
     Category: 'Qualité',
     Published: daysAgo(63),
-    AuthorName: 'Qualité BBI',
+    AuthorName: 'Qualité Business Builders International',
     DemoIndex: 1,
     Body: body([
       "L'évaluation à 90 jours mesure ce qui reste réellement en place : les gestes professionnels, les rituels d'équipe et les livrables produits.",
@@ -457,7 +457,7 @@ export const DEMO_NEWS: IHomeNews[] = [
     Summary: "Dix places pour un parcours de six mois mêlant coaching individuel, pairs et mise en relation avec des mentors.",
     Category: 'Programmes',
     Published: daysAgo(70),
-    AuthorName: 'Équipe BBI',
+    AuthorName: 'Équipe Business Builders International',
     DemoIndex: 2,
     Body: body([
       "Le programme combine six mois d'accompagnement : coaching individuel, ateliers entre pairs et mise en relation avec un mentor du réseau.",
@@ -466,11 +466,11 @@ export const DEMO_NEWS: IHomeNews[] = [
   },
   {
     Id: 11,
-    Title: 'Le studio BBI ouvre ses portes aux antennes',
+    Title: 'Le studio Business Builders International ouvre ses portes aux antennes',
     Summary: 'Les antennes peuvent désormais produire leurs propres capsules vidéo avec les équipes du studio.',
     Category: 'Digital',
     Published: daysAgo(78),
-    AuthorName: 'Digital BBI',
+    AuthorName: 'Digital Business Builders International',
     DemoIndex: 3,
     Body: body([
       "Tournage, montage, sous-titrage : le studio accompagne les antennes de la conception à la publication des capsules.",
@@ -481,9 +481,9 @@ export const DEMO_NEWS: IHomeNews[] = [
     Id: 12,
     Title: 'Restauration de la plateforme d’inscription en ligne',
     Summary: "Une nouvelle interface d'inscription, plus rapide, disponible depuis les prochaines sessions du portail.",
-    Category: 'Vie BBI',
+    Category: 'Vie de Business Builders International',
     Published: daysAgo(86),
-    AuthorName: 'Communication BBI',
+    AuthorName: 'Communication Business Builders International',
     DemoIndex: 0,
     Body: body([
       "La nouvelle interface d'inscription tient en un écran : choix de la session, informations du participant et confirmation immédiate.",
@@ -521,7 +521,7 @@ const TRAINER_SEED: ITrainerSeed[] = [
     Filiere: 'Management & Qualité',
     Location: 'Paris — Siège',
     Phone: '+33 6 12 45 78 90',
-    Bio: "Pilote l'ingénierie pédagogique du réseau depuis 2018. Elle conçoit les parcours managériaux et accompagne la montée en compétences des formateurs BBI.",
+    Bio: "Pilote l'ingénierie pédagogique du réseau depuis 2018. Elle conçoit les parcours managériaux et accompagne la montée en compétences des formateurs Business Builders International.",
     Specialites: 'Management de proximité · Ingénierie pédagogique',
     Certifications: 'Qualiopi · Coach professionnel (RNCP)'
   },
@@ -543,7 +543,7 @@ const TRAINER_SEED: ITrainerSeed[] = [
     Phone: '+221 77 456 78 90',
     Bio: "Spécialiste de la négociation complexe, elle anime depuis six ans les parcours commerciaux et accompagne les équipes de vente sur le terrain.",
     Specialites: 'Négociation · Prospection terrain',
-    Certifications: 'Méthode BBI Vente · TOSA'
+    Certifications: 'Méthode Business Builders International Vente · TOSA'
   },
   {
     Name: 'Thomas Bernard',
@@ -573,7 +573,7 @@ const TRAINER_SEED: ITrainerSeed[] = [
     Phone: '+33 6 45 78 01 23',
     Bio: "Spécialiste de la conduite du changement, il intervient sur les transformations d'organisation et les fusions d'équipes.",
     Specialites: 'Conduite du changement · Leadership',
-    Certifications: 'Méthode BBI Leadership · Prosci (notions)'
+    Certifications: 'Méthode Business Builders International Leadership · Prosci (notions)'
   },
   {
     Name: 'Claire Fontaine',
@@ -603,7 +603,7 @@ const TRAINER_SEED: ITrainerSeed[] = [
     Phone: '+223 76 12 34 56',
     Bio: "Forme les équipes aux standards de service et à la gestion des réclamations clients.",
     Specialites: 'Relation client · Qualité de service',
-    Certifications: 'Méthode BBI Service · Qualiopi (sensibilisation)'
+    Certifications: 'Méthode Business Builders International Service · Qualiopi (sensibilisation)'
   },
   {
     Name: 'Samuel Kouassi',
@@ -613,7 +613,7 @@ const TRAINER_SEED: ITrainerSeed[] = [
     Phone: '+225 05 98 76 54 32',
     Bio: "Accompagne les équipes de vente et les managers de proximité en Afrique de l'Ouest.",
     Specialites: 'Management de proximité · Vente',
-    Certifications: 'Méthode BBI Vente · Coach en cours de certification'
+    Certifications: 'Méthode Business Builders International Vente · Coach en cours de certification'
   }
 ];
 
@@ -677,7 +677,7 @@ export const DEMO_PEDAGOGICAL_REFERENCES: IHomePedagogicalReference[] = [
   },
   {
     Id: 3,
-    Title: 'Méthode BBI Leadership',
+    Title: 'Méthode Business Builders International Leadership',
     Categorie: 'Méthode',
     Resume: 'Référentiel pédagogique interne utilisé dans les parcours management et coaching.',
     Ordre: 2
@@ -805,7 +805,7 @@ export const DEMO_CERTIFICATIONS: IHomeCertification[] = [
   },
   {
     Id: 3,
-    Title: 'Certification BBI Formateur référent',
+    Title: 'Certification Business Builders International Formateur référent',
     Issuer: 'Business Builders International',
     Scope: 'Référentiel interne : ingénierie, animation, évaluation et posture.',
     ValidUntil: '',
