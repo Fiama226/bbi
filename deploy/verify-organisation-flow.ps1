@@ -37,7 +37,7 @@ function Check {
 $work = Join-Path ([IO.Path]::GetTempPath()) "bbi-flow-$([guid]::NewGuid().ToString('N'))"
 $dep  = Join-Path $work 'deploy'
 New-Item -ItemType Directory -Path $dep, (Join-Path $work 'deliverables/spfx') | Out-Null
-foreach ($f in 'BbiOrganization.ps1', 'BbiSlug.ps1', 'New-BbiOrganization.ps1', 'Test-BbiOrganization.ps1') { Copy-Item (Join-Path $PSScriptRoot $f) $dep }
+foreach ($f in 'BbiOrganization.ps1', 'BbiRightsDemo.ps1', 'BbiSlug.ps1', 'New-BbiOrganization.ps1', 'New-BbiRightsDemo.ps1', 'Test-BbiOrganization.ps1') { Copy-Item (Join-Path $PSScriptRoot $f) $dep }
 Set-Content (Join-Path $work 'deliverables/spfx/bbi-portail.sppkg') 'paquet factice'
 Set-Content (Join-Path $dep 'logo.png') 'image factice'
 
@@ -48,6 +48,10 @@ $cfg.filiales[0].proprietaires = @('abidjan.resp@exemple.com')
 $cfg.filiales[0].membres = @('abidjan.membre@exemple.com')
 $cfg.groupes.editeurs.membres = @('editeur@exemple.com')
 $cfg.groupes.lectureTous = $true
+$cfg.options.demonstrationDroits = $true
+$cfg.demonstration.comptes.clients = @('client@exemple.com')
+$cfg.demonstration.comptes.employes = @('employe@exemple.com')
+$cfg.demonstration.comptes.direction = @('dg@exemple.com')
 $cfg.identite.logo = 'logo.png'
 $cfg.identite.piedDePage = @([pscustomobject]@{ titre = 'Mentions légales'; url = 'https://exemple.com/mentions' })
 $cfgPath = Join-Path $dep 'organisation.json'
@@ -88,23 +92,23 @@ Set-Content (Join-Path $dep 'provision-bbi-intranet.ps1') $stub -Encoding utf8
 # ------------------------------------------------------------------
 # Faux tenant SharePoint (fonctions globales : elles masquent les cmdlets PnP)
 # ------------------------------------------------------------------
-$RequiredLists = @('Actualites', 'Sessions', 'Formateurs', 'Formations', 'Offres', 'Employés du mois', 'Certifications', 'Annonces', 'Pensées du jour', 'Anniversaires', 'Implantations', 'Nos références', 'Références pédagogiques', 'Supports publiés', 'Documents administratifs', 'Galerie médias')
+$RequiredLists = @('Actualites', 'Sessions', 'Formateurs', 'Formations', 'Offres', 'Avis clients', 'Employés du mois', 'Certifications', 'Annonces', 'Pensées du jour', 'Anniversaires', 'Implantations', 'Nos références', 'Références pédagogiques', 'Supports publiés', 'Documents administratifs', 'Galerie médias')
 
 function global:Log { param([string]$Message) $global:Mock.Calls.Add($Message) }
 function global:Reset-Mock {
-    param([switch]$NoCatalog)
+    param([switch]$NoCatalog, [switch]$NoViewOnly)
     $global:Mock = @{
         Calls = [System.Collections.Generic.List[string]]::new()
         Sites = @{}; Current = ''; Groups = @{}; M365 = @{}; Nav = @{}
         Catalog = $(if ($NoCatalog) { $null } else { 'https://businessbuilderinter.sharepoint.com/sites/appcatalog' })
         AppDeployed = $false; HubUrl = ''; HubId = [guid]::NewGuid().ToString(); NextId = 1
-        TenantId = [guid]::NewGuid().ToString(); RequiredLists = $RequiredLists
+        TenantId = [guid]::NewGuid().ToString(); RequiredLists = $RequiredLists; NoViewOnly = $NoViewOnly.IsPresent
     }
 }
 function global:New-MockSite {
     param([string]$Url)
     $u = $Url.TrimEnd('/')
-    $global:Mock.Sites[$u] = @{ HubSiteId = [Guid]::Empty.ToString(); GroupId = [guid]::NewGuid().ToString(); Lists = @{}; Items = @{}; Page = $false; WebPart = $false }
+    $global:Mock.Sites[$u] = @{ HubSiteId = [Guid]::Empty.ToString(); GroupId = [guid]::NewGuid().ToString(); Lists = @{}; Items = @{}; Files = @{}; Page = $false; WebPart = $false }
     return $u
 }
 function global:Provision-MockSite {
@@ -115,7 +119,7 @@ function global:Provision-MockSite {
     $s.Page = $true; $s.WebPart = $true
 }
 function global:Get-MockSite { $global:Mock.Sites[$global:Mock.Current] }
-function global:Get-MockGroup { param([string]$Name) $key = "$($global:Mock.Current)|$Name"; if (-not $global:Mock.Groups.ContainsKey($key)) { $global:Mock.Groups[$key] = @{ Name = $Name; Members = [System.Collections.Generic.List[object]]::new() } }; $global:Mock.Groups[$key] }
+function global:Get-MockGroup { param([string]$Name) $key = "$($global:Mock.Current)|$Name"; if (-not $global:Mock.Groups.ContainsKey($key)) { $global:Mock.Groups[$key] = @{ Name = $Name; Title = $Name; Members = [System.Collections.Generic.List[object]]::new() } }; $global:Mock.Groups[$key] }
 
 function global:Get-Module { [CmdletBinding()] param([switch]$ListAvailable, [string]$Name) [pscustomobject]@{ Name = 'PnP.PowerShell'; Version = [version]'2.12.0' } }
 function global:Connect-PnPOnline { [CmdletBinding()] param([string]$Url, [switch]$Interactive, [string]$ClientId) $global:Mock.Current = $Url.TrimEnd('/'); Log "connect $($Url.TrimEnd('/'))$(if ($ClientId) { ' client=' + $ClientId })" }
@@ -145,7 +149,7 @@ function global:Get-PnPMicrosoft365GroupOwner { [CmdletBinding()] param([string]
 function global:Get-PnPMicrosoft365GroupMember { [CmdletBinding()] param([string]$Identity) if ($global:Mock.M365.ContainsKey($Identity)) { $global:Mock.M365[$Identity].Members | ForEach-Object { [pscustomobject]@{ Email = $_; UserPrincipalName = $_ } } } }
 function global:Get-PnPTenantId { [CmdletBinding()] param() $global:Mock.TenantId }
 
-function global:Get-PnPList { [CmdletBinding()] param([string]$Identity) if ((Get-MockSite).Lists.ContainsKey($Identity)) { [pscustomobject]@{ Title = $Identity } } }
+function global:Get-PnPList { [CmdletBinding()] param([string]$Identity, [string[]]$Includes) if ((Get-MockSite).Lists.ContainsKey($Identity)) { [pscustomobject]@{ Title = $Identity; RootFolder = [pscustomobject]@{ Name = $Identity; ServerRelativeUrl = "/sites/mock/$Identity" } } } }
 function global:Get-PnPListItem { [CmdletBinding()] param([string]$List, [int]$PageSize) $items = (Get-MockSite).Items; if ($items.ContainsKey($List)) { @($items[$List]) } else { @() } }
 function global:Add-PnPListItem {
     [CmdletBinding()] param([string]$List, [hashtable]$Values)
@@ -164,9 +168,33 @@ function global:Set-PnPListItem {
 function global:Get-PnPPage { [CmdletBinding()] param([string]$Identity) if ((Get-MockSite).Page) { [pscustomobject]@{ Name = $Identity } } else { throw 'page introuvable' } }
 function global:Get-PnPPageComponent { [CmdletBinding()] param([string]$Page) if ((Get-MockSite).WebPart) { [pscustomobject]@{ WebPartId = '{6a9b6e3b-44f1-4a70-8f0a-45c82b29126d}' } } }
 
+function global:New-MockRole {
+    param([string]$Name, [string]$Kind, [string[]]$Perms)
+    $bp = [pscustomobject]@{ Perms = $Perms }
+    Add-Member -InputObject $bp -MemberType ScriptMethod -Name Has -Value { param($k) $this.Perms -contains "$k" }
+    [pscustomobject]@{ Name = $Name; RoleTypeKind = $Kind; BasePermissions = $bp }
+}
+function global:Get-PnPRoleDefinition {
+    [CmdletBinding()] param($Identity)
+    $all = @('ViewListItems', 'ViewPages', 'OpenItems', 'Open', 'EditListItems')
+    $defs = @(
+        (New-MockRole 'Accès limité' 'Guest' @('Open')),
+        (New-MockRole 'Lecture' 'Reader' @('ViewListItems', 'ViewPages', 'OpenItems', 'Open')),
+        (New-MockRole 'Contribution' 'Contributor' $all),
+        (New-MockRole 'Modification' 'Editor' $all),
+        (New-MockRole 'Contrôle total' 'Administrator' $all)
+    )
+    if (-not $global:Mock.NoViewOnly) { $defs += (New-MockRole 'Affichage uniquement' 'None' @('ViewListItems', 'ViewPages', 'Open')) }
+    $defs
+}
+function global:Add-PnPRoleDefinition { [CmdletBinding()] param([string]$RoleName, $Clone, $Exclude, [string]$Description) Log "add-role-def $RoleName exclude=$($Exclude -join ',')" }
+function global:Get-PnPFile { [CmdletBinding()] param([string]$Url, [switch]$AsListItem) $f = (Get-MockSite).Files[$Url]; if ($f) { [pscustomobject]@{ Id = $f.Id } } }
+function global:Set-PnPWebPermission { [CmdletBinding()] param([string]$Group, [string]$AddRole) Log "web-perm $Group => $AddRole" }
+function global:Set-PnPListItemPermission { [CmdletBinding()] param([string]$List, $Identity, [string]$Group, [string]$AddRole, [switch]$ClearExisting) Log "perm $List #$Identity $Group => $AddRole clear=$($ClearExisting.IsPresent)" }
+
 function global:Set-PnPWebTheme { [CmdletBinding()] param([string]$Theme, [string]$WebUrl) Log "theme $Theme $WebUrl" }
 function global:Set-PnPWebHeader { [CmdletBinding()] param([string]$HeaderLayout, [string]$HeaderEmphasis, [string]$SiteLogoUrl) Log "header $($global:Mock.Current) $HeaderLayout/$HeaderEmphasis$(if ($SiteLogoUrl) { ' logo=' + $SiteLogoUrl })" }
-function global:Add-PnPFile { [CmdletBinding()] param([string]$Path, [string]$Folder) Log "upload $([IO.Path]::GetFileName($Path)) $Folder"; [pscustomobject]@{ ServerRelativeUrl = "/$Folder/$([IO.Path]::GetFileName($Path))" } }
+function global:Add-PnPFile { [CmdletBinding()] param([string]$Path, [string]$Folder, [hashtable]$Values) $name = [IO.Path]::GetFileName($Path); Log "upload $name $Folder"; $key = if ($Folder.StartsWith('/')) { "$Folder/$name" } else { "/sites/mock/$Folder/$name" }; (Get-MockSite).Files[$key] = @{ Id = $global:Mock.NextId++; Values = $Values }; [pscustomobject]@{ ServerRelativeUrl = "/$Folder/$name" } }
 function global:Set-PnPFooter { [CmdletBinding()] param([switch]$Enabled, [string]$Layout, [string]$Title) Log "footer $($global:Mock.Current) $Title" }
 function global:Get-PnPNavigationNode { [CmdletBinding()] param([string]$Location) $k = "$($global:Mock.Current)|$Location"; if ($global:Mock.Nav.ContainsKey($k)) { @($global:Mock.Nav[$k] | ForEach-Object { [pscustomobject]@{ Title = $_ } }) } else { @() } }
 function global:Add-PnPNavigationNode { [CmdletBinding()] param([string]$Location, [string]$Title, [string]$Url) $k = "$($global:Mock.Current)|$Location"; if (-not $global:Mock.Nav.ContainsKey($k)) { $global:Mock.Nav[$k] = [System.Collections.Generic.List[string]]::new() }; $global:Mock.Nav[$k].Add($Title); Log "nav-add $Location $Title" }
@@ -237,6 +265,19 @@ try {
     Check "pied de page et lien « Mentions légales » sur chacun des 4 sites" ((Count-Calls $r.Calls '^footer ') -eq 4 -and (Count-Calls $r.Calls '^nav-add Footer Mentions légales$') -eq 4)
     Check "audit final : organisation conforme" ($r.Out -match 'Organisation conforme') (($r.Out -split "`n" | Select-String 'contrôle' | Select-Object -First 3 | ForEach-Object { $_.Line.Trim() }) -join ' | ')
 
+    Write-Host ''
+    Write-Host 'Démonstration des droits sur le tenant vide'
+    Check "dix documents téléversés, cinq dans chaque bibliothèque" ((Count-Calls $r.Calls '^upload Cas-') -eq 10 -and (Count-Calls $r.Calls '^upload Cas-0[1-5]-.* Supports publiés$') -eq 5 -and (Count-Calls $r.Calls '^upload Cas-(0[6-9]|10)-.* Documents administratifs$') -eq 5)
+    Check "cinq groupes de démonstration créés" ((Count-Calls $r.Calls '^new-group BBI-Demo-') -eq 5)
+    Check "comptes de démonstration ajoutés à leur groupe" ((Count-Calls $r.Calls 'group-add BBI-Demo-Clients .*client@exemple.com') -eq 1 -and (Count-Calls $r.Calls 'group-add BBI-Demo-Employes .*employe@exemple.com') -eq 1 -and (Count-Calls $r.Calls 'group-add BBI-Demo-Direction .*dg@exemple.com') -eq 1)
+    Check "chaque groupe de démonstration reçoit la lecture du site (accès à la page d'accueil)" ((Count-Calls $r.Calls '^web-perm BBI-Demo-.* => Lecture$') -eq 5)
+    Check "niveau « Affichage uniquement » retrouvé dans le tenant, sans être recréé" ((Count-Calls $r.Calls '^add-role-def') -eq 0)
+    Check "droits propres : héritage rompu une fois par document, propriétaires en contrôle total" ((Count-Calls $r.Calls 'clear=True$') -eq 10 -and (Count-Calls $r.Calls '^perm .* Owners => Contrôle total clear=True$') -eq 10)
+    Check "31 attributions au total : 10 propriétaires et 21 groupes" ((Count-Calls $r.Calls '^perm ') -eq 31)
+    Check "cas 1 et 4 : le client est en consultation seule ; cas 2 : le client lit" ((Count-Calls $r.Calls '^perm Supports publiés #\d+ BBI-Demo-Clients => Affichage uniquement clear=False$') -eq 2 -and (Count-Calls $r.Calls '^perm Supports publiés #\d+ BBI-Demo-Clients => Lecture clear=False$') -eq 1)
+    Check "cas 8 : les employés sont en consultation seule" ((Count-Calls $r.Calls '^perm Documents administratifs #\d+ BBI-Demo-Employes => Affichage uniquement clear=False$') -eq 1)
+    Check "cas 10 : les employés contribuent" ((Count-Calls $r.Calls '^perm Documents administratifs #\d+ BBI-Demo-Employes => Contribution clear=False$') -eq 1)
+
     # --- 4. Seconde exécution : idempotence ------------------------------
     Write-Host "`nSeconde exécution (idempotence)"
     $m.Calls.Clear()
@@ -248,6 +289,8 @@ try {
     Check "aucun membre rajouté deux fois" ((Count-Calls $r2.Calls '^group-add') -eq 0)
     Check "pas de doublon de lien de pied de page" ((Count-Calls $r2.Calls '^nav-add') -eq 0)
     Check "audit final : organisation conforme" ($r2.Out -match 'Organisation conforme')
+
+    Check "démonstration des droits : aucun document renvoyé, 31 droits réappliqués, aucun groupe recréé" ((Count-Calls $r2.Calls '^upload Cas-') -eq 0 -and (Count-Calls $r2.Calls '^perm ') -eq 31 -and (Count-Calls $r2.Calls '^new-group BBI-Demo-') -eq 0)
 
     # --- 5. Une seule filiale ---------------------------------------------
     Write-Host "`nUne seule filiale (-Filiale dakar)"
@@ -262,12 +305,28 @@ try {
     # --- 6. Options -------------------------------------------------------
     Write-Host "`nOptions"
     Reset-Mock
-    $r = Invoke-Scenario @{ Config = $cfgPath; ClientId = 'cid-1'; SkipAppDeploy = $true; SkipDemoData = $true; SkipPermissions = $true; SkipBranding = $true }
+    $r = Invoke-Scenario @{ Config = $cfgPath; ClientId = 'cid-1'; SkipAppDeploy = $true; SkipDemoData = $true; SkipPermissions = $true; SkipBranding = $true; SkipRightsDemo = $true }
     Check "sortie 0" ($r.Exit -eq 0) "exit=$($r.Exit) $($r.Thrown)"
     Check "-SkipAppDeploy : aucune application téléversée" ((Count-Calls $r.Calls '^add-app') -eq 0)
     Check "-SkipDemoData : passe 2 sans démo" ((Count-Calls $r.Calls 'filiales=True demo=False') -eq 1)
     Check "-SkipPermissions : aucun membre ajouté aux sites" ((Count-Calls $r.Calls '^(m365-|group-add Visitors)') -eq 0)
     Check "-SkipBranding : aucun thème ni pied de page" ((Count-Calls $r.Calls '^(theme|footer|header)') -eq 0)
+    Check "-SkipRightsDemo : aucun document ni groupe de démonstration" ((Count-Calls $r.Calls '^(upload Cas-|new-group BBI-Demo-|perm |web-perm )') -eq 0)
+
+    # --- 6 bis. Démonstration des droits ---------------------------------------
+    Write-Host ''
+    Write-Host 'Démonstration des droits sans niveau « Affichage uniquement » dans le tenant'
+    Reset-Mock -NoViewOnly
+    $r = Invoke-Scenario @{ Config = $cfgPath; ClientId = 'cid-1'; SkipAppDeploy = $true; SkipDemoData = $true; SkipPermissions = $true; SkipBranding = $true }
+    Check "sortie 0" ($r.Exit -eq 0) "exit=$($r.Exit) $($r.Thrown)"
+    Check "niveau absent : créé une fois à partir de Lecture, sans « Ouvrir les éléments »" ((Count-Calls $r.Calls '^add-role-def BBI Affichage uniquement exclude=OpenItems$') -eq 1)
+    Check "niveau créé utilisé pour les quatre consultations seules" ((Count-Calls $r.Calls '=> BBI Affichage uniquement clear=False$') -eq 4)
+    Write-Host ''
+    Write-Host 'Script de démonstration seul (-PlanOnly)'
+    Reset-Mock
+    $global:LASTEXITCODE = 0
+    $planOut = & (Join-Path $dep 'New-BbiRightsDemo.ps1') -Config $cfgPath -PlanOnly *>&1 | Out-String
+    Check "tableau « qui voit quoi » affiché, aucune connexion" ($LASTEXITCODE -eq 0 -and $planOut -match 'Cas 1 - Consultation seule' -and $planOut -match 'Voir seulement' -and $global:Mock.Calls.Count -eq 0)
 
     # --- 7. Erreurs -------------------------------------------------------
     Write-Host "`nErreurs"

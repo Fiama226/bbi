@@ -16,7 +16,8 @@
          navigation du hub, données de démonstration (provision-bbi-intranet.ps1) ;
       7. liste « Implantations » recopiée sur chaque filiale (bandeau Siège et filiales) ;
       8. propriétaires, membres et visiteurs de chaque site ;
-      9. thème, en-tête, logo et pied de page de chaque site, puis vérification finale.
+      9. thème, en-tête, logo et pied de page de chaque site ;
+     10. démonstration des droits : dix documents aux droits différents, puis vérification finale.
 
     Le script est IDEMPOTENT : relancez-le sans risque, il ne recrée pas l'existant.
 
@@ -41,6 +42,8 @@
     Saute les propriétaires, membres et visiteurs.
 .PARAMETER SkipBranding
     Saute le thème, l'en-tête, le logo et le pied de page.
+.PARAMETER SkipRightsDemo
+    Saute la démonstration des droits (dix documents aux droits différents).
 
 .EXAMPLE
     # 1. Voir ce qui sera créé, sans rien toucher
@@ -70,6 +73,7 @@ param(
     [switch]$SkipDemoData,
     [switch]$SkipPermissions,
     [switch]$SkipBranding,
+    [switch]$SkipRightsDemo,
     [string[]]$Filiale = @()
 )
 
@@ -109,7 +113,7 @@ function Invoke-Phase {
 # ------------------------------------------------------------------
 # 0. Configuration et plan
 # ------------------------------------------------------------------
-Write-OrgTitle "0/9 · Configuration"
+Write-OrgTitle "0/10 · Configuration"
 $configPath = (Resolve-Path -LiteralPath $Config -ErrorAction SilentlyContinue)?.Path
 if (-not $configPath) { $configPath = $Config }
 $cfg  = Read-BbiOrganizationConfig -Path $configPath
@@ -137,7 +141,7 @@ if ($PlanOnly) {
 if ($VerifyOnly) {
     $verifyArgs = @{ Config = $configPath }
     if ($ClientId) { $verifyArgs.ClientId = $ClientId }
-    if ($Filiale.Count -gt 0) { $verifyArgs.Filiale = $Filiale }
+    if ($Filiale.Count -gt 0) { $verifyArgs.Filiale = $Filiale }; if ($SkipRightsDemo) { $verifyArgs.SkipRightsDemo = $true }
     & (Join-Path $PSScriptRoot 'Test-BbiOrganization.ps1') @verifyArgs
     exit $LASTEXITCODE
 }
@@ -239,7 +243,7 @@ function Sync-OrgImplantations {
 # ------------------------------------------------------------------
 # 1. Connexion et site du siège
 # ------------------------------------------------------------------
-Write-OrgTitle "1/9 · Connexion et site du siège"
+Write-OrgTitle "1/10 · Connexion et site du siège"
 Connect-Bbi -Url $plan.AdminUrl -ClientId $ClientId
 Write-OrgOk "Connecté à $($plan.AdminUrl)"
 
@@ -264,7 +268,7 @@ Invoke-Phase 'Site du siège' -Critical {
 # ------------------------------------------------------------------
 # 2. Application SPFx
 # ------------------------------------------------------------------
-Write-OrgTitle "2/9 · Application SPFx"
+Write-OrgTitle "2/10 · Application SPFx"
 if (-not $plan.DeployerApp -or $SkipAppDeploy) {
     Write-OrgSkip "Déploiement de l'application ignoré (option ou -SkipAppDeploy)"
     Add-OrgReport 'Application SPFx' 'IGNORÉ'
@@ -296,7 +300,7 @@ if (-not $script:siegeExists -and $DryRun) {
 # ------------------------------------------------------------------
 # 3. Groupe des éditeurs
 # ------------------------------------------------------------------
-Write-OrgTitle "3/9 · Groupe des éditeurs de contenu"
+Write-OrgTitle "3/10 · Groupe des éditeurs de contenu"
 Invoke-Phase 'Groupe des éditeurs' {
     Connect-Bbi -Url $plan.Siege.Url -ClientId $ClientId
     $group = try { Get-PnPGroup -Identity $plan.GroupeEditeurs -ErrorAction Stop } catch { $null }
@@ -311,13 +315,13 @@ Invoke-Phase 'Groupe des éditeurs' {
 # ------------------------------------------------------------------
 # 4. Première passe : listes, bibliothèques, page d'accueil du siège
 # ------------------------------------------------------------------
-Write-OrgTitle "4/9 · Siège : listes, bibliothèques et page d'accueil"
+Write-OrgTitle "4/10 · Siège : listes, bibliothèques et page d'accueil"
 Invoke-Phase 'Provisionnement du siège (passe 1)' -Critical { Invoke-Provisioning -Extra @{ SkipNavigation = $true } }
 
 # ------------------------------------------------------------------
 # 5. Implantations depuis la configuration
 # ------------------------------------------------------------------
-Write-OrgTitle "5/9 · Liste Implantations (siège et filiales)"
+Write-OrgTitle "5/10 · Liste Implantations (siège et filiales)"
 Invoke-Phase 'Implantations du siège' {
     Connect-Bbi -Url $plan.Siege.Url -ClientId $ClientId
     Sync-OrgImplantations -SiteLabel 'siège'
@@ -326,7 +330,7 @@ Invoke-Phase 'Implantations du siège' {
 # ------------------------------------------------------------------
 # 6. Seconde passe : hub, filiales, portail sur chaque filiale, démo
 # ------------------------------------------------------------------
-Write-OrgTitle "6/9 · Hub, sites de filiale et portail sur chacun"
+Write-OrgTitle "6/10 · Hub, sites de filiale et portail sur chacun"
 if (-not $plan.Hub) {
     Write-OrgSkip "Hub désactivé (options.hub = false) : filiales non créées"
     Add-OrgReport 'Filiales' 'IGNORÉ' 'options.hub = false'
@@ -342,7 +346,7 @@ if (-not $plan.Hub) {
 # ------------------------------------------------------------------
 # 7. Implantations recopiées sur chaque filiale
 # ------------------------------------------------------------------
-Write-OrgTitle "7/9 · Bandeau Siège et filiales sur chaque filiale"
+Write-OrgTitle "7/10 · Bandeau Siège et filiales sur chaque filiale"
 if (-not $plan.Hub -or $DryRun) {
     Write-OrgSkip "Recopie des implantations ignorée (hub désactivé ou simulation)"
 } else {
@@ -357,7 +361,7 @@ if (-not $plan.Hub -or $DryRun) {
 # ------------------------------------------------------------------
 # 8. Propriétaires, membres, visiteurs
 # ------------------------------------------------------------------
-Write-OrgTitle "8/9 · Groupes et permissions"
+Write-OrgTitle "8/10 · Groupes et permissions"
 function Set-OrgSitePermissions {
     param([string]$Url, [string]$Titre, [string[]]$Owners, [string[]]$Members, [string[]]$Visitors)
     Connect-Bbi -Url $Url -ClientId $ClientId
@@ -398,7 +402,7 @@ if ($SkipPermissions) {
 # ------------------------------------------------------------------
 # 9. Identité visuelle et vérification
 # ------------------------------------------------------------------
-Write-OrgTitle "9/9 · Thème, en-tête, logo, pied de page"
+Write-OrgTitle "9/10 · Thème, en-tête, logo, pied de page"
 function Set-OrgSiteBranding {
     param([string]$Url, [string]$Titre)
     Connect-Bbi -Url $Url -ClientId $ClientId
@@ -433,6 +437,24 @@ if ($SkipBranding) {
     }
 }
 
+# ------------------------------------------------------------------
+# 10. Démonstration des droits
+# ------------------------------------------------------------------
+Write-OrgTitle "10/10 · Démonstration des droits"
+if (-not $plan.DemonstrationDroits -or $SkipRightsDemo) {
+    Write-OrgSkip "Démonstration des droits ignorée (options.demonstrationDroits ou -SkipRightsDemo)"
+    Add-OrgReport 'Démonstration des droits' 'IGNORÉ'
+} else {
+    Invoke-Phase 'Démonstration des droits' {
+        $rightsArgs = @{ Config = $configPath }
+        if ($ClientId) { $rightsArgs.ClientId = $ClientId }
+        if ($DryRun) { $rightsArgs.DryRun = $true }
+        & (Join-Path $PSScriptRoot 'New-BbiRightsDemo.ps1') @rightsArgs
+        if ($LASTEXITCODE -ne 0) { throw "New-BbiRightsDemo.ps1 a signalé des erreurs (voir ci-dessus)." }
+        Add-OrgReport 'Démonstration des droits' ($(if ($DryRun) { 'SIMULÉ' } else { 'OK' })) 'dix documents aux droits différents'
+    }
+}
+
 }  # fin du bloc « siège disponible »
 
 # ------------------------------------------------------------------
@@ -446,7 +468,7 @@ if (-not $DryRun -and $script:siegeExists) {
     Write-Host "Vérification finale (Test-BbiOrganization.ps1)..." -ForegroundColor White
     $verifyArgs = @{ Config = $configPath }
     if ($ClientId) { $verifyArgs.ClientId = $ClientId }
-    if ($Filiale.Count -gt 0) { $verifyArgs.Filiale = $Filiale }
+    if ($Filiale.Count -gt 0) { $verifyArgs.Filiale = $Filiale }; if ($SkipRightsDemo) { $verifyArgs.SkipRightsDemo = $true }
     try {
         & (Join-Path $PSScriptRoot 'Test-BbiOrganization.ps1') @verifyArgs
         if ($LASTEXITCODE -ne 0) { Write-OrgWarn "La vérification finale signale des écarts (voir ci-dessus)." }

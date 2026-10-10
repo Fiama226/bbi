@@ -195,7 +195,8 @@ function Ensure-BbiList {
     param(
         [string]$Title,
         [string]$Template = 'GenericList',   # GenericList | DocumentLibrary | PictureLibrary
-        [switch]$OnQuickLaunch
+        [switch]$OnQuickLaunch,
+        [string]$Url = ''           # adresse relative de la liste (sinon SharePoint la déduit du titre)
     )
     $existing = Get-BbiList -Title $Title
     if ($existing) { Write-Skip "Liste « $Title »"; Add-Report "Liste $Title" 'OK'; return $existing }
@@ -208,6 +209,7 @@ function Ensure-BbiList {
     Invoke-Bbi "Création de la liste « $Title » ($Template)" {
         $params = @{ Title = $Title; Template = $Template }
         if ($OnQuickLaunch) { $params.OnQuickLaunch = $true }
+        if ($Url) { $params.Url = $Url }
         New-PnPList @params | Out-Null
     } | Out-Null
     Add-Report "Liste $Title" 'CRÉÉ'
@@ -478,6 +480,8 @@ function Invoke-BbiSiteProvisioning {
         Ensure-BbiField -List 'Sessions' -DisplayName 'Statut'        -InternalName 'Status'   -Type Text
         Ensure-BbiField -List 'Sessions' -DisplayName 'Inscription (URL)' -InternalName 'RegistrationUrl' -Type Hyperlink
         Ensure-BbiField -List 'Sessions' -DisplayName 'Formateur'      -InternalName 'Trainer'   -Type Text
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Formulaire de satisfaction (URL)' -InternalName 'LienSatisfaction' -Type Hyperlink
+        Ensure-BbiField -List 'Sessions' -DisplayName 'Formulaire envoyé'  -InternalName 'SatisfactionEnvoyee' -Type Boolean
         Ensure-BbiView  -List 'Sessions' -Title 'Prochaines sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
             -Query '<Where><Geq><FieldRef Name="StartDate"/><Value Type="DateTime"><Today/></Value></Geq></Where><OrderBy><FieldRef Name="StartDate"/></OrderBy>'
         Ensure-BbiView  -List 'Sessions' -Title 'Toutes les sessions' -Fields @('Title','StartDate','Modality','Location','Status') `
@@ -644,6 +648,30 @@ function Invoke-BbiSiteProvisioning {
         Ensure-BbiView  -List 'Offres' -Title 'Par pôle' -Fields @('Title','Pole','CodeOffre','Filiere','Format','Duree') `
             -Query '<OrderBy><FieldRef Name="Pole"/><FieldRef Name="Title"/></OrderBy>'
 
+        # --- Avis clients : formulaire de satisfaction envoyé après chaque séance (coaching, formation, conseil)
+        Ensure-BbiList -Title 'Avis clients' -Template GenericList -Url 'Lists/AvisClients' | Out-Null
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Client ou entreprise' -InternalName 'Client'       -Type Text
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Pôle'                 -InternalName 'Pole'         -Type Choice `
+            -Choices @('Formation','Conseil','Coaching')
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Offre ou séance'      -InternalName 'Seance'       -Type Text
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Date de la séance'    -InternalName 'DateSeance'   -Type DateTime
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Formateur ou coach'   -InternalName 'Formateur'    -Type Text
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Note globale (1 à 5)' -InternalName 'NoteGlobale'  -Type Number
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Note du contenu (1 à 5)' -InternalName 'NoteContenu' -Type Number
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Note de l''animation (1 à 5)' -InternalName 'NoteAnimation' -Type Number
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Note de l''organisation (1 à 5)' -InternalName 'NoteOrganisation' -Type Number
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Recommanderiez-vous BBI ? (0 à 10)' -InternalName 'Recommandation' -Type Number
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Points forts'         -InternalName 'PointsForts'  -Type Note
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'À améliorer'          -InternalName 'Ameliorations' -Type Note
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Commentaire libre'    -InternalName 'Commentaire'  -Type Note
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Témoignage autorisé'  -InternalName 'AutoriseTemoignage' -Type Boolean
+        Ensure-BbiField -List 'Avis clients' -DisplayName 'Source'               -InternalName 'Source'       -Type Choice `
+            -Choices @('Microsoft Forms','Formulaire SharePoint','Papier','Autre')
+        Ensure-BbiView  -List 'Avis clients' -Title 'Tous les avis' -Fields @('Title','Client','Pole','Seance','DateSeance','NoteGlobale','Recommandation') `
+            -Query '<OrderBy><FieldRef Name="DateSeance" Ascending="FALSE"/></OrderBy>'
+        Ensure-BbiView  -List 'Avis clients' -Title 'Par pôle' -Fields @('Title','Pole','Seance','Formateur','NoteGlobale','Recommandation') `
+        -Query '<OrderBy><FieldRef Name="Pole"/><FieldRef Name="DateSeance" Ascending="FALSE"/></OrderBy>'
+
         # ==================================================================
         # 3. BIBLIOTHÈQUES DOCUMENTAIRES
         # ==================================================================
@@ -723,7 +751,7 @@ function Invoke-BbiSiteProvisioning {
         Write-Title "${StepPrefix}5/10 · Pages et web parts"
         Write-Step "Astuce : les propriétés ci-dessous correspondent aux réglages recommandés (modifiables ensuite dans le volet Propriétés)."
 
-        $homeProps = @{
+        $homePropsTable = @{
             siteUrl               = $DataUrl
             newsListTitle         = 'Actualites'
             sessionsListTitle     = 'Sessions'
@@ -754,12 +782,22 @@ function Invoke-BbiSiteProvisioning {
             secondaryCtaLabel     = 'Voir les sessions et missions'
             secondaryCtaUrl       = '#sessions'
             navLinks              = "# Accueil | #accueil`n# Nos offres | #offres`n# Sessions & missions | #sessions`n# Actualités | #actualites`n# Ressources | #ressources`n# Communauté | #communaute"
-            quickLinks            = "▦ | Nos offres | Formation, conseil et coaching | #offres`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
+            quickLinks            = "▦ | Nos offres | Formation, conseil et coaching | #offres`n◆ | Références pédagogiques | Ouvrages, normes, méthodes et outils | #formations`n▣ | Prochaines sessions | Planning et inscriptions | #sessions`n▤ | Supports & médias | Documents, photos et vidéos | #ressources`n◈ | Nos implantations | Siège, filiales et antennes | #implantations`n◎ | Communauté BBI | Formateurs et experts | #communaute`n✦ | Actualités BBI | Les nouvelles du réseau | #actualites"
             kpis                  = "1 500+ | Professionnels accompagnés`n3 | Pôles : formation, conseil, coaching`n9 | Pays couverts par le réseau`n96 % | De satisfaction constatée"
             visionText            = "Être le partenaire de référence du renforcement de capacités des dirigeants, des équipes et des organisations en Afrique et au-delà."
             missionText           = "Accompagner nos clients par la formation, le conseil et le coaching, pour transformer leurs compétences en résultats durables."
             objectivesText        = "Proposer trois pôles d'expertise complémentaires : formation, conseil et coaching`nMesurer l'impact de chaque accompagnement sur le terrain`nPartager un référentiel de qualité commun à tout le réseau`nRenforcer la présence locale dans chaque pays d'implantation"
-        } | ConvertTo-Json -Compress
+        }
+        # Contact support (en haut à droite de la page) : lu dans le fichier d'environnement, sinon laissé tel quel.
+        if ($BbiEnv -and "$($BbiEnv.supportEmail)".Trim()) { $homePropsTable.supportEmail = "$($BbiEnv.supportEmail)".Trim() }
+        if ($BbiEnv -and "$($BbiEnv.supportPhone)".Trim()) { $homePropsTable.supportPhone = "$($BbiEnv.supportPhone)".Trim() }
+        # Satisfaction : lien du formulaire envoyé après chaque séance (Microsoft Forms) et lien vers les avis reçus.
+        $avisUrl = "$($TargetUrl.TrimEnd('/'))/Lists/AvisClients/AllItems.aspx"
+        $satisfactionLinks = ''
+        if ($BbiEnv -and "$($BbiEnv.satisfactionFormUrl)".Trim()) { $satisfactionLinks += "`n★ | Formulaire de satisfaction | À envoyer après chaque séance | $("$($BbiEnv.satisfactionFormUrl)".Trim())" }
+        $satisfactionLinks += "`n★ | Avis clients | Notes et recommandations reçues | $avisUrl"
+        $homePropsTable.quickLinks = "$($homePropsTable.quickLinks)$satisfactionLinks"
+        $homeProps = $homePropsTable | ConvertTo-Json -Compress
 
         # --- Page d'accueil : page APPLICATIVE (aucun en-tête, aucune navigation)
         Ensure-BbiPage -Name 'accueil' -Title 'Accueil' -LayoutType 'SingleWebPartAppPage' | Out-Null
@@ -1081,6 +1119,20 @@ if ($SeedDemoData -and -not $DryRun -and -not $VerifyOnly) {
                 $offre['StatutCatalogue'] = 'Actif'
                 Add-PnPListItem -List 'Offres' -Values $offre | Out-Null
             }
+        } | Out-Null
+    }
+
+    # Avis clients (satisfaction)
+    if ((Get-PnPListItem -List 'Avis clients' -PageSize 1).Count -eq 0) {
+        Invoke-Bbi "Insertion des avis clients d'exemple" {
+            $avis = @(
+                @{ Title = 'Exemple : avis 1'; Client = 'Entreprise cliente A'; Pole = 'Formation'; Seance = "Management d'équipe"; DateSeance = $today.AddDays(-12); Formateur = 'Claire Fontaine'; NoteGlobale = 5; NoteContenu = 5; NoteAnimation = 5; NoteOrganisation = 4; Recommandation = 10; PointsForts = 'Cas pratiques très concrets, rythme adapté.'; Ameliorations = 'Prévoir une demi-journée de plus.'; Commentaire = 'Nous referons appel à BBI pour toute notre équipe.'; AutoriseTemoignage = $true; Source = 'Microsoft Forms' },
+                @{ Title = 'Exemple : avis 2'; Client = 'Entreprise cliente B'; Pole = 'Coaching'; Seance = 'Coaching de dirigeants'; DateSeance = $today.AddDays(-20); Formateur = 'Jean-Marc Okafor'; NoteGlobale = 5; NoteContenu = 5; NoteAnimation = 5; NoteOrganisation = 5; Recommandation = 10; PointsForts = 'Écoute, bienveillance et exigence.'; Ameliorations = ''; Commentaire = 'Un accompagnement qui change la façon de décider.'; AutoriseTemoignage = $true; Source = 'Microsoft Forms' },
+                @{ Title = 'Exemple : avis 3'; Client = 'Entreprise cliente C'; Pole = 'Conseil'; Seance = 'Diagnostic organisationnel'; DateSeance = $today.AddDays(-35); Formateur = 'Awa Traoré'; NoteGlobale = 4; NoteContenu = 4; NoteAnimation = 4; NoteOrganisation = 4; Recommandation = 9; PointsForts = 'Restitution claire et plan d''action réaliste.'; Ameliorations = 'Partager le calendrier plus tôt.'; Commentaire = ''; AutoriseTemoignage = $false; Source = 'Formulaire SharePoint' },
+                @{ Title = 'Exemple : avis 4'; Client = 'Entreprise cliente D'; Pole = 'Formation'; Seance = 'Fondamentaux Qualiopi'; DateSeance = $today.AddDays(-8); Formateur = 'Khadija Diallo'; NoteGlobale = 4; NoteContenu = 5; NoteAnimation = 4; NoteOrganisation = 3; Recommandation = 8; PointsForts = 'Contenu à jour.'; Ameliorations = 'Salle trop petite.'; Commentaire = 'Très utile, merci.'; AutoriseTemoignage = $false; Source = 'Papier' },
+                @{ Title = 'Exemple : avis 5'; Client = 'Entreprise cliente E'; Pole = 'Coaching'; Seance = "Coaching d'équipe"; DateSeance = $today.AddDays(-3); Formateur = 'Claire Fontaine'; NoteGlobale = 5; NoteContenu = 4; NoteAnimation = 5; NoteOrganisation = 5; Recommandation = 9; PointsForts = 'Équipe plus soudée dès la deuxième séance.'; Ameliorations = ''; Commentaire = ''; AutoriseTemoignage = $true; Source = 'Microsoft Forms' }
+            )
+            foreach ($a in $avis) { Add-PnPListItem -List 'Avis clients' -Values $a | Out-Null }
         } | Out-Null
     }
 

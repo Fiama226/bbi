@@ -107,11 +107,12 @@ cd deploy
 
 # Kit « organisation » : recrée siège, filiales, application, groupes, identité, audit depuis deploy/organisation.json
 copy organisation.example.json organisation.json            # puis adapter (tenant, siège, filiales)
-pwsh -File .\verify-organisation.ps1                         # tests hors ligne : configuration et plan (34 contrôles)
-pwsh -File .\verify-organisation-flow.ps1                    # tests hors ligne : déroulé complet contre un SharePoint simulé (49 contrôles)
+pwsh -File .\verify-organisation.ps1                         # tests hors ligne : configuration, plan, couverture du croquis, démonstration des droits (81 contrôles)
+pwsh -File .\verify-organisation-flow.ps1                    # tests hors ligne : déroulé complet contre un SharePoint simulé (65 contrôles)
 pwsh -File .\verify-pnp-parameters.ps1                      # paramètres PnP de tous les scripts contre le module installé (lecture seule)
 pwsh -File .\New-BbiOrganization.ps1 -PlanOnly              # le plan, sans connexion
 pwsh -File .\New-BbiOrganization.ps1 -DryRun -ClientId <id>  # lecture seule
 pwsh -File .\New-BbiOrganization.ps1 -ClientId <id>          # tout créer (idempotent) ; -Filiale Abidjan pour un premier essai
 pwsh -File .\Test-BbiOrganization.ps1 -ClientId <id>         # audit en lecture seule
+pwsh -File .\New-BbiRightsDemo.ps1 -PlanOnly                # démonstration des droits : 10 documents aux droits différents (étape 10 du kit)
 ```

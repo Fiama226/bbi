@@ -56,6 +56,12 @@ function Test-BbiOrganizationConfig {
     $prefix = "$(Get-BbiOptional $Config.options 'prefixeFiliale' 'intranet-')"
     if ($prefix -and $prefix -cnotmatch '^[a-z0-9-]+$') { $errors.Add("options.prefixeFiliale « $prefix » : minuscules, chiffres et tirets uniquement.") }
 
+    $support = "$(Get-BbiOptional $Config.organisation 'emailSupport' '')"
+    if ($support -and $support -notmatch $emailRx) { $errors.Add("organisation.emailSupport : adresse e-mail invalide « $support ».") }
+
+    $form = "$(Get-BbiOptional $Config.organisation 'formulaireSatisfaction' '')"
+    if ($form -and $form -notmatch '^https://\S+$') { $errors.Add("organisation.formulaireSatisfaction : adresse https attendue « $form ».") }
+
     $seen = @{}
     $i = 0
     foreach ($f in @($Config.filiales)) {
@@ -93,6 +99,10 @@ function Test-BbiOrganizationConfig {
     }
     foreach ($m in @(Get-BbiOptional $Config.groupes.editeurs 'membres' @())) {
         $people += [pscustomobject]@{ Where = 'groupes.editeurs.membres'; Mail = $m }
+    }
+    $demoAccounts = Get-BbiOptional (Get-BbiOptional $Config 'demonstration' $null) 'comptes' $null
+    foreach ($k in 'clients', 'apprenants', 'employes', 'rh', 'direction') {
+        foreach ($m in @(Get-BbiOptional $demoAccounts $k @())) { $people += [pscustomobject]@{ Where = "demonstration.comptes.$k"; Mail = $m } }
     }
     foreach ($p in $people) {
         if ("$($p.Mail)" -notmatch $emailRx) { $errors.Add("$($p.Where) : adresse e-mail invalide « $($p.Mail) ».") }
@@ -183,9 +193,13 @@ function Get-BbiOrganizationPlan {
         TenantUrl       = $tenantUrl
         AdminUrl        = "https://$tenant-admin.sharepoint.com"
         Lcid            = [int](Get-BbiOptional $Config.organisation 'langue' 1036)
+        EmailSupport    = "$(Get-BbiOptional $Config.organisation 'emailSupport' '')"
+        TelephoneSupport = "$(Get-BbiOptional $Config.organisation 'telephoneSupport' '')"
+        FormulaireSatisfaction = "$(Get-BbiOptional $Config.organisation 'formulaireSatisfaction' '')"
         Prefixe         = $prefix
         Hub             = [bool](Get-BbiOptional $Config.options 'hub' $true)
         DonneesDemo     = [bool](Get-BbiOptional $Config.options 'donneesDemo' $true)
+        DemonstrationDroits = [bool](Get-BbiOptional $Config.options 'demonstrationDroits' $false)
         DeployerApp     = [bool](Get-BbiOptional $Config.options 'deployerApplication' $true)
         CheminPaquet    = $packagePath
         GroupeEditeurs  = "$(Get-BbiOptional $Config.groupes.editeurs 'nom' 'BBI-Concepteurs')"
@@ -208,6 +222,7 @@ function Write-BbiOrganizationPlan {
     Write-Host "Hub          : $(if ($Plan.Hub) { 'oui, le siège devient hub, les filiales y sont rattachées' } else { 'non' })" -ForegroundColor Gray
     Write-Host "Application  : $(if ($Plan.DeployerApp) { $Plan.CheminPaquet } else { 'non déployée par le script' })" -ForegroundColor Gray
     Write-Host "Groupe éditeurs : $($Plan.GroupeEditeurs)   Thème : $($Plan.NomTheme)" -ForegroundColor Gray
+    Write-Host "Démonstration des droits : $(if ($Plan.DemonstrationDroits) { 'oui, dix documents aux droits différents' } else { 'non' })" -ForegroundColor Gray
     Write-Host ""
     $rows = @()
     $rows += [pscustomobject]@{ Site = $Plan.Siege.Titre; Role = 'Siège (hub)'; Url = $Plan.Siege.Url; Proprio = $Plan.Siege.Proprietaires.Count; Membres = $Plan.Siege.Membres.Count; Visiteurs = $Plan.Siege.Visiteurs.Count; Inclus = 'oui' }
@@ -232,6 +247,9 @@ function New-BbiEnvironmentFile {
         hubEnabled        = $Plan.Hub
         filialeSitePrefix = $Plan.Prefixe
         workbenchUrl      = "$($Plan.TenantUrl)/_layouts/15/workbench.aspx"
+        supportEmail      = $Plan.EmailSupport
+        supportPhone      = $Plan.TelephoneSupport
+        satisfactionFormUrl = $Plan.FormulaireSatisfaction
     }
     $json = $envData | ConvertTo-Json -Depth 4
     [IO.File]::WriteAllText($Path, $json, (New-Object System.Text.UTF8Encoding($false)))

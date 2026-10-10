@@ -11,7 +11,12 @@
   "organisation": {
     "nom": "Business Builders International",
     "_langue": "Code de langue des sites créés (1036 = français, 1033 = anglais).",
-    "langue": 1036
+    "langue": 1036,
+    "_support": "Contact affiché en haut à droite du portail (laisser vide pour ne rien afficher).",
+    "emailSupport": "",
+    "telephoneSupport": "",
+    "_formulaireSatisfaction": "Adresse du formulaire Microsoft Forms de satisfaction que le formateur envoie après chaque séance (voir deliverables/satisfaction). Laisser vide tant qu'il n'est pas créé.",
+    "formulaireSatisfaction": ""
   },
 
   "siege": {
@@ -90,6 +95,17 @@
     "piedDePage": []
   },
 
+  "demonstration": {
+    "_comptes": "Comptes Microsoft 365 de démonstration, un ou plusieurs par groupe. Ils servent à montrer la gestion des droits (voir deploy/README.md, section 10). Un client externe doit d'abord être invité dans l'annuaire. Laisser les listes vides pour créer seulement les groupes.",
+    "comptes": {
+      "clients": [],
+      "apprenants": [],
+      "employes": [],
+      "rh": [],
+      "direction": []
+    }
+  },
+
   "options": {
     "_prefixeFiliale": "Préfixe de l'URL des sites de filiale.",
     "prefixeFiliale": "intranet-",
@@ -99,6 +115,8 @@
     "donneesDemo": true,
     "_deployerApplication": "true : téléverse et déploie le paquet SPFx dans le catalogue d'applications du tenant. Le catalogue doit déjà exister.",
     "deployerApplication": true,
-    "cheminPaquet": "../deliverables/spfx/bbi-portail.sppkg"
+    "cheminPaquet": "../deliverables/spfx/bbi-portail.sppkg",
+    "_demonstrationDroits": "true : crée dix documents aux droits différents (consultation seule, lecture, modification, confidentiel...) pour la démonstration. À mettre à false sur un tenant de production.",
+    "demonstrationDroits": true
   }
 }

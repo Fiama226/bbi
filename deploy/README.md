@@ -21,7 +21,7 @@ communauté/trombinoscope) sans navigation vers des pages SharePoint séparées.
 
 Et les listes : `Actualites`, `Sessions`, `Formateurs`, `Employés du mois`, `Certifications`, `Annonces`,
 `Pensées du jour`, `Anniversaires`, `Implantations`, `Nos références`, `Références pédagogiques`,
-`Formations` (catalogue autonome historique), `Offres`, `Supports publiés`, `Documents administratifs`, `Galerie médias`.
+`Formations` (catalogue autonome historique), `Offres`, `Avis clients`, `Supports publiés`, `Documents administratifs`, `Galerie médias`.
 
 > **Le portail est présentable dès la fin du déploiement, même sans aucune donnée.** Si une liste ou une
 > bibliothèque est absente, non créée ou vide, la vue concernée présente un contenu de repli professionnel.
@@ -436,12 +436,14 @@ Le croquis du client montre un **siège** et des **filiales** (bandeau « Siège
 | **Site du siège** | Site d'équipe privé, devenu **hub** |
 | **Sites de filiale** | Un site d'équipe par filiale, rattaché au hub (`/sites/intranet-<ville>`) : ce sont des sites frères reliés au siège, pas des sous-sites classiques |
 | **Tableau de bord** | La page d'accueil du portail (`accueil.aspx`, web part *BBI Accueil*) sur le siège **et** sur chaque filiale |
-| **Listes et bibliothèques** | Les 16 listes et bibliothèques du portail sur chaque site, dont `Offres` |
+| **Listes et bibliothèques** | Les 17 listes et bibliothèques du portail sur chaque site, dont `Offres` et `Avis clients` |
 | **Application SPFx** | Téléversée et déployée dans le catalogue d'applications du tenant |
 | **Bandeau Siège et filiales** | La liste `Implantations` est remplie depuis la configuration, puis recopiée sur chaque site, avec le lien, la couleur et les initiales de chaque filiale |
 | **Groupes et permissions** | Groupe des éditeurs de contenu ; propriétaires, membres et visiteurs de chaque site ; option « tout le personnel en lecture » |
 | **Identité visuelle** | Thème, en-tête compact, logo, pied de page et ses liens, sur chaque site |
 | **Contenu de démonstration** | Offres, actualités, sessions, annonces… (option), pour que chaque site soit présentable le premier jour |
+| **Formulaire de satisfaction** | La liste `Avis clients` pour recueillir les avis et la recommandation après chaque séance, le suivi d'envoi sur `Sessions` et les liens dans le portail (le formulaire Forms se crée à la main, voir plus bas) |
+| **Démonstration des droits** | Dix documents Word et PDF aux droits différents (consultation seule sans téléchargement, lecture, modification, confidentiel...) et cinq groupes de démonstration, pour montrer la gestion des droits au client |
 | **Audit** | Un bilan final site par site |
 
 ### Les fichiers du kit
@@ -449,11 +451,13 @@ Le croquis du client montre un **siège** et des **filiales** (bandeau « Siège
 | Fichier | Rôle |
 |---|---|
 | [`organisation.example.json`](./organisation.example.json) | Modèle de configuration à copier en `organisation.json` (ce dernier n'est pas versionné) |
-| [`New-BbiOrganization.ps1`](./New-BbiOrganization.ps1) | **Le script à lancer** : enchaîne les neuf étapes ci-dessous |
+| [`New-BbiOrganization.ps1`](./New-BbiOrganization.ps1) | **Le script à lancer** : enchaîne les dix étapes ci-dessous |
 | [`Test-BbiOrganization.ps1`](./Test-BbiOrganization.ps1) | Audit en lecture seule (appelé à la fin, utilisable seul) |
 | [`BbiOrganization.ps1`](./BbiOrganization.ps1) | Fonctions communes (lecture et contrôle de la configuration, plan) |
-| [`verify-organisation.ps1`](./verify-organisation.ps1) | Test hors ligne de la configuration et du plan (34 contrôles) |
-| [`verify-organisation-flow.ps1`](./verify-organisation-flow.ps1) | Test hors ligne du déroulé complet contre un SharePoint simulé (49 contrôles) |
+| [`New-BbiRightsDemo.ps1`](./New-BbiRightsDemo.ps1) | Démonstration des droits : groupes, dix documents, droits propres à chaque document (appelé par l'étape 10, utilisable seul) |
+| [`BbiRightsDemo.ps1`](./BbiRightsDemo.ps1) | Plan de la démonstration et génération des documents Word et PDF |
+| [`verify-organisation.ps1`](./verify-organisation.ps1) | Test hors ligne de la configuration, du plan, de la couverture du croquis et de la démonstration des droits (81 contrôles) |
+| [`verify-organisation-flow.ps1`](./verify-organisation-flow.ps1) | Test hors ligne du déroulé complet contre un SharePoint simulé (65 contrôles) |
 | [`verify-pnp-parameters.ps1`](./verify-pnp-parameters.ps1) | Vérifie que chaque appel PnP des scripts utilise des paramètres qui existent dans le module installé (à relancer après une mise à jour de PnP.PowerShell) |
 | [`provision-bbi-intranet.ps1`](./provision-bbi-intranet.ps1) | Le script existant, réutilisé par le kit pour chaque site |
 
@@ -499,7 +503,9 @@ Ouvrez `organisation.json` et adaptez-le. Les clés qui commencent par `_` sont 
 | `siege` et `filiales[]` | `proprietaires`, `membres`, `visiteurs` : adresses e-mail Microsoft 365 (listes vides = rien ajouté) |
 | `groupes` | `editeurs.nom` et `editeurs.membres` ; `lectureTous` pour donner la lecture à tout le personnel |
 | `identite` | `nomTheme`, `logo` (fichier image, chemin relatif), `titrePiedDePage`, `piedDePage` (liens) |
-| `options` | `prefixeFiliale`, `hub`, `donneesDemo`, `deployerApplication`, `cheminPaquet` |
+| `organisation` | `nom`, `langue`, `emailSupport` et `telephoneSupport` (contact affiché en haut à droite du portail), `formulaireSatisfaction` (adresse du formulaire de satisfaction) |
+| `demonstration.comptes` | Comptes de démonstration par groupe (`clients`, `apprenants`, `employes`, `rh`, `direction`) pour la démonstration des droits |
+| `options` | `prefixeFiliale`, `hub`, `donneesDemo`, `deployerApplication`, `cheminPaquet`, `demonstrationDroits` |
 
 **4. Contrôler, sans toucher à rien**
 
@@ -508,6 +514,7 @@ Ouvrez `organisation.json` et adaptez-le. Les clés qui commencent par `_` sont 
 pwsh -File .\verify-organisation.ps1
 pwsh -File .\verify-organisation-flow.ps1
 pwsh -File .\verify-pnp-parameters.ps1      # noms de paramètres PnP contre le module installé
+pwsh -File .\New-BbiRightsDemo.ps1 -PlanOnly   # le tableau « qui voit quoi » de la démonstration des droits
 
 # Le plan : sites, URL, nombre de personnes par site
 pwsh -File .\New-BbiOrganization.ps1 -PlanOnly
@@ -553,9 +560,10 @@ Pour chaque site : existence, rattachement au hub, listes et bibliothèques, pag
 | `-SkipDemoData` | Pas de données de démonstration (tenant de production) |
 | `-SkipPermissions` | Ne touche ni aux propriétaires ni aux membres |
 | `-SkipBranding` | Ne touche ni au thème, ni au logo, ni au pied de page |
+| `-SkipRightsDemo` | Ne crée pas les documents et groupes de la démonstration des droits |
 | `-Config <fichier>` | Autre fichier de configuration (un fichier par client) |
 
-### Les neuf étapes du script
+### Les dix étapes du script
 
 | # | Étape | Détail |
 |---|---|---|
@@ -567,7 +575,97 @@ Pour chaque site : existence, rattachement au hub, listes et bibliothèques, pag
 | 6 | Hub et filiales | `provision-bbi-intranet.ps1 -ProvisionFiliales` : hub, un site par filiale, portail sur chacun, menu du hub, données de démonstration |
 | 7 | Bandeau sur les filiales | Recopie `Implantations` sur chaque filiale, pour que le bandeau Siège et filiales y soit réel |
 | 8 | Groupes et permissions | Propriétaires et membres dans le groupe Microsoft 365 du site, visiteurs dans le groupe SharePoint, option « tout le personnel » |
-| 9 | Identité et audit | Thème, en-tête compact, logo, pied de page, puis `Test-BbiOrganization.ps1` |
+| 9 | Identité visuelle | Thème, en-tête compact, logo, pied de page |
+| 10 | Démonstration des droits | Cinq groupes, dix documents aux droits propres (`New-BbiRightsDemo.ps1`), puis l'audit final `Test-BbiOrganization.ps1` |
+
+### Ce que le kit recrée du croquis du client
+
+Les huit photos du dossier `recommendation/` (croquis du client, non versionné) montrent la page d'accueil voulue par le client. Chaque bloc du croquis a son équivalent créé par le kit. Le test `verify-organisation.ps1` vérifie chaque ligne de ce tableau : il échoue si le script de provisionnement cesse de créer l'une de ces listes ou colonnes.
+
+| Bloc du croquis | Ce que le kit crée | Liste ou bibliothèque |
+|---|---|---|
+| Logo, vision, mission | Le logo est intégré à la web part ; vision, mission et objectifs sont renseignés dans ses propriétés | propriétés de la web part |
+| Email support, en haut à droite | `organisation.emailSupport` et `telephoneSupport` sont écrits dans la web part et s'affichent dans l'en-tête | propriétés de la web part |
+| Menu et « Références pédagogiques » | Barre de navigation, et un accès direct « Références pédagogiques » dans « Vos espaces » | `Références pédagogiques` |
+| Trombinoscope (photo, nom, titre) | Annuaire avec photo, fonction, filière, coordonnées, filtre par catégorie | `Formateurs` |
+| Documents administratifs | Bibliothèque avec catégorie, public visé, référence, date de validité | `Documents administratifs` |
+| Parcours | Catalogue des offres Formation, Conseil et Coaching | `Offres` |
+| Documents pédagogiques | Bibliothèque des supports, avec type et statut de publication | `Supports publiés` |
+| Nos plannings (calendrier) | Planning des séances et des missions, en liste et en calendrier | `Sessions` |
+| Annonces | Bandeau d'annonces avec niveau et dates de validité | `Annonces` |
+| Citation, pensée du jour | Une citation affichée chaque jour | `Pensées du jour` |
+| Anniversaires | Anniversaires du jour et à venir | `Anniversaires` |
+| Siège, Filiale 1, Filiale… | Tuiles de sites et un site d'équipe par filiale, rattaché au hub | `Implantations` |
+| Nos références (nom, logo, lien, contact, pays, ville) | Logos des clients avec lien, contact, pays et ville | `Nos références` |
+
+Le kit ajoute deux éléments que le croquis ne montre pas mais que le client a demandés ensuite : la liste `Avis clients` (satisfaction) et les documents de démonstration des droits, décrits ci-dessous.
+
+Les bibliothèques de documents sont créées avec leurs colonnes, mais **vides** : les documents réels sont ceux du client. Tant qu'une bibliothèque est vide, le portail affiche des documents d'exemple. Pour montrer de vrais documents aux droits différents, activez la démonstration des droits.
+
+### Formulaire de satisfaction après chaque séance
+
+Après un coaching, une formation ou n'importe quelle séance, le formateur envoie un formulaire pour recueillir l'avis et la recommandation du client. Le kit prépare tout ce qui se fait par script :
+
+| Élément | Détail |
+|---|---|
+| Liste `Avis clients` | Une ligne par réponse : client, pôle, séance, date, formateur, quatre notes de 1 à 5, probabilité de recommandation de 0 à 10, points forts, améliorations, commentaire, témoignage autorisé, source. Vues « Tous les avis » et « Par pôle » |
+| Suivi sur `Sessions` | Deux colonnes : l'adresse du formulaire envoyé pour la séance, et une case « Formulaire envoyé » |
+| Accès directs du portail | « Avis clients » (la liste) et, si vous renseignez `organisation.formulaireSatisfaction`, « Formulaire de satisfaction » (le formulaire à envoyer) |
+| Avis d'exemple | Cinq avis, avec les données de démonstration, pour montrer la liste remplie |
+
+Deux étapes ne peuvent pas être faites par script et se font une seule fois : créer le formulaire dans **Microsoft Forms** (lien ouvert aux clients externes) et brancher ses réponses sur la liste avec **Power Automate**. Le document [`deliverables/satisfaction/questionnaire-satisfaction.md`](../deliverables/satisfaction/questionnaire-satisfaction.md) donne les 14 questions prêtes à copier, la correspondance avec les colonnes, le message à envoyer après la séance et le calcul du score de recommandation.
+
+Le portail ne calcule pas encore de moyenne ni de score de recommandation à l'écran : la lecture se fait dans les vues de la liste.
+
+### Démonstration de la gestion des droits
+
+Pour la démonstration au client, le kit crée **dix documents** (Word et PDF) aux droits différents, dans `Supports publiés` (apprenants et clients) et dans `Documents administratifs` (personnel). Chaque document porte lui-même le cas d'usage qu'il illustre et ce que chaque compte doit constater. C'est l'étape 10 de `New-BbiOrganization.ps1`, pilotée par `options.demonstrationDroits`, ou à part :
+
+```powershell
+pwsh -File .\New-BbiRightsDemo.ps1 -PlanOnly            # le tableau ci-dessous, sans connexion
+pwsh -File .\New-BbiRightsDemo.ps1 -ClientId <identifiant>
+```
+
+Chaque document reçoit des droits **propres** (l'héritage de la bibliothèque est rompu). Les propriétaires du site gardent le contrôle total sur tous.
+
+| Cas | Document | Concepteur | Client externe | Apprenant | Employé | RH | Direction |
+|---|---|---|---|---|---|---|---|
+| 1 | Consultation seule, sans téléchargement | Modifier | **Voir seulement** | **Voir seulement** | Aucun | Aucun | Aucun |
+| 2 | Lecture et téléchargement | Modifier | Lire et télécharger | Lire et télécharger | Aucun | Aucun | Aucun |
+| 3 | Réservé aux concepteurs | Modifier | Aucun | Aucun | Aucun | Aucun | Aucun |
+| 4 | Support réservé à un client | Modifier | **Voir seulement** | Aucun | Aucun | Aucun | Aucun |
+| 5 | Brouillon non publié | Modifier | Aucun | Aucun | Aucun | Aucun | Aucun |
+| 6 | Règlement intérieur, tous les employés | Aucun | Aucun | Aucun | Lire et télécharger | Modifier | Modifier |
+| 7 | Grille salariale, RH et direction | Aucun | Aucun | Aucun | Aucun | Modifier | Lire et télécharger |
+| 8 | Procédure qualité, consultation seule | Modifier | Aucun | Aucun | **Voir seulement** | Aucun | Modifier |
+| 9 | Note de direction confidentielle | Aucun | Aucun | Aucun | Aucun | Aucun | Modifier |
+| 10 | Document collaboratif, tous les employés | Aucun | Aucun | Aucun | Contribuer | Aucun | Modifier |
+| 11 | Lien de partage externe expirant | à faire à la main, voir plus bas | | | | | |
+
+**Ce que « Voir seulement » veut dire.** C'est le niveau SharePoint « Affichage uniquement » : la personne ouvre le document dans le navigateur (Word, Excel, PowerPoint, PDF), mais sans bouton de téléchargement et sans modification. Le script retrouve ce niveau dans le site quelle que soit sa langue, ou le crée à partir du niveau Lecture sans le droit « Ouvrir les éléments » s'il n'existe pas. Cela empêche le téléchargement par l'interface de SharePoint. Cela n'empêche pas une capture d'écran : pour aller plus loin, utilisez les étiquettes de confidentialité du §4. Les trois cas en consultation seule (1, 4 et 8) sont des documents Word : testez un PDF avant de le montrer, car le lecteur PDF peut se comporter autrement. Le rapport du script indique le niveau retenu : vérifiez qu'il s'agit bien d'« Affichage uniquement » (ou de son équivalent dans la langue du site).
+
+**Préparer les comptes.** Le kit crée les groupes `BBI-Demo-Clients`, `BBI-Demo-Apprenants`, `BBI-Demo-Employes`, `BBI-Demo-RH` et `BBI-Demo-Direction` (le groupe des concepteurs est celui des éditeurs). Renseignez dans `organisation.json`, section `demonstration.comptes`, un ou plusieurs comptes Microsoft 365 par groupe :
+
+```json
+"demonstration": { "comptes": { "clients": ["client.demo@votredomaine.com"], "apprenants": [], "employes": [], "rh": [], "direction": [] } }
+```
+
+Un **client externe** doit d'abord être invité dans l'annuaire Entra ID (invité B2B) et avoir accepté l'invitation. Son identifiant dans SharePoint est alors de la forme `prenom_domaine.com#EXT#@votretenant.onmicrosoft.com` : c'est celui à saisir. Sans compte renseigné, les groupes sont créés vides et vous ajoutez les personnes ensuite dans SharePoint.
+
+Le kit donne aussi à chacun de ces cinq groupes la **lecture du site** : sans elle, un compte n'aurait que l'accès limité et ne pourrait pas ouvrir la page d'accueil du portail. Cette lecture ne donne accès à aucun des dix documents, qui ont des droits propres. Elle donne en revanche accès aux autres contenus du site qui héritent des droits : c'est acceptable pour des comptes de démonstration, pas pour de vrais clients, qui doivent avoir leur propre site.
+
+**Dérouler la démonstration.**
+
+1. Ouvrez le portail dans une fenêtre de navigation privée par compte de démonstration.
+2. Ouvrez `Supports publiés` avec le compte client : seuls les cas 1, 2 et 4 sont visibles. Ouvrez le cas 1 : il s'affiche sans bouton de téléchargement.
+3. Avec le compte apprenant : les cas 1 et 2, pas le cas 4. Le cas 2 se télécharge, le cas 1 non.
+4. Ouvrez `Documents administratifs` avec le compte employé : cas 6 (téléchargeable), 8 (consultation seule) et 10 (modifiable). Pas les cas 7 et 9.
+5. Avec le compte RH : cas 6 et 7. Avec le compte direction : tous les cas administratifs.
+6. Avec un compte concepteur : les cinq supports, dont le brouillon du cas 5.
+
+**Cas 11, à faire à la main : lien de partage externe.** Le module PnP.PowerShell installé ne sait pas créer de lien de partage. Dans `Supports publiés`, ouvrez le cas 1, puis **Partager**, **Personnes spécifiques**, **Paramètres du lien** : décochez « Autoriser la modification », cochez « Bloquer le téléchargement », fixez une date d'expiration. Le client reçoit un lien qui expire tout seul. Selon la politique de partage du tenant, ces options peuvent être absentes.
+
+**Rejouer.** Relancer le script est sans risque : les documents déjà présents ne sont pas renvoyés, leurs droits sont simplement réappliqués. Pour repartir de zéro, supprimez les fichiers `Cas-NN-*` des deux bibliothèques. **Sur un tenant de production, mettez `options.demonstrationDroits` à `false`.**
 
 ### Pour un autre client ou un autre tenant
 
@@ -584,6 +682,8 @@ Copiez `organisation.json` vers un autre fichier (par exemple `client-b.json`), 
 | Propriétaires ou membres non ajoutés | Permissions Graph manquantes sur l'application | Ajouter `Group.ReadWrite.All` et `User.Read.All` (délégué) avec consentement administrateur |
 | Le bilan signale « À VÉRIFIER » sur l'application | Elle est téléversée mais pas encore marquée Déployée | Attendre quelques minutes, ou la déployer à la main dans le catalogue |
 | Un site de filiale reste en `ÉCHEC` dans le rapport | Les autres filiales ne sont pas bloquées | Relire le message, corriger, relancer (`-Filiale <ville>` pour cibler) |
+| Un client externe ne peut pas ouvrir un document | Il n'est pas invité dans l'annuaire, ou n'a pas accepté l'invitation | L'inviter (invité B2B), puis l'ajouter au groupe `BBI-Demo-Clients` avec son identifiant `...#EXT#@...` |
+| Le client voit un bouton Télécharger sur un cas « Voir seulement » | Le groupe a aussi un autre droit (autre groupe, droit du site) ou la politique du tenant l'autorise | Vérifier **Gérer l'accès** sur le document : seuls les propriétaires, les concepteurs et le groupe voulu doivent y figurer |
 | Les anciennes pages gardent « Formations » dans le menu | Les propriétés enregistrées de la web part priment sur les valeurs par défaut | Relancer sans `-PreserveWebPart` ou modifier le menu dans le volet Propriétés |
 
 ### Ce que le kit ne fait pas
@@ -593,4 +693,4 @@ Copiez `organisation.json` vers un autre fichier (par exemple `client-b.json`), 
 - Il ne migre aucun contenu existant d'un tenant vers un autre.
 - Il ne fait pas les réglages de conformité du §4 (étiquettes de confidentialité, IRM, partage externe).
 
-> **À savoir avant le premier vrai lancement.** Les tests hors ligne (`verify-organisation.ps1` et `verify-organisation-flow.ps1`) valident la configuration, le plan et l'enchaînement des étapes, y compris l'idempotence. `verify-pnp-parameters.ps1` contrôle en plus que chaque appel PnP existe dans le module installé (dernier contrôle : PnP.PowerShell 3.3.0, 137 appels reconnus). Aucun de ces tests ne valide les droits de votre tenant ni le comportement réel de SharePoint : le kit n'a pas encore été lancé sur un tenant réel. Commencez par `-PlanOnly`, puis `-DryRun`, puis une seule filiale (`-Filiale`), et gardez l'audit pour conclure.
+> **À savoir avant le premier vrai lancement.** Les tests hors ligne (`verify-organisation.ps1` et `verify-organisation-flow.ps1`) valident la configuration, le plan et l'enchaînement des étapes, y compris l'idempotence. `verify-pnp-parameters.ps1` contrôle en plus que chaque appel PnP existe dans le module installé (dernier contrôle : PnP.PowerShell 3.3.0, tous les appels reconnus). Aucun de ces tests ne valide les droits de votre tenant ni le comportement réel de SharePoint : le kit n'a pas encore été lancé sur un tenant réel. Commencez par `-PlanOnly`, puis `-DryRun`, puis une seule filiale (`-Filiale`), et gardez l'audit pour conclure.

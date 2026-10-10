@@ -16,7 +16,8 @@
 param(
     [string]$Config = (Join-Path $PSScriptRoot 'organisation.json'),
     [string]$ClientId = '',
-    [string[]]$Filiale = @()
+    [string[]]$Filiale = @(),
+    [switch]$SkipRightsDemo
 )
 
 $ErrorActionPreference = 'Stop'
@@ -26,7 +27,7 @@ $WP_HOME = '6a9b6e3b-44f1-4a70-8f0a-45c82b29126d'   # BBI Accueil (plein écran)
 
 # Listes et bibliothèques que le portail attend sur chaque site
 $RequiredLists = @(
-    'Actualites', 'Sessions', 'Formateurs', 'Formations', 'Offres', 'Employés du mois', 'Certifications',
+    'Actualites', 'Sessions', 'Formateurs', 'Formations', 'Offres', 'Avis clients', 'Employés du mois', 'Certifications',
     'Annonces', 'Pensées du jour', 'Anniversaires', 'Implantations', 'Nos références',
     'Références pédagogiques', 'Supports publiés', 'Documents administratifs', 'Galerie médias'
 )
@@ -132,6 +133,31 @@ foreach ($site in $sites) {
     } catch {
         Add-Result $t 'Contrôles du site' 'ÉCHEC' $_.Exception.Message
     }
+}
+
+# --- Démonstration des droits -------------------------------------------
+if ($plan.DemonstrationDroits -and -not $SkipRightsDemo) {
+    . (Join-Path $PSScriptRoot 'BbiRightsDemo.ps1')
+    $demoSite = $plan.Siege.Titre
+    try {
+        Connect-Bbi -Url $plan.Siege.Url -ClientId $ClientId
+        $rights = Get-BbiRightsDemoPlan -Config $cfg -Plan $plan
+        $missingGroups = @()
+        foreach ($g in $rights.Groups) {
+            $found = try { Get-PnPGroup -Identity $g.Name -ErrorAction Stop } catch { $null }
+            if (-not $found) { $missingGroups += $g.Name }
+        }
+        if ($missingGroups.Count -eq 0) { Add-Result $demoSite 'Groupes de démonstration' 'OK' "$($rights.Groups.Count) groupes" }
+        else { Add-Result $demoSite 'Groupes de démonstration' 'MANQUANT' ($missingGroups -join ', ') }
+        $missingDocs = @()
+        foreach ($doc in $rights.Documents) {
+            $library = Get-PnPList -Identity $doc.Library -Includes RootFolder -ErrorAction SilentlyContinue
+            $file = if ($library) { try { Get-PnPFile -Url "$($library.RootFolder.ServerRelativeUrl)/$($doc.FileName)" -AsListItem -ErrorAction Stop } catch { $null } } else { $null }
+            if (-not $file) { $missingDocs += "cas $($doc.Num)" }
+        }
+        if ($missingDocs.Count -eq 0) { Add-Result $demoSite 'Documents de démonstration des droits' 'OK' "$($rights.Documents.Count) documents" }
+        else { Add-Result $demoSite 'Documents de démonstration des droits' 'MANQUANT' ($missingDocs -join ', ') }
+    } catch { Add-Result $demoSite 'Démonstration des droits' 'ÉCHEC' $_.Exception.Message }
 }
 
 # --- Bilan ---------------------------------------------------------------
