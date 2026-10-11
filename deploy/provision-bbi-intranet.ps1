@@ -377,29 +377,28 @@ function Ensure-BbiWebPart {
         return
     }
 
-    # On retire une éventuelle instance existante avant de la recréer proprement.
-    try {
-        $controls = Get-PnPPageComponent -Page $Page -ErrorAction SilentlyContinue
-        $existing = $controls | Where-Object { $_.ComponentId -eq [Guid]$ComponentId }
-        if ($existing) {
-            foreach ($control in $existing) {
-                Remove-PnPPageComponent -Page $Page -InstanceId $control.InstanceId -ErrorAction SilentlyContinue
-            }
-            Write-Step "  remplacement du web part existant sur $Page"
-        }
-    } catch { }
-
+    # Add-PnPPageWebPart ne sait pas toujours résoudre le composant : il écrit alors un contrôle vide
+    # (webPartId nul) sans erreur, et en empile un de plus à chaque passage. On écrit donc le contenu
+    # de la page (CanvasContent1) nous-mêmes : une seule instance, avec l'identifiant du composant.
     Invoke-Bbi "  ajout du web part $Name sur « $Page »" {
-        # Une page tout juste créée n'a aucune section : Add-PnPPageWebPart échouerait (index hors limites).
-        $target = Get-PnPPage -Identity $Page
-        if (@($target.Sections).Count -lt $Section) {
-            # Une page applicative (SingleWebPartAppPage) n'affiche qu'une section pleine largeur.
-            $template = if ("$($target.LayoutType)" -eq 'SingleWebPartAppPage') { 'OneColumnFullWidth' } else { 'OneColumn' }
-            Add-PnPPageSection -Page $Page -SectionTemplate $template | Out-Null
+        $webPartProperties = $PropertiesJson | ConvertFrom-Json
+        $instanceId = [Guid]::NewGuid().ToString()
+        $webPartData = [ordered]@{
+            id = $ComponentId; instanceId = $instanceId; title = $Name; description = $Name
+            audiences = @(); serverProcessedContent = [ordered]@{ htmlStrings = @{}; searchablePlainTexts = @{}; imageSources = @{}; links = @{} }
+            dataVersion = '1.0'; properties = $webPartProperties
         }
-        Add-PnPPageWebPart -Page $Page -Component $ComponentId -WebPartProperties $PropertiesJson `
-            -Section $Section -Column $Column -Order $Order | Out-Null
-        # Sans republication, les visiteurs voient encore l'ancienne version (vide) de la page.
+        $controlData = [ordered]@{
+            controlType = 3; webPartId = $ComponentId; id = $instanceId
+            position = [ordered]@{ controlIndex = 1; sectionIndex = 1; zoneIndex = 1; sectionFactor = 12; layoutIndex = 1 }
+            emphasis = @{}
+        }
+        $encode = { param($o) [System.Net.WebUtility]::HtmlEncode(($o | ConvertTo-Json -Depth 20 -Compress)) }
+        $canvas = '<div><div data-sp-canvascontrol="" data-sp-canvasdataversion="1.0" data-sp-controldata="' + (& $encode $controlData) + '">' +
+            '<div data-sp-webpart="" data-sp-webpartdataversion="1.0" data-sp-webpartdata="' + (& $encode $webPartData) + '">' +
+            '<div data-sp-componentid="">' + $ComponentId + '</div><div data-sp-htmlproperties=""></div></div></div></div>'
+        $target = Get-PnPPage -Identity $Page
+        Set-PnPListItem -List 'Pages du site' -Identity $target.PageId -Values @{ CanvasContent1 = $canvas } | Out-Null
         Set-PnPPage -Identity $Page -Publish | Out-Null
     } | Out-Null
     Add-Report "Web part $Name → $Page" 'CRÉÉ'

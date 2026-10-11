@@ -150,7 +150,7 @@ function global:Get-PnPMicrosoft365GroupMember { [CmdletBinding()] param([string
 function global:Get-PnPTenantId { [CmdletBinding()] param() $global:Mock.TenantId }
 
 function global:Get-PnPList { [CmdletBinding()] param([string]$Identity, [string[]]$Includes) if ((Get-MockSite).Lists.ContainsKey($Identity)) { [pscustomobject]@{ Title = $Identity; RootFolder = [pscustomobject]@{ Name = $Identity; ServerRelativeUrl = "/sites/mock/$Identity" } } } }
-function global:Get-PnPListItem { [CmdletBinding()] param([string]$List, [int]$PageSize) $items = (Get-MockSite).Items; if ($items.ContainsKey($List)) { @($items[$List]) } else { @() } }
+function global:Get-PnPListItem { [CmdletBinding()] param([string]$List, [int]$PageSize, $Id, [string[]]$Fields) if ($List -eq "Pages du site") { return @{ CanvasContent1 = "6a9b6e3b-44f1-4a70-8f0a-45c82b29126d" } } $items = (Get-MockSite).Items; if ($items.ContainsKey($List)) { @($items[$List]) } else { @() } }
 function global:Add-PnPListItem {
     [CmdletBinding()] param([string]$List, [hashtable]$Values)
     $items = (Get-MockSite).Items; if (-not $items.ContainsKey($List)) { $items[$List] = [System.Collections.Generic.List[object]]::new() }
@@ -165,7 +165,7 @@ function global:Set-PnPListItem {
     if ($row['SiteUrl'] -is [string]) { $parts = $row['SiteUrl'] -split ',\s*', 2; $row['SiteUrl'] = [pscustomobject]@{ Url = $parts[0]; Description = $parts[1] } }
     Log "item-set $List $($Values['Title'])"
 }
-function global:Get-PnPPage { [CmdletBinding()] param([string]$Identity) if ((Get-MockSite).Page) { [pscustomobject]@{ Name = $Identity } } else { throw 'page introuvable' } }
+function global:Get-PnPPage { [CmdletBinding()] param([string]$Identity) if ((Get-MockSite).Page) { [pscustomobject]@{ Name = $Identity; PageId = 1 } } else { throw 'page introuvable' } }
 function global:Get-PnPPageComponent { [CmdletBinding()] param([string]$Page) if ((Get-MockSite).WebPart) { [pscustomobject]@{ WebPartId = '{6a9b6e3b-44f1-4a70-8f0a-45c82b29126d}' } } }
 
 function global:New-MockRole {

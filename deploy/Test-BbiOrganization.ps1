@@ -95,7 +95,8 @@ foreach ($site in $sites) {
         if (-not $page) { Add-Result $t 'Page accueil.aspx' 'MANQUANT' }
         else {
             Add-Result $t 'Page accueil.aspx' 'OK'
-            $parts = @(Get-PnPPageComponent -Page 'accueil.aspx' -ErrorAction SilentlyContinue | Where-Object { ("$($_.WebPartId)".Trim('{', '}') -eq $WP_HOME) -or ("$($_.ComponentId)".Trim('{', '}') -eq $WP_HOME) })
+            $canvas = try { "$((Get-PnPListItem -List 'Pages du site' -Id (Get-PnPPage -Identity 'accueil.aspx').PageId -Fields 'CanvasContent1' -ErrorAction Stop)['CanvasContent1'])" } catch { '' }
+            $parts = @(if ($canvas -match [regex]::Escape($WP_HOME)) { 1 })
             Add-Result $t 'Web part Business Builders International Accueil' ($(if ($parts.Count -gt 0) { 'OK' } else { 'MANQUANT' }))
         }
 
